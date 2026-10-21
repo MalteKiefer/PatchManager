@@ -7,6 +7,7 @@ from django.db import DatabaseError, transaction
 from django.http import HttpRequest
 from django.utils.translation import gettext as _
 
+from patchmanager.accounts import policy
 from patchmanager.accounts.models import User
 from patchmanager.accounts.services import PermissionDeniedError, ServiceError
 from patchmanager.audit import services as audit
@@ -49,6 +50,8 @@ def run(
 ) -> list[Result]:
     """Process all rows; keep the changes only if ``apply`` and no row failed."""
     table = TABLES[kind]
+    if not policy.has_perm_within(actor, f"{table.object_type}.import", tenant.policy_path):
+        raise PermissionDeniedError(_("You do not have permission to do that."))
     check_columns(table, rows)
     assert table.handler is not None  # noqa: S101  # nosec B101: checked above
     results = []

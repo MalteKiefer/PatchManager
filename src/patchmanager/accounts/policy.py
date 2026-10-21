@@ -207,6 +207,22 @@ def has_perm(user: Any, permission: str, obj: Any = None, *, scope_path: str | N
     return explain(user, permission, obj, scope_path=scope_path).allowed
 
 
+def has_perm_within(user: Any, permission: str, path: str) -> bool:
+    """True if an allow grant gives ``permission`` somewhere at, above or below ``path``.
+
+    An entry gate only (for example "may import racks in this tenant"); every
+    object is still checked on its own.
+    """
+    if not _usable(user):
+        return False
+    return any(
+        g.effect == "allow"
+        and g.grants(permission)
+        and (g.scope_path is None or g.covers(path) or g.scope_path.startswith(path + "."))
+        for g in grants_for(user)
+    )
+
+
 def scope_queryset[M: Model](
     user: Any,
     permission: str,

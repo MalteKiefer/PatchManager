@@ -42,6 +42,7 @@ class Table:
 
     kind: str
     title: Any
+    object_type: str  # "<type>.export" and "<type>.import" are required
     columns: list[str]
     required: list[str]
     export: Callable[[Any, Tenant, Site | None], Iterator[dict[str, Any]]]
@@ -174,7 +175,7 @@ def _scoped(user: Any, permission: str, queryset: Any, site: Site | None) -> Any
 
 def export_locations(user: Any, tenant: Tenant, site: Site | None) -> Iterator[dict[str, Any]]:
     """One row per room, plus empty floors, buildings and sites."""
-    rooms = _scoped(user, "locations.room.view", Room.objects.filter(tenant=tenant), site)
+    rooms = _scoped(user, "locations.room.export", Room.objects.filter(tenant=tenant), site)
     seen_floors = set()
     for room in rooms.select_related("floor__building__site").order_by("path")[:EXPORT_LIMIT]:
         seen_floors.add(room.floor_id)
@@ -184,7 +185,7 @@ def export_locations(user: Any, tenant: Tenant, site: Site | None) -> Iterator[d
             "floor_level": room.floor.level,
             "room_kind": room.kind,
         }
-    floors = _scoped(user, "locations.floor.view", Floor.objects.filter(tenant=tenant), site)
+    floors = _scoped(user, "locations.floor.export", Floor.objects.filter(tenant=tenant), site)
     for floor in (
         floors.select_related("building__site")
         .exclude(pk__in=seen_floors)
@@ -219,7 +220,7 @@ RACK_FIELDS: dict[str, Callable[[Row, str], Any]] = {
 
 def export_racks(user: Any, tenant: Tenant, site: Site | None) -> Iterator[dict[str, Any]]:
     """Racks with their location."""
-    racks = _scoped(user, "dcim.rack.view", Rack.objects.filter(tenant=tenant), site)
+    racks = _scoped(user, "dcim.rack.export", Rack.objects.filter(tenant=tenant), site)
     for rack in racks.select_related("room__floor__building__site").order_by("path")[:EXPORT_LIMIT]:
         yield {
             **_names(rack),
@@ -264,7 +265,7 @@ DEVICE_FIELDS: dict[str, Callable[[Row, str], Any]] = {
 
 def export_devices(user: Any, tenant: Tenant, site: Site | None) -> Iterator[dict[str, Any]]:
     """Devices with location and mounting."""
-    found = _scoped(user, "dcim.device.view", Device.objects.filter(tenant=tenant), site)
+    found = _scoped(user, "dcim.device.export", Device.objects.filter(tenant=tenant), site)
     for device in found.select_related(
         "room__floor__building__site", "rack", "device_type__vendor"
     ).order_by("path")[:EXPORT_LIMIT]:
@@ -373,7 +374,7 @@ def export_vlans(user: Any, tenant: Tenant, site: Site | None) -> Iterator[dict[
     if site is not None:
         vlans = vlans.filter(Q(site=site) | Q(site=None))
     for vlan in vlans[:EXPORT_LIMIT]:
-        if policy.has_perm(user, "networks.vlan.view", vlan):
+        if policy.has_perm(user, "networks.vlan.export", vlan):
             yield {
                 "site": vlan.site.name if vlan.site else "",
                 "vid": vlan.vid,
@@ -429,7 +430,7 @@ CABLE_FIELDS: dict[str, Callable[[Row, str], Any]] = {
 
 def export_cables(user: Any, tenant: Tenant, site: Site | None) -> Iterator[dict[str, Any]]:
     """Cables with both ends (ends on devices the user may not view are masked)."""
-    cables = _scoped(user, "cabling.cable.view", Cable.objects.filter(tenant=tenant), site)
+    cables = _scoped(user, "cabling.cable.export", Cable.objects.filter(tenant=tenant), site)
     for cable in cables.prefetch_related("ends__port__device").order_by("pk")[:EXPORT_LIMIT]:
         ends = {e.side: e.port for e in cable.ends.all()}
         if len(ends) != 2:
@@ -487,7 +488,7 @@ def import_cable(request: HttpRequest, actor: User, tenant: Tenant, row: Row) ->
 
 def export_ports(user: Any, tenant: Tenant, site: Site | None) -> Iterator[dict[str, Any]]:
     """Ports with VLAN and connected peer."""
-    allowed = _scoped(user, "dcim.device.view", Device.objects.filter(tenant=tenant), site)
+    allowed = _scoped(user, "dcim.device.export", Device.objects.filter(tenant=tenant), site)
     ports = (
         Port.objects.filter(device__in=allowed)
         .select_related("device", "untagged_vlan")
@@ -527,6 +528,7 @@ TABLES = {
         Table(
             "locations",
             gettext_lazy("Locations"),
+            "locations.site",
             ["site", "site_code", "building", "floor", "floor_level", "room", "room_kind"],
             ["site"],
             export_locations,
@@ -535,6 +537,7 @@ TABLES = {
         Table(
             "racks",
             gettext_lazy("Racks"),
+            "dcim.rack",
             [*LOCATION, "name", "u_height", "status", "serial", "asset_tag"],
             [*LOCATION, "name"],
             export_racks,
@@ -543,6 +546,7 @@ TABLES = {
         Table(
             "devices",
             gettext_lazy("Devices"),
+            "dcim.device",
             [
                 *LOCATION,
                 "rack",
@@ -562,6 +566,7 @@ TABLES = {
         Table(
             "vlans",
             gettext_lazy("VLANs"),
+            "networks.vlan",
             ["site", "vid", "name", "status", "description"],
             ["vid", "name"],
             export_vlans,
@@ -570,6 +575,7 @@ TABLES = {
         Table(
             "cables",
             gettext_lazy("Cables"),
+            "cabling.cable",
             [
                 "device_a",
                 "port_a",
@@ -589,6 +595,7 @@ TABLES = {
         Table(
             "ports",
             gettext_lazy("Ports"),
+            "dcim.device",
             [
                 "device",
                 "name",
