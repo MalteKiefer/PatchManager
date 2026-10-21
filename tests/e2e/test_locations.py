@@ -23,7 +23,9 @@ def _sign_in(page: Page, live_server, user) -> None:
 def test_site_to_rack_and_move_block(page: Page, live_server, super_admin, make_tenant) -> None:
     make_tenant(name="ACME")
     csp: list[str] = []
-    page.on("console", lambda m: csp.append(m.text) if "Content-Security-Policy" in m.text else None)
+    page.on(
+        "console", lambda m: csp.append(m.text) if "Content-Security-Policy" in m.text else None
+    )
     _sign_in(page, live_server, super_admin)
 
     page.get_by_role("link", name="Locations").click()
