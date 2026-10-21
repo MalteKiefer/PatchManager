@@ -1,5 +1,7 @@
 """Login, second factor, logout, first run setup and invitations."""
 
+import logging
+
 from django.contrib import messages
 from django.core.exceptions import ValidationError
 from django.http import HttpRequest, HttpResponse, JsonResponse
@@ -14,6 +16,7 @@ from patchmanager.audit import services as audit
 from patchmanager.core import ratelimit
 
 NEXT = "_pm_next"
+logger = logging.getLogger(__name__)
 
 
 def _safe_next(request: HttpRequest) -> str:
@@ -97,7 +100,8 @@ def webauthn_login_verify(request: HttpRequest) -> JsonResponse:
     try:
         user = mfa.webauthn_authenticate(request, pending, request.body.decode())
     except ServiceError as exc:
-        return JsonResponse({"error": str(exc)}, status=400)
+        logger.info("webauthn sign in rejected", extra={"reason": str(exc)})
+        return JsonResponse({"error": _("The security key could not be verified.")}, status=400)
     if not user.is_active or user.is_locked or user.deactivated_at:
         return JsonResponse({"error": _("This account cannot sign in.")}, status=403)
     auth.complete_login(request, user, method="webauthn" if pending else "passkey")

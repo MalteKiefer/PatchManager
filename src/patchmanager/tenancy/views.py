@@ -41,11 +41,11 @@ def switch(request: HttpRequest) -> HttpResponse:
     if tenant is not None:
         request.session[CURRENT_TENANT] = str(tenant.pk)
     target = request.POST.get("next", "/")
-    if not url_has_allowed_host_and_scheme(
+    if url_has_allowed_host_and_scheme(
         target, {request.get_host()}, require_https=request.is_secure()
     ):
-        target = "/"
-    return redirect(target)
+        return redirect(target)
+    return redirect("/")
 
 
 @permission_required("tenancy.tenant.view", any_scope=True)

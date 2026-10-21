@@ -1,5 +1,7 @@
 """Self service: profile, password, second factors, sessions."""
 
+import logging
+
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ValidationError
@@ -14,6 +16,7 @@ from patchmanager.accounts.models import TOTPDevice, User
 from patchmanager.accounts.services import ServiceError, auth, mfa, users
 
 RECOVERY_CODES = "_pm_new_recovery_codes"
+logger = logging.getLogger(__name__)
 
 
 def _user(request: HttpRequest) -> User:
@@ -131,7 +134,8 @@ def webauthn_register(request: HttpRequest) -> JsonResponse:
     try:
         mfa.webauthn_register(request, user, name, request.body.decode())
     except ServiceError as exc:
-        return JsonResponse({"error": str(exc)}, status=400)
+        logger.info("webauthn registration rejected", extra={"reason": str(exc)})
+        return JsonResponse({"error": _("The security key could not be verified.")}, status=400)
     _after_first_factor(request, user)
     messages.success(request, _("Security key added."))
     return JsonResponse({"redirect": "/account/security/"})
