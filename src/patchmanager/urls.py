@@ -16,6 +16,9 @@ urlpatterns = [
     path("manage/", include("patchmanager.manage_urls")),
     path("locations/", include("patchmanager.locations.urls")),
     path("racks/", include("patchmanager.dcim.urls")),
+    path("library/", include("patchmanager.library.urls")),
+    path("devices/", include("patchmanager.dcim.device_urls")),
+    path("meta/", include("patchmanager.metadata.urls")),
     path("", include("patchmanager.accounts.urls")),
     path("", include(core_patterns)),
 ]

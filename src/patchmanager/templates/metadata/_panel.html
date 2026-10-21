@@ -1,0 +1,36 @@
+{% load i18n pm %}
+<section class="card" aria-labelledby="meta-{{ target.pk }}">
+  <h2 id="meta-{{ target.pk }}" class="mb-3">{% translate "Photos, files and notes" %}</h2>
+  {% if attachments %}
+  <ul class="mb-4 grid grid-cols-2 gap-3 sm:grid-cols-3">
+    {% for a in attachments %}
+    <li class="rounded border border-slate-200 p-2 text-xs dark:border-slate-800">
+      {% if a.kind == "image" %}<a href="{% url 'metadata:download' a.pk %}"><img src="{% url 'metadata:download' a.pk %}" alt="{{ a.caption|default:a.original_name }}" class="mb-1 h-24 w-full rounded object-cover" loading="lazy"></a>
+      {% else %}<a class="mb-1 block font-medium" href="{% url 'metadata:download' a.pk %}?download=1">{{ a.original_name }}</a>{% endif %}
+      <span class="block truncate text-slate-500" title="{{ a.original_name }}">{{ a.caption|default:a.original_name }}</span>
+      {% if can_change %}<form method="post" action="{% url 'metadata:remove' a.pk %}" data-confirm="{% translate 'Delete this file?' %}">{% csrf_token %}<input type="hidden" name="next" value="{{ request.get_full_path }}"><button class="mt-1 text-red-600 hover:underline">{% translate "Delete" %}</button></form>{% endif %}
+    </li>
+    {% endfor %}
+  </ul>
+  {% endif %}
+  {% for n in notes %}
+  <article class="mb-3 rounded border border-slate-200 p-3 text-sm dark:border-slate-800">
+    <div class="prose-sm space-y-2 [&_a]:underline [&_code]:font-mono [&_ul]:list-disc [&_ul]:pl-5">{{ n.body|markdown }}</div>
+    <footer class="mt-2 flex items-center gap-2 text-xs text-slate-500">{{ n.author.display_name|default:"-" }} · {{ n.created_at|date:"Y-m-d H:i" }}
+      {% if can_change %}<form method="post" action="{% url 'metadata:remove-note' n.pk %}" data-confirm="{% translate 'Delete this note?' %}">{% csrf_token %}<input type="hidden" name="next" value="{{ request.get_full_path }}"><button class="text-red-600 hover:underline">{% translate "Delete" %}</button></form>{% endif %}
+    </footer>
+  </article>
+  {% endfor %}
+  {% if can_change %}
+  <div class="grid gap-4 md:grid-cols-2">
+    <form method="post" action="{% url 'metadata:upload' label target.pk %}" enctype="multipart/form-data">{% csrf_token %}
+      <input type="hidden" name="next" value="{{ request.get_full_path }}">{% include "core/_form.html" with form=upload_form %}
+      <button class="btn-secondary">{% translate "Upload" %}</button>
+    </form>
+    <form method="post" action="{% url 'metadata:note' label target.pk %}">{% csrf_token %}
+      <input type="hidden" name="next" value="{{ request.get_full_path }}">{% include "core/_form.html" with form=note_form %}
+      <button class="btn-secondary">{% translate "Add note" %}</button>
+    </form>
+  </div>
+  {% elif not attachments and not notes %}<p class="text-sm text-slate-500">{% translate "Nothing attached." %}</p>{% endif %}
+</section>

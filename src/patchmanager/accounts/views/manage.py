@@ -1,7 +1,6 @@
 """Admin area: users, groups, roles, assignments, permission matrix and explainer."""
 
 from typing import Any
-from uuid import UUID
 
 from django.contrib import messages
 from django.core.exceptions import PermissionDenied
@@ -28,6 +27,7 @@ from patchmanager.accounts.forms import (
 )
 from patchmanager.accounts.models import Assignment, Group, Role, User
 from patchmanager.accounts.services import ServiceError, rbac, users
+from patchmanager.core.utils import parse_uuid
 from patchmanager.tenancy.models import Tenant
 
 
@@ -40,12 +40,7 @@ def _tenants(request: HttpRequest) -> Any:
     return Tenant.objects.filter(archived_at__isnull=True)  # RLS limits to the actor's tenants
 
 
-def _uuid(value: str | None) -> UUID | None:
-    """Parse a UUID from form input; invalid input means "nothing selected"."""
-    try:
-        return UUID(str(value))
-    except ValueError:
-        return None
+_uuid = parse_uuid
 
 
 def visible_users(actor: User) -> Any:

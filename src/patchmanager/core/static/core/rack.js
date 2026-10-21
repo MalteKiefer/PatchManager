@@ -66,3 +66,13 @@ if (svg) {
   }
   svg.dataset.ready = "1"; // lets tests wait until blocks are interactive
 }
+
+// Double click (or Enter) on a device block opens the device.
+if (svg) {
+  for (const block of svg.querySelectorAll(".rack-block[data-href]")) {
+    block.addEventListener("dblclick", () => location.assign(block.dataset.href));
+    block.addEventListener("keydown", (event) => {
+      if (event.key === "Enter") location.assign(block.dataset.href);
+    });
+  }
+}

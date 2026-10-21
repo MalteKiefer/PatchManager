@@ -26,13 +26,18 @@ _VISIBLE = (
 )
 
 
-def policy_sql(table: str, column: str = "tenant_id") -> list[str]:
-    """Return the statements that enable and force RLS on ``table``."""
+def policy_sql(table: str, column: str = "tenant_id", *, shared: bool = False) -> list[str]:
+    """Return the statements that enable and force RLS on ``table``.
+
+    With ``shared``, rows without a tenant (instance wide library entries) are
+    readable by everyone; writing them still needs all tenant visibility.
+    """
     visible = _VISIBLE.format(column=column)
+    readable = f"({column} IS NULL OR {visible})" if shared else visible
     return [
         f'ALTER TABLE "{table}" ENABLE ROW LEVEL SECURITY',
         f'ALTER TABLE "{table}" FORCE ROW LEVEL SECURITY',
-        f'CREATE POLICY tenant_isolation ON "{table}" USING {visible} WITH CHECK {visible}',
+        f'CREATE POLICY tenant_isolation ON "{table}" USING {readable} WITH CHECK {visible}',
     ]
 
 
@@ -42,10 +47,11 @@ class EnableRowLevelSecurity(Operation):
     reduces_to_sql = True
     reversible = True
 
-    def __init__(self, model_name: str, column: str = "tenant_id") -> None:
-        """Remember the model and the tenant column."""
+    def __init__(self, model_name: str, column: str = "tenant_id", *, shared: bool = False) -> None:
+        """Remember the model, the tenant column and whether untenanted rows are shared."""
         self.model_name = model_name
         self.column = column
+        self.shared = shared
 
     def state_forwards(self, app_label: str, state: Any) -> None:
         """No model state change."""
@@ -55,7 +61,7 @@ class EnableRowLevelSecurity(Operation):
     ) -> None:
         """Create the policy."""
         table = to_state.apps.get_model(app_label, self.model_name)._meta.db_table
-        for sql in policy_sql(table, self.column):
+        for sql in policy_sql(table, self.column, shared=self.shared):
             schema_editor.execute(sql)
 
     def database_backwards(
@@ -73,7 +79,10 @@ class EnableRowLevelSecurity(Operation):
 
     def deconstruct(self) -> tuple[str, list[Any], dict[str, Any]]:
         """Serialise for migration files."""
-        return self.__class__.__qualname__, [self.model_name], {"column": self.column}
+        kwargs: dict[str, Any] = {"column": self.column}
+        if self.shared:
+            kwargs["shared"] = True
+        return self.__class__.__qualname__, [self.model_name], kwargs
 
 
 def set_context(tenant_ids: Iterable[UUID | str], *, all_tenants: bool = False) -> None:

@@ -1,6 +1,6 @@
 [workspace]
 name = "patchmanager"
-version = "0.3.1"
+version = "0.4.0"
 description = "Self-hosted network and rack documentation platform"
 authors = ["Malte Kiefer"]
 license = "AGPL-3.0-only"
@@ -27,6 +27,10 @@ celery = ">=5.6.3,<6"
 redis-py = ">=8.1.0,<9"
 prometheus_client = ">=0.26.0,<0.27"
 pyyaml = ">=6.0.3,<7"
+pillow = ">=13.0.0,<14"
+nh3 = ">=0.3.7,<0.4"
+markdown-it-py = ">=4.2.0,<5"
+defusedxml = ">=0.7.1,<0.8"
 
 [tasks]
 check = "python -m django check --deploy --fail-level WARNING"

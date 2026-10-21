@@ -70,6 +70,16 @@ docker compose -f compose.prod.yaml pull
 docker compose -f compose.prod.yaml up -d
 ```
 
+## Uploads
+
+Photos and files are stored encrypted in the `media` volume (`/app/media`) and are
+included in the daily backup archive. Limits and scanning:
+
+| Variable | Default | Meaning |
+|---|---|---|
+| `PATCHMANAGER_UPLOAD_MAX_MB` | `20` | Maximum upload size (Caddy limits request bodies to 25 MB) |
+| `PATCHMANAGER_CLAMD_HOST` / `PATCHMANAGER_CLAMD_PORT` | unset / `3310` | Scan uploads with clamd; uploads fail while it is unreachable |
+
 ## Maps
 
 Site maps load tiles from OpenStreetMap in the user's browser. Set

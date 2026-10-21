@@ -19,7 +19,8 @@ RUN PYTHONPATH=/app/src DJANGO_SETTINGS_MODULE=patchmanager.settings \
     PATCHMANAGER_TESTING=true \
     PATCHMANAGER_ENCRYPTION_KEYS=AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA= \
     PATCHMANAGER_STATIC_ROOT=/app/staticfiles \
-    /app/.pixi/envs/prod/bin/python -m django collectstatic --noinput
+    /app/.pixi/envs/prod/bin/python -m django collectstatic --noinput \
+    && mkdir -p /app/media/attachments
 
 # --- dev: full dev environment, source is bind-mounted by compose.yaml ---
 FROM ${PIXI_IMAGE} AS dev
@@ -46,10 +47,13 @@ WORKDIR /app
 COPY --from=build /app/.pixi/envs/prod /app/.pixi/envs/prod
 COPY --from=build /app/src /app/src
 COPY --from=build /app/staticfiles /app/staticfiles
+# Owned by the runtime user so a fresh named volume inherits writable permissions.
+COPY --from=build --chown=65532:65532 /app/media /app/media
 ENV PATH=/app/.pixi/envs/prod/bin \
     PYTHONPATH=/app/src \
     DJANGO_SETTINGS_MODULE=patchmanager.settings \
     PATCHMANAGER_STATIC_ROOT=/app/staticfiles \
+    PATCHMANAGER_MEDIA_ROOT=/app/media \
     PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
     PROMETHEUS_MULTIPROC_DIR=/tmp/prometheus

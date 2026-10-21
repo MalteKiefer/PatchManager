@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-21 14:22+0000\n"
+"POT-Creation-Date: 2026-10-21 15:27+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -75,7 +75,8 @@ msgstr "Mandant"
 msgid "All tenants (global)"
 msgstr "Alle Mandanten (global)"
 
-#: accounts/forms.py:130 templates/manage/_assignments.html:3
+#: accounts/forms.py:130 templates/library/types.html:17
+#: templates/manage/_assignments.html:3
 msgid "Scope"
 msgstr "Geltungsbereich"
 
@@ -109,7 +110,9 @@ msgstr "Ort"
 
 #: accounts/forms.py:145
 msgid "Narrows the scope to a site, building, floor, room or rack."
-msgstr "Beschränkt den Geltungsbereich auf einen Standort, ein Gebäude, eine Etage, einen Raum oder ein Rack."
+msgstr ""
+"Beschränkt den Geltungsbereich auf einen Standort, ein Gebäude, eine Etage, "
+"einen Raum oder ein Rack."
 
 #: accounts/forms.py:171
 msgid "Name of the copy"
@@ -119,11 +122,11 @@ msgstr "Name der Kopie"
 msgid "JSON or YAML file"
 msgstr "JSON- oder YAML-Datei"
 
-#: accounts/forms.py:183
+#: accounts/forms.py:183 metadata/uploads.py:175 metadata/views.py:65
 msgid "The file is too large."
 msgstr "Die Datei ist zu groß."
 
-#: accounts/forms.py:187
+#: accounts/forms.py:187 library/views.py:291
 msgid "The file must be UTF-8 text."
 msgstr "Die Datei muss UTF-8-Text enthalten."
 
@@ -176,8 +179,9 @@ msgstr "Anzeigename"
 msgid "language"
 msgstr "Sprache"
 
-#: accounts/models.py:42 dcim/models.py:30 templates/manage/tenants.html:8
-#: templates/manage/user_detail.html:6 templates/manage/users.html:13
+#: accounts/models.py:42 dcim/models.py:31 dcim/models.py:173
+#: templates/manage/tenants.html:8 templates/manage/user_detail.html:6
+#: templates/manage/users.html:13
 msgid "active"
 msgstr "aktiv"
 
@@ -185,14 +189,16 @@ msgstr "aktiv"
 msgid "locked until"
 msgstr "gesperrt bis"
 
-#: accounts/models.py:137 accounts/models.py:158 dcim/models.py:34
-#: locations/models.py:16 locations/models.py:58 locations/models.py:78
-#: locations/models.py:108 tenancy/models.py:21
+#: accounts/models.py:137 accounts/models.py:158 dcim/models.py:35
+#: dcim/models.py:183 dcim/models.py:220 library/models.py:25
+#: library/models.py:177 locations/models.py:16 locations/models.py:58
+#: locations/models.py:78 locations/models.py:108 tenancy/models.py:21
 msgid "name"
 msgstr "Name"
 
-#: accounts/models.py:138 accounts/models.py:159 locations/models.py:35
-#: locations/models.py:59 locations/models.py:110
+#: accounts/models.py:138 accounts/models.py:159 dcim/models.py:230
+#: library/models.py:127 locations/models.py:35 locations/models.py:59
+#: locations/models.py:110
 msgid "description"
 msgstr "Beschreibung"
 
@@ -333,7 +339,8 @@ msgstr "Dadurch würde ein Zyklus verschachtelter Gruppen entstehen."
 
 #: accounts/services/rbac.py:295
 msgid "You cannot add permissions you do not hold yourself."
-msgstr "Sie können keine Berechtigungen hinzufügen, die Sie selbst nicht besitzen."
+msgstr ""
+"Sie können keine Berechtigungen hinzufügen, die Sie selbst nicht besitzen."
 
 #: accounts/services/rbac.py:303
 msgid "Only super admins can grant the Super Admin role."
@@ -352,7 +359,8 @@ msgstr "Wählen Sie entweder einen Benutzer oder eine Gruppe."
 msgid "The last super admin cannot be removed."
 msgstr "Der letzte Super-Admin kann nicht entfernt werden."
 
-#: accounts/services/users.py:29
+#: accounts/services/users.py:29 metadata/services.py:96
+#: metadata/services.py:164
 msgid "You do not have permission to do that."
 msgstr "Sie haben keine Berechtigung dafür."
 
@@ -398,7 +406,9 @@ msgstr "Als inaktiver oder gesperrter Benutzer kann nicht gehandelt werden."
 
 #: accounts/services/users.py:260
 msgid "You cannot act as a user with rights you do not hold."
-msgstr "Sie können nicht als Benutzer mit Rechten handeln, die Sie selbst nicht besitzen."
+msgstr ""
+"Sie können nicht als Benutzer mit Rechten handeln, die Sie selbst nicht "
+"besitzen."
 
 #: accounts/views/account.py:46
 msgid "Profile saved."
@@ -482,90 +492,90 @@ msgstr "Einladung ungültig oder abgelaufen"
 msgid "Your password is set. Please sign in."
 msgstr "Ihr Passwort wurde festgelegt. Bitte melden Sie sich an."
 
-#: accounts/views/manage.py:149
+#: accounts/views/manage.py:144
 #, python-format
 msgid "Invitation sent to %(email)s."
 msgstr "Einladung an %(email)s gesendet."
 
-#: accounts/views/manage.py:186
+#: accounts/views/manage.py:181
 msgid "Account locked."
 msgstr "Konto gesperrt."
 
-#: accounts/views/manage.py:190
+#: accounts/views/manage.py:185
 msgid "Account unlocked."
 msgstr "Konto entsperrt."
 
-#: accounts/views/manage.py:194
+#: accounts/views/manage.py:189
 msgid "Account deactivated."
 msgstr "Konto deaktiviert."
 
-#: accounts/views/manage.py:198
+#: accounts/views/manage.py:193
 msgid "Account reactivated."
 msgstr "Konto reaktiviert."
 
-#: accounts/views/manage.py:202
+#: accounts/views/manage.py:197
 msgid "Second factors removed."
 msgstr "Zweite Faktoren entfernt."
 
-#: accounts/views/manage.py:206
+#: accounts/views/manage.py:201
 msgid "Sessions signed out."
 msgstr "Sitzungen abgemeldet."
 
-#: accounts/views/manage.py:215
+#: accounts/views/manage.py:210
 #, python-format
 msgid "You are now acting as %(user)s."
 msgstr "Sie handeln jetzt als %(user)s."
 
-#: accounts/views/manage.py:243
+#: accounts/views/manage.py:238
 #, python-format
 msgid "Check the assignment: %(errors)s"
 msgstr "Prüfen Sie die Zuweisung: %(errors)s"
 
-#: accounts/views/manage.py:261
+#: accounts/views/manage.py:256
 msgid "Assignment added."
 msgstr "Zuweisung hinzugefügt."
 
-#: accounts/views/manage.py:279
+#: accounts/views/manage.py:274
 msgid "Assignment removed."
 msgstr "Zuweisung entfernt."
 
-#: accounts/views/manage.py:337
+#: accounts/views/manage.py:332
 msgid "Group saved."
 msgstr "Gruppe gespeichert."
 
-#: accounts/views/manage.py:345
+#: accounts/views/manage.py:340
 msgid "Members saved."
 msgstr "Mitglieder gespeichert."
 
-#: accounts/views/manage.py:351
+#: accounts/views/manage.py:346
 msgid "Group nested."
 msgstr "Gruppe verschachtelt."
 
-#: accounts/views/manage.py:361
+#: accounts/views/manage.py:356
 msgid "Nesting removed."
 msgstr "Verschachtelung entfernt."
 
-#: accounts/views/manage.py:364
+#: accounts/views/manage.py:359
 msgid "Group deleted."
 msgstr "Gruppe gelöscht."
 
-#: accounts/views/manage.py:435
+#: accounts/views/manage.py:430
 msgid "Role created."
 msgstr "Rolle erstellt."
 
-#: accounts/views/manage.py:465
+#: accounts/views/manage.py:460
 msgid "Role saved."
 msgstr "Rolle gespeichert."
 
-#: accounts/views/manage.py:493
+#: accounts/views/manage.py:488
 msgid "Role copied."
 msgstr "Rolle kopiert."
 
-#: accounts/views/manage.py:502
+#: accounts/views/manage.py:497
 msgid "Role deleted."
 msgstr "Rolle gelöscht."
 
-#: accounts/views/manage.py:535
+#: accounts/views/manage.py:530
 #, python-format
 msgid "%(count)s roles imported."
 msgstr "%(count)s Rollen importiert."
@@ -580,114 +590,465 @@ msgstr "Kette intakt: %(count)s Ereignisse überprüft."
 msgid "Chain broken at event %(seq)s: %(reason)s"
 msgstr "Kette unterbrochen bei Ereignis %(seq)s: %(reason)s"
 
-#: dcim/models.py:29
-msgid "planned"
-msgstr "geplant"
+#: dcim/device_views.py:56
+msgid "Device type"
+msgstr "Gerätetyp"
 
-#: dcim/models.py:31
-msgid "retired"
-msgstr "außer Betrieb"
+#: dcim/device_views.py:58 dcim/device_views.py:85 dcim/views.py:32
+msgid "Lowest unit"
+msgstr "Unterste Höheneinheit"
 
-#: dcim/models.py:36
-msgid "height (U)"
-msgstr "Höhe (HE)"
+#: dcim/device_views.py:60 dcim/device_views.py:87 dcim/views.py:35
+#: templates/dcim/rack.html:67
+msgid "Face"
+msgstr "Seite"
 
-#: dcim/models.py:40
-msgid "width"
-msgstr "Breite"
-
-#: dcim/models.py:41
-msgid "depth (mm)"
-msgstr "Tiefe (mm)"
-
-#: dcim/models.py:42
-msgid "number units from the top"
-msgstr "Höheneinheiten von oben nummerieren"
-
-#: dcim/models.py:44
-msgid "status"
-msgstr "Status"
-
-#: dcim/models.py:46
-msgid "serial number"
-msgstr "Seriennummer"
-
-#: dcim/models.py:47
-msgid "asset tag"
-msgstr "Inventarnummer"
-
-#: dcim/models.py:48
-msgid "notes"
-msgstr "Notizen"
-
-#: dcim/models.py:100
+#: dcim/device_views.py:61 dcim/device_views.py:88 dcim/models.py:101
 msgid "front"
 msgstr "Vorderseite"
 
-#: dcim/models.py:101
+#: dcim/device_views.py:61 dcim/device_views.py:88 dcim/models.py:102
 msgid "rear"
 msgstr "Rückseite"
 
-#: dcim/models.py:102
+#: dcim/device_views.py:73
+msgid "Leave empty to use the type's naming convention."
+msgstr "Leer lassen, um die Namenskonvention des Typs zu verwenden."
+
+#: dcim/device_views.py:81
+msgid "Room"
+msgstr "Raum"
+
+#: dcim/device_views.py:83 templates/locations/node.html:19
+msgid "Rack"
+msgstr "Rack"
+
+#: dcim/device_views.py:176
+#, python-format
+msgid "Device created with %(n)s ports."
+msgstr "Gerät mit %(n)s Ports angelegt."
+
+#: dcim/device_views.py:223 dcim/device_views.py:281 dcim/views.py:99
+#: library/views.py:213 locations/views.py:171
+msgid "Saved."
+msgstr "Gespeichert."
+
+#: dcim/device_views.py:236
+msgid "Device moved."
+msgstr "Gerät verschoben."
+
+#: dcim/device_views.py:244 dcim/views.py:108 library/views.py:241
+#: locations/views.py:183
+msgid "Deleted."
+msgstr "Gelöscht."
+
+#: dcim/devices.py:71 dcim/devices.py:77
+msgid "A device with this name already exists in this tenant."
+msgstr "In diesem Mandanten existiert bereits ein Gerät mit diesem Namen."
+
+#: dcim/devices.py:79
+msgid "This device type cannot be used here."
+msgstr "Dieser Gerätetyp kann hier nicht verwendet werden."
+
+#: dcim/devices.py:91
+msgid "The device does not fit at this position."
+msgstr "Das Gerät passt nicht an diese Position."
+
+#: dcim/devices.py:96 dcim/services.py:24
+msgid "These units are already taken."
+msgstr "Diese Höheneinheiten sind bereits belegt."
+
+#: dcim/devices.py:114
+msgid "This device type is private to another tenant."
+msgstr "Dieser Gerätetyp ist nur für einen anderen Mandanten verfügbar."
+
+#: dcim/devices.py:116 dcim/devices.py:163
+msgid "Rack devices need a rack mounted type and a position."
+msgstr "Rackgeräte benötigen einen Typ für den Rackeinbau und eine Position."
+
+#: dcim/devices.py:165
+msgid "The rack is not in this room."
+msgstr "Das Rack befindet sich nicht in diesem Raum."
+
+#: dcim/devices.py:218
+msgid "The rear port must belong to the same device."
+msgstr "Der Rückport muss zum selben Gerät gehören."
+
+#: dcim/devices.py:240 dcim/devices.py:246
+msgid "This port name or rear position is already used."
+msgstr "Dieser Portname oder diese Rückposition wird bereits verwendet."
+
+#: dcim/models.py:30 dcim/models.py:172
+msgid "planned"
+msgstr "geplant"
+
+#: dcim/models.py:32
+msgid "retired"
+msgstr "außer Betrieb"
+
+#: dcim/models.py:37 library/models.py:115
+msgid "height (U)"
+msgstr "Höhe (HE)"
+
+#: dcim/models.py:41
+msgid "width"
+msgstr "Breite"
+
+#: dcim/models.py:42
+msgid "depth (mm)"
+msgstr "Tiefe (mm)"
+
+#: dcim/models.py:43
+msgid "number units from the top"
+msgstr "Höheneinheiten von oben nummerieren"
+
+#: dcim/models.py:45 dcim/models.py:185
+msgid "status"
+msgstr "Status"
+
+#: dcim/models.py:47 dcim/models.py:191
+msgid "serial number"
+msgstr "Seriennummer"
+
+#: dcim/models.py:48 dcim/models.py:192
+msgid "asset tag"
+msgstr "Inventarnummer"
+
+#: dcim/models.py:49 dcim/models.py:196
+msgid "notes"
+msgstr "Notizen"
+
+#: dcim/models.py:103
 msgid "front and rear"
 msgstr "Vorder- und Rückseite"
 
-#: dcim/models.py:107
+#: dcim/models.py:111
 msgid "face"
 msgstr "Seite"
 
-#: dcim/models.py:110
+#: dcim/models.py:114 dcim/models.py:229
 msgid "label"
 msgstr "Bezeichnung"
 
-#: dcim/models.py:111
+#: dcim/models.py:115 metadata/models.py:60
 msgid "note"
 msgstr "Notiz"
+
+#: dcim/models.py:174
+msgid "offline"
+msgstr "offline"
+
+#: dcim/models.py:175
+msgid "decommissioned"
+msgstr "außer Betrieb genommen"
+
+#: dcim/models.py:181
+msgid "device type"
+msgstr "Gerätetyp"
+
+#: dcim/models.py:193
+msgid "purchase date"
+msgstr "Kaufdatum"
+
+#: dcim/models.py:194
+msgid "in service since"
+msgstr "in Betrieb seit"
+
+#: dcim/models.py:195
+msgid "responsible person"
+msgstr "Verantwortliche Person"
+
+#: dcim/models.py:222 library/models.py:180 locations/models.py:109
+msgid "kind"
+msgstr "Art"
+
+#: dcim/models.py:225 library/models.py:183
+msgid "connector"
+msgstr "Steckverbinder"
+
+#: dcim/models.py:227 library/models.py:185
+msgid "speed (Mbit/s)"
+msgstr "Geschwindigkeit (Mbit/s)"
+
+#: dcim/models.py:228
+msgid "enabled"
+msgstr "aktiviert"
+
+#: dcim/models.py:231
+msgid "MAC address"
+msgstr "MAC-Adresse"
+
+#: dcim/models.py:232
+msgid "positions"
+msgstr "Positionen"
+
+#: dcim/models.py:239
+msgid "rear port"
+msgstr "Rückport"
+
+#: dcim/models.py:241
+msgid "rear position"
+msgstr "Rückposition"
 
 #: dcim/services.py:18
 #, python-format
 msgid "The units must lie between 1 and %(height)s."
 msgstr "Die Höheneinheiten müssen zwischen 1 und %(height)s liegen."
 
-#: dcim/services.py:24
-msgid "These units are already taken."
-msgstr "Diese Höheneinheiten sind bereits belegt."
+#: dcim/services.py:77
+msgid "Move or delete the device instead."
+msgstr "Verschieben oder löschen Sie stattdessen das Gerät."
 
-#: dcim/views.py:31 templates/dcim/rack.html:56
+#: dcim/views.py:31 templates/dcim/device.html:15 templates/dcim/rack.html:67
 msgid "Label"
 msgstr "Bezeichnung"
-
-#: dcim/views.py:32
-msgid "Lowest unit"
-msgstr "Unterste Höheneinheit"
 
 #: dcim/views.py:33
 msgid "Height (U)"
 msgstr "Höhe (HE)"
 
-#: dcim/views.py:35 templates/dcim/rack.html:56
-msgid "Face"
-msgstr "Seite"
-
-#: dcim/views.py:92 locations/views.py:169
-msgid "Saved."
-msgstr "Gespeichert."
-
-#: dcim/views.py:96
+#: dcim/views.py:103
 msgid "Units reserved."
 msgstr "Höheneinheiten reserviert."
 
-#: dcim/views.py:101 locations/views.py:181
-msgid "Deleted."
-msgstr "Gelöscht."
-
-#: dcim/views.py:137
+#: dcim/views.py:148
 msgid "Invalid request."
 msgstr "Ungültige Anfrage."
 
-#: dcim/views.py:141
+#: dcim/views.py:152
 msgid "These units are taken or outside the rack."
 msgstr "Diese Höheneinheiten sind belegt oder liegen außerhalb des Racks."
+
+#: library/interchange.py:105
+#, python-format
+msgid "%(section)s must be a list of ports with names."
+msgstr "%(section)s muss eine Liste von Ports mit Namen sein."
+
+#: library/interchange.py:108
+msgid "Too many ports."
+msgstr "Zu viele Ports."
+
+#: library/interchange.py:119
+msgid "The file is not valid YAML or JSON."
+msgstr "Die Datei ist kein gültiges YAML oder JSON."
+
+#: library/interchange.py:125
+msgid "The file needs a manufacturer and a model."
+msgstr "Die Datei benötigt einen Hersteller und ein Modell."
+
+#: library/models.py:26
+msgid "website"
+msgstr "Website"
+
+#: library/models.py:62 library/models.py:74
+msgid "wireless"
+msgstr "Funk"
+
+#: library/models.py:63 library/models.py:98
+msgid "other"
+msgstr "Sonstiges"
+
+#: library/models.py:69
+msgid "network interface"
+msgstr "Netzwerkschnittstelle"
+
+#: library/models.py:70
+msgid "front port (passive)"
+msgstr "Frontport (passiv)"
+
+#: library/models.py:71
+msgid "rear port (passive)"
+msgstr "Rückport (passiv)"
+
+#: library/models.py:72
+msgid "console"
+msgstr "Konsole"
+
+#: library/models.py:73
+msgid "power"
+msgstr "Strom"
+
+#: library/models.py:81
+msgid "rack mounted"
+msgstr "Rackeinbau"
+
+#: library/models.py:82
+msgid "floor device"
+msgstr "Raumgerät"
+
+#: library/models.py:85
+msgid "switch"
+msgstr "Switch"
+
+#: library/models.py:86
+msgid "router"
+msgstr "Router"
+
+#: library/models.py:87
+msgid "firewall"
+msgstr "Firewall"
+
+#: library/models.py:88
+msgid "server"
+msgstr "Server"
+
+#: library/models.py:89
+msgid "storage"
+msgstr "Speicher"
+
+#: library/models.py:90
+msgid "patch panel"
+msgstr "Patchfeld"
+
+#: library/models.py:91
+msgid "power distribution"
+msgstr "Stromverteilung (PDU)"
+
+#: library/models.py:92
+msgid "UPS"
+msgstr "USV"
+
+#: library/models.py:93
+msgid "access point"
+msgstr "Access Point"
+
+#: library/models.py:94
+msgid "camera"
+msgstr "Kamera"
+
+#: library/models.py:95
+msgid "printer"
+msgstr "Drucker"
+
+#: library/models.py:96
+msgid "network outlet"
+msgstr "Netzwerkdose"
+
+#: library/models.py:97
+msgid "phone"
+msgstr "Telefon"
+
+#: library/models.py:106
+msgid "private to tenant"
+msgstr "Nur für diesen Mandanten"
+
+#: library/models.py:109
+msgid "model"
+msgstr "Modell"
+
+#: library/models.py:110
+msgid "form"
+msgstr "Bauform"
+
+#: library/models.py:112
+msgid "category"
+msgstr "Kategorie"
+
+#: library/models.py:118
+msgid "full depth"
+msgstr "volle Tiefe"
+
+#: library/models.py:118
+msgid "Occupies front and rear."
+msgstr "Belegt Vorder- und Rückseite."
+
+#: library/models.py:121
+msgid "naming convention"
+msgstr "Namenskonvention"
+
+#: library/models.py:124
+#, python-brace-format
+msgid "For example SW-{n:02}. {n} is a counter."
+msgstr "Zum Beispiel SW-{n:02}. {n} ist ein Zähler."
+
+#: library/models.py:126
+msgid "part number"
+msgstr "Artikelnummer"
+
+#: library/models.py:177
+#, python-brace-format
+msgid "For example Gi1/0/{n}."
+msgstr "Zum Beispiel Gi1/0/{n}."
+
+#: library/models.py:187
+msgid "count"
+msgstr "Anzahl"
+
+#: library/models.py:189
+msgid "first number"
+msgstr "Erste Nummer"
+
+#: library/models.py:191
+msgid "positions per rear port"
+msgstr "Positionen pro Rückport"
+
+#: library/models.py:201
+msgid "maps to rear ports"
+msgstr "Zuordnung zu Rückports"
+
+#: library/services.py:28
+msgid "An entry with this name already exists."
+msgstr "Ein Eintrag mit diesem Namen existiert bereits."
+
+#: library/services.py:60
+msgid "This vendor still has device types."
+msgstr "Dieser Hersteller hat noch Gerätetypen."
+
+#: library/services.py:96
+msgid "Form, height and depth of a type in use cannot change."
+msgstr "Bauform, Höhe und Tiefe eines verwendeten Typs können nicht geändert werden."
+
+#: library/services.py:111
+msgid "Devices of this type exist."
+msgstr "Es existieren Geräte dieses Typs."
+
+#: library/services.py:127
+msgid "Front ports can only map to rear ports of the same type."
+msgstr "Frontports können nur Rückports desselben Typs zugeordnet werden."
+
+#: library/services.py:132
+msgid "The number of front ports must be a multiple of the rear ports."
+msgstr "Die Anzahl der Frontports muss ein Vielfaches der Rückports sein."
+
+#: library/views.py:39 templates/library/types.html:17
+msgid "Vendor"
+msgstr "Hersteller"
+
+#: library/views.py:40 library/views.py:91
+msgid "Shared with all tenants"
+msgstr "Für alle Mandanten freigegeben"
+
+#: library/views.py:74
+msgid "Front image"
+msgstr "Bild der Vorderseite"
+
+#: library/views.py:77
+msgid "Rear image"
+msgstr "Bild der Rückseite"
+
+#: library/views.py:90
+msgid "YAML or JSON file"
+msgstr "YAML- oder JSON-Datei"
+
+#: library/views.py:170
+msgid "Device type created. Now add its ports."
+msgstr "Gerätetyp angelegt. Fügen Sie jetzt die Ports hinzu."
+
+#: library/views.py:235
+msgid "copy"
+msgstr "Kopie"
+
+#: library/views.py:237
+msgid "Copied into a private type of this tenant."
+msgstr "In einen privaten Typ dieses Mandanten kopiert."
+
+#: library/views.py:283
+msgid "Choose a file of at most 1 MB."
+msgstr "Wählen Sie eine Datei mit höchstens 1 MB."
+
+#: library/views.py:295
+msgid "Device type imported."
+msgstr "Gerätetyp importiert."
 
 #: locations/forms.py:73
 msgid "Target tenant"
@@ -741,10 +1102,6 @@ msgstr "Büro"
 msgid "Other"
 msgstr "Sonstiges"
 
-#: locations/models.py:109
-msgid "kind"
-msgstr "Art"
-
 #: locations/services.py:27 locations/services.py:33
 msgid "An object with this name already exists here."
 msgstr "Hier existiert bereits ein Objekt mit diesem Namen."
@@ -753,13 +1110,17 @@ msgstr "Hier existiert bereits ein Objekt mit diesem Namen."
 msgid "This change conflicts with existing data."
 msgstr "Diese Änderung steht im Konflikt mit vorhandenen Daten."
 
-#: locations/services.py:80
+#: locations/services.py:90
 msgid "Remove everything inside it first."
 msgstr "Entfernen Sie zuerst alles darin."
 
-#: locations/services.py:107
+#: locations/services.py:118
 msgid "The site already belongs to this tenant."
 msgstr "Der Standort gehört bereits zu diesem Mandanten."
+
+#: locations/services.py:125
+msgid "Devices in this site use device types private to the current tenant."
+msgstr "Geräte an diesem Standort verwenden Gerätetypen, die nur für den aktuellen Mandanten verfügbar sind."
 
 #: locations/views.py:49
 msgid "Buildings"
@@ -777,21 +1138,93 @@ msgstr "Räume"
 msgid "Racks"
 msgstr "Racks"
 
-#: locations/views.py:119
+#: locations/views.py:121
 msgid "Site created."
 msgstr "Standort erstellt."
 
-#: locations/views.py:176
+#: locations/views.py:178
 msgid "Created."
 msgstr "Erstellt."
 
-#: locations/views.py:238
+#: locations/views.py:246
 msgid "The name does not match."
 msgstr "Der Name stimmt nicht überein."
 
-#: locations/views.py:246
+#: locations/views.py:254
 msgid "Site moved."
 msgstr "Standort verschoben."
+
+#: metadata/models.py:36
+msgid "image"
+msgstr "Bild"
+
+#: metadata/models.py:37
+msgid "document"
+msgstr "Dokument"
+
+#: metadata/models.py:40
+msgid "file name"
+msgstr "Dateiname"
+
+#: metadata/models.py:45
+msgid "caption"
+msgstr "Bildunterschrift"
+
+#: metadata/services.py:76
+msgid "Files cannot be attached here."
+msgstr "Hier können keine Dateien angehängt werden."
+
+#: metadata/services.py:81
+msgid "Object not found."
+msgstr "Objekt nicht gefunden."
+
+#: metadata/services.py:191 metadata/views.py:91
+msgid "The note is empty."
+msgstr "Die Notiz ist leer."
+
+#: metadata/uploads.py:120 metadata/uploads.py:122
+msgid "The SVG file is not valid."
+msgstr "Die SVG-Datei ist ungültig."
+
+#: metadata/uploads.py:169
+msgid "The image could not be read."
+msgstr "Das Bild konnte nicht gelesen werden."
+
+#: metadata/uploads.py:186
+msgid "Only JPEG, PNG, GIF, WebP, SVG and PDF files are accepted."
+msgstr "Es werden nur JPEG-, PNG-, GIF-, WebP-, SVG- und PDF-Dateien akzeptiert."
+
+#: metadata/uploads.py:205
+msgid "The virus scanner is not reachable. Try again later."
+msgstr "Der Virenscanner ist nicht erreichbar. Versuchen Sie es später erneut."
+
+#: metadata/uploads.py:207
+msgid "The file was rejected by the virus scanner."
+msgstr "Die Datei wurde vom Virenscanner abgelehnt."
+
+#: metadata/views.py:24
+msgid "File"
+msgstr "Datei"
+
+#: metadata/views.py:25
+msgid "Caption"
+msgstr "Bildunterschrift"
+
+#: metadata/views.py:32
+msgid "Note"
+msgstr "Notiz"
+
+#: metadata/views.py:35
+msgid "Markdown is supported."
+msgstr "Markdown wird unterstützt."
+
+#: metadata/views.py:59
+msgid "Choose a file to upload."
+msgstr "Wählen Sie eine Datei zum Hochladen."
+
+#: metadata/views.py:79
+msgid "File attached."
+msgstr "Datei angehängt."
 
 #: templates/accounts/email/invitation.txt:1
 #, python-format
@@ -876,18 +1309,21 @@ msgid "Cancel"
 msgstr "Abbrechen"
 
 #: templates/accounts/profile.html:2 templates/accounts/profile.html:4
-#: templates/base.html:51
+#: templates/base.html:52
 msgid "Profile"
 msgstr "Profil"
 
-#: templates/accounts/profile.html:7 templates/locations/node.html:42
+#: templates/accounts/profile.html:7 templates/dcim/device.html:34
+#: templates/library/type_detail.html:35 templates/locations/node.html:53
 #: templates/manage/audit.html:18 templates/manage/group_detail.html:7
 msgid "Details"
 msgstr "Details"
 
-#: templates/accounts/profile.html:9 templates/dcim/rack.html:72
-#: templates/locations/node.html:44 templates/manage/group_detail.html:9
-#: templates/manage/role_detail.html:15 templates/manage/tenant_detail.html:7
+#: templates/accounts/profile.html:9 templates/dcim/device.html:36
+#: templates/dcim/port.html:19 templates/dcim/rack.html:84
+#: templates/library/type_detail.html:37 templates/locations/node.html:55
+#: templates/manage/group_detail.html:9 templates/manage/role_detail.html:15
+#: templates/manage/tenant_detail.html:7
 msgid "Save"
 msgstr "Speichern"
 
@@ -896,7 +1332,7 @@ msgid "Change password"
 msgstr "Passwort ändern"
 
 #: templates/accounts/security.html:2 templates/accounts/security.html:5
-#: templates/base.html:52
+#: templates/base.html:53
 msgid "Security"
 msgstr "Sicherheit"
 
@@ -927,7 +1363,8 @@ msgid "Remove this factor?"
 msgstr "Diesen Faktor entfernen?"
 
 #: templates/accounts/security.html:22 templates/accounts/security.html:26
-#: templates/manage/_assignments.html:8 templates/manage/group_detail.html:19
+#: templates/library/type_detail.html:21 templates/manage/_assignments.html:8
+#: templates/manage/group_detail.html:19
 msgid "Remove"
 msgstr "Entfernen"
 
@@ -991,7 +1428,7 @@ msgstr "Zuletzt aktiv"
 msgid "This session"
 msgstr "Diese Sitzung"
 
-#: templates/accounts/security.html:55 templates/base.html:54
+#: templates/accounts/security.html:55 templates/base.html:55
 msgid "Sign out"
 msgstr "Abmelden"
 
@@ -1061,16 +1498,20 @@ msgstr "Hauptmenü"
 msgid "Locations"
 msgstr "Orte"
 
-#: templates/base.html:41 templates/manage/_base.html:4
+#: templates/base.html:41
+msgid "Library"
+msgstr "Bibliothek"
+
+#: templates/base.html:42 templates/manage/_base.html:4
 #: templates/manage/dashboard.html:2 templates/manage/dashboard.html:4
 msgid "Administration"
 msgstr "Administration"
 
-#: templates/base.html:68
+#: templates/base.html:69
 msgid "Language"
 msgstr "Sprache"
 
-#: templates/core/_breadcrumbs.html:2
+#: templates/core/_breadcrumbs.html:2 templates/library/type_detail.html:4
 msgid "Breadcrumb"
 msgstr "Brotkrumen-Navigation"
 
@@ -1108,17 +1549,121 @@ msgstr ""
 "Standorte, Racks und Geräte folgen im nächsten Release. Richten Sie bis "
 "dahin Mandanten, Benutzer und Rollen im Administrationsbereich ein."
 
+#: templates/dcim/device.html:13 templates/library/type_detail.html:14
+msgid "Ports"
+msgstr "Ports"
+
+#: templates/dcim/device.html:15 templates/dcim/port.html:17
+msgid "Port"
+msgstr "Port"
+
+#: templates/dcim/device.html:15 templates/library/type_detail.html:16
+msgid "Kind"
+msgstr "Art"
+
+#: templates/dcim/device.html:15 templates/library/type_detail.html:16
+msgid "Connector"
+msgstr "Steckverbinder"
+
+#: templates/dcim/device.html:15 templates/library/type_detail.html:16
+msgid "Speed"
+msgstr "Geschwindigkeit"
+
+#: templates/dcim/device.html:15 templates/dcim/rack.html:10
+#: templates/dcim/rack.html:50
+msgid "Rear"
+msgstr "Rückseite"
+
+#: templates/dcim/device.html:15
+msgid "Enabled"
+msgstr "Aktiviert"
+
+#: templates/dcim/device.html:20
+msgid "yes"
+msgstr "ja"
+
+#: templates/dcim/device.html:20
+msgid "no"
+msgstr "nein"
+
+#: templates/dcim/device.html:21
+msgid "No ports."
+msgstr "Keine Ports."
+
+#: templates/dcim/device.html:24
+msgid "Add port"
+msgstr "Port hinzufügen"
+
+#: templates/dcim/device.html:26 templates/library/type_detail.html:27
+#: templates/locations/node.html:32 templates/manage/_assignments.html:15
+msgid "Add"
+msgstr "Hinzufügen"
+
+#: templates/dcim/device.html:40
+msgid "Placement"
+msgstr "Platzierung"
+
+#: templates/dcim/device.html:42
+msgid "Leave the rack empty for a floor device."
+msgstr "Rack leer lassen für ein Raumgerät."
+
+#: templates/dcim/device.html:43
+msgid "Move"
+msgstr "Verschieben"
+
+#: templates/dcim/device.html:46
+msgid "Delete this device with all its ports?"
+msgstr "Dieses Gerät mit allen Ports löschen?"
+
+#: templates/dcim/device.html:46
+msgid "Delete device"
+msgstr "Gerät löschen"
+
+#: templates/dcim/device_form.html:2 templates/dcim/device_form.html:4
+msgid "New device"
+msgstr "Neues Gerät"
+
+#: templates/dcim/device_form.html:6
+#, python-format
+msgid "New device in %(parent)s"
+msgstr "Neues Gerät in %(parent)s"
+
+#: templates/dcim/device_form.html:8
+msgid ""
+"Ports are created from the device type. Missing a type? Create it in the "
+"device library."
+msgstr "Die Ports werden aus dem Gerätetyp erzeugt. Fehlt ein Typ? Legen Sie ihn in der Gerätebibliothek an."
+
+#: templates/dcim/device_form.html:8 templates/library/type_form.html:2
+#: templates/library/type_form.html:5 templates/library/types.html:14
+msgid "New device type"
+msgstr "Neuer Gerätetyp"
+
+#: templates/dcim/device_form.html:9 templates/library/type_form.html:8
+#: templates/locations/node.html:34 templates/locations/site_form.html:9
+#: templates/manage/groups.html:13
+msgid "Create"
+msgstr "Erstellen"
+
+#: templates/dcim/port.html:9
+msgid "Front ports on this rear port"
+msgstr "Frontports an diesem Rückport"
+
+#: templates/dcim/port.html:21
+msgid "Delete this port?"
+msgstr "Diesen Port löschen?"
+
+#: templates/dcim/port.html:21
+msgid "Delete port"
+msgstr "Port löschen"
+
 #: templates/dcim/rack.html:8
 msgid "Rack face"
 msgstr "Rack-Seite"
 
-#: templates/dcim/rack.html:9 templates/dcim/rack.html:47
+#: templates/dcim/rack.html:9 templates/dcim/rack.html:49
 msgid "Front"
 msgstr "Vorderseite"
-
-#: templates/dcim/rack.html:10 templates/dcim/rack.html:48
-msgid "Rear"
-msgstr "Rückseite"
 
 #: templates/dcim/rack.html:15
 msgid "Front view"
@@ -1138,58 +1683,176 @@ msgstr "Ansicht von Rack %(name)s"
 msgid "units %(start)s to %(end)s"
 msgstr "Höheneinheiten %(start)s bis %(end)s"
 
-#: templates/dcim/rack.html:37
+#: templates/dcim/rack.html:39
 msgid "Drag a block, or focus it and use the arrow keys, to move it."
-msgstr "Ziehen Sie einen Block oder fokussieren Sie ihn und verwenden Sie die Pfeiltasten, um ihn zu verschieben."
+msgstr ""
+"Ziehen Sie einen Block oder fokussieren Sie ihn und verwenden Sie die "
+"Pfeiltasten, um ihn zu verschieben."
 
-#: templates/dcim/rack.html:43
+#: templates/dcim/rack.html:45
 msgid "Utilisation"
 msgstr "Auslastung"
 
-#: templates/dcim/rack.html:45 templates/dcim/rack.html:50
+#: templates/dcim/rack.html:47 templates/dcim/rack.html:52
 #: templates/locations/node.html:19 templates/locations/node.html:22
 msgid "Used"
 msgstr "Belegt"
 
-#: templates/dcim/rack.html:46 templates/dcim/rack.html:58
+#: templates/dcim/rack.html:48 templates/dcim/rack.html:69
 msgid "Free"
 msgstr "Frei"
 
-#: templates/dcim/rack.html:54
+#: templates/dcim/rack.html:56 templates/library/types.html:17
+msgid "Devices"
+msgstr "Geräte"
+
+#: templates/dcim/rack.html:57
+msgid "Mount device"
+msgstr "Gerät einbauen"
+
+#: templates/dcim/rack.html:60
+msgid "No devices mounted."
+msgstr "Keine Geräte eingebaut."
+
+#: templates/dcim/rack.html:65
 msgid "Reserved units"
 msgstr "Reservierte Höheneinheiten"
 
-#: templates/dcim/rack.html:56
+#: templates/dcim/rack.html:67
 msgid "Units"
 msgstr "Höheneinheiten"
 
-#: templates/dcim/rack.html:58
+#: templates/dcim/rack.html:69
 msgid "Free these units?"
 msgstr "Diese Höheneinheiten freigeben?"
 
-#: templates/dcim/rack.html:59
+#: templates/dcim/rack.html:70
 msgid "No units reserved."
 msgstr "Keine Höheneinheiten reserviert."
 
-#: templates/dcim/rack.html:62
+#: templates/dcim/rack.html:73
 msgid "Reserve units"
 msgstr "Höheneinheiten reservieren"
 
-#: templates/dcim/rack.html:64
+#: templates/dcim/rack.html:75
 msgid "Reserve"
 msgstr "Reservieren"
 
-#: templates/dcim/rack.html:70
+#: templates/dcim/rack.html:82
 msgid "Rack details"
 msgstr "Rack-Details"
 
-#: templates/dcim/rack.html:75
+#: templates/dcim/rack.html:87
 msgid "Delete this rack and its reservations?"
 msgstr "Dieses Rack und seine Reservierungen löschen?"
 
-#: templates/dcim/rack.html:75
+#: templates/dcim/rack.html:87
 msgid "Delete rack"
 msgstr "Rack löschen"
+
+#: templates/library/type_detail.html:4 templates/library/types.html:2
+#: templates/library/types.html:5
+msgid "Device library"
+msgstr "Gerätebibliothek"
+
+#: templates/library/type_detail.html:6 templates/library/types.html:21
+msgid "this tenant"
+msgstr "dieser Mandant"
+
+#: templates/library/type_detail.html:9
+msgid "Copy as custom type"
+msgstr "Als eigenen Typ kopieren"
+
+#: templates/library/type_detail.html:16
+msgid "Names"
+msgstr "Namen"
+
+#: templates/library/type_detail.html:16
+msgid "Maps to"
+msgstr "Zugeordnet zu"
+
+#: templates/library/type_detail.html:22
+msgid "No ports defined."
+msgstr "Keine Ports definiert."
+
+#: templates/library/type_detail.html:25
+msgid "Add ports"
+msgstr "Ports hinzufügen"
+
+#: templates/library/type_detail.html:41
+msgid "Images"
+msgstr "Bilder"
+
+#: templates/library/type_detail.html:43
+msgid "Upload images below, then choose them here."
+msgstr "Laden Sie unten Bilder hoch und wählen Sie sie dann hier aus."
+
+#: templates/library/type_detail.html:44
+msgid "Save images"
+msgstr "Bilder speichern"
+
+#: templates/library/type_detail.html:47
+msgid "Delete this device type?"
+msgstr "Diesen Gerätetyp löschen?"
+
+#: templates/library/type_detail.html:47 templates/locations/node.html:58
+#: templates/metadata/_panel.html:11 templates/metadata/_panel.html:20
+msgid "Delete"
+msgstr "Löschen"
+
+#: templates/library/type_form.html:7
+msgid ""
+"Shared types need a global library permission; otherwise the type is private "
+"to the current tenant."
+msgstr "Für freigegebene Typen ist eine globale Bibliotheksberechtigung nötig, andernfalls ist der Typ nur für den aktuellen Mandanten verfügbar."
+
+#: templates/library/types.html:7 templates/manage/users.html:6
+msgid "Search"
+msgstr "Suchen"
+
+#: templates/library/types.html:8
+msgid "Vendor, model, part number"
+msgstr "Hersteller, Modell, Artikelnummer"
+
+#: templates/library/types.html:9 templates/library/types.html:17
+msgid "Form"
+msgstr "Bauform"
+
+#: templates/library/types.html:11
+msgid "All"
+msgstr "Alle"
+
+#: templates/library/types.html:17
+msgid "Model"
+msgstr "Modell"
+
+#: templates/library/types.html:17
+msgid "Category"
+msgstr "Kategorie"
+
+#: templates/library/types.html:17 templates/locations/node.html:19
+msgid "Height"
+msgstr "Höhe"
+
+#: templates/library/types.html:21
+msgid "shared"
+msgstr "freigegeben"
+
+#: templates/library/types.html:22
+msgid "No device types yet."
+msgstr "Noch keine Gerätetypen."
+
+#: templates/library/types.html:26
+msgid "Import device type"
+msgstr "Gerätetyp importieren"
+
+#: templates/library/types.html:27
+msgid "YAML or JSON in the community device type library format."
+msgstr "YAML oder JSON im Format der Community-Gerätetypbibliothek."
+
+#: templates/library/types.html:29 templates/manage/roles.html:21
+msgid "Import"
+msgstr "Importieren"
 
 #: templates/locations/_map.html:3
 msgid "Map"
@@ -1228,14 +1891,6 @@ msgstr "Noch keine Standorte."
 msgid "Move to tenant"
 msgstr "Zu Mandant verschieben"
 
-#: templates/locations/node.html:19
-msgid "Rack"
-msgstr "Rack"
-
-#: templates/locations/node.html:19
-msgid "Height"
-msgstr "Höhe"
-
 #: templates/locations/node.html:19 templates/manage/tenants.html:6
 #: templates/manage/users.html:10
 msgid "Status"
@@ -1249,22 +1904,21 @@ msgstr "Noch keine Racks."
 msgid "Nothing here yet."
 msgstr "Hier ist noch nichts."
 
-#: templates/locations/node.html:32 templates/manage/_assignments.html:15
-msgid "Add"
-msgstr "Hinzufügen"
+#: templates/locations/node.html:40
+msgid "Floor devices"
+msgstr "Raumgeräte"
 
-#: templates/locations/node.html:34 templates/locations/site_form.html:9
-#: templates/manage/groups.html:13
-msgid "Create"
-msgstr "Erstellen"
+#: templates/locations/node.html:41
+msgid "Add device"
+msgstr "Gerät hinzufügen"
 
-#: templates/locations/node.html:47
+#: templates/locations/node.html:44
+msgid "No floor devices."
+msgstr "Keine Raumgeräte."
+
+#: templates/locations/node.html:58
 msgid "Delete this object? It must be empty."
 msgstr "Dieses Objekt löschen? Es muss leer sein."
-
-#: templates/locations/node.html:47
-msgid "Delete"
-msgstr "Löschen"
 
 #: templates/locations/site_form.html:11
 msgid "Click the map to set latitude and longitude."
@@ -1283,7 +1937,9 @@ msgstr "%(name)s verschieben"
 msgid ""
 "The site and everything in it move to the chosen tenant. Role assignments "
 "scoped to it move along."
-msgstr "Der Standort und alles darin werden zum gewählten Mandanten verschoben. Rollenzuweisungen, die darauf beschränkt sind, werden mitverschoben."
+msgstr ""
+"Der Standort und alles darin werden zum gewählten Mandanten verschoben. "
+"Rollenzuweisungen, die darauf beschränkt sind, werden mitverschoben."
 
 #: templates/manage/_assignments.html:3
 msgid "Conditions"
@@ -1556,10 +2212,6 @@ msgstr "erforderlich"
 msgid "Import roles"
 msgstr "Rollen importieren"
 
-#: templates/manage/roles.html:21
-msgid "Import"
-msgstr "Importieren"
-
 #: templates/manage/system.html:6
 msgid "Versions"
 msgstr "Versionen"
@@ -1711,10 +2363,6 @@ msgstr "Benutzer einladen"
 msgid "Send invitation"
 msgstr "Einladung senden"
 
-#: templates/manage/users.html:6
-msgid "Search"
-msgstr "Suchen"
-
 #: templates/manage/users.html:10
 msgid "Last login"
 msgstr "Letzte Anmeldung"
@@ -1726,6 +2374,30 @@ msgstr "eingeladen"
 #: templates/manage/users.html:15
 msgid "No users found."
 msgstr "Keine Benutzer gefunden."
+
+#: templates/metadata/_panel.html:3
+msgid "Photos, files and notes"
+msgstr "Fotos, Dateien und Notizen"
+
+#: templates/metadata/_panel.html:11
+msgid "Delete this file?"
+msgstr "Diese Datei löschen?"
+
+#: templates/metadata/_panel.html:20
+msgid "Delete this note?"
+msgstr "Diese Notiz löschen?"
+
+#: templates/metadata/_panel.html:28
+msgid "Upload"
+msgstr "Hochladen"
+
+#: templates/metadata/_panel.html:32
+msgid "Add note"
+msgstr "Notiz hinzufügen"
+
+#: templates/metadata/_panel.html:35
+msgid "Nothing attached."
+msgstr "Nichts angehängt."
 
 #: tenancy/models.py:13
 msgid "Lowercase letters, digits, dashes."

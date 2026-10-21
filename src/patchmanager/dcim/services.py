@@ -54,6 +54,10 @@ def move(
 ) -> RackSpace:
     """Move a block to another start unit (and optionally another face)."""
     require(actor, "dcim.rack.change", space.rack)
+    if space.device is not None:
+        require(actor, "dcim.device.change", space.device)
+        if space.device.device_type.full_depth:
+            face = RackSpace.Face.BOTH
     before = [space.start, space.end, space.face]
     space.place(start, space.size, face)
     _store(space)
@@ -67,8 +71,10 @@ def move(
 
 
 def release(request: HttpRequest, actor: User, space: RackSpace) -> None:
-    """Free the units."""
+    """Free reserved units (device space goes with the device)."""
     require(actor, "dcim.rack.change", space.rack)
+    if space.device_id:
+        raise ServiceError(_("Move or delete the device instead."))
     audit.record(
         "dcim.rackspace.deleted", request=request, obj=space.rack, data={"label": space.label}
     )

@@ -54,9 +54,11 @@ LEVELS: dict[str, Level] = {
 
 
 def node_url(node: Any) -> str:
-    """Detail URL of any tree node."""
+    """Detail URL of any tree node (including devices)."""
     if isinstance(node, Rack):
         return reverse("dcim:rack", args=[node.pk])
+    if type(node).__name__ == "Device":
+        return reverse("devices:device", args=[node.pk])
     return reverse("locations:node", args=[type(node).__name__.lower(), node.pk])
 
 
@@ -218,7 +220,13 @@ def node_detail(request: HttpRequest, level: str, pk: str) -> HttpResponse:
         else [],
     }
     if level == "room":
+        from patchmanager.dcim.models import Device
+
         context["children"] = list(children.prefetch_related("spaces"))
+        context["floor_devices"] = _visible(
+            request, Device, room=node, rack__isnull=True
+        ).select_related("device_type__vendor")
+        context["can_add_device"] = policy.has_perm(actor, "dcim.device.add", node)
     return render(request, "locations/node.html", context)
 
 

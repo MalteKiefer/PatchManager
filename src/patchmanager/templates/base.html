@@ -38,6 +38,7 @@
       {% endif %}
       <nav class="flex items-center gap-1" aria-label="{% translate 'Main' %}">
         <a class="nav-link" href="{% url 'locations:index' %}">{% translate "Locations" %}</a>
+        <a class="nav-link" href="{% url 'library:types' %}">{% translate "Library" %}</a>
         <a class="nav-link" href="{% url 'manage:dashboard' %}">{% translate "Administration" %}</a>
       </nav>
       <div x-data="themeToggle">

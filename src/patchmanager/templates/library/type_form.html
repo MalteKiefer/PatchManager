@@ -1,0 +1,10 @@
+{% extends "base.html" %}{% load i18n %}
+{% block title %}{% translate "New device type" %}{% endblock %}
+{% block content %}
+<form method="post" class="card mx-auto max-w-2xl" novalidate>{% csrf_token %}
+  <h1 class="mb-4">{% translate "New device type" %}</h1>
+  <div class="grid gap-x-4 sm:grid-cols-2">{% include "core/_form.html" %}</div>
+  <p class="mb-4 text-xs text-slate-500">{% translate "Shared types need a global library permission; otherwise the type is private to the current tenant." %}</p>
+  <button class="btn-primary">{% translate "Create" %}</button>
+</form>
+{% endblock %}

@@ -101,6 +101,7 @@ _TREE_TABLES = (
     "locations_floor",
     "locations_room",
     "dcim_rack",
+    "dcim_device",
 )
 
 
@@ -115,6 +116,14 @@ def move_site(request: HttpRequest, actor: User, site: Any, target: Tenant) -> N
     require(actor, "locations.site.add", scope_path=target.policy_path)
     if target.pk == site.tenant_id:
         raise ServiceError(_("The site already belongs to this tenant."))
+    from patchmanager.dcim.models import Device
+
+    if Device.objects.filter(
+        path__descendant_of=site.path, device_type__tenant__isnull=False
+    ).exists():
+        raise ServiceError(
+            _("Devices in this site use device types private to the current tenant.")
+        )
     source_tenant = site.tenant_id
     old = str(site.path)
     new = f"{path_label(target.pk)}.{path_label(site.pk)}"
@@ -133,6 +142,26 @@ def move_site(request: HttpRequest, actor: User, site: Any, target: Tenant) -> N
                 "(SELECT id FROM dcim_rack WHERE path <@ %s::ltree)",
                 [target.pk, new],
             )
+            cursor.execute(
+                "UPDATE dcim_port SET tenant_id = %s WHERE device_id IN "
+                "(SELECT id FROM dcim_device WHERE path <@ %s::ltree)",
+                [target.pk, new],
+            )
+            # Photos and notes follow their objects.
+            targets = " UNION ".join(
+                f"SELECT id FROM {t} WHERE path <@ %s::ltree"  # noqa: S608  # nosec B608: fixed names
+                for t in _TREE_TABLES
+            )
+            ports = (
+                "SELECT p.id FROM dcim_port p JOIN dcim_device d ON d.id = p.device_id"
+                " WHERE d.path <@ %s::ltree"
+            )
+            for table in ("metadata_attachment", "metadata_note"):
+                cursor.execute(
+                    f"UPDATE {table} SET tenant_id = %s WHERE tenant_id = %s"  # noqa: S608  # nosec B608: fixed names
+                    f" AND object_id IN ({targets} UNION {ports})",
+                    [target.pk, source_tenant, *([new] * len(_TREE_TABLES)), new],
+                )
         Assignment.objects.filter(scope_path__descendant_of=old).update(tenant=target)
         with connection.cursor() as cursor:
             cursor.execute(

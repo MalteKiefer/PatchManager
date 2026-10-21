@@ -51,3 +51,4 @@ nav:
       - adr/0012-authentication-and-sessions.md
       - adr/0013-database-roles.md
       - adr/0014-location-tree-and-rack-space.md
+      - adr/0015-devices-ports-and-uploads.md

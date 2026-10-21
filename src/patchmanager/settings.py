@@ -84,6 +84,8 @@ INSTALLED_APPS = [
     "patchmanager.accounts",
     "patchmanager.audit",
     "patchmanager.locations",
+    "patchmanager.metadata",
+    "patchmanager.library",
     "patchmanager.dcim",
 ]
 if DJANGO_ADMIN_ENABLED:
@@ -224,9 +226,25 @@ USE_TZ = True
 
 STATIC_URL = "static/"
 STATIC_ROOT = Path(env("PATCHMANAGER_STATIC_ROOT", str(BASE_DIR.parent.parent / "staticfiles")))
+MEDIA_ROOT = Path(env("PATCHMANAGER_MEDIA_ROOT", str(BASE_DIR.parent.parent / "media")))
 STORAGES = {
     "staticfiles": {"BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage"},
+    # Encrypted uploads. Never served directly: see metadata.views.download.
+    "attachments": {
+        "BACKEND": "django.core.files.storage.FileSystemStorage",
+        "OPTIONS": {
+            "location": MEDIA_ROOT / "attachments",
+            "base_url": None,
+            "file_permissions_mode": 0o600,
+            "directory_permissions_mode": 0o700,
+        },
+    },
 }
+UPLOAD_MAX_BYTES = int(env("PATCHMANAGER_UPLOAD_MAX_MB", "20")) * 1024 * 1024
+DATA_UPLOAD_MAX_MEMORY_SIZE = UPLOAD_MAX_BYTES + 1024 * 1024
+FILE_UPLOAD_MAX_MEMORY_SIZE = 5 * 1024 * 1024
+CLAMD_HOST = env("PATCHMANAGER_CLAMD_HOST", "")
+CLAMD_PORT = int(env("PATCHMANAGER_CLAMD_PORT", "3310"))
 
 # Map view. Tiles load directly from the browser; set an empty URL to disable maps.
 MAP_TILE_URL = env("PATCHMANAGER_MAP_TILE_URL", "https://tile.openstreetmap.org/{z}/{x}/{y}.png")

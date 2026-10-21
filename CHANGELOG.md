@@ -4,6 +4,25 @@ All notable changes to this project are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the project uses
 [Semantic Versioning](https://semver.org/).
 
+## [0.4.0] - 2026-10-21
+
+### Added
+
+* Device library: vendors, shared and tenant private device types (rack and floor),
+  naming conventions, port templates with front to rear mapping (one to one and
+  cassette style), images, copy as custom type.
+* Import and export of device types in the community device type library format
+  (YAML, JSON).
+* Devices in racks (unit position, face, full depth) and in rooms (floor devices) with
+  serial, asset tag, dates, responsible person; ports generated from the type and
+  documented individually; placement changes; devices in the rack elevation.
+* Photos, PDFs and Markdown notes on sites, buildings, floors, rooms, racks, devices,
+  ports and device types.
+* Upload hardening: content sniffing allow list, image re-encoding (EXIF and trailing
+  data removed), SVG sanitising, size and pixel limits, optional clamd scan (fails
+  closed), encryption at rest, permission checked downloads with a sandboxing CSP.
+* Media volume in the image and prod compose; the backup job archives uploads.
+
 ## [0.3.1] - 2026-10-21
 
 ### Fixed
@@ -71,6 +90,7 @@ All notable changes to this project are documented here. The format follows
 * pre-commit hooks, Renovate configuration.
 * Documentation site, ADRs 0001 to 0010, STRIDE threat model draft, security policy.
 
+[0.4.0]: https://github.com/MalteKiefer/PatchManager/releases/tag/v0.4.0
 [0.3.1]: https://github.com/MalteKiefer/PatchManager/releases/tag/v0.3.1
 [0.3.0]: https://github.com/MalteKiefer/PatchManager/releases/tag/v0.3.0
 [0.2.0]: https://github.com/MalteKiefer/PatchManager/releases/tag/v0.2.0
