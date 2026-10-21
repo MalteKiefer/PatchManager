@@ -27,6 +27,7 @@ from django.utils import timezone
 
 from patchmanager.accounts import conditions
 from patchmanager.accounts.roles import SUPER_ADMIN, SYSTEM_ROLES
+from patchmanager.core.fields import path_label
 
 _VERSION_KEY = "policy:version"
 _CACHE_SECONDS = 300
@@ -122,13 +123,27 @@ def _compile(user: Any) -> list[Grant]:
 
     groups = _group_names(user)
     grants = []
+    mfa_tenants: set[str] = set()
+    if getattr(user, "is_service", False):  # API clients have no second factor
+        from patchmanager.tenancy.models import Tenant
+
+        mfa_tenants = {
+            path_label(pk)
+            for pk in Tenant.objects.filter(requires_mfa=True).values_list("pk", flat=True)
+        }
     for a in Assignment.objects.filter(Q(user=user) | Q(group_id__in=groups)).select_related(
         "role"
     ):
         system = SYSTEM_ROLES.get(a.role.key) if a.role.is_system else None
         needs_mfa = a.role.requires_mfa or bool(system and system.requires_mfa)
         if getattr(user, "is_service", False) and a.effect == "allow" and needs_mfa:
-            continue  # API clients have no second factor: MFA roles never apply, via groups neither
+            continue  # MFA roles never apply to API clients, via groups neither
+        if (
+            a.effect == "allow"
+            and a.scope_path
+            and str(a.scope_path).split(".", 1)[0] in mfa_tenants
+        ):
+            continue  # nor grants inside tenants that require MFA
         grants.append(
             Grant(
                 assignment_id=a.id,

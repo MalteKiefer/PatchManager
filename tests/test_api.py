@@ -454,3 +454,55 @@ def test_session_auth_requires_csrf(kit, super_admin) -> None:
     with rls.system_context():
         assert not Building.objects.filter(name="X").exists()
         assert Rack.objects.count() == 1
+
+
+def test_rotate_needs_the_clients_rights_and_no_tokens_while_impersonating(
+    kit, super_admin, make_user
+) -> None:
+    from django.test import RequestFactory
+
+    from patchmanager.accounts import policy
+    from patchmanager.tenancy import services as tenancy
+
+    manager = make_user()
+    with rls.system_context():
+        client, _secret = tokens.create_client(
+            kit["request"], super_admin, name="Bot", scopes=["read"]
+        )
+        Assignment.objects.create(
+            role=Role.objects.get(key="admin"),
+            user=client.user,
+            tenant=kit["tenant"],
+            scope_path=kit["tenant"].policy_path,
+        )
+        Assignment.objects.create(
+            role=Role.objects.get(key="tenant_owner"), user=manager, scope_label="global"
+        )
+        policy.bump_version()
+        assert policy.has_perm(manager, "accounts.apiclient.manage")
+        Assignment.objects.filter(user=manager).delete()
+        Assignment.objects.create(
+            role=Role.objects.get(key="viewer"), user=manager, scope_label="global"
+        )
+        custom = Role.objects.create(
+            key="client_keeper", name="Client keeper", permissions=["accounts.apiclient.manage"]
+        )
+        Assignment.objects.create(role=custom, user=manager, scope_label="global")
+        policy.bump_version()
+        with pytest.raises(PermissionDeniedError):
+            tokens.rotate_secret(
+                kit["request"], manager, client
+            )  # the client is an admin, the manager is not
+
+        request = RequestFactory().post("/")
+        request.user = super_admin
+        request.impersonator = manager
+        with pytest.raises(PermissionDeniedError, match="acting as"):
+            tokens.create_token(request, super_admin, name="x", scopes=["read"], days=1)
+
+        assert policy.has_perm(client.user, "dcim.rack.view", kit["rack"])
+        tenancy.update_tenant(kit["request"], super_admin, kit["tenant"], requires_mfa=True)
+        client.user.refresh_from_db()
+        assert not policy.has_perm(
+            client.user, "dcim.rack.view", kit["rack"]
+        )  # no second factor, no MFA tenant

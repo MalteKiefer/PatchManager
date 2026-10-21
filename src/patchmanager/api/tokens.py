@@ -18,7 +18,7 @@ from django.utils.translation import gettext as _
 
 from patchmanager.accounts import policy
 from patchmanager.accounts.models import User
-from patchmanager.accounts.services import PermissionDeniedError, ServiceError
+from patchmanager.accounts.services import PermissionDeniedError, ServiceError, users
 from patchmanager.api.models import ApiClient, ApiToken
 from patchmanager.audit import services as audit
 from patchmanager.audit.services import client_ip
@@ -55,6 +55,10 @@ def create_token(
     """A personal token for ``actor``. The plain token is returned once."""
     if actor.is_service:
         raise PermissionDeniedError(_("Service accounts use their client credentials."))
+    if (
+        getattr(request, "impersonator", None) is not None
+    ):  # would outlive the time limited impersonation
+        raise PermissionDeniedError(_("Tokens cannot be created while acting as another user."))
     if not name.strip():
         raise ServiceError(_("Enter a name."))
     if not 1 <= days <= MAX_DAYS:
@@ -159,6 +163,7 @@ def create_client(
 def rotate_secret(request: HttpRequest, actor: User, client: ApiClient) -> str:
     """A new secret; the old one and all access tokens stop working."""
     _require_manage(actor)
+    users.require_rights_of(actor, client.user)  # whoever sees the secret can act as the client
     secret = secrets.token_urlsafe(32)
     with transaction.atomic():
         ApiClient.objects.filter(pk=client.pk).update(secret_hash=digest(secret))
