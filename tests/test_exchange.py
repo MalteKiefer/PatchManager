@@ -518,3 +518,23 @@ def test_viewers_cannot_export_reports(kit, make_user) -> None:
     assert client.get(rack_url, secure=True).status_code == 404
     assert client.get(f"/exchange/reports/bom/{kit['site'].pk}.pdf", secure=True).status_code == 404
     assert b"sw1" not in client.get("/exchange/devices.csv", secure=True).content
+
+
+def test_report_content_respects_export_denies(kit, make_user, super_admin) -> None:
+    user = make_user()
+    with rls.system_context():
+        Assignment.objects.create(
+            role=Role.objects.get(key="editor"),
+            user=user,
+            tenant=kit["tenant"],
+            scope_path=kit["tenant"].policy_path,
+        )
+        Assignment.objects.create(
+            role=Role.objects.get(key="editor"),
+            user=user,
+            tenant=kit["tenant"],
+            scope_path=kit["room"].path,
+            effect="deny",
+        )
+        assert pdf._visible(user, "dcim.device.view", Device.objects.all()).count() == 0
+        assert pdf._visible(super_admin, "dcim.device.view", Device.objects.all()).count() == 2

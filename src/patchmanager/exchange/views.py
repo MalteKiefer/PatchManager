@@ -251,7 +251,7 @@ def report(request: HttpRequest, kind: str, pk: str) -> HttpResponse:
         if same_type  # other types: judged by scope only, the object's fields mean nothing there
         else policy.has_perm(request.user, permission, scope_path=obj.policy_path)
     )
-    if not allowed:
+    if not allowed or not policy.has_perm(request.user, f"{obj.policy_object_type}.view", obj):
         raise Http404
     if _limited(request):
         return HttpResponse(_("Too many exports. Try again in a few minutes."), status=429)

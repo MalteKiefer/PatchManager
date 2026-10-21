@@ -134,7 +134,10 @@ def _render(title: str, subtitle: str, story: list[Any], user: Any, *, wide: boo
 
 
 def _visible(user: Any, permission: str, queryset: Any) -> Any:
-    return policy.scope_queryset(user, permission, queryset)
+    """Rows listed in a report: the user must be allowed to view and to export them."""
+    object_type = permission.rsplit(".", 1)[0]
+    viewable = policy.scope_queryset(user, f"{object_type}.view", queryset)
+    return policy.scope_queryset(user, f"{object_type}.export", viewable)
 
 
 # ---------------------------------------------------------------- reports
