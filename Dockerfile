@@ -7,7 +7,9 @@ ARG RUNTIME_IMAGE=gcr.io/distroless/base-debian13:nonroot@sha256:7e22204ffcba783
 FROM ${PIXI_IMAGE} AS build
 WORKDIR /app
 COPY pixi.toml pixi.lock ./
-RUN pixi install --locked -e prod && pixi install --locked -e build
+# python-ldap ships its test server helper (slapdtest) with throwaway TLS keys: not for the image.
+RUN pixi install --locked -e prod && pixi install --locked -e build \
+    && rm -rf /app/.pixi/envs/prod/lib/python3.14/site-packages/slapdtest
 COPY scripts/tailwind.py ./scripts/tailwind.py
 COPY src ./src
 # Tailwind CSS (pinned, checksum verified binary) and compiled translations.

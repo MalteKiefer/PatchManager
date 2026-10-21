@@ -118,8 +118,11 @@ def start(request: HttpRequest, provider: IdentityProvider) -> HttpResponse:
     outstanding = dict(list(_outstanding(request).items())[-4:]) | {
         request_id: str(provider.pk)
     }  # a few tabs
-    key = request.COOKIES[COOKIE] if _state_key(request) else secrets.token_urlsafe(32)
+    previous = _state_key(request)
+    key = secrets.token_urlsafe(32)  # always a fresh key: the cookie never echoes client input
     cache.set(f"saml:outstanding:{key}", outstanding, COOKIE_SECONDS)
+    if previous:
+        cache.delete(previous)
     response = HttpResponseRedirect(str(dict(info["headers"])["Location"]))
     response.set_cookie(
         COOKIE,
