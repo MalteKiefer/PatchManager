@@ -32,8 +32,11 @@ as v0.8.0 after the last one.
 
 * **Personal tokens** `pmat_<prefix>_<secret>`: scopes `read` and/or `write`,
   optionally limited to one tenant, expiring after 1 to 365 days, revocable, with
-  last use time and address. Only a SHA-256 hash is stored (the secret has 256
-  bits of entropy); the prefix finds the row. Tokens act with the owner's
+  last use time and address. Only an HMAC-SHA256 of the token keyed with the
+  Django secret key is stored (the secret has 256 bits of entropy, so a slow hash
+  would only cost time on every request); `SECRET_KEY_FALLBACKS` keeps tokens
+  valid while the key is rotated. The prefix finds the row. Client secrets are
+  checked rarely and are stored with Argon2id like passwords. Tokens act with the owner's
   permissions. They cannot be created while impersonating.
 * **OAuth 2.0 client credentials** (RFC 6749 section 4.4) at `/api/oauth/token/`
   with `client_secret_basic` or `client_secret_post`; access tokens are bearer

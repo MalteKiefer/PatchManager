@@ -15,7 +15,7 @@ class ApiClient(TimestampedModel):
 
     name = models.CharField(_("name"), max_length=100)
     client_id = models.CharField(max_length=40, unique=True)
-    secret_hash = models.CharField(max_length=64)
+    secret_hash = models.CharField(max_length=128)  # Argon2id
     user = models.OneToOneField(
         settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="api_client"
     )

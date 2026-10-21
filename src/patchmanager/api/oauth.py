@@ -65,7 +65,7 @@ def token(request: HttpRequest) -> JsonResponse:
         JsonResponse(
             {
                 "access_token": plain,
-                "token_type": "Bearer",
+                "token_type": "Bearer",  # nosec B105: RFC 6749 token type, not a password
                 "expires_in": tokens.OAUTH_SECONDS,
                 "scope": " ".join(access.scopes),
             }

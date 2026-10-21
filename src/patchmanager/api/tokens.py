@@ -1,19 +1,23 @@
 """Creating, checking and revoking API credentials.
 
 Tokens look like ``pmat_<prefix>_<secret>`` (personal) or ``pmoa_...`` (OAuth).
-The secret has 256 bits of entropy, so a plain SHA-256 is a sufficient hash;
-the prefix is stored to find the row without scanning.
+The secret has 256 bits of entropy, so a keyed HMAC-SHA256 is a sufficient hash
+(rotating the Django secret key keeps tokens valid through SECRET_KEY_FALLBACKS);
+the prefix is stored to find the row without scanning. Client secrets are rarely
+checked and use Argon2id like passwords.
 """
 
-import hashlib
 import hmac
 import secrets
 from datetime import timedelta
 from typing import Any
 
+from django.conf import settings
+from django.contrib.auth.hashers import check_password, make_password
 from django.db import transaction
 from django.http import HttpRequest
 from django.utils import timezone
+from django.utils.crypto import salted_hmac
 from django.utils.translation import gettext as _
 
 from patchmanager.accounts import policy
@@ -30,11 +34,18 @@ MAX_DAYS = 365
 OAUTH_SECONDS = 3600
 VALID_SCOPES = {"read", "write"}
 LAST_USED_EVERY = timedelta(minutes=5)
+HASH_CONTEXT = "patchmanager.api"  # salted_hmac key salt
 
 
-def digest(secret: str) -> str:
-    """Hash of a token or client secret."""
-    return hashlib.sha256(secret.encode()).hexdigest()
+def digest(plain: str, key: str | None = None) -> str:
+    """Keyed hash of a token (HMAC-SHA256): tokens are random, so no slow hash is needed."""
+    return salted_hmac(HASH_CONTEXT, plain, secret=key, algorithm="sha256").hexdigest()
+
+
+def _matches(stored: str, plain: str) -> bool:
+    """Compare in constant time, also against hashes made with a previous secret key."""
+    keys = [settings.SECRET_KEY, *getattr(settings, "SECRET_KEY_FALLBACKS", [])]
+    return any(hmac.compare_digest(stored, digest(plain, key)) for key in keys)
 
 
 def _new(kind: str) -> tuple[str, str]:
@@ -99,11 +110,7 @@ def authenticate(plain: str, request: HttpRequest | None = None) -> ApiToken | N
     if len(parts) != 3 or parts[0] not in (PERSONAL_PREFIX, OAUTH_PREFIX):
         return None
     token = ApiToken.objects.select_related("user", "client").filter(prefix=parts[1]).first()
-    if (
-        token is None
-        or not hmac.compare_digest(token.token_hash, digest(plain))
-        or not token.usable
-    ):
+    if token is None or not _matches(token.token_hash, plain) or not token.usable:
         return None
     if token.client is not None and token.client.revoked_at is not None:
         return None
@@ -145,7 +152,7 @@ def create_client(
         client = ApiClient.objects.create(
             name=name.strip()[:100],
             client_id=client_id,
-            secret_hash=digest(secret),
+            secret_hash=make_password(secret),  # client secrets: Argon2id like passwords
             user=user,
             scopes=_scopes(scopes),
             tenant=tenant,
@@ -166,7 +173,7 @@ def rotate_secret(request: HttpRequest, actor: User, client: ApiClient) -> str:
     users.require_rights_of(actor, client.user)  # whoever sees the secret can act as the client
     secret = secrets.token_urlsafe(32)
     with transaction.atomic():
-        ApiClient.objects.filter(pk=client.pk).update(secret_hash=digest(secret))
+        ApiClient.objects.filter(pk=client.pk).update(secret_hash=make_password(secret))
         client.tokens.filter(revoked_at__isnull=True).update(revoked_at=timezone.now())
     audit.record(
         "api.client.rotated", request=request, obj=client.user, data={"client": client.client_id}
@@ -194,7 +201,7 @@ def issue_access_token(
     client = ApiClient.objects.select_related("user").filter(client_id=client_id).first()
     if (
         client is None
-        or not hmac.compare_digest(client.secret_hash, digest(secret))
+        or not check_password(secret, client.secret_hash)
         or client.revoked_at is not None
         or not client.user.is_active
     ):
