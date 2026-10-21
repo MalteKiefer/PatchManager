@@ -53,6 +53,7 @@ def test_site_to_rack_and_move_block(page: Page, live_server, super_admin, make_
     reserve.get_by_label("Label").fill("Switch")
     reserve.get_by_label("Lowest unit").fill("5")
     reserve.get_by_role("button", name="Reserve").click()
+    page.locator("#rack-elevation[data-ready]").wait_for()
     block = page.get_by_role("button", name=re.compile("Switch, units 5 to 5"))
     block.focus()
     page.keyboard.press("ArrowUp")

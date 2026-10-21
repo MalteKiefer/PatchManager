@@ -64,4 +64,5 @@ if (svg) {
       block.addEventListener("pointerup", onUp);
     });
   }
+  svg.dataset.ready = "1"; // lets tests wait until blocks are interactive
 }

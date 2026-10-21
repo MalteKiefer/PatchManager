@@ -4,6 +4,13 @@ All notable changes to this project are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the project uses
 [Semantic Versioning](https://semver.org/).
 
+## [0.3.1] - 2026-10-21
+
+### Fixed
+
+* End to end test waited too little for the rack elevation script, which failed the
+  0.3.0 release build; no container image was published for 0.3.0. Use 0.3.1.
+
 ## [0.3.0] - 2026-10-21
 
 ### Added
@@ -64,6 +71,7 @@ All notable changes to this project are documented here. The format follows
 * pre-commit hooks, Renovate configuration.
 * Documentation site, ADRs 0001 to 0010, STRIDE threat model draft, security policy.
 
+[0.3.1]: https://github.com/MalteKiefer/PatchManager/releases/tag/v0.3.1
 [0.3.0]: https://github.com/MalteKiefer/PatchManager/releases/tag/v0.3.0
 [0.2.0]: https://github.com/MalteKiefer/PatchManager/releases/tag/v0.2.0
 [0.1.0]: https://github.com/MalteKiefer/PatchManager/releases/tag/v0.1.0
