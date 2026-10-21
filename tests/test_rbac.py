@@ -250,3 +250,30 @@ def test_group_manager_cannot_join_privileged_group(super_admin, make_user) -> N
         rbac.add_parent(request, manager, helpers, admins)
     rbac.set_members(request, manager, helpers, [manager])  # no assignments: allowed
     assert not policy.is_super_admin(manager)
+
+
+def test_impersonation_checks_nested_group_grants(super_admin, make_user, make_tenant) -> None:
+    from patchmanager.accounts.services import users
+
+    request = RequestFactory().post("/")
+    request.user = super_admin
+    role = rbac.create_role(
+        request,
+        super_admin,
+        name="Helpdesk",
+        permission_codes=["accounts.user.impersonate", "accounts.user.view"],
+    )
+    actor = make_user()
+    Assignment.objects.create(role=role, user=actor)
+    child = rbac.create_group(request, super_admin, name="Child")
+    parent = rbac.create_group(request, super_admin, name="Parent")
+    rbac.add_parent(request, super_admin, child, parent)
+    rbac.assign(
+        request, super_admin, role=Role.objects.get(key="admin"), group=parent, tenant=make_tenant()
+    )
+    target = make_user()
+    child.members.add(target)
+    request.user = actor
+    request.session = {}  # type: ignore[assignment]
+    with pytest.raises(PermissionDeniedError):
+        users.start_impersonation(request, actor, target, "support")
