@@ -72,6 +72,16 @@ webhook targets (SSRF risk).
 | E4 | Elevation of privilege | Container escape after RCE | Non-root, read only root fs, no shell, dropped capabilities, no-new-privileges | 0 |
 | E5 | Elevation of privilege | Supply chain (dependency, action, image) | Lockfile, digest pinning, Renovate, pip-audit, Trivy, CodeQL, signed images | 0 |
 
+## Phase 2 controls in place
+
+* T1: hierarchy trigger rejects cross tenant parents and forged scope paths; RLS on
+  every tree table; site moves rewrite subtree, rack space and assignments atomically.
+* T1: rack space overlap and bounds enforced in the database (exclusion constraint,
+  triggers), not only in the UI.
+* I2: map popups and SVG labels are built as text, never as HTML.
+* I (privacy): map tiles are third party requests from the browser; configurable or
+  disabled (ADR 0014). No server side geocoding.
+
 ## Phase 1 controls in place
 
 * S1: Argon2id, account lockout, per IP limits, TOTP/WebAuthn/recovery codes, MFA
