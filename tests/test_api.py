@@ -564,3 +564,29 @@ def test_rotate_checks_unfiltered_grants(kit, super_admin, make_user) -> None:
         )  # filtered, but it would count if the rule changed
         with pytest.raises(PermissionDeniedError):
             tokens.rotate_secret(kit["request"], manager, client)
+
+
+def test_filters_search_fields_and_shared_types_for_scoped_users(
+    kit, make_user, super_admin
+) -> None:
+    user = make_user()
+    with rls.system_context():
+        Assignment.objects.create(
+            role=Role.objects.get(key="editor"),
+            user=user,
+            tenant=kit["tenant"],
+            scope_path=kit["room"].path,
+        )
+    api = _api(_token(user))
+    created = _send(
+        api,
+        "post",
+        "/api/v1/devices/",
+        {"device_type": str(kit["ap"].pk), "room": str(kit["room"].pk), "name": "ap7"},
+    )
+    assert created.status_code == 201, created.content  # shared library type, room scoped user
+    admin = _api(_token(super_admin))
+    assert _get(admin, "/api/v1/cables/", q="x").status_code == 200
+    assert _get(admin, "/api/v1/wlans/", q="x").status_code == 200
+    assert _get(admin, "/api/v1/vlans/", vid="abc").status_code == 400
+    assert _get(admin, "/api/v1/changes/", since="yesterday").status_code == 400

@@ -390,3 +390,56 @@ def test_send_window_and_redacted_default_name(make_tree, super_admin, sent, mon
         services.deliver_due()
         assert calls == [] and Delivery.objects.get().status == "pending"
     assert services.LEASE.total_seconds() > services.SEND_WINDOW + 60
+
+
+def test_inactive_hooks_bad_ports_and_broken_sends(
+    make_tree, super_admin, sent, monkeypatch
+) -> None:
+    calls, _fake = sent
+    t = make_tree()
+    with pytest.raises(ServiceError, match="port"):
+        http.check("https://h.example.com:99999/")
+    with rls.system_context():
+        hook, _s = services.create(
+            t["request"],
+            super_admin,
+            t["tenant"],
+            name="x",
+            url="https://h.example.com/",
+            events=["*"],
+        )
+        first = services.ping(t["request"], super_admin, hook)
+        services.update(
+            t["request"],
+            super_admin,
+            hook,
+            name="x",
+            url="https://h.example.com/",
+            events=["*"],
+            active=False,
+        )
+        services.deliver_due()
+        first.refresh_from_db()
+        assert first.status == "failed" and "inactive" in first.last_error and calls == []
+        services.update(
+            t["request"],
+            super_admin,
+            hook,
+            name="x",
+            url="https://h.example.com/",
+            events=["*"],
+            active=True,
+        )
+        second = services.ping(t["request"], super_admin, hook)
+
+        def boom(delivery):
+            raise RuntimeError("bad key")
+
+        monkeypatch.setattr(services, "_send", boom)
+        services.deliver_due()
+        second.refresh_from_db()
+        assert (
+            second.status == "pending"
+            and second.attempts == 1
+            and "server log" in second.last_error
+        )

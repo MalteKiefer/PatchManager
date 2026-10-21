@@ -34,6 +34,7 @@ class Base(viewsets.ModelViewSet):  # type: ignore[type-arg]
     model: ClassVar[Any]
     path_field: ClassVar[str] = "path"
     filters: ClassVar[dict[str, str]] = {}
+    search: ClassVar[str] = "name__icontains"  # what ?q= matches
     related: ClassVar[tuple[str, ...]] = ()
     http_method_names = ["get", "post", "patch", "delete", "head", "options"]
 
@@ -53,7 +54,7 @@ class Base(viewsets.ModelViewSet):  # type: ignore[type-arg]
         if getattr(self, "swagger_fake_view", False):
             return rows
         return filtered(
-            rows, self.request.query_params, {"q": "name__icontains", **self.filters}
+            rows, self.request.query_params, {"q": self.search, **self.filters}
         ).order_by("pk")
 
     @property
@@ -263,7 +264,7 @@ class DeviceViewSet(Base):
             request.user,
             DeviceType,
             data.validated_data["device_type_id"],
-            "library.devicetype.view",
+            None,  # RLS shows shared and own library types; the service checks the fit
             "device_type",
         )
         room, rack = self._place(place)
@@ -366,6 +367,7 @@ class CableViewSet(Base):
 
     serializer_class = s.CableSerializer
     model, object_type = Cable, "cabling.cable"
+    search = "label__icontains"
     filters: ClassVar[dict[str, str]] = {
         "kind": "kind",
         "media": "media",
@@ -377,12 +379,6 @@ class CableViewSet(Base):
     def base_queryset(self) -> QuerySet[Cable]:
         """Rows before permission scoping."""
         return Cable.objects.prefetch_related("ends")
-
-    def get_queryset(self) -> QuerySet[Any]:
-        """Rows the caller may view, filtered by the query parameters."""
-        rows = super().get_queryset()
-        q = self.request.query_params.get("q")
-        return rows.filter(label__icontains=q) if q else rows
 
     def create(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         """Create one through the domain service (permissions, validation, audit apply)."""
@@ -482,18 +478,13 @@ class WLANViewSet(Base):
 
     serializer_class = s.WLANSerializer
     model, object_type, path_field = WLAN, "networks.wlan", "scope"
+    search = "ssid__icontains"
     filters: ClassVar[dict[str, str]] = {"tenant": "tenant_id", "vlan": "vlan_id"}
     fields = ("ssid", "security", "hidden", "description")
 
     def base_queryset(self) -> QuerySet[WLAN]:
         """Rows before permission scoping."""
         return tenant_scope(WLAN.objects.all())
-
-    def get_queryset(self) -> QuerySet[Any]:
-        """Rows the caller may view, filtered by the query parameters."""
-        rows = super().get_queryset()
-        q = self.request.query_params.get("q")
-        return rows.filter(ssid__icontains=q) if q else rows
 
     def _vlan(self, data: Any) -> dict[str, Any]:
         if "vlan_id" not in data.validated_data:

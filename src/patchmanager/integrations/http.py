@@ -60,7 +60,10 @@ def check(url: str) -> Target:
         raise ServiceError(_("Webhook URLs must use https."))
     if not parts.hostname or parts.username or parts.password:
         raise ServiceError(_("Enter a URL with a host and without credentials."))
-    port = parts.port or (443 if parts.scheme == "https" else 80)
+    try:
+        port = parts.port or (443 if parts.scheme == "https" else 80)
+    except ValueError as exc:
+        raise ServiceError(_("Enter a valid port.")) from exc
     try:
         answers = socket.getaddrinfo(parts.hostname, port, type=socket.SOCK_STREAM)
     except (socket.gaierror, UnicodeError) as exc:

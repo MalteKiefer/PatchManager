@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-21 19:01+0000\n"
+"POT-Creation-Date: 2026-10-21 19:05+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -372,10 +372,10 @@ msgstr "API-Clients können keine Rollen erhalten, die MFA erfordern."
 msgid "The last super admin cannot be removed."
 msgstr "Der letzte Super-Admin kann nicht entfernt werden."
 
-#: accounts/services/users.py:29 api/core.py:27 api/tokens.py:88
+#: accounts/services/users.py:29 api/core.py:28 api/tokens.py:88
 #: api/tokens.py:123 cabling/services.py:50 exchange/importer.py:54
 #: exchange/importer.py:70 floorplans/services.py:187 floorplans/views.py:192
-#: history/services.py:76 history/services.py:97 integrations/services.py:64
+#: history/services.py:76 history/services.py:97 integrations/services.py:69
 #: metadata/services.py:98 metadata/services.py:166 networks/services.py:109
 #: networks/services.py:139 networks/services.py:148
 msgid "You do not have permission to do that."
@@ -601,11 +601,15 @@ msgstr "%(count)s Rollen importiert."
 msgid "Invalid or expired token."
 msgstr "Token ungültig oder abgelaufen."
 
-#: api/core.py:64
+#: api/core.py:65
 msgid "Not a valid id."
 msgstr "Keine gültige ID."
 
-#: api/core.py:98
+#: api/core.py:70
+msgid "Not a valid value."
+msgstr "Kein gültiger Wert."
+
+#: api/core.py:102
 msgid "Not found."
 msgstr "Nicht gefunden."
 
@@ -1572,11 +1576,15 @@ msgstr "Webhook-URLs müssen https verwenden."
 msgid "Enter a URL with a host and without credentials."
 msgstr "Geben Sie eine URL mit Host und ohne Zugangsdaten ein."
 
-#: integrations/http.py:67
+#: integrations/http.py:66
+msgid "Enter a valid port."
+msgstr "Geben Sie einen gültigen Port ein."
+
+#: integrations/http.py:70
 msgid "The host cannot be resolved."
 msgstr "Der Host kann nicht aufgelöst werden."
 
-#: integrations/http.py:70
+#: integrations/http.py:73
 msgid "This address is not allowed for webhooks."
 msgstr "Diese Adresse ist für Webhooks nicht erlaubt."
 
@@ -1597,7 +1605,7 @@ msgstr "gesendet"
 msgid "failed"
 msgstr "fehlgeschlagen"
 
-#: integrations/services.py:76
+#: integrations/services.py:81
 msgid "Events are patterns like dcim.device.*, cabling.cable.insert or *."
 msgstr "Ereignisse sind Muster wie dcim.device.*, cabling.cable.insert oder *."
 

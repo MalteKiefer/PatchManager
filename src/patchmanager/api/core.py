@@ -2,6 +2,7 @@
 
 from typing import Any
 
+from django.core.exceptions import ValidationError as DjangoValidationError
 from django.db.models import F, QuerySet, TextField, Value
 from django.db.models.functions import Cast, Coalesce, Replace
 from django.http import Http404
@@ -63,7 +64,10 @@ def filtered(queryset: QuerySet[Any], params: Any, spec: dict[str, str]) -> Quer
             if uuid is None:
                 raise exceptions.ValidationError({param: _("Not a valid id.")})
             value = uuid
-        queryset = queryset.filter(**{lookup: value})
+        try:
+            queryset = queryset.filter(**{lookup: value})
+        except (ValueError, DjangoValidationError) as exc:
+            raise exceptions.ValidationError({param: [_("Not a valid value.")]}) from exc
     return queryset
 
 

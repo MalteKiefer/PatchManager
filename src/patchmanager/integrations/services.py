@@ -3,6 +3,7 @@
 import hashlib
 import hmac
 import json
+import logging
 import re
 import secrets
 import time
@@ -27,6 +28,7 @@ from patchmanager.integrations.models import Delivery, Webhook
 from patchmanager.tenancy import rls
 from patchmanager.tenancy.models import Tenant
 
+logger = logging.getLogger(__name__)
 PATTERN = re.compile(r"^(\*|[a-z]+(\.[a-z]+){0,2}(\.\*)?)$")
 BACKOFF = (60, 300, 1800, 7200, 21600, 86400)  # seconds after attempt 1, 2, ...
 LEASE = timedelta(minutes=5)  # longer than a batch can take (BATCH x total timeout)
@@ -266,8 +268,22 @@ def deliver_due(limit: int = BATCH) -> int:
             hook = delivery.webhook
             if hook.pk not in allowed:  # the creator must still see everything the webhook sends
                 allowed[hook.pk] = sees_everything(hook.created_by, hook.tenant)
-            if allowed[hook.pk]:
-                _send(delivery)
+            if not hook.active:
+                Delivery.objects.filter(pk=delivery.pk).update(
+                    status=Delivery.Status.FAILED, last_error="The webhook is inactive."
+                )
+            elif allowed[hook.pk]:
+                try:
+                    _send(delivery)
+                except Exception:  # one broken delivery must not stop the others; it is retried
+                    logger.exception(
+                        "webhook delivery failed", extra={"delivery": str(delivery.pk)}
+                    )
+                    Delivery.objects.filter(pk=delivery.pk).update(
+                        attempts=delivery.attempts + 1,
+                        last_error="Internal error, see the server log.",
+                        next_attempt_at=timezone.now() + timedelta(seconds=BACKOFF[0]),
+                    )
             else:
                 Delivery.objects.filter(pk=delivery.pk).update(
                     status=Delivery.Status.FAILED,
