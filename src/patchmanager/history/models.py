@@ -2,6 +2,7 @@
 
 from django.contrib.postgres.fields import ArrayField
 from django.db import models
+from django.utils.translation import gettext_lazy as _
 
 from patchmanager.core.fields import LtreeField
 
@@ -10,9 +11,9 @@ class Change(models.Model):
     """One insert, update or delete of a tracked row, with before and after state."""
 
     class Action(models.TextChoices):
-        INSERT = "insert", "created"
-        UPDATE = "update", "changed"
-        DELETE = "delete", "deleted"
+        INSERT = "insert", _("created")
+        UPDATE = "update", _("changed")
+        DELETE = "delete", _("deleted")
 
     id = models.UUIDField(primary_key=True)  # uuidv7() in the trigger
     occurred_at = models.DateTimeField(db_index=True)

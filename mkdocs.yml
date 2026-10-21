@@ -54,3 +54,4 @@ nav:
       - adr/0015-devices-ports-and-uploads.md
       - adr/0016-cabling-trace-and-networks.md
       - adr/0017-floor-plans.md
+      - adr/0018-history-search-import-export.md

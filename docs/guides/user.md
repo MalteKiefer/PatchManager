@@ -88,6 +88,30 @@ focus one and use the arrow keys (Shift for bigger steps). Dropping a floor
 device into another room's outline moves it to that room. Double click a symbol
 to open it.
 
+## Search
+
+Use the search field in the header. Search finds names, codes, serial numbers,
+asset tags, port labels and MAC addresses, cable labels, VLAN names and IDs, WLAN
+names and text in notes, also with small typos. Filter by type on the right and
+save a search under a name to run it again.
+
+## History
+
+**Activity** lists recent changes in the tenant; filter by type, action, name,
+person and date. Every object page links to its **History**. Open a change to see
+the values before and after; **Restore earlier values** sets changed fields back
+if nobody changed them again since. Moves (room, rack) are not restored.
+
+## Import and export
+
+**Import/Export** imports locations, racks, devices, VLANs and cables from CSV or
+XLSX. Download a template, fill it in and choose **Check file**: nothing changes
+yet, every line shows what would happen. **Import now** applies the file, or
+nothing if a line fails. Objects with the same name are updated; empty cells keep
+their value. Exports use the same columns, so you can export, edit and import
+again. PDF reports: site report, patch list and bill of materials per site, the
+rack elevation on rack pages and the port list on device pages.
+
 ## VLANs and WLANs
 
 **Networks** holds VLANs (for the whole tenant or one site) and WLANs. On a

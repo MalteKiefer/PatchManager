@@ -16,7 +16,7 @@ from django.utils.translation import gettext_lazy
 
 from patchmanager.accounts import policy
 from patchmanager.accounts.models import User
-from patchmanager.accounts.services import ServiceError
+from patchmanager.accounts.services import PermissionDeniedError, ServiceError
 from patchmanager.cabling import services as cabling
 from patchmanager.cabling.models import Cable, CableEnd
 from patchmanager.dcim import devices
@@ -96,6 +96,13 @@ def _text(row: Row, key: str) -> str | None:
     return row.get(key) or None
 
 
+def _seen[O](actor: Any, permission: str, obj: O) -> O:
+    """Existing objects the actor may not view are refused, so results reveal nothing."""
+    if obj is not None and not policy.has_perm(actor, permission, obj):
+        raise PermissionDeniedError(_("You do not have permission to do that."))
+    return obj
+
+
 def _changed(obj: Any, values: dict[str, Any]) -> dict[str, Any]:
     return {k: v for k, v in values.items() if getattr(obj, k) != v}
 
@@ -115,7 +122,7 @@ def location(request: HttpRequest, actor: User, tenant: Tenant, row: Row, *, cre
             if model is Site
             else query.filter(**{model.parent_field: parent})
         )
-        node = query.first()
+        node = _seen(actor, f"{model.policy_object_type}.view", query.first())
         if node is None:
             if not create:
                 raise ServiceError(
@@ -223,7 +230,9 @@ def import_rack(request: HttpRequest, actor: User, tenant: Tenant, row: Row) -> 
     if not isinstance(room, Room):
         raise ServiceError(_("Racks need a room."))
     values = _fields(row, RACK_FIELDS)
-    rack = Rack.objects.filter(room=room, name__iexact=row["name"]).first()
+    rack = _seen(
+        actor, "dcim.rack.view", Rack.objects.filter(room=room, name__iexact=row["name"]).first()
+    )
     if rack is None:
         tree.create(request, actor, Rack, parent=room, name=row["name"], **values)
         return "created"
@@ -284,16 +293,20 @@ def import_device(request: HttpRequest, actor: User, tenant: Tenant, row: Row) -
         raise ServiceError(_("Devices need a room."))
     rack = None
     if row.get("rack"):
-        rack = Rack.objects.filter(room=room, name__iexact=row["rack"]).first()
+        rack = _seen(
+            actor,
+            "dcim.rack.view",
+            Rack.objects.filter(room=room, name__iexact=row["rack"]).first(),
+        )
         if rack is None:
             raise ServiceError(_("Rack %(name)s not found.") % {"name": row["rack"]})
     position = _int(row, "position")
     face = _choice(row, "face", RackSpace.Face.choices)
     values = _fields(row, DEVICE_FIELDS)
-    device = (
-        Device.objects.filter(tenant=tenant, name__iexact=row["name"])
-        .select_related("rack")
-        .first()
+    device = _seen(
+        actor,
+        "dcim.device.view",
+        Device.objects.filter(tenant=tenant, name__iexact=row["name"]).first(),
     )
     if device is None:
         devices.create(
@@ -362,14 +375,20 @@ def import_vlan(request: HttpRequest, actor: User, tenant: Tenant, row: Row) -> 
     """Create or update a VLAN by site and VID."""
     site = None
     if row.get("site"):
-        site = Site.objects.filter(tenant=tenant, name__iexact=row["site"]).first()
+        site = _seen(
+            actor,
+            "locations.site.view",
+            Site.objects.filter(tenant=tenant, name__iexact=row["site"]).first(),
+        )
         if site is None:
             raise ServiceError(_("Site %(name)s not found.") % {"name": row["site"]})
     vid = _int(row, "vid")
     if vid is None:
         raise ServiceError(_("vid must be a number."))
     values = _fields(row, VLAN_FIELDS)
-    vlan = VLAN.objects.filter(tenant=tenant, site=site, vid=vid).first()
+    vlan = _seen(
+        actor, "networks.vlan.view", VLAN.objects.filter(tenant=tenant, site=site, vid=vid).first()
+    )
     if vlan is None:
         networks.create_vlan(request, actor, tenant, site=site, vid=vid, **values)
         return "created"
@@ -393,27 +412,21 @@ CABLE_FIELDS: dict[str, Callable[[Row, str], Any]] = {
 
 
 def export_cables(user: Any, tenant: Tenant, site: Site | None) -> Iterator[dict[str, Any]]:
-    """Cables with both ends."""
+    """Cables with both ends (ends on devices the user may not view are masked)."""
     cables = _scoped(user, "cabling.cable.view", Cable.objects.filter(tenant=tenant), site)
     for cable in cables.prefetch_related("ends__port__device").order_by("pk")[:EXPORT_LIMIT]:
         ends = {e.side: e.port for e in cable.ends.all()}
         if len(ends) != 2:
             continue
-        yield {
-            "device_a": ends["a"].device.name,
-            "port_a": ends["a"].name,
-            "device_b": ends["b"].device.name,
-            "port_b": ends["b"].name,
-            "kind": cable.kind,
-            "media": cable.media,
-            "colour": cable.colour,
-            "length_m": cable.length_m,
-            "label": cable.label,
-            "status": cable.status,
-        }
+        row: dict[str, Any] = {key: getattr(cable, key) for key in CABLE_FIELDS}
+        for side, port in ends.items():
+            shown = policy.has_perm(user, "dcim.device.view", port.device)
+            row[f"device_{side}"] = port.device.name if shown else "…"
+            row[f"port_{side}"] = port.name if shown else ""
+        yield row
 
 
-def _port(tenant: Tenant, row: Row, side: str) -> Port:
+def _port(actor: User, tenant: Tenant, row: Row, side: str) -> Port:
     port = (
         Port.objects.filter(
             tenant=tenant,
@@ -428,15 +441,17 @@ def _port(tenant: Tenant, row: Row, side: str) -> Port:
             _("Port %(d)s %(p)s not found.")
             % {"d": row[f"device_{side}"], "p": row[f"port_{side}"]}
         )
+    _seen(actor, "dcim.device.view", port.device)
     return port
 
 
 def import_cable(request: HttpRequest, actor: User, tenant: Tenant, row: Row) -> str:
     """Connect two ports, or update the cable between them."""
-    a, b = _port(tenant, row, "a"), _port(tenant, row, "b")
+    a, b = _port(actor, tenant, row, "a"), _port(actor, tenant, row, "b")
     values = _fields(row, CABLE_FIELDS)
     end = CableEnd.objects.filter(port=a).select_related("cable").first()
     if end is not None and CableEnd.objects.filter(cable=end.cable, port=b).exists():
+        _seen(actor, "cabling.cable.view", end.cable)
         changes = _changed(end.cable, values)
         if not changes:
             return "unchanged"

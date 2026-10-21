@@ -80,6 +80,13 @@ included in the daily backup archive. Limits and scanning:
 | `PATCHMANAGER_UPLOAD_MAX_MB` | `20` | Maximum upload size (Caddy limits request bodies to 25 MB) |
 | `PATCHMANAGER_CLAMD_HOST` / `PATCHMANAGER_CLAMD_PORT` | unset / `3310` | Scan uploads with clamd; uploads fail while it is unreachable |
 
+## Reports
+
+PDF reports show the instance name (`PATCHMANAGER_INSTANCE_NAME`). Set
+`PATCHMANAGER_BRAND_LOGO` to a PNG or JPEG file (up to 2 MB) mounted into the
+container to print your logo on every report; the system check fails if the file
+cannot be used.
+
 ## Maps
 
 Site maps load tiles from OpenStreetMap in the user's browser. Set

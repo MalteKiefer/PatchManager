@@ -25,6 +25,8 @@ markdown-it-py 4.2.0 (notes), defusedxml 0.7.1 (SVG parsing).
 
 Added in 0.6.0: pypdfium2 5.13.0 (PDF floor plans to PNG).
 
+Added in 0.7.0: reportlab 5.0.1 (PDF reports), openpyxl 3.1.5 (XLSX import and export).
+
 Front end assets (self hosted, no CDN at runtime):
 
 | Asset | Version | Integrity |

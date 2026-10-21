@@ -13,6 +13,8 @@ from openpyxl import Workbook, load_workbook
 from patchmanager.accounts.services import ServiceError
 
 MAX_ROWS = 5000
+MAX_LINES = MAX_ROWS + 1000  # empty lines count too, so padding cannot bypass the limit
+MAX_COLUMNS = 50
 MAX_CELL = 1000
 MAX_UNZIPPED = 100 * 1024 * 1024
 FORMULA_START = ("=", "+", "-", "@", "\t", "\r")  # OWASP CSV injection
@@ -85,9 +87,11 @@ def read(data: bytes) -> list[dict[str, str]]:
     first = text.split("\n", 1)[0]
     delimiter = max(",;\t", key=first.count)  # the header has no quoted separators
     reader = csv.reader(io.StringIO(text), delimiter=delimiter)
-    header = _header(next(reader, []))
+    header = _header(next(reader, []))[:MAX_COLUMNS]
     rows = []
-    for values in reader:
+    for number, values in enumerate(reader):
+        if number > MAX_LINES:
+            raise ServiceError(_("At most %(n)s rows per import.") % {"n": MAX_ROWS})
         if any(v.strip() for v in values):
             rows.append(_clean(header, values))
             if len(rows) > MAX_ROWS:
@@ -105,10 +109,12 @@ def _read_xlsx(data: bytes) -> list[dict[str, str]]:
         raise ServiceError(_("The workbook could not be read.")) from exc
     try:
         sheet = workbook.worksheets[0]
-        lines = sheet.iter_rows(values_only=True)
+        lines = sheet.iter_rows(values_only=True, max_col=MAX_COLUMNS)
         header = _header(next(lines, ()))
         rows = []
-        for values in lines:
+        for number, values in enumerate(lines):
+            if number > MAX_LINES:
+                raise ServiceError(_("At most %(n)s rows per import.") % {"n": MAX_ROWS})
             if any(v not in (None, "") for v in values):
                 rows.append(_clean(header, values))
                 if len(rows) > MAX_ROWS:

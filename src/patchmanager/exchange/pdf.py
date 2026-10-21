@@ -1,5 +1,6 @@
 """PDF reports: site report, rack elevation, port list, patch list and bill of materials."""
 
+import html
 import io
 from collections import Counter
 from functools import cache
@@ -70,11 +71,9 @@ STYLES = {
 
 
 def _p(text: Any, style: str = "body") -> Paragraph:
-    from xml.sax.saxutils import escape
-
     _fonts()
     return Paragraph(
-        escape("" if text is None else str(text)), STYLES[style]
+        html.escape("" if text is None else str(text)), STYLES[style]
     )  # data is text, never markup
 
 

@@ -83,6 +83,10 @@ def test_read_limits_and_errors(monkeypatch) -> None:
     monkeypatch.setattr(formats, "MAX_ROWS", 2)
     with pytest.raises(ServiceError, match="At most"):
         formats.read(b"a\n1\n2\n3\n")
+    monkeypatch.setattr(formats, "MAX_LINES", 3)
+    with pytest.raises(ServiceError, match="At most"):
+        formats.read(b"a\n1\n\n\n\n\n\n")
+    monkeypatch.setattr(formats, "MAX_LINES", 100)
     with pytest.raises(ServiceError, match="longer"):
         formats.read(b"a\n" + b"x" * 1001 + b"\n")
     with pytest.raises(ServiceError, match="could not be read"):
@@ -292,6 +296,46 @@ def test_exports_match_import_columns_and_scope(kit, super_admin, make_user) -> 
         )
         names = {r["name"] for r in TABLES["devices"].export(user, kit["tenant"], None)}
         assert names == {"sw1", "sw2"}
+        hidden = Device.objects.get(name="hidden")
+        cabling.connect(
+            kit["request"],
+            super_admin,
+            Device.objects.get(name="sw1").ports.get(name="ge2"),
+            hidden.ports.get(name="ge1"),
+        )
+        Assignment.objects.filter(user=user).update(scope_path=kit["floor"].path)
+        Assignment.objects.create(
+            role=Role.objects.get(key="viewer"),
+            user=user,
+            tenant=kit["tenant"],
+            scope_path=secret.path,
+            effect="deny",
+        )
+        ends = {
+            (r["device_a"], r["device_b"])
+            for r in TABLES["cables"].export(user, kit["tenant"], None)
+        }
+        assert ("sw1", "…") in ends and not any("hidden" in e for pair in ends for e in pair)
+        # importing over an object the user cannot view reveals nothing
+        results = importer.run(
+            kit["request"],
+            user,
+            kit["tenant"],
+            "devices",
+            [
+                {
+                    "site": "HQ",
+                    "building": "B1",
+                    "floor": "F1",
+                    "room": "R1",
+                    "name": "hidden",
+                    "vendor": "Acme",
+                    "model": "Switch 8",
+                }
+            ],
+            apply=False,
+        )
+        assert results[0].message == "You do not have permission to do that."
 
 
 def test_pdf_reports(kit, super_admin, make_user, settings, tmp_path) -> None:

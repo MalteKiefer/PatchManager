@@ -4,6 +4,20 @@ All notable changes to this project are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the project uses
 [Semantic Versioning](https://semver.org/).
 
+## [0.7.0] - 2026-10-21
+
+### Added
+
+* Change history for locations, racks, devices, ports, cables, VLANs and WLANs,
+  recorded by database triggers: activity log with filters, per object history,
+  before and after view and restore of changed fields.
+* Global search across names, serial numbers, asset tags, ports, cables, VLANs, WLANs
+  and notes, typo tolerant, with type facets and saved searches.
+* Import wizard for locations, racks, devices, VLANs and cables from CSV or XLSX with
+  a dry run, per line results and all or nothing apply; templates per table.
+* Exports as CSV, XLSX and JSON (re-importable) and PDF reports: site report, rack
+  elevation, port list, patch list and bill of materials, with an optional logo.
+
 ## [0.6.0] - 2026-10-21
 
 ### Added
