@@ -29,6 +29,7 @@ from patchmanager.locations.models import Site
 
 PENDING_SECONDS = 1800
 EXPORTS_PER_10_MIN = 60
+IMPORTS_PER_10_MIN = 20
 CONTENT_TYPES = {
     "csv": "text/csv; charset=utf-8",
     "xlsx": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
@@ -78,6 +79,13 @@ def _limited(request: HttpRequest) -> bool:
     return not ratelimit.hit(f"export:{request.user.pk}", limit=EXPORTS_PER_10_MIN, window=600)
 
 
+def _import_limited(request: HttpRequest) -> bool:
+    if ratelimit.hit(f"import:{request.user.pk}", limit=IMPORTS_PER_10_MIN, window=600):
+        return False
+    messages.error(request, _("Too many imports. Try again in a few minutes."))
+    return True
+
+
 def _pending_key(request: HttpRequest, token: str) -> str:
     return f"import:{request.user.pk}:{token}"
 
@@ -108,6 +116,8 @@ def index(request: HttpRequest) -> HttpResponse:
 def upload(request: HttpRequest) -> HttpResponse:
     """Parse the file and run a dry run."""
     tenant = _tenant(request)
+    if _import_limited(request):
+        return redirect("exchange:index")
     form = ImportForm(request.POST, request.FILES)
     if not form.is_valid():
         messages.error(request, _("Choose a table and a file."))
@@ -147,6 +157,8 @@ def upload(request: HttpRequest) -> HttpResponse:
 def apply(request: HttpRequest) -> HttpResponse:
     """Run the checked import for real."""
     tenant = _tenant(request)
+    if _import_limited(request):
+        return redirect("exchange:index")
     token = request.POST.get("token", "")[:64]
     pending = cache.get(_pending_key(request, token)) if token else None
     if pending is None or pending["tenant"] != str(tenant.pk):

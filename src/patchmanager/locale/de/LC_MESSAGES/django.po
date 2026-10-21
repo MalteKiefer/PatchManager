@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-21 18:08+0000\n"
+"POT-Creation-Date: 2026-10-21 18:20+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -27,7 +27,7 @@ msgstr "E-Mail"
 msgid "Password"
 msgstr "Passwort"
 
-#: accounts/forms.py:32 exchange/pdf.py:148
+#: accounts/forms.py:32 exchange/pdf.py:147
 msgid "Code"
 msgstr "Code"
 
@@ -40,7 +40,7 @@ msgid "Run the setup_token command to get one."
 msgstr "Führen Sie den Befehl setup_token aus, um eines zu erhalten."
 
 #: accounts/forms.py:49 accounts/forms.py:103 accounts/forms.py:110
-#: exchange/pdf.py:201 templates/manage/groups.html:6
+#: exchange/pdf.py:200 templates/manage/groups.html:6
 #: templates/manage/roles.html:11 templates/manage/tenants.html:6
 #: templates/manage/users.html:10 templates/networks/vlans.html:7
 #: templates/search/results.html:35 templates/search/results.html:36
@@ -77,7 +77,7 @@ msgstr "Mandant"
 msgid "All tenants (global)"
 msgstr "Alle Mandanten (global)"
 
-#: accounts/forms.py:130 exchange/pdf.py:201 templates/library/types.html:17
+#: accounts/forms.py:130 exchange/pdf.py:200 templates/library/types.html:17
 #: templates/manage/_assignments.html:3
 msgid "Scope"
 msgstr "Geltungsbereich"
@@ -124,7 +124,7 @@ msgstr "Name der Kopie"
 msgid "JSON or YAML file"
 msgstr "JSON- oder YAML-Datei"
 
-#: accounts/forms.py:183 exchange/views.py:119 floorplans/views.py:169
+#: accounts/forms.py:183 exchange/views.py:129 floorplans/views.py:169
 #: metadata/uploads.py:183 metadata/views.py:65
 msgid "The file is too large."
 msgstr "Die Datei ist zu groß."
@@ -364,8 +364,8 @@ msgid "The last super admin cannot be removed."
 msgstr "Der letzte Super-Admin kann nicht entfernt werden."
 
 #: accounts/services/users.py:29 cabling/services.py:50 exchange/importer.py:67
-#: floorplans/services.py:187 floorplans/views.py:192 history/services.py:70
-#: history/services.py:91 metadata/services.py:98 metadata/services.py:166
+#: floorplans/services.py:187 floorplans/views.py:192 history/services.py:76
+#: history/services.py:97 metadata/services.py:98 metadata/services.py:166
 #: networks/services.py:109 networks/services.py:139 networks/services.py:148
 msgid "You do not have permission to do that."
 msgstr "Sie haben keine Berechtigung dafür."
@@ -710,7 +710,7 @@ msgstr "Diese Ports können nicht verbunden werden."
 msgid "Device"
 msgstr "Gerät"
 
-#: cabling/views.py:44 exchange/pdf.py:266 templates/dcim/device.html:16
+#: cabling/views.py:44 exchange/pdf.py:265 templates/dcim/device.html:16
 #: templates/dcim/port.html:35
 msgid "Port"
 msgstr "Port"
@@ -754,7 +754,7 @@ msgstr "Rückseite"
 msgid "Leave empty to use the type's naming convention."
 msgstr "Leer lassen, um die Namenskonvention des Typs zu verwenden."
 
-#: dcim/device_views.py:81 exchange/pdf.py:185
+#: dcim/device_views.py:81 exchange/pdf.py:184
 msgid "Room"
 msgstr "Raum"
 
@@ -937,7 +937,7 @@ msgstr "Die Höheneinheiten müssen zwischen 1 und %(height)s liegen."
 msgid "Move or delete the device instead."
 msgstr "Verschieben oder löschen Sie stattdessen das Gerät."
 
-#: dcim/views.py:31 exchange/pdf.py:271 templates/dcim/device.html:16
+#: dcim/views.py:31 exchange/pdf.py:270 templates/dcim/device.html:16
 #: templates/dcim/rack.html:68
 msgid "Label"
 msgstr "Bezeichnung"
@@ -958,25 +958,34 @@ msgstr "Ungültige Anfrage."
 msgid "These units are taken or outside the rack."
 msgstr "Diese Höheneinheiten sind belegt oder liegen außerhalb des Racks."
 
-#: exchange/formats.py:68
+#: exchange/formats.py:72
 #, python-format
 msgid "A cell is longer than %(n)s characters."
 msgstr "Eine Zelle ist länger als %(n)s Zeichen."
 
-#: exchange/formats.py:84
+#: exchange/formats.py:86
+msgid "The file could not be read."
+msgstr "Die Datei konnte nicht gelesen werden."
+
+#: exchange/formats.py:88
+msgid "The file contains too much text."
+msgstr "Die Datei enthält zu viel Text."
+
+#: exchange/formats.py:96
 msgid "CSV files must be UTF-8 encoded."
 msgstr "CSV Dateien müssen UTF-8 codiert sein."
 
-#: exchange/formats.py:94 exchange/formats.py:115
+#: exchange/formats.py:104 exchange/formats.py:108 exchange/formats.py:127
+#: exchange/formats.py:131
 #, python-format
 msgid "At most %(n)s rows per import."
 msgstr "Höchstens %(n)s Zeilen pro Import."
 
-#: exchange/formats.py:102
+#: exchange/formats.py:116
 msgid "The workbook is too large."
 msgstr "Die Arbeitsmappe ist zu groß."
 
-#: exchange/formats.py:105
+#: exchange/formats.py:119
 msgid "The workbook could not be read."
 msgstr "Die Arbeitsmappe konnte nicht gelesen werden."
 
@@ -1007,188 +1016,188 @@ msgstr "Leer: %(cols)s."
 msgid "The database refused this row."
 msgstr "Die Datenbank hat diese Zeile abgelehnt."
 
-#: exchange/pdf.py:101
+#: exchange/pdf.py:100
 #, python-format
 msgid "%(name)s · %(user)s · %(time)s"
 msgstr "%(name)s · %(user)s · %(time)s"
 
-#: exchange/pdf.py:112
+#: exchange/pdf.py:111
 #, python-format
 msgid "Page %(n)s"
 msgstr "Seite %(n)s"
 
-#: exchange/pdf.py:148 templates/accounts/security.html:50
+#: exchange/pdf.py:147 templates/accounts/security.html:50
 #: templates/manage/audit.html:18
 msgid "Address"
 msgstr "Adresse"
 
-#: exchange/pdf.py:148
+#: exchange/pdf.py:147
 msgid "Description"
 msgstr "Beschreibung"
 
-#: exchange/pdf.py:184 exchange/tables.py:493 templates/base.html:44
+#: exchange/pdf.py:183 exchange/tables.py:525 templates/base.html:44
 #: templates/core/_breadcrumbs.html:4 templates/locations/index.html:2
 #: templates/locations/index.html:6
 msgid "Locations"
 msgstr "Orte"
 
-#: exchange/pdf.py:185
+#: exchange/pdf.py:184
 msgid "Building"
 msgstr "Gebäude"
 
-#: exchange/pdf.py:185
+#: exchange/pdf.py:184
 msgid "Floor"
 msgstr "Etage"
 
-#: exchange/pdf.py:185 exchange/pdf.py:267 exchange/pdf.py:311
+#: exchange/pdf.py:184 exchange/pdf.py:266 exchange/pdf.py:310
 #: templates/cabling/cables.html:7 templates/cabling/cables.html:12
 #: templates/dcim/device.html:16 templates/library/type_detail.html:16
 msgid "Kind"
 msgstr "Art"
 
-#: exchange/pdf.py:185 exchange/tables.py:501 locations/views.py:52
+#: exchange/pdf.py:184 exchange/tables.py:533 locations/views.py:52
 #: search/services.py:58
 msgid "Racks"
 msgstr "Racks"
 
-#: exchange/pdf.py:185 exchange/tables.py:509 search/services.py:66
+#: exchange/pdf.py:184 exchange/tables.py:541 search/services.py:66
 #: templates/dcim/rack.html:57 templates/library/types.html:17
 msgid "Devices"
 msgstr "Geräte"
 
-#: exchange/pdf.py:187
+#: exchange/pdf.py:186
 #, python-format
 msgid "Totals: %(r)s racks, %(d)s devices"
 msgstr "Summen: %(r)s Racks, %(d)s Geräte"
 
-#: exchange/pdf.py:199 exchange/tables.py:528 search/services.py:84
+#: exchange/pdf.py:198 exchange/tables.py:560 search/services.py:84
 msgid "VLANs"
 msgstr "VLANs"
 
-#: exchange/pdf.py:201
+#: exchange/pdf.py:200
 msgid "VID"
 msgstr "VID"
 
-#: exchange/pdf.py:201 templates/locations/node.html:21
+#: exchange/pdf.py:200 templates/locations/node.html:21
 #: templates/manage/tenants.html:6 templates/manage/users.html:10
 #: templates/networks/vlans.html:7
 msgid "Status"
 msgstr "Status"
 
-#: exchange/pdf.py:203
+#: exchange/pdf.py:202
 msgid "tenant"
 msgstr "Mandant"
 
-#: exchange/pdf.py:208
+#: exchange/pdf.py:207
 #, python-format
 msgid "Site report: %(name)s"
 msgstr "Standortbericht: %(name)s"
 
-#: exchange/pdf.py:218 networks/models.py:16
+#: exchange/pdf.py:217 networks/models.py:16
 msgid "reserved"
 msgstr "reserviert"
 
-#: exchange/pdf.py:218 exchange/pdf.py:250 exchange/pdf.py:298
+#: exchange/pdf.py:217 exchange/pdf.py:249 exchange/pdf.py:297
 #: templates/cabling/trace.html:18
 msgid "not visible"
 msgstr "nicht sichtbar"
 
-#: exchange/pdf.py:227
+#: exchange/pdf.py:226
 msgid "Unit"
 msgstr "Höheneinheit"
 
-#: exchange/pdf.py:227 templates/dcim/rack.html:10 templates/dcim/rack.html:50
+#: exchange/pdf.py:226 templates/dcim/rack.html:10 templates/dcim/rack.html:50
 msgid "Front"
 msgstr "Vorderseite"
 
-#: exchange/pdf.py:227 templates/dcim/device.html:16
+#: exchange/pdf.py:226 templates/dcim/device.html:16
 #: templates/dcim/rack.html:11 templates/dcim/rack.html:51
 msgid "Rear"
 msgstr "Rückseite"
 
-#: exchange/pdf.py:229
+#: exchange/pdf.py:228
 #, python-format
 msgid "%(n)s units used"
 msgstr "%(n)s Höheneinheiten belegt"
 
-#: exchange/pdf.py:230
+#: exchange/pdf.py:229
 #, python-format
 msgid "Rack %(name)s"
 msgstr "Rack %(name)s"
 
-#: exchange/pdf.py:268 templates/dcim/device.html:16
+#: exchange/pdf.py:267 templates/dcim/device.html:16
 #: templates/library/type_detail.html:16
 msgid "Connector"
 msgstr "Steckverbinder"
 
-#: exchange/pdf.py:269
+#: exchange/pdf.py:268
 msgid "Mbit/s"
 msgstr "Mbit/s"
 
-#: exchange/pdf.py:270 networks/models.py:75
+#: exchange/pdf.py:269 networks/models.py:75
 msgid "VLAN"
 msgstr "VLAN"
 
-#: exchange/pdf.py:272 templates/dcim/device.html:35
+#: exchange/pdf.py:271 templates/dcim/device.html:35
 #: templates/dcim/port.html:16
 msgid "Connected to"
 msgstr "Verbunden mit"
 
-#: exchange/pdf.py:277
+#: exchange/pdf.py:276
 #, python-format
 msgid "Ports of %(name)s"
 msgstr "Ports von %(name)s"
 
-#: exchange/pdf.py:311 templates/cabling/cable.html:2
+#: exchange/pdf.py:310 templates/cabling/cable.html:2
 #: templates/cabling/cable.html:6 templates/cabling/cables.html:12
 #: templates/dcim/device.html:16 templates/dcim/port.html:14
 msgid "Cable"
 msgstr "Kabel"
 
-#: exchange/pdf.py:311 templates/cabling/cables.html:8
+#: exchange/pdf.py:310 templates/cabling/cables.html:8
 #: templates/cabling/cables.html:12
 msgid "Media"
 msgstr "Medium"
 
-#: exchange/pdf.py:311
+#: exchange/pdf.py:310
 msgid "Length (m)"
 msgstr "Länge (m)"
 
-#: exchange/pdf.py:311 templates/cabling/cables.html:12
+#: exchange/pdf.py:310 templates/cabling/cables.html:12
 msgid "A"
 msgstr "A"
 
-#: exchange/pdf.py:311 templates/cabling/cables.html:12
+#: exchange/pdf.py:310 templates/cabling/cables.html:12
 msgid "B"
 msgstr "B"
 
-#: exchange/pdf.py:313
+#: exchange/pdf.py:312
 #, python-format
 msgid "Patch list: %(name)s"
 msgstr "Patchliste: %(name)s"
 
-#: exchange/pdf.py:330 library/views.py:39 templates/library/types.html:17
+#: exchange/pdf.py:329 library/views.py:39 templates/library/types.html:17
 msgid "Vendor"
 msgstr "Hersteller"
 
-#: exchange/pdf.py:330 templates/library/types.html:17
+#: exchange/pdf.py:329 templates/library/types.html:17
 msgid "Model"
 msgstr "Modell"
 
-#: exchange/pdf.py:330
+#: exchange/pdf.py:329
 msgid "Part number"
 msgstr "Artikelnummer"
 
-#: exchange/pdf.py:330
+#: exchange/pdf.py:329
 msgid "Quantity"
 msgstr "Menge"
 
-#: exchange/pdf.py:332
+#: exchange/pdf.py:331
 #, python-format
 msgid "Bill of materials: %(name)s"
 msgstr "Stückliste: %(name)s"
 
-#: exchange/pdf.py:334
+#: exchange/pdf.py:333
 #, python-format
 msgid "Total: %(n)s devices"
 msgstr "Gesamt: %(n)s Geräte"
@@ -1208,84 +1217,94 @@ msgstr "%(col)s muss eine ganze Zahl sein."
 msgid "%(col)s must be one of: %(allowed)s."
 msgstr "%(col)s muss einer der folgenden Werte sein: %(allowed)s."
 
-#: exchange/tables.py:122
+#: exchange/tables.py:102
 #, python-format
-msgid "%(level)s %(name)s not found."
-msgstr "%(level)s %(name)s nicht gefunden."
+msgid "%(name)s not found."
+msgstr "%(name)s nicht gefunden."
 
-#: exchange/tables.py:134
+#: exchange/tables.py:115
+#, python-format
+msgid "Location %(path)s not found."
+msgstr "Ort %(path)s nicht gefunden."
+
+#: exchange/tables.py:141
 msgid "The site is missing."
 msgstr "Der Standort fehlt."
 
-#: exchange/tables.py:224
+#: exchange/tables.py:234
 msgid "Racks need a room."
 msgstr "Racks benötigen einen Raum."
 
-#: exchange/tables.py:275
+#: exchange/tables.py:290
 #, python-format
 msgid "Device type %(v)s %(m)s not found."
 msgstr "Gerätetyp %(v)s %(m)s nicht gefunden."
 
-#: exchange/tables.py:284
+#: exchange/tables.py:299
 msgid "Devices need a room."
 msgstr "Geräte benötigen einen Raum."
 
-#: exchange/tables.py:289
+#: exchange/tables.py:309
 #, python-format
 msgid "Rack %(name)s not found."
 msgstr "Rack %(name)s nicht gefunden."
 
-#: exchange/tables.py:367
+#: exchange/tables.py:393
 #, python-format
 msgid "Site %(name)s not found."
 msgstr "Standort %(name)s nicht gefunden."
 
-#: exchange/tables.py:370
+#: exchange/tables.py:396
 msgid "vid must be a number."
 msgstr "vid muss eine Zahl sein."
 
-#: exchange/tables.py:428
+#: exchange/tables.py:453
 #, python-format
 msgid "Port %(d)s %(p)s not found."
 msgstr "Port %(d)s %(p)s nicht gefunden."
 
-#: exchange/tables.py:536 search/services.py:81 templates/base.html:46
+#: exchange/tables.py:568 search/services.py:81 templates/base.html:46
 #: templates/cabling/cable.html:4 templates/cabling/cables.html:2
 #: templates/cabling/cables.html:4
 msgid "Cables"
 msgstr "Kabel"
 
-#: exchange/tables.py:555 search/services.py:74 templates/dcim/device.html:14
+#: exchange/tables.py:587 search/services.py:74 templates/dcim/device.html:14
 #: templates/library/type_detail.html:14
 msgid "Ports"
 msgstr "Ports"
 
-#: exchange/views.py:51
+#: exchange/views.py:52
 msgid "Table"
 msgstr "Tabelle"
 
-#: exchange/views.py:53
+#: exchange/views.py:54
 msgid "CSV or XLSX file"
 msgstr "CSV oder XLSX Datei"
 
-#: exchange/views.py:113
+#: exchange/views.py:85
+msgid "Too many imports. Try again in a few minutes."
+msgstr "Zu viele Importe. Versuchen Sie es in einigen Minuten erneut."
+
+#: exchange/views.py:123
 msgid "Choose a table and a file."
 msgstr "Wählen Sie eine Tabelle und eine Datei."
 
-#: exchange/views.py:153
+#: exchange/views.py:165
 msgid "This import expired. Upload the file again."
 msgstr "Dieser Import ist abgelaufen. Laden Sie die Datei erneut hoch."
 
-#: exchange/views.py:164
+#: exchange/views.py:176
 msgid "Nothing was imported: the data changed since the check."
-msgstr "Es wurde nichts importiert: Die Daten haben sich seit der Prüfung geändert."
+msgstr ""
+"Es wurde nichts importiert: Die Daten haben sich seit der Prüfung geändert."
 
-#: exchange/views.py:178
+#: exchange/views.py:190
 #, python-format
 msgid "Imported: %(c)s created, %(u)s updated, %(n)s unchanged."
 msgstr "Importiert: %(c)s angelegt, %(u)s aktualisiert, %(n)s unverändert."
 
-#: exchange/views.py:196 exchange/views.py:239
+#: exchange/views.py:208 exchange/views.py:251
 msgid "Too many exports. Try again in a few minutes."
 msgstr "Zu viele Exporte. Versuchen Sie es in einigen Minuten erneut."
 
@@ -1409,25 +1428,33 @@ msgstr "geändert"
 msgid "deleted"
 msgstr "gelöscht"
 
-#: history/services.py:37
+#: history/services.py:38
 msgid "Unknown object type."
 msgstr "Unbekannter Objekttyp."
 
-#: history/services.py:64
+#: history/services.py:70
 msgid "Only changes can be restored, not creation or deletion."
-msgstr "Nur Änderungen können wiederhergestellt werden, nicht das Anlegen oder Löschen."
+msgstr ""
+"Nur Änderungen können wiederhergestellt werden, nicht das Anlegen oder "
+"Löschen."
 
-#: history/services.py:68
+#: history/services.py:74
 msgid "The object no longer exists."
 msgstr "Das Objekt existiert nicht mehr."
 
-#: history/services.py:75
+#: history/services.py:81
 msgid "None of these fields can be restored."
 msgstr "Keines dieser Felder kann wiederhergestellt werden."
 
-#: history/services.py:85
+#: history/services.py:91
 msgid "These fields were changed again since. Restore the later change first."
-msgstr "Diese Felder wurden seitdem erneut geändert. Stellen Sie zuerst die spätere Änderung wieder her."
+msgstr ""
+"Diese Felder wurden seitdem erneut geändert. Stellen Sie zuerst die spätere "
+"Änderung wieder her."
+
+#: history/services.py:112
+msgid "The earlier values conflict with the current data."
+msgstr "Die früheren Werte stehen im Konflikt mit den aktuellen Daten."
 
 #: history/views.py:154
 #, python-format
@@ -2626,7 +2653,10 @@ msgid ""
 "The file is checked first; nothing changes until you confirm. Up to %(n)s "
 "rows. Existing objects with the same name are updated, empty cells keep "
 "their value."
-msgstr "Die Datei wird zuerst geprüft. Nichts ändert sich, bis Sie bestätigen. Bis zu %(n)s Zeilen. Vorhandene Objekte mit demselben Namen werden aktualisiert, leere Zellen behalten ihren Wert."
+msgstr ""
+"Die Datei wird zuerst geprüft. Nichts ändert sich, bis Sie bestätigen. Bis "
+"zu %(n)s Zeilen. Vorhandene Objekte mit demselben Namen werden aktualisiert, "
+"leere Zellen behalten ihren Wert."
 
 #: templates/exchange/index.html:10
 msgid "Check file"
@@ -2698,7 +2728,9 @@ msgstr "Jetzt importieren"
 
 #: templates/exchange/preview.html:16
 msgid "Fix the errors in the file and upload it again. Nothing was changed."
-msgstr "Beheben Sie die Fehler in der Datei und laden Sie sie erneut hoch. Es wurde nichts geändert."
+msgstr ""
+"Beheben Sie die Fehler in der Datei und laden Sie sie erneut hoch. Es wurde "
+"nichts geändert."
 
 #: templates/exchange/preview.html:18
 msgid "Line"
@@ -3658,3 +3690,7 @@ msgstr "Mandant gespeichert."
 #: tenancy/views.py:105
 msgid "Tenant deleted."
 msgstr "Mandant gelöscht."
+
+#, python-format
+#~ msgid "%(level)s %(name)s not found."
+#~ msgstr "%(level)s %(name)s nicht gefunden."

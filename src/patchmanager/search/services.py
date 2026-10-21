@@ -108,7 +108,7 @@ def _matches(source: Source, query: str, tenant: Any) -> QuerySet[Any]:
     text = Q()
     for field in source.fields:
         text |= Q(**{f"{field}__icontains": query}) | Q(**{f"{field}__trigram_word_similar": query})
-    if source.kind == "vlan" and query.isdigit():
+    if source.kind == "vlan" and query.isascii() and query.isdecimal():
         text |= Q(vid=int(query))
     rows = source.model.objects.filter(text, tenant=tenant)
     if source.related:

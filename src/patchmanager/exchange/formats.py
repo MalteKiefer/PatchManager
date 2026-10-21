@@ -6,6 +6,7 @@ import json
 import zipfile
 from collections.abc import Iterable, Sequence
 from typing import Any
+from xml.etree.ElementTree import ParseError  # nosec B405: exception class only
 
 from django.utils.translation import gettext as _
 from openpyxl import Workbook, load_workbook
@@ -15,6 +16,7 @@ from patchmanager.accounts.services import ServiceError
 MAX_ROWS = 5000
 MAX_LINES = MAX_ROWS + 1000  # empty lines count too, so padding cannot bypass the limit
 MAX_COLUMNS = 50
+MAX_TEXT = 5_000_000  # characters in all cells: the parsed rows wait in the cache
 MAX_CELL = 1000
 MAX_UNZIPPED = 100 * 1024 * 1024
 FORMULA_START = ("=", "+", "-", "@", "\t", "\r")  # OWASP CSV injection
@@ -78,8 +80,16 @@ def _header(values: Sequence[Any]) -> list[str]:
 
 def read(data: bytes) -> list[dict[str, str]]:
     """Rows of the first sheet (XLSX) or the CSV, keyed by lower case header."""
-    if data[:4] == b"PK\x03\x04":
-        return _read_xlsx(data)
+    try:
+        rows = _read_xlsx(data) if data[:4] == b"PK\x03\x04" else _read_csv(data)
+    except (csv.Error, ParseError, IndexError) as exc:
+        raise ServiceError(_("The file could not be read.")) from exc
+    if sum(len(v) for row in rows for v in row.values()) > MAX_TEXT:
+        raise ServiceError(_("The file contains too much text."))
+    return rows
+
+
+def _read_csv(data: bytes) -> list[dict[str, str]]:
     try:
         text = data.decode("utf-8-sig")
     except UnicodeDecodeError as exc:

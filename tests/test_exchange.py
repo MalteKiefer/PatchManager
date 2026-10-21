@@ -83,6 +83,12 @@ def test_read_limits_and_errors(monkeypatch) -> None:
     monkeypatch.setattr(formats, "MAX_ROWS", 2)
     with pytest.raises(ServiceError, match="At most"):
         formats.read(b"a\n1\n2\n3\n")
+    with pytest.raises(ServiceError, match="could not be read"):
+        formats.read(b"a\n" + b"x" * 200_000 + b"\n")  # beyond the csv field limit
+    monkeypatch.setattr(formats, "MAX_TEXT", 3)
+    with pytest.raises(ServiceError, match="too much text"):
+        formats.read(b"a\nabcd\n")
+    monkeypatch.setattr(formats, "MAX_TEXT", 5_000_000)
     monkeypatch.setattr(formats, "MAX_LINES", 3)
     with pytest.raises(ServiceError, match="At most"):
         formats.read(b"a\n1\n\n\n\n\n\n")
@@ -207,7 +213,11 @@ def test_import_is_all_or_nothing_and_reports_rows(kit, super_admin) -> None:
             kit["request"], super_admin, kit["tenant"], "racks", rows, apply=True
         )
         assert [r.line for r in results if r.outcome == "error"] == [3, 4, 5, 6]
-        assert "Nope not found" in results[1].message and "number" in results[3].message
+        assert (
+            "B1 / F1 / R1" not in results[1].message
+            and "F1 / Nope not found" in results[1].message
+            and "number" in results[3].message
+        )
         assert "one of" in results[4].message
         assert not Rack.objects.filter(name="N1").exists()
         for bad, match in (
@@ -335,7 +345,7 @@ def test_exports_match_import_columns_and_scope(kit, super_admin, make_user) -> 
             ],
             apply=False,
         )
-        assert results[0].message == "You do not have permission to do that."
+        assert results[0].message == "hidden not found."
 
 
 def test_pdf_reports(kit, super_admin, make_user, settings, tmp_path) -> None:
@@ -429,6 +439,36 @@ def test_views(kit, admin_client: Client, super_admin, make_user) -> None:
     assert (
         stranger.get(f"/exchange/reports/rack/{kit['rack'].pk}.pdf", secure=True).status_code == 404
     )
+
+
+def test_import_audits_once_on_success(kit, super_admin) -> None:
+    from patchmanager.audit.models import AuditEvent
+
+    with rls.system_context():
+        before = AuditEvent.objects.count()
+        row = [{"site": "HQ", "building": "B7"}]
+        importer.run(kit["request"], super_admin, kit["tenant"], "locations", row, apply=False)
+        assert AuditEvent.objects.count() == before
+        importer.run(kit["request"], super_admin, kit["tenant"], "locations", row, apply=True)
+        actions = list(AuditEvent.objects.order_by("-seq").values_list("action", flat=True)[:2])
+        assert actions == ["exchange.imported", "locations.building.created"]
+
+
+def test_import_rate_limit(kit, admin_client: Client, monkeypatch) -> None:
+    from patchmanager.exchange import views
+
+    cache.clear()
+    monkeypatch.setattr(views, "IMPORTS_PER_10_MIN", 1)
+    admin_client.post(
+        "/exchange/import/", {"kind": "locations", "file": io.BytesIO(b"site\nX\n")}, secure=True
+    )
+    response = admin_client.post(
+        "/exchange/import/",
+        {"kind": "locations", "file": io.BytesIO(b"site\nX\n")},
+        secure=True,
+        follow=True,
+    )
+    assert b"Too many imports" in response.content
 
 
 def test_export_rate_limit(kit, admin_client: Client, monkeypatch) -> None:

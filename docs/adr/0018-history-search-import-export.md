@@ -25,7 +25,8 @@
   audit log: the audit log stays the tamper evident security record; history is
   the working view for users.
 * **Restore** sets the changed plain fields of one update back. It needs the
-  change permission on the current object and on the resulting state, and is
+  change permission on the current object (for ports: their device) and on the
+  resulting state, and is
   refused when one of the fields changed again since (no silent overwrite).
   Links (room, rack, VLAN) and deletions are not restored: moves and re-creation
   have side effects (rack space, ports, cable scopes) that belong to the domain
@@ -53,6 +54,15 @@
   within the tenant, VLAN ID within the site, the two cable ports) and updated;
   empty cells keep current values. Only the locations table creates missing
   parents; other tables refuse unknown locations to avoid typos creating places.
+* Objects the importing user may not view are reported as not found, like
+  missing ones; a location is reported with its full path, so no level reveals
+  whether it exists. Only the named location itself has to be visible: names of
+  its ancestors are shown as location context anyway, as in breadcrumbs, search
+  results and exports.
+* Audit events of the rows are collected and written once the import succeeded,
+  so a batch does not hold the audit chain lock and dry runs write nothing.
+  Uploads and applies are rate limited (20 per user in 10 minutes); the parsed
+  rows held in the cache are capped at 5 million characters.
 * The whole file runs in one transaction. The first pass always rolls back (dry
   run) and shows the result per line; *Import now* runs it again for real and
   imports nothing if any row fails. The parsed rows wait 30 minutes in the cache,

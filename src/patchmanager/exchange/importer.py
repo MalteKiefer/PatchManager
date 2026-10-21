@@ -52,7 +52,7 @@ def run(
     check_columns(table, rows)
     assert table.handler is not None  # noqa: S101  # nosec B101: checked above
     results = []
-    with transaction.atomic():
+    with transaction.atomic(), audit.deferred() as events:
         for line, row in enumerate(rows, start=2):
             missing = [c for c in table.required if not row.get(c)]
             if missing:
@@ -72,6 +72,8 @@ def run(
         failed = any(r.outcome == "error" for r in results)
         if not apply or failed:
             transaction.set_rollback(True)
+    if apply and not failed:
+        audit.flush(events)  # per row events, written once the batch succeeded
     if apply and not failed:
         audit.record(
             "exchange.imported",

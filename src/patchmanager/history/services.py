@@ -4,7 +4,7 @@ import json
 from typing import Any
 
 from django.core.exceptions import ValidationError
-from django.db import connection, transaction
+from django.db import DatabaseError, connection, transaction
 from django.db.models import QuerySet
 from django.http import HttpRequest
 from django.utils.translation import gettext as _
@@ -13,6 +13,7 @@ from patchmanager.accounts import policy
 from patchmanager.accounts.models import User
 from patchmanager.accounts.services import PermissionDeniedError, ServiceError
 from patchmanager.audit import services as audit
+from patchmanager.dcim.models import Device, Port, RackSpace
 from patchmanager.history.models import Change
 from patchmanager.history.registry import TRACKED, Tracked
 
@@ -54,6 +55,11 @@ def _restorable(t: Tracked) -> dict[str, Any]:
     }
 
 
+def governing(obj: Any) -> Any:
+    """The object whose permissions apply (ports are governed by their device)."""
+    return obj.device if isinstance(obj, Port) else obj
+
+
 def restore(request: HttpRequest, actor: User, change: Change) -> tuple[list[str], list[str]]:
     """Set the fields of an update back to their earlier values.
 
@@ -66,7 +72,7 @@ def restore(request: HttpRequest, actor: User, change: Change) -> tuple[list[str
     obj = t.model._default_manager.filter(pk=change.object_id).first()
     if obj is None:
         raise ServiceError(_("The object no longer exists."))
-    if not policy.has_perm(actor, f"{t.policy_type}.change", obj):
+    if not policy.has_perm(actor, f"{t.policy_type}.change", governing(obj)):
         raise PermissionDeniedError(_("You do not have permission to do that."))
     columns = _restorable(t)
     fields = [f for f in change.fields if f in columns]
@@ -87,7 +93,7 @@ def restore(request: HttpRequest, actor: User, change: Change) -> tuple[list[str
     for column in fields:
         field = columns[column]
         setattr(obj, field.attname, field.to_python((change.before or {}).get(column)))
-    if not policy.has_perm(actor, f"{t.policy_type}.change", obj):  # the result must be allowed too
+    if not policy.has_perm(actor, f"{t.policy_type}.change", governing(obj)):  # the result too
         raise PermissionDeniedError(_("You do not have permission to do that."))
     try:
         obj.full_clean(
@@ -95,8 +101,15 @@ def restore(request: HttpRequest, actor: User, change: Change) -> tuple[list[str
         )
     except ValidationError as exc:
         raise ServiceError("; ".join(exc.messages)) from exc
-    with transaction.atomic():
-        obj.save(update_fields=[columns[c].name for c in fields])
+    try:
+        with transaction.atomic():
+            obj.save(update_fields=[columns[c].name for c in fields])
+            if isinstance(obj, Device) and "name" in fields:
+                RackSpace.objects.filter(device=obj).update(
+                    label=obj.name
+                )  # as devices.update does
+    except DatabaseError as exc:  # unique names, rack space rules
+        raise ServiceError(_("The earlier values conflict with the current data.")) from exc
     audit.record(
         "history.restored",
         request=request,

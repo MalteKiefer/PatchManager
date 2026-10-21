@@ -16,7 +16,7 @@ from django.utils.translation import gettext_lazy
 
 from patchmanager.accounts import policy
 from patchmanager.accounts.models import User
-from patchmanager.accounts.services import PermissionDeniedError, ServiceError
+from patchmanager.accounts.services import ServiceError
 from patchmanager.cabling import services as cabling
 from patchmanager.cabling.models import Cable, CableEnd
 from patchmanager.dcim import devices
@@ -96,10 +96,10 @@ def _text(row: Row, key: str) -> str | None:
     return row.get(key) or None
 
 
-def _seen[O](actor: Any, permission: str, obj: O) -> O:
-    """Existing objects the actor may not view are refused, so results reveal nothing."""
+def _seen[O](actor: Any, permission: str, obj: O, name: str) -> O:
+    """Objects the actor may not view are reported like missing ones."""
     if obj is not None and not policy.has_perm(actor, permission, obj):
-        raise PermissionDeniedError(_("You do not have permission to do that."))
+        raise ServiceError(_("%(name)s not found.") % {"name": name})
     return obj
 
 
@@ -111,6 +111,8 @@ def location(request: HttpRequest, actor: User, tenant: Tenant, row: Row, *, cre
     """The deepest location named in the row; with ``create`` missing levels are added."""
     parent: Any = tenant
     node: Any = None
+    named = " / ".join(row[level] for level in LOCATION if row.get(level))
+    missing = ServiceError(_("Location %(path)s not found.") % {"path": named})
     models: tuple[Any, ...] = (Site, Building, Floor, Room)
     for level, model in zip(LOCATION, models, strict=True):
         name = row.get(level, "")
@@ -122,12 +124,10 @@ def location(request: HttpRequest, actor: User, tenant: Tenant, row: Row, *, cre
             if model is Site
             else query.filter(**{model.parent_field: parent})
         )
-        node = _seen(actor, f"{model.policy_object_type}.view", query.first())
+        node = query.first()
         if node is None:
             if not create:
-                raise ServiceError(
-                    _("%(level)s %(name)s not found.") % {"level": level, "name": name}
-                )
+                raise missing
             extra: dict[str, Any] = {}
             if model is Site and row.get("site_code"):
                 extra["code"] = row["site_code"]
@@ -139,6 +139,9 @@ def location(request: HttpRequest, actor: User, tenant: Tenant, row: Row, *, cre
         parent = node
     if node is None:
         raise ServiceError(_("The site is missing."))
+    # Ancestors are shown as context of visible objects; the named location itself must be visible.
+    if not policy.has_perm(actor, f"{node.policy_object_type}.view", node):
+        raise missing
     return node
 
 
@@ -231,7 +234,10 @@ def import_rack(request: HttpRequest, actor: User, tenant: Tenant, row: Row) -> 
         raise ServiceError(_("Racks need a room."))
     values = _fields(row, RACK_FIELDS)
     rack = _seen(
-        actor, "dcim.rack.view", Rack.objects.filter(room=room, name__iexact=row["name"]).first()
+        actor,
+        "dcim.rack.view",
+        Rack.objects.filter(room=room, name__iexact=row["name"]).first(),
+        row["name"],
     )
     if rack is None:
         tree.create(request, actor, Rack, parent=room, name=row["name"], **values)
@@ -297,6 +303,7 @@ def import_device(request: HttpRequest, actor: User, tenant: Tenant, row: Row) -
             actor,
             "dcim.rack.view",
             Rack.objects.filter(room=room, name__iexact=row["rack"]).first(),
+            f"Rack {row['rack']}",
         )
         if rack is None:
             raise ServiceError(_("Rack %(name)s not found.") % {"name": row["rack"]})
@@ -307,6 +314,7 @@ def import_device(request: HttpRequest, actor: User, tenant: Tenant, row: Row) -
         actor,
         "dcim.device.view",
         Device.objects.filter(tenant=tenant, name__iexact=row["name"]).first(),
+        row["name"],
     )
     if device is None:
         devices.create(
@@ -379,6 +387,7 @@ def import_vlan(request: HttpRequest, actor: User, tenant: Tenant, row: Row) -> 
             actor,
             "locations.site.view",
             Site.objects.filter(tenant=tenant, name__iexact=row["site"]).first(),
+            f"Site {row['site']}",
         )
         if site is None:
             raise ServiceError(_("Site %(name)s not found.") % {"name": row["site"]})
@@ -387,7 +396,10 @@ def import_vlan(request: HttpRequest, actor: User, tenant: Tenant, row: Row) -> 
         raise ServiceError(_("vid must be a number."))
     values = _fields(row, VLAN_FIELDS)
     vlan = _seen(
-        actor, "networks.vlan.view", VLAN.objects.filter(tenant=tenant, site=site, vid=vid).first()
+        actor,
+        "networks.vlan.view",
+        VLAN.objects.filter(tenant=tenant, site=site, vid=vid).first(),
+        f"VLAN {vid}",
     )
     if vlan is None:
         networks.create_vlan(request, actor, tenant, site=site, vid=vid, **values)
@@ -441,7 +453,12 @@ def _port(actor: User, tenant: Tenant, row: Row, side: str) -> Port:
             _("Port %(d)s %(p)s not found.")
             % {"d": row[f"device_{side}"], "p": row[f"port_{side}"]}
         )
-    _seen(actor, "dcim.device.view", port.device)
+    _seen(
+        actor,
+        "dcim.device.view",
+        port.device,
+        f"Port {row[f'device_{side}']} {row[f'port_{side}']}",
+    )
     return port
 
 
@@ -451,7 +468,7 @@ def import_cable(request: HttpRequest, actor: User, tenant: Tenant, row: Row) ->
     values = _fields(row, CABLE_FIELDS)
     end = CableEnd.objects.filter(port=a).select_related("cable").first()
     if end is not None and CableEnd.objects.filter(cable=end.cable, port=b).exists():
-        _seen(actor, "cabling.cable.view", end.cable)
+        _seen(actor, "cabling.cable.view", end.cable, f"Port {a.device} {a.name}")
         changes = _changed(end.cable, values)
         if not changes:
             return "unchanged"

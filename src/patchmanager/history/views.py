@@ -121,7 +121,7 @@ def change_detail(request: HttpRequest, pk: str) -> HttpResponse:
     can_restore = (
         change.action == Change.Action.UPDATE
         and obj is not None
-        and policy.has_perm(request.user, f"{t.policy_type}.change", obj)
+        and policy.has_perm(request.user, f"{t.policy_type}.change", services.governing(obj))
     )
     return render(
         request,

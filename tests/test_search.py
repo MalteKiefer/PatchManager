@@ -52,6 +52,7 @@ def test_search_by_name_serial_typo_vid_and_note(kit, super_admin) -> None:
     assert find("fuses")["note"][0].obj == kit["rack"]
     assert set(find("core", kind="device")) == {"device"}
     assert find("x") == {}
+    assert "vlan" not in find("²²")  # not a decimal number
 
 
 def test_search_respects_scope(kit, make_user) -> None:

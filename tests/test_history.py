@@ -191,3 +191,54 @@ def test_restore_checks_resulting_state(make_tree, make_user, super_admin) -> No
         with pytest.raises(PermissionDeniedError):
             services.restore(t["request"], user, change)  # would set status back to planned
         assert Rack.objects.get(pk=t["rack"].pk).status == "active"
+
+
+def test_restore_ports_by_device_and_conflicts(
+    make_tree, make_type, make_user, super_admin
+) -> None:
+    from patchmanager.dcim import devices
+    from patchmanager.dcim.models import Device, Port, RackSpace
+
+    t = make_tree()
+    switch = make_type("Sw", u_height=1, ports=[{"name_pattern": "ge{n}", "count": 2}])
+    user = make_user()
+    with rls.system_context():
+        dev = devices.create(
+            t["request"],
+            super_admin,
+            device_type=switch,
+            room=t["room"],
+            rack=t["rack"],
+            position=1,
+            name="s1",
+        )
+        port = dev.ports.get(name="ge1")
+        devices.update_port(t["request"], super_admin, port, label="uplink")
+        label_change = _changes(port)[-1]
+        devices.update(t["request"], super_admin, dev, status="decommissioned")
+        Assignment.objects.create(
+            role=Role.objects.get(key="editor"),
+            user=user,
+            tenant=t["tenant"],
+            scope_path=t["tenant"].policy_path,
+        )
+        Assignment.objects.create(
+            role=Role.objects.get(key="editor"),
+            user=user,
+            tenant=t["tenant"],
+            scope_path=t["tenant"].policy_path,
+            effect="deny",
+            conditions=[{"attr": "status", "op": "eq", "value": "decommissioned"}],
+        )
+        with pytest.raises(PermissionDeniedError):  # judged by the device, which is denied
+            services.restore(t["request"], user, label_change)
+        devices.update_port(
+            t["request"], super_admin, Port.objects.get(name="ge2", device=dev), name="ge3"
+        )
+        rename = _changes(Port.objects.get(name="ge3", device=dev))[-1]
+        devices.add_port(t["request"], super_admin, dev, name="ge2")
+        with pytest.raises(ServiceError, match="conflict"):
+            services.restore(t["request"], super_admin, rename)
+        devices.update(t["request"], super_admin, Device.objects.get(pk=dev.pk), name="s2")
+        services.restore(t["request"], super_admin, _changes(dev)[-1])
+        assert RackSpace.objects.get(device=dev).label == "s1"
