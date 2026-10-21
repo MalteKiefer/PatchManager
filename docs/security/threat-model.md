@@ -72,6 +72,20 @@ webhook targets (SSRF risk).
 | E4 | Elevation of privilege | Container escape after RCE | Non-root, read only root fs, no shell, dropped capabilities, no-new-privileges | 0 |
 | E5 | Elevation of privilege | Supply chain (dependency, action, image) | Lockfile, digest pinning, Renovate, pip-audit, Trivy, CodeQL, signed images | 0 |
 
+## Phase 3 controls in place
+
+* T3: uploads accepted by content only; images re-encoded (EXIF, polyglot payloads
+  dropped), decompression bomb limit, SVG rebuilt from an allow list (no scripts,
+  events, external references), PDFs only as downloads; size limit; optional AV scan
+  failing closed.
+* I1/I4: uploads encrypted at rest, never addressable by URL; downloads check the
+  target object's view permission and use `nosniff` and a sandboxing CSP.
+* T1: device trigger keeps devices in their parent's tenant and racks in their rooms,
+  forbids other tenants' private types; ports and port templates share their owner's
+  tenant; RLS on every new table.
+* I2: notes are Markdown without raw HTML, sanitised by nh3 after rendering.
+* E (format string): naming patterns only substitute `{n}`; no `str.format`.
+
 ## Phase 2 controls in place
 
 * T1: hierarchy trigger rejects cross tenant parents and forged scope paths; RLS on

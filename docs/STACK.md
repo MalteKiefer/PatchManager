@@ -20,6 +20,9 @@ Added in 0.2.0: argon2-cffi 25.1.0, pyotp 2.10.0, webauthn 3.0.1, qrcode 8.2,
 cryptography (Fernet), celery 5.6.3, redis-py 8.1.0, prometheus_client 0.26.0,
 pyyaml 6.0.3, gettext 0.25, playwright 1.64.1, pytest-playwright 0.10.0.
 
+Added in 0.4.0: Pillow 13.0.0 (image re-encoding), nh3 0.3.7 (HTML sanitising),
+markdown-it-py 4.2.0 (notes), defusedxml 0.7.1 (SVG parsing).
+
 Front end assets (self hosted, no CDN at runtime):
 
 | Asset | Version | Integrity |
@@ -38,7 +41,6 @@ comes from py_webauthn directly.
 |---|---|---|
 | Django REST Framework | 3.18.3 | 7 |
 | drf-spectacular (OpenAPI 3.1) | 0.30.0 | 7 |
-| nh3 (HTML sanitising) | 0.3.7 | 3 |
 | WeasyPrint | 69.0 | 6 |
 | openpyxl | 3.1.5 | 6 |
 | mozilla-django-oidc / python3-saml | 5.0.2 / 1.16.0 | 7 |

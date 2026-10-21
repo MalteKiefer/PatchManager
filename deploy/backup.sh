@@ -6,5 +6,9 @@ export PGPASSWORD
 target="/backups/patchmanager-$(date -u +%Y%m%dT%H%M%SZ).dump"
 pg_dump --format=custom --file="$target.partial"
 mv "$target.partial" "$target"
-find /backups -name 'patchmanager-*.dump' -mtime +"${BACKUP_KEEP_DAYS:-14}" -delete
+# Uploads are stored encrypted by the application; archive them as they are.
+if [ -d /media ]; then
+    tar -C /media -cf "$target.media.tar.partial" . && mv "$target.media.tar.partial" "$target.media.tar"
+fi
+find /backups -name 'patchmanager-*' -mtime +"${BACKUP_KEEP_DAYS:-14}" -delete
 echo "backup written: $target"

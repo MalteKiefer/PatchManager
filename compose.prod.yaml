@@ -13,6 +13,7 @@ x-app: &app
   security_opt: ["no-new-privileges:true"]
   restart: unless-stopped
   networks: [backend]
+  volumes: ["media:/app/media"]
   secrets: [postgres_password, django_secret_key, encryption_keys, email_password]
   environment:
     PATCHMANAGER_BASE_URL: https://${PATCHMANAGER_DOMAIN:?set PATCHMANAGER_DOMAIN}
@@ -140,6 +141,7 @@ services:
     volumes:
       - ./deploy/backup.sh:/usr/local/bin/backup.sh:ro
       - backups:/backups
+      - media:/media:ro
     entrypoint: ["sh", "-c", "while true; do /usr/local/bin/backup.sh; sleep 86400; done"]
     depends_on:
       postgres: { condition: service_healthy }
@@ -151,6 +153,7 @@ networks:
 
 volumes:
   pgdata:
+  media:
   backups:
   caddy_data:
   caddy_config:

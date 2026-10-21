@@ -18,7 +18,7 @@ x-app: &app
     PATCHMANAGER_EMAIL_HOST: mailpit
     PATCHMANAGER_EMAIL_PORT: "1025"
     PATCHMANAGER_EMAIL_USE_TLS: "false"
-  volumes: ["./src:/app/src", "./scripts:/app/scripts:ro"]
+  volumes: ["./src:/app/src", "./scripts:/app/scripts:ro", "media:/app/media"]
   depends_on:
     postgres: { condition: service_healthy }
     redis: { condition: service_healthy }
@@ -74,3 +74,4 @@ secrets:
 
 volumes:
   pgdata:
+  media:

@@ -33,3 +33,33 @@ page shows the elevation for the **Front** or **Rear** face.
   by default), status, serial number and asset tag.
 
 Devices, ports and cabling follow in the next releases.
+
+## Device library
+
+**Library** lists device types: shared ones and the custom types of the current
+tenant. A type defines vendor, model, form (rack mounted or floor device),
+category, height in units, whether it is full depth, a naming convention (for
+example `SW-{n:02}` for SW-01, SW-02, ...) and its ports.
+
+* **Add ports** creates a group: name pattern (`Gi1/0/{n}`), count, first
+  number, kind, connector and speed. Front ports of patch panels map to rear
+  ports; choose the rear group they map to.
+* **Images:** upload front and rear photos in the files section, then select
+  them; the rack elevation shows them.
+* **Copy as custom type** copies a shared type into the current tenant to adapt it.
+* **Import / export** uses YAML or JSON in the community device type library format.
+
+## Devices
+
+* **Mount device** on a rack page, or **Add device** on a room page for floor
+  devices (access points, cameras, outlets, printers ...).
+* Ports are created from the type. Open a port to label it, disable it, set its
+  speed, MAC address and rear port mapping, or attach photos and notes.
+* **Placement** moves a device to another rack position, another rack or out of
+  the rack. Full depth devices always take both faces.
+
+## Photos, files and notes
+
+Sites, buildings, floors, rooms, racks, devices, ports and device types carry
+photos, PDFs and Markdown notes. Uploads are checked by content, re-encoded and
+stored encrypted; only people who can see the object can open its files.

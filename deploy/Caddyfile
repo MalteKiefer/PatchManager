@@ -24,7 +24,7 @@
 	respond @internal 404
 
 	request_body {
-		max_size 50MB
+		max_size 25MB
 	}
 
 	reverse_proxy app:8000
