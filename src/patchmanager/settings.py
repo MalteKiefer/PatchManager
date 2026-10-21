@@ -97,6 +97,7 @@ INSTALLED_APPS = [
     "rest_framework",
     "drf_spectacular",
     "patchmanager.api",
+    "patchmanager.integrations",
 ]
 if DJANGO_ADMIN_ENABLED:
     INSTALLED_APPS.insert(0, "django.contrib.admin")
@@ -175,7 +176,16 @@ CELERY_BEAT_SCHEDULE = {
         "task": "patchmanager.accounts.tasks.clear_expired_sessions",
         "schedule": 86400,
     },
+    "deliver-webhooks": {"task": "patchmanager.integrations.tasks.deliver", "schedule": 10},
+    "prune-webhook-deliveries": {
+        "task": "patchmanager.integrations.tasks.prune",
+        "schedule": 86400,
+    },
 }
+
+# Webhooks: only public addresses unless listed here (CIDRs, e.g. "10.0.0.0/8")
+WEBHOOK_ALLOWED_NETWORKS = env_list("PATCHMANAGER_WEBHOOK_ALLOWED_NETWORKS")
+WEBHOOK_ALLOW_HTTP = env_bool("PATCHMANAGER_WEBHOOK_ALLOW_HTTP", False)
 
 # Mail
 _MAIL_BACKEND = env(

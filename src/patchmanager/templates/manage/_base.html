@@ -11,6 +11,7 @@
       <li><a class="nav-link" href="{% url 'manage:roles' %}" {% if '/manage/roles' in p %}aria-current="page"{% endif %}>{% translate "Roles" %}</a></li>
       <li><a class="nav-link" href="{% url 'manage:permissions' %}" {% if '/manage/permissions' in p %}aria-current="page"{% endif %}>{% translate "Permission matrix" %}</a></li>
       <li><a class="nav-link" href="{% url 'manage:explain' %}" {% if '/manage/explain' in p %}aria-current="page"{% endif %}>{% translate "Explain access" %}</a></li>
+      <li><a class="nav-link" href="{% url 'integrations:webhooks' %}">{% translate "Webhooks" %}</a></li>
       <li><a class="nav-link" href="{% url 'api-ui:clients' %}" {% if '/manage/api-clients' in p %}aria-current="page"{% endif %}>{% translate "API clients" %}</a></li>
       <li><a class="nav-link" href="{% url 'manage:audit' %}" {% if '/manage/audit' in p %}aria-current="page"{% endif %}>{% translate "Audit log" %}</a></li>
       <li><a class="nav-link" href="{% url 'manage:system' %}" {% if '/manage/system' in p %}aria-current="page"{% endif %}>{% translate "System" %}</a></li>
