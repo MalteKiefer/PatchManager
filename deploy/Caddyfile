@@ -1,0 +1,31 @@
+{
+	servers {
+		protocols h1 h2 h3
+	}
+}
+
+{$PATCHMANAGER_DOMAIN} {
+	encode zstd gzip
+
+	tls {
+		protocols tls1.2 tls1.3
+	}
+
+	header {
+		Strict-Transport-Security "max-age=63072000; includeSubDomains"
+		X-Content-Type-Options "nosniff"
+		Referrer-Policy "same-origin"
+		Permissions-Policy "camera=(), microphone=(), geolocation=(), payment=()"
+		-Server
+	}
+
+	# Liveness/readiness stay internal.
+	@health path /health/*
+	respond @health 404
+
+	request_body {
+		max_size 50MB
+	}
+
+	reverse_proxy app:8000
+}
