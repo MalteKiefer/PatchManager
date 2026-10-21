@@ -187,9 +187,15 @@ def test_enforced_domain_and_break_glass(idp, client: Client, make_user) -> None
         "/sso/corp/login/?login_hint="
     )
     admin = make_user("root2@example.com", break_glass=True)
-    response = client.post("/auth/login/", {"email": admin.email, "password": "wrong"}, secure=True)
-    assert response.status_code == 200 and b"incorrect" in response.content
-    assert b"Sign in with Corp" in client.get("/auth/login/", secure=True).content
+    from tests.conftest import PASSWORD
+
+    response = client.post(
+        "/auth/login/", {"email": admin.email, "password": PASSWORD}, secure=True
+    )
+    assert (
+        response.status_code == 302 and response["Location"] == "/"
+    )  # break glass keeps the password
+    assert b"Sign in with Corp" in Client().get("/auth/login/", secure=True).content
 
 
 def test_disabled_and_unknown_providers(idp, client: Client) -> None:
@@ -518,3 +524,48 @@ def test_saml_rejects_unsigned_forged_and_unsolicited(saml_idp, client: Client) 
     )
     assert b"expired" in unsolicited.content
     assert not User.objects.filter(email__endswith="@saml.example").exists()
+
+
+def test_break_glass_toggle(admin_client: Client, make_user) -> None:
+    user = make_user("ops@example.com")
+    page = admin_client.get(f"/manage/users/{user.pk}/", secure=True).content
+    assert b"Make break glass account" in page
+    admin_client.post(f"/manage/users/{user.pk}/break-glass-on/", secure=True)
+    user.refresh_from_db()
+    assert user.break_glass
+    admin_client.post(f"/manage/users/{user.pk}/break-glass-off/", secure=True)
+    user.refresh_from_db()
+    assert not user.break_glass
+    from django.test import RequestFactory
+
+    from patchmanager.accounts.services import PermissionDeniedError, users
+
+    with pytest.raises(PermissionDeniedError):
+        users.set_break_glass(RequestFactory().post("/"), make_user(), user, on=True)
+
+
+def test_jit_only_for_own_domains_and_passkey_respects_enforcement(
+    idp, client: Client, make_user
+) -> None:
+    _flow(client, idp, email="mallory@victim.org", sub="u-9")
+    assert not User.objects.filter(
+        email="mallory@victim.org"
+    ).exists()  # no squatting other domains
+    idp.provider.enforce = True
+    idp.provider.save()
+    from patchmanager.sso.services import sso_required
+
+    user = make_user("ada@example.com")
+    assert sso_required(user)
+    user.break_glass = True
+    user.save()
+    assert not sso_required(user)
+    # same answer for a wrong break glass password and for any other account of the domain
+    wrong = client.post(
+        "/auth/login/", {"email": "ada@example.com", "password": "wrong"}, secure=True
+    )
+    other = client.post(
+        "/auth/login/", {"email": "bob@example.com", "password": "wrong"}, secure=True
+    )
+    assert wrong.status_code == other.status_code == 302
+    assert wrong["Location"].split("?")[0] == other["Location"].split("?")[0] == "/sso/corp/login/"

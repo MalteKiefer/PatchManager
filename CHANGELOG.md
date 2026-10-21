@@ -13,6 +13,9 @@ All notable changes to this project are documented here. The format follows
 * Personal API tokens (scoped, expiring, optionally per tenant) and OAuth 2.0 client
   credentials with service users.
 * Signed webhooks for change events with retries and an SSRF guard.
+* Single sign on with OpenID Connect (PKCE), SAML 2.0 and LDAP: per domain
+  providers, account creation on first sign in, group mapping, enforcement with
+  break glass accounts and single logout.
 
 ### Fixed
 

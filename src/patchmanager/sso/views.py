@@ -102,9 +102,7 @@ def saml_acs(request: HttpRequest, slug: str) -> HttpResponse:
         assertion = saml.finish(request, provider)
     except ServiceError as exc:
         return _failed(request, provider, exc)
-    response = _done(request, provider, assertion)
-    saml.forget(request, response)
-    return response
+    return _done(request, provider, assertion)
 
 
 @require_GET

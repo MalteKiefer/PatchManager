@@ -165,6 +165,7 @@ def user_detail(request: HttpRequest, pk: str) -> HttpResponse:
             ),
             "reason_form": ReasonForm(),
             "is_super_admin": policy.is_super_admin(subject),
+            "can_manage_sso": policy.has_perm(request.user, "system.sso.manage"),
         },
     )
 
@@ -199,6 +200,14 @@ def user_action(request: HttpRequest, pk: str, action: str) -> HttpResponse:
         "revoke-sessions": (
             lambda: users.revoke_sessions(request, actor, subject),
             _("Sessions signed out."),
+        ),
+        "break-glass-on": (
+            lambda: users.set_break_glass(request, actor, subject, on=True),
+            _("This account may now sign in with its password where SSO is enforced."),
+        ),
+        "break-glass-off": (
+            lambda: users.set_break_glass(request, actor, subject, on=False),
+            _("This account now follows the SSO rules of its domain."),
         ),
     }
     if action == "impersonate":

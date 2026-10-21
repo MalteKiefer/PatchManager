@@ -43,6 +43,11 @@ def provider_for(email: str, *kinds: str) -> IdentityProvider | None:
     return providers.order_by("name").first()
 
 
+def sso_required(user: User) -> bool:
+    """True if this user must sign in at an identity provider, not with a local factor."""
+    return enforced_for(user.email) is not None and not user.break_glass
+
+
 def enforced_for(email: str) -> IdentityProvider | None:
     """The web SSO provider a password sign in must be replaced with, if any."""
     provider = provider_for(email, IdentityProvider.Kind.OIDC, IdentityProvider.Kind.SAML)
@@ -63,22 +68,19 @@ def _account(provider: IdentityProvider, assertion: Assertion) -> User:
         raise ServiceError(_("The identity provider sent no email address."))
     if not assertion.email_verified:
         raise ServiceError(_("The identity provider did not confirm the email address."))
+    if domain(email) not in provider.domains:
+        # Linking takes over an account, JIT reserves an address: only the domain's provider may.
+        raise ServiceError(_("This identity provider may not sign in addresses of this domain."))
     user = User.objects.filter(email__iexact=email).first()
-    if user is not None:
-        # Linking takes over the account: only providers responsible for the domain may.
-        if domain(email) not in provider.domains:
-            raise ServiceError(
-                _("An account with this email exists. Ask an administrator to link it.")
-            )
-    elif provider.jit:
+    if user is None and not provider.jit:
+        raise ServiceError(
+            _("There is no account for this email. Ask an administrator for access.")
+        )
+    if user is None:
         user = User.objects.create_user(
             email=email, display_name=(assertion.name or email)[:150], password=None
         )
         audit.record("sso.user.provisioned", obj=user, data={"provider": provider.slug})
-    else:
-        raise ServiceError(
-            _("There is no account for this email. Ask an administrator for access.")
-        )
     ExternalIdentity.objects.create(user=user, provider=provider, subject=assertion.subject[:500])
     audit.record("sso.identity.linked", obj=user, data={"provider": provider.slug})
     return user

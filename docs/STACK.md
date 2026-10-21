@@ -28,7 +28,8 @@ Added in 0.6.0: pypdfium2 5.13.0 (PDF floor plans to PNG).
 Added in 0.7.0: reportlab 5.0.1 (PDF reports), openpyxl 3.1.5 (XLSX import and export).
 
 Added in 0.8.0: djangorestframework 3.18.3, drf-spectacular 0.30.0 (OpenAPI 3.1),
-djangorestframework-stubs 3.18.1 (type checking).
+djangorestframework-stubs 3.18.1 (type checking), joserfc 1.7.7 (OIDC ID tokens),
+requests 2.34.2, pysaml2 7.5.5 with libxmlsec1 1.3.12 (SAML), python-ldap 3.4.8.
 
 Front end assets (self hosted, no CDN at runtime):
 

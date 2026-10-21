@@ -58,6 +58,27 @@ Lock or unlock, deactivate or reactivate, reset second factors, sign the user
 out everywhere, or impersonate them (with a reason; a banner stays visible, it
 ends after 30 minutes and is audited). Super admins cannot be impersonated.
 
+## Single sign on
+
+*Administration → Single sign on* (super admins) adds identity providers:
+
+* **OpenID Connect**: enter the issuer URL, client id and secret, and register the
+  redirect URI shown on the provider page at your provider.
+* **SAML 2.0**: paste the IdP metadata XML, then import the SP metadata from the
+  URL shown on the provider page into your IdP. Assertions must be signed.
+* **LDAP**: `ldaps://` URI (or `ldap://` with StartTLS), bind DN and password, user
+  base and a filter with `{email}`. Users of the provider's domains then sign in
+  with their directory password in the normal form.
+
+*Email domains* tell which users a provider is responsible for. Only for these
+domains may a provider take over existing accounts; with *Create accounts on
+first sign in* new people get an account automatically. *Group mapping* lines
+like `network-admins = Network team` keep local groups in step with the provider.
+*Enforce* sends users of these domains to the provider instead of the password
+form. Mark at least one super admin as *break glass account* (on the user page)
+so you can still sign in when the provider is down. Unless *The provider
+enforces MFA* is set, users still need their second factor here.
+
 ## Audit log
 
 Security events (logins, failures, lockouts, MFA changes, role and assignment

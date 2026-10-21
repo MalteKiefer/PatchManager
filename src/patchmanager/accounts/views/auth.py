@@ -39,11 +39,13 @@ def login_view(request: HttpRequest) -> HttpResponse:
     form = LoginForm(request.POST or None)
     if request.method == "POST" and form.is_valid():
         sso_start = _enforced_sso(form.cleaned_data["email"])
-        if sso_start is not None:  # domain discovery: this domain signs in at its identity provider
-            return redirect(sso_start)
+        if sso_start is not None and not _may_use_password(form.cleaned_data["email"]):
+            return redirect(sso_start)  # domain discovery: this domain signs in at its provider
         result = auth.password_step(
             request, form.cleaned_data["email"], form.cleaned_data["password"]
         )
+        if sso_start is not None and result.outcome not in (auth.Outcome.OK, auth.Outcome.MFA):
+            return redirect(sso_start)  # a wrong break glass password looks like any other account
         if result.outcome == auth.Outcome.OK:
             return redirect(_safe_next(request))
         if result.outcome == auth.Outcome.MFA:
@@ -58,17 +60,20 @@ def login_view(request: HttpRequest) -> HttpResponse:
 
 
 def _enforced_sso(email: str) -> str | None:
-    """Start URL of the identity provider this email must use (break glass accounts may not)."""
-    from patchmanager.accounts.models import User
+    """Start URL of the identity provider enforced for this email's domain."""
     from patchmanager.sso.services import enforced_for
 
     provider = enforced_for(email)
     if provider is None:
         return None
-    user = User.objects.filter(email__iexact=email.strip()).first()
-    if user is not None and user.break_glass:
-        return None
     return f"{reverse('sso:login', args=[provider.slug])}?{urlencode({'login_hint': email})}"
+
+
+def _may_use_password(email: str) -> bool:
+    """Break glass accounts keep their password where SSO is enforced."""
+    from patchmanager.accounts.models import User
+
+    return User.objects.filter(email__iexact=email.strip(), break_glass=True).exists()
 
 
 @require_http_methods(["GET", "POST"])
@@ -127,6 +132,12 @@ def webauthn_login_verify(request: HttpRequest) -> JsonResponse:
         return JsonResponse({"error": _("The security key could not be verified.")}, status=400)
     if not user.is_active or user.is_locked or user.deactivated_at:
         return JsonResponse({"error": _("This account cannot sign in.")}, status=403)
+    from patchmanager.sso.services import sso_required
+
+    if pending is None and sso_required(user):  # a passkey must not bypass enforced SSO
+        return JsonResponse(
+            {"error": _("Sign in with your organisation's identity provider.")}, status=403
+        )
     auth.complete_login(request, user, method="webauthn" if pending else "passkey")
     return JsonResponse({"redirect": _safe_next(request)})
 

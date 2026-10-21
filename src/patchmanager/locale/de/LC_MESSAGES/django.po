@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-21 19:05+0000\n"
+"POT-Creation-Date: 2026-10-21 19:22+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -41,11 +41,12 @@ msgstr "Führen Sie den Befehl setup_token aus, um eines zu erhalten."
 
 #: accounts/forms.py:49 accounts/forms.py:103 accounts/forms.py:110
 #: api/ui.py:31 api/ui.py:54 exchange/pdf.py:203 integrations/views.py:26
-#: templates/api/clients.html:9 templates/api/tokens.html:9
+#: sso/views.py:189 templates/api/clients.html:9 templates/api/tokens.html:9
 #: templates/integrations/webhooks.html:8 templates/manage/groups.html:6
 #: templates/manage/roles.html:11 templates/manage/tenants.html:6
 #: templates/manage/users.html:10 templates/networks/vlans.html:7
 #: templates/search/results.html:35 templates/search/results.html:36
+#: templates/sso/providers.html:7
 msgid "Name"
 msgstr "Name"
 
@@ -196,30 +197,34 @@ msgstr "aktiv"
 msgid "locked until"
 msgstr "gesperrt bis"
 
-#: accounts/models.py:140 accounts/models.py:161 api/models.py:16
+#: accounts/models.py:49
+msgid "break glass"
+msgstr ""
+
+#: accounts/models.py:141 accounts/models.py:162 api/models.py:16
 #: api/models.py:56 dcim/models.py:35 dcim/models.py:188 dcim/models.py:227
 #: integrations/models.py:16 library/models.py:25 library/models.py:177
 #: locations/models.py:16 locations/models.py:58 locations/models.py:78
 #: locations/models.py:108 networks/models.py:30 search/models.py:16
-#: tenancy/models.py:21
+#: sso/models.py:19 tenancy/models.py:21
 msgid "name"
 msgstr "Name"
 
-#: accounts/models.py:141 accounts/models.py:162 dcim/models.py:237
+#: accounts/models.py:142 accounts/models.py:163 dcim/models.py:237
 #: library/models.py:127 locations/models.py:35 locations/models.py:59
 #: locations/models.py:110 networks/models.py:34 networks/models.py:81
 msgid "description"
 msgstr "Beschreibung"
 
-#: accounts/models.py:165
+#: accounts/models.py:166
 msgid "require MFA"
 msgstr "MFA erforderlich"
 
-#: accounts/models.py:201 templates/manage/_assignments.html:6
+#: accounts/models.py:202 templates/manage/_assignments.html:6
 msgid "allow"
 msgstr "erlauben"
 
-#: accounts/models.py:202 templates/manage/_assignments.html:6
+#: accounts/models.py:203 templates/manage/_assignments.html:6
 msgid "deny"
 msgstr "verweigern"
 
@@ -274,15 +279,15 @@ msgstr "Auditor"
 msgid "Read only access including the audit log."
 msgstr "Nur Lesezugriff, einschließlich Audit-Log."
 
-#: accounts/services/auth.py:60 accounts/services/mfa.py:229
+#: accounts/services/auth.py:64 accounts/services/mfa.py:229 sso/views.py:67
 msgid "Too many attempts. Try again in a few minutes."
 msgstr "Zu viele Versuche. Versuchen Sie es in einigen Minuten erneut."
 
-#: accounts/services/auth.py:65
+#: accounts/services/auth.py:69
 msgid "This account is temporarily locked."
 msgstr "Dieses Konto ist vorübergehend gesperrt."
 
-#: accounts/services/auth.py:74
+#: accounts/services/auth.py:81 accounts/services/auth.py:134
 msgid "Email or password is incorrect."
 msgstr "E-Mail oder Passwort ist falsch."
 
@@ -293,7 +298,7 @@ msgstr ""
 
 #: accounts/services/mfa.py:181 accounts/services/mfa.py:234
 #: accounts/services/mfa.py:254 accounts/views/account.py:136
-#: accounts/views/auth.py:104
+#: accounts/views/auth.py:127
 msgid "The security key could not be verified."
 msgstr "Der Sicherheitsschlüssel konnte nicht überprüft werden."
 
@@ -372,12 +377,12 @@ msgstr "API-Clients können keine Rollen erhalten, die MFA erfordern."
 msgid "The last super admin cannot be removed."
 msgstr "Der letzte Super-Admin kann nicht entfernt werden."
 
-#: accounts/services/users.py:29 api/core.py:28 api/tokens.py:88
-#: api/tokens.py:123 cabling/services.py:50 exchange/importer.py:54
-#: exchange/importer.py:70 floorplans/services.py:187 floorplans/views.py:192
-#: history/services.py:76 history/services.py:97 integrations/services.py:69
-#: metadata/services.py:98 metadata/services.py:166 networks/services.py:109
-#: networks/services.py:139 networks/services.py:148
+#: accounts/services/users.py:29 accounts/services/users.py:167 api/core.py:28
+#: api/tokens.py:99 api/tokens.py:130 cabling/services.py:50
+#: exchange/importer.py:54 exchange/importer.py:70 floorplans/services.py:187
+#: floorplans/views.py:192 history/services.py:76 history/services.py:97
+#: integrations/services.py:69 metadata/services.py:98 metadata/services.py:166
+#: networks/services.py:109 networks/services.py:139 networks/services.py:148
 msgid "You do not have permission to do that."
 msgstr "Sie haben keine Berechtigung dafür."
 
@@ -397,33 +402,39 @@ msgstr "Diese Einladung ist ungültig oder abgelaufen."
 msgid "You cannot lock your own account."
 msgstr "Sie können Ihr eigenes Konto nicht sperren."
 
-#: accounts/services/users.py:168
+#: accounts/services/users.py:169
+#, fuzzy
+#| msgid "This account cannot sign in."
+msgid "API clients do not sign in."
+msgstr "Dieses Konto kann sich nicht anmelden."
+
+#: accounts/services/users.py:178
 msgid "You cannot deactivate your own account."
 msgstr "Sie können Ihr eigenes Konto nicht deaktivieren."
 
-#: accounts/services/users.py:212
+#: accounts/services/users.py:222
 msgid "Session not found."
 msgstr "Sitzung nicht gefunden."
 
-#: accounts/services/users.py:220
+#: accounts/services/users.py:230
 msgid "The current password is incorrect."
 msgstr "Das aktuelle Passwort ist falsch."
 
-#: accounts/services/users.py:255
+#: accounts/services/users.py:265
 msgid "You cannot act as a user with rights you do not hold."
 msgstr ""
 "Sie können nicht als Benutzer mit Rechten handeln, die Sie selbst nicht "
 "besitzen."
 
-#: accounts/services/users.py:262
+#: accounts/services/users.py:272
 msgid "A reason is required."
 msgstr "Ein Grund ist erforderlich."
 
-#: accounts/services/users.py:264
+#: accounts/services/users.py:274
 msgid "This user cannot be impersonated."
 msgstr "Als dieser Benutzer kann nicht gehandelt werden."
 
-#: accounts/services/users.py:266
+#: accounts/services/users.py:276
 msgid "Inactive or locked users cannot be impersonated."
 msgstr "Als inaktiver oder gesperrter Benutzer kann nicht gehandelt werden."
 
@@ -470,42 +481,42 @@ msgstr "Faktor entfernt."
 msgid "%(count)s other sessions were signed out."
 msgstr "%(count)s andere Sitzungen wurden abgemeldet."
 
-#: accounts/views/auth.py:56
+#: accounts/views/auth.py:79
 msgid "Please sign in again."
 msgstr "Bitte melden Sie sich erneut an."
 
-#: accounts/views/auth.py:63
+#: accounts/views/auth.py:86
 msgid "Too many attempts. Please sign in again."
 msgstr "Zu viele Versuche. Bitte melden Sie sich erneut an."
 
-#: accounts/views/auth.py:77
+#: accounts/views/auth.py:100
 msgid "You used a recovery code. Generate new ones soon."
 msgstr ""
 "Sie haben einen Wiederherstellungscode verwendet. Erzeugen Sie bald neue."
 
-#: accounts/views/auth.py:80
+#: accounts/views/auth.py:103
 msgid "This code is not valid."
 msgstr "Dieser Code ist ungültig."
 
-#: accounts/views/auth.py:106
+#: accounts/views/auth.py:129 sso/services.py:129
 msgid "This account cannot sign in."
 msgstr "Dieses Konto kann sich nicht anmelden."
 
-#: accounts/views/auth.py:115
+#: accounts/views/auth.py:141 sso/views.py:126
 msgid "You have been signed out."
 msgstr "Sie wurden abgemeldet."
 
-#: accounts/views/auth.py:139
+#: accounts/views/auth.py:165
 msgid "Setup complete. Now protect your account with a second factor."
 msgstr ""
 "Einrichtung abgeschlossen. Schützen Sie Ihr Konto jetzt mit einem zweiten "
 "Faktor."
 
-#: accounts/views/auth.py:153
+#: accounts/views/auth.py:179
 msgid "Invitation invalid or expired"
 msgstr "Einladung ungültig oder abgelaufen"
 
-#: accounts/views/auth.py:165
+#: accounts/views/auth.py:191
 msgid "Your password is set. Please sign in."
 msgstr "Ihr Passwort wurde festgelegt. Bitte melden Sie sich an."
 
@@ -514,85 +525,93 @@ msgstr "Ihr Passwort wurde festgelegt. Bitte melden Sie sich an."
 msgid "Invitation sent to %(email)s."
 msgstr "Einladung an %(email)s gesendet."
 
-#: accounts/views/manage.py:181
+#: accounts/views/manage.py:182
 msgid "Account locked."
 msgstr "Konto gesperrt."
 
-#: accounts/views/manage.py:185
+#: accounts/views/manage.py:186
 msgid "Account unlocked."
 msgstr "Konto entsperrt."
 
-#: accounts/views/manage.py:189
+#: accounts/views/manage.py:190
 msgid "Account deactivated."
 msgstr "Konto deaktiviert."
 
-#: accounts/views/manage.py:193
+#: accounts/views/manage.py:194
 msgid "Account reactivated."
 msgstr "Konto reaktiviert."
 
-#: accounts/views/manage.py:197
+#: accounts/views/manage.py:198
 msgid "Second factors removed."
 msgstr "Zweite Faktoren entfernt."
 
-#: accounts/views/manage.py:201
+#: accounts/views/manage.py:202
 msgid "Sessions signed out."
 msgstr "Sitzungen abgemeldet."
 
+#: accounts/views/manage.py:206
+msgid "This account may now sign in with its password where SSO is enforced."
+msgstr ""
+
 #: accounts/views/manage.py:210
+msgid "This account now follows the SSO rules of its domain."
+msgstr ""
+
+#: accounts/views/manage.py:219
 #, python-format
 msgid "You are now acting as %(user)s."
 msgstr "Sie handeln jetzt als %(user)s."
 
-#: accounts/views/manage.py:238
+#: accounts/views/manage.py:247
 #, python-format
 msgid "Check the assignment: %(errors)s"
 msgstr "Prüfen Sie die Zuweisung: %(errors)s"
 
-#: accounts/views/manage.py:256
+#: accounts/views/manage.py:265
 msgid "Assignment added."
 msgstr "Zuweisung hinzugefügt."
 
-#: accounts/views/manage.py:274
+#: accounts/views/manage.py:283
 msgid "Assignment removed."
 msgstr "Zuweisung entfernt."
 
-#: accounts/views/manage.py:332
+#: accounts/views/manage.py:341
 msgid "Group saved."
 msgstr "Gruppe gespeichert."
 
-#: accounts/views/manage.py:340
+#: accounts/views/manage.py:349
 msgid "Members saved."
 msgstr "Mitglieder gespeichert."
 
-#: accounts/views/manage.py:346
+#: accounts/views/manage.py:355
 msgid "Group nested."
 msgstr "Gruppe verschachtelt."
 
-#: accounts/views/manage.py:356
+#: accounts/views/manage.py:365
 msgid "Nesting removed."
 msgstr "Verschachtelung entfernt."
 
-#: accounts/views/manage.py:359
+#: accounts/views/manage.py:368
 msgid "Group deleted."
 msgstr "Gruppe gelöscht."
 
-#: accounts/views/manage.py:430
+#: accounts/views/manage.py:439
 msgid "Role created."
 msgstr "Rolle erstellt."
 
-#: accounts/views/manage.py:460
+#: accounts/views/manage.py:469
 msgid "Role saved."
 msgstr "Rolle gespeichert."
 
-#: accounts/views/manage.py:488
+#: accounts/views/manage.py:497
 msgid "Role copied."
 msgstr "Rolle kopiert."
 
-#: accounts/views/manage.py:497
+#: accounts/views/manage.py:506
 msgid "Role deleted."
 msgstr "Rolle gelöscht."
 
-#: accounts/views/manage.py:530
+#: accounts/views/manage.py:539
 #, python-format
 msgid "%(count)s roles imported."
 msgstr "%(count)s Rollen importiert."
@@ -629,24 +648,24 @@ msgstr "persönlicher Token"
 msgid "OAuth access token"
 msgstr "OAuth-Zugriffstoken"
 
-#: api/tokens.py:48
+#: api/tokens.py:59
 msgid "Choose read, write or both."
 msgstr "Wählen Sie Lesen, Schreiben oder beides."
 
-#: api/tokens.py:57
+#: api/tokens.py:68
 msgid "Service accounts use their client credentials."
 msgstr "Dienstkonten verwenden ihre Client-Zugangsdaten."
 
-#: api/tokens.py:61
+#: api/tokens.py:72
 msgid "Tokens cannot be created while acting as another user."
 msgstr ""
 "Token können nicht erstellt werden, solange Sie als anderer Benutzer handeln."
 
-#: api/tokens.py:63 api/tokens.py:135
+#: api/tokens.py:74 api/tokens.py:142
 msgid "Enter a name."
 msgstr "Geben Sie einen Namen ein."
 
-#: api/tokens.py:65
+#: api/tokens.py:76
 #, python-format
 msgid "Tokens expire after 1 to %(n)s days."
 msgstr "Token laufen nach 1 bis %(n)s Tagen ab."
@@ -1006,7 +1025,7 @@ msgstr "Steckverbinder"
 msgid "speed (Mbit/s)"
 msgstr "Geschwindigkeit (Mbit/s)"
 
-#: dcim/models.py:235
+#: dcim/models.py:235 sso/models.py:22 templates/sso/providers.html:10
 msgid "enabled"
 msgstr "aktiviert"
 
@@ -1183,6 +1202,7 @@ msgstr "VID"
 #: exchange/pdf.py:203 templates/integrations/webhook.html:23
 #: templates/locations/node.html:21 templates/manage/tenants.html:6
 #: templates/manage/users.html:10 templates/networks/vlans.html:7
+#: templates/sso/providers.html:7
 msgid "Status"
 msgstr "Status"
 
@@ -2157,6 +2177,217 @@ msgstr "Suche gespeichert."
 msgid "A saved search with this name exists."
 msgstr "Eine gespeicherte Suche mit diesem Namen existiert bereits."
 
+#: sso/ldap.py:62
+msgid "The directory refused the service account."
+msgstr ""
+
+#: sso/ldap.py:70 sso/ldap.py:82
+#, fuzzy
+#| msgid "The virus scanner is not reachable. Try again later."
+msgid "The directory is not reachable."
+msgstr "Der Virenscanner ist nicht erreichbar. Versuchen Sie es später erneut."
+
+#: sso/models.py:20 tenancy/models.py:20
+msgid "identifier"
+msgstr "Kennung"
+
+#: sso/models.py:21
+msgid "type"
+msgstr ""
+
+#: sso/models.py:24
+msgid "enforce for these domains"
+msgstr ""
+
+#: sso/models.py:25
+#, fuzzy
+#| msgid "This account cannot sign in."
+msgid "create accounts on first sign in"
+msgstr "Dieses Konto kann sich nicht anmelden."
+
+#: sso/models.py:26
+msgid "the provider enforces MFA"
+msgstr ""
+
+#: sso/oidc.py:51 sso/oidc.py:186
+#, fuzzy
+#| msgid "The identifier does not match."
+msgid "The identity provider is not reachable."
+msgstr "Die Kennung stimmt nicht überein."
+
+#: sso/oidc.py:53
+msgid "The identity provider answered unexpectedly."
+msgstr ""
+
+#: sso/oidc.py:65
+msgid "The issuer in the metadata does not match the configuration."
+msgstr ""
+
+#: sso/oidc.py:121 sso/oidc.py:135 sso/oidc.py:138 sso/saml.py:146
+#: sso/saml.py:148
+#, fuzzy
+#| msgid "The security key could not be verified."
+msgid "The sign in could not be verified."
+msgstr "Der Sicherheitsschlüssel konnte nicht überprüft werden."
+
+#: sso/oidc.py:146 sso/oidc.py:172 sso/oidc.py:174
+msgid "The identity provider refused the sign in."
+msgstr ""
+
+#: sso/oidc.py:152 sso/saml.py:139
+#, fuzzy
+#| msgid "Your session expired. Please sign in again."
+msgid "This sign in expired. Please try again."
+msgstr "Ihre Sitzung ist abgelaufen. Bitte melden Sie sich erneut an."
+
+#: sso/saml.py:41
+msgid "SAML is not available: xmlsec1 is missing."
+msgstr ""
+
+#: sso/saml.py:85
+msgid "The SAML configuration of this provider is invalid."
+msgstr ""
+
+#: sso/saml.py:91
+msgid "The IdP metadata must describe exactly one identity provider."
+msgstr ""
+
+#: sso/services.py:63
+msgid "The identity provider sent no email address."
+msgstr ""
+
+#: sso/services.py:65
+msgid "The identity provider did not confirm the email address."
+msgstr ""
+
+#: sso/services.py:71
+msgid "An account with this email exists. Ask an administrator to link it."
+msgstr ""
+
+#: sso/services.py:80
+msgid "There is no account for this email. Ask an administrator for access."
+msgstr ""
+
+#: sso/services.py:117
+msgid "This sign in method is disabled."
+msgstr ""
+
+#: sso/views.py:190 templates/manage/tenants.html:6
+msgid "Identifier"
+msgstr "Kennung"
+
+#: sso/views.py:191 templates/history/activity.html:7
+#: templates/manage/roles.html:11 templates/search/results.html:7
+#: templates/sso/providers.html:7
+msgid "Type"
+msgstr "Typ"
+
+#: sso/views.py:192 templates/dcim/device.html:16
+msgid "Enabled"
+msgstr "Aktiviert"
+
+#: sso/views.py:194
+msgid "Email domains"
+msgstr ""
+
+#: sso/views.py:197
+msgid ""
+"Comma separated. The provider may link existing accounts of these domains."
+msgstr ""
+
+#: sso/views.py:201
+msgid "Enforce for these domains (except break glass accounts)"
+msgstr ""
+
+#: sso/views.py:205
+#, fuzzy
+#| msgid "This account cannot sign in."
+msgid "Create accounts on first sign in"
+msgstr "Dieses Konto kann sich nicht anmelden."
+
+#: sso/views.py:208
+msgid "The provider enforces MFA"
+msgstr ""
+
+#: sso/views.py:211
+msgid "Single logout"
+msgstr ""
+
+#: sso/views.py:214
+msgid "Client secret or bind password"
+msgstr ""
+
+#: sso/views.py:217
+#, fuzzy
+#| msgid "Leave empty to use the type's naming convention."
+msgid "Leave empty to keep the stored one."
+msgstr "Leer lassen, um die Namenskonvention des Typs zu verwenden."
+
+#: sso/views.py:220
+msgid "Group mapping"
+msgstr ""
+
+#: sso/views.py:223
+msgid "One per line: external group = group name"
+msgstr ""
+
+#: sso/views.py:232
+msgid "Trust unverified email addresses"
+msgstr ""
+
+#: sso/views.py:238
+msgid "Email attribute"
+msgstr ""
+
+#: sso/views.py:239
+msgid "Name attribute"
+msgstr ""
+
+#: sso/views.py:240
+msgid "Groups attribute"
+msgstr ""
+
+#: sso/views.py:245
+msgid "CA file (path in the container)"
+msgstr ""
+
+#: sso/views.py:259
+msgid "Enter domains like example.com."
+msgstr ""
+
+#: sso/views.py:272
+#, fuzzy, python-format
+#| msgid "Unknown columns: %(cols)s."
+msgid "Unknown group in: %(line)s"
+msgstr "Unbekannte Spalten: %(cols)s."
+
+#: sso/views.py:284
+msgid "Use ldaps:// or ldap:// with StartTLS."
+msgstr ""
+
+#: sso/views.py:290
+msgid "Plain LDAP needs StartTLS."
+msgstr ""
+
+#: sso/views.py:296
+#, python-brace-format
+msgid "The filter must contain {email}."
+msgstr ""
+
+#: sso/views.py:370
+#, fuzzy
+#| msgid "The identifier does not match."
+msgid "This identifier is taken."
+msgstr "Die Kennung stimmt nicht überein."
+
+#: sso/views.py:377
+msgid "Identity provider saved."
+msgstr ""
+
+#: sso/views.py:396
+msgid "Identity provider deleted."
+msgstr ""
+
 #: templates/accounts/email/invitation.txt:1
 #, python-format
 msgid "Hello %(name)s,"
@@ -2207,6 +2438,12 @@ msgstr "oder"
 
 #: templates/accounts/login.html:13
 msgid "Sign in with a passkey"
+msgstr "Mit Passkey anmelden"
+
+#: templates/accounts/login.html:17
+#, fuzzy, python-format
+#| msgid "Sign in with a passkey"
+msgid "Sign in with %(name)s"
 msgstr "Mit Passkey anmelden"
 
 #: templates/accounts/mfa.html:2
@@ -2261,6 +2498,7 @@ msgstr "Details"
 #: templates/manage/group_detail.html:9 templates/manage/role_detail.html:15
 #: templates/manage/tenant_detail.html:7 templates/networks/vlan.html:16
 #: templates/networks/wlan.html:17 templates/search/results.html:37
+#: templates/sso/provider.html:12
 msgid "Save"
 msgstr "Speichern"
 
@@ -2410,7 +2648,7 @@ msgstr ""
 "Es wird nur einmal angezeigt. Speichern Sie es in einem Passwortmanager."
 
 #: templates/api/clients.html:2 templates/api/clients.html:4
-#: templates/manage/_base.html:15
+#: templates/manage/_base.html:16
 msgid "API clients"
 msgstr "API-Clients"
 
@@ -2711,10 +2949,6 @@ msgstr "Portliste (PDF)"
 #: templates/dcim/device.html:16 templates/library/type_detail.html:16
 msgid "Speed"
 msgstr "Geschwindigkeit"
-
-#: templates/dcim/device.html:16
-msgid "Enabled"
-msgstr "Aktiviert"
 
 #: templates/dcim/device.html:23 templates/integrations/webhooks.html:11
 msgid "yes"
@@ -3173,11 +3407,6 @@ msgstr "Keine Änderungen."
 msgid "Object name"
 msgstr "Objektname"
 
-#: templates/history/activity.html:7 templates/manage/roles.html:11
-#: templates/search/results.html:7
-msgid "Type"
-msgstr "Typ"
-
 #: templates/history/activity.html:10 templates/manage/audit.html:13
 msgid "From"
 msgstr "Von"
@@ -3234,6 +3463,7 @@ msgstr "Diesen Webhook löschen?"
 #: templates/locations/node.html:60 templates/metadata/_panel.html:12
 #: templates/metadata/_panel.html:21 templates/networks/vlan.html:17
 #: templates/networks/wlan.html:18 templates/search/results.html:31
+#: templates/sso/provider.html:5
 msgid "Delete"
 msgstr "Löschen"
 
@@ -3275,7 +3505,7 @@ msgid "Settings"
 msgstr "Einstellungen"
 
 #: templates/integrations/webhooks.html:2
-#: templates/integrations/webhooks.html:4 templates/manage/_base.html:14
+#: templates/integrations/webhooks.html:4 templates/manage/_base.html:15
 msgid "Webhooks"
 msgstr "Webhooks"
 
@@ -3522,12 +3752,17 @@ msgstr "Berechtigungsmatrix"
 msgid "Explain access"
 msgstr "Zugriff erklären"
 
-#: templates/manage/_base.html:16 templates/manage/audit.html:2
+#: templates/manage/_base.html:14 templates/sso/providers.html:2
+#: templates/sso/providers.html:4
+msgid "Single sign on"
+msgstr ""
+
+#: templates/manage/_base.html:17 templates/manage/audit.html:2
 #: templates/manage/audit.html:5
 msgid "Audit log"
 msgstr "Audit-Log"
 
-#: templates/manage/_base.html:17 templates/manage/system.html:2
+#: templates/manage/_base.html:18 templates/manage/system.html:2
 #: templates/manage/system.html:4
 msgid "System"
 msgstr "System"
@@ -3763,10 +3998,6 @@ msgid "Archive"
 msgstr "Archivieren"
 
 #: templates/manage/tenants.html:6
-msgid "Identifier"
-msgstr "Kennung"
-
-#: templates/manage/tenants.html:6
 msgid "Contact"
 msgstr "Kontakt"
 
@@ -3844,11 +4075,25 @@ msgstr "MFA zurücksetzen"
 msgid "Sign out everywhere"
 msgstr "Überall abmelden"
 
-#: templates/manage/user_detail.html:33
+#: templates/manage/user_detail.html:30
+#, fuzzy
+#| msgid "Remove cable"
+msgid "Remove break glass"
+msgstr "Kabel entfernen"
+
+#: templates/manage/user_detail.html:31
+msgid "Allow a password sign in even where SSO is enforced?"
+msgstr ""
+
+#: templates/manage/user_detail.html:31
+msgid "Make break glass account"
+msgstr ""
+
+#: templates/manage/user_detail.html:37
 msgid "Impersonate"
 msgstr "Als Benutzer handeln"
 
-#: templates/manage/user_detail.html:34
+#: templates/manage/user_detail.html:38
 msgid ""
 "A banner stays visible, the session ends after 30 minutes, and every action "
 "is audited."
@@ -3986,13 +4231,50 @@ msgstr "%(n)s löschen"
 msgid "None yet."
 msgstr "Noch keine."
 
+#: templates/sso/provider.html:2 templates/sso/provider.html:4
+#: templates/sso/providers.html:5
+#, fuzzy
+#| msgid "New device type"
+msgid "New identity provider"
+msgstr "Neuer Gerätetyp"
+
+#: templates/sso/provider.html:5
+msgid "Delete this identity provider? Linked users keep their accounts."
+msgstr ""
+
+#: templates/sso/provider.html:6
+msgid "Register these at the provider"
+msgstr ""
+
+#: templates/sso/providers.html:7
+msgid "Domains"
+msgstr ""
+
+#: templates/sso/providers.html:10
+#, fuzzy
+#| msgid "enabled"
+msgid "disabled"
+msgstr "aktiviert"
+
+#: templates/sso/providers.html:10
+msgid "enforced"
+msgstr ""
+
+#: templates/sso/providers.html:11
+#, fuzzy
+#| msgid "No device types yet."
+msgid "No identity providers yet."
+msgstr "Noch keine Gerätetypen."
+
+#: templates/sso/providers.html:13
+msgid ""
+"Where SSO is enforced, accounts marked as break glass still sign in with "
+"their password. Keep at least one such super admin."
+msgstr ""
+
 #: tenancy/models.py:13
 msgid "Lowercase letters, digits, dashes."
 msgstr "Kleinbuchstaben, Ziffern, Bindestriche."
-
-#: tenancy/models.py:20
-msgid "identifier"
-msgstr "Kennung"
 
 #: tenancy/models.py:23
 msgid "contact person"

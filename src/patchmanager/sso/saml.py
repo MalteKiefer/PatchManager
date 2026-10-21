@@ -5,13 +5,14 @@ refused (InResponseTo must match a request of this session), clock skew is
 one minute, and the IdP's metadata is pasted by a super admin (no fetching).
 """
 
+import secrets
 import shutil
 import sys
 from pathlib import Path
 from typing import Any
 
 from django.conf import settings
-from django.core import signing
+from django.core.cache import cache
 from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
 from django.urls import reverse
 from django.utils.translation import gettext as _
@@ -27,10 +28,11 @@ from patchmanager.sso.models import IdentityProvider
 from patchmanager.sso.services import Assertion
 
 # The IdP posts the response cross site, where browsers do not send the Lax session
-# cookie. Outstanding request ids therefore travel in their own signed cookie.
+# cookie. A cookie of its own carries a random key; the outstanding request ids are
+# kept on the server under it and consumed on use, and assertion ids are single use.
 COOKIE = "__Host-pm_saml" if not settings.DEBUG else "pm_saml"
 COOKIE_SECONDS = 600
-SALT = "patchmanager.sso.saml"
+USED_SECONDS = 3600  # assertion ids are remembered longer than assertions live
 
 
 def xmlsec_binary() -> str:
@@ -92,11 +94,18 @@ def _idp(saml: Saml2Client) -> str:
     return str(entities[0])
 
 
+def _state_key(request: HttpRequest) -> str | None:
+    key = request.COOKIES.get(COOKIE, "")
+    return (
+        f"saml:outstanding:{key}"
+        if len(key) == 43 and all(c.isalnum() or c in "-_" for c in key)
+        else None
+    )
+
+
 def _outstanding(request: HttpRequest) -> dict[str, str]:
-    try:
-        value = signing.loads(request.COOKIES.get(COOKIE, ""), salt=SALT, max_age=COOKIE_SECONDS)
-    except signing.BadSignature:
-        return {}
+    key = _state_key(request)
+    value = cache.get(key) if key else None
     return value if isinstance(value, dict) else {}
 
 
@@ -109,10 +118,12 @@ def start(request: HttpRequest, provider: IdentityProvider) -> HttpResponse:
     outstanding = dict(list(_outstanding(request).items())[-4:]) | {
         request_id: str(provider.pk)
     }  # a few tabs
+    key = request.COOKIES[COOKIE] if _state_key(request) else secrets.token_urlsafe(32)
+    cache.set(f"saml:outstanding:{key}", outstanding, COOKIE_SECONDS)
     response = HttpResponseRedirect(str(dict(info["headers"])["Location"]))
     response.set_cookie(
         COOKIE,
-        signing.dumps(outstanding, salt=SALT),
+        key,
         max_age=COOKIE_SECONDS,
         secure=not settings.DEBUG,
         httponly=True,
@@ -146,7 +157,10 @@ def finish(request: HttpRequest, provider: IdentityProvider) -> Assertion:
         raise ServiceError(_("The sign in could not be verified.")) from exc
     if response is None or response.assertion is None:
         raise ServiceError(_("The sign in could not be verified."))
-    request.saml_answered = response.in_response_to  # type: ignore[attr-defined]  # the view drops it from the cookie
+    remaining = {k: v for k, v in _outstanding(request).items() if k != response.in_response_to}
+    cache.set(str(_state_key(request)), remaining, COOKIE_SECONDS)  # each request is answered once
+    if not cache.add(f"saml:assertion:{response.assertion.id}", 1, USED_SECONDS):
+        raise ServiceError(_("The sign in could not be verified."))  # the same assertion again
     name_id = response.get_subject()
     ava = response.get_identity()
     cfg = provider.config
@@ -166,26 +180,6 @@ def finish(request: HttpRequest, provider: IdentityProvider) -> Assertion:
             "session_index": _session_index(response),
         },
     )
-
-
-def forget(request: HttpRequest, response: HttpResponse) -> None:
-    """Drop the answered request id, so a response cannot be replayed."""
-    remaining = {
-        k: v
-        for k, v in _outstanding(request).items()
-        if k != getattr(request, "saml_answered", None)
-    }
-    if remaining:
-        response.set_cookie(
-            COOKIE,
-            signing.dumps(remaining, salt=SALT),
-            max_age=COOKIE_SECONDS,
-            secure=not settings.DEBUG,
-            httponly=True,
-            samesite="None" if not settings.DEBUG else "Lax",
-        )
-    else:
-        response.delete_cookie(COOKIE, samesite="None" if not settings.DEBUG else "Lax")
 
 
 def metadata(request: HttpRequest, provider: IdentityProvider) -> str:
