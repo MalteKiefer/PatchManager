@@ -72,6 +72,19 @@ webhook targets (SSRF risk).
 | E4 | Elevation of privilege | Container escape after RCE | Non-root, read only root fs, no shell, dropped capabilities, no-new-privileges | 0 |
 | E5 | Elevation of privilege | Supply chain (dependency, action, image) | Lockfile, digest pinning, Renovate, pip-audit, Trivy, CodeQL, signed images | 0 |
 
+## Phase 1 controls in place
+
+* S1: Argon2id, account lockout, per IP limits, TOTP/WebAuthn/recovery codes, MFA
+  enforcement per role and tenant, no user enumeration by message or timing.
+* T1/I1: policy engine on every view and service; RLS (`FORCE`) with a non-superuser
+  role; tests with application filtering bypassed.
+* T2/R1: hash chained, append only audit log (trigger blocks UPDATE, DELETE, TRUNCATE).
+* T4: CSRF tokens on all forms and HTMX requests; `__Host-` cookies.
+* E1: no escalation when granting, last super admin protected, system roles immutable.
+* E2: impersonation limited, time boxed, bannered and audited.
+* I3: MFA secrets encrypted at rest (Fernet, rotatable keys); tokens stored hashed.
+* Open redirect protection on login and tenant switch; CSV formula neutralisation.
+
 ## Phase 0 controls in place
 
 * Security headers: HSTS, CSP (`default-src 'self'`, no inline script), nosniff,

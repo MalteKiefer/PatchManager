@@ -4,16 +4,19 @@ Self-hosted documentation for network infrastructure: sites, buildings, floors, 
 racks, devices, ports, patch panels, cabling, VLANs and WLANs. Multi-tenant, with fine
 grained permissions, SSO and an API.
 
-> Status: Phase 0 (foundation). The application currently exposes health endpoints
-> only. See the [phase backlog](docs/plan/backlog.md).
+> Status: Phase 1 (identity and tenancy). Tenants, users, MFA, roles and the audit
+> log work; sites, racks and devices follow. See the [phase backlog](docs/plan/backlog.md).
 
 ## Quick start (development)
 
 ```bash
 pixi install -e dev
 pixi run -e dev test
-pixi run -e dev dev
+pixi run -e dev python -m django setup_token   # first run only
+pixi run -e dev dev                            # http://127.0.0.1:8000
 ```
+
+Browser tests: `pixi run -e dev e2e-install` once, then `pixi run -e dev e2e`.
 
 Or with Docker: `docker compose up --build`.
 

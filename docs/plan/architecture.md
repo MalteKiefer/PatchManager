@@ -42,7 +42,7 @@ src/patchmanager/
   networks/          VLANs, WLANs, port assignments                     (Phase 4)
   floorplans/        plan uploads, scale, placements                    (Phase 5)
   exports/           PDF, CSV, XLSX, JSON, import wizard                (Phase 6)
-  api/               REST API, tokens, webhooks, SCIM                   (Phase 1, 7)
+  api/               REST API, tokens, webhooks, SCIM                   (Phase 7)
 ```
 
 Apps are created when their phase starts, not before.
