@@ -5,7 +5,6 @@ a filter can never reach other columns. Expressions are bounded in length and
 nesting depth.
 """
 
-import re
 from collections.abc import Iterator
 from dataclasses import dataclass
 from datetime import datetime
@@ -17,7 +16,6 @@ from django.db.models import Q
 MAX_LENGTH = 1000
 MAX_DEPTH = 10
 OPS = {"eq", "ne", "co", "sw", "ew", "pr", "gt", "ge", "lt", "le"}
-TOKEN = re.compile(r'\s*(?:(?P<str>"(?:[^"\\]|\\.)*")|(?P<punct>[()\[\]])|(?P<word>[^\s()\[\]"]+))')
 
 
 class FilterError(ValueError):
@@ -33,21 +31,32 @@ class Attribute:
 
 
 def _tokens(text: str) -> Iterator[tuple[str, Any]]:
-    position = 0
-    while position < len(text):
-        match = TOKEN.match(text, position)
-        if not match or match.end() == position:
-            if text[position:].strip():
-                raise FilterError("Unexpected character in filter.")
-            return
-        position = match.end()
-        if match.group("str") is not None:
-            raw = match.group("str")[1:-1]
-            yield "value", re.sub(r"\\(.)", r"\1", raw)
-        elif match.group("punct"):
-            yield match.group("punct"), match.group("punct")
+    """Split a filter into strings, brackets and words in one linear pass."""
+    position, end = 0, len(text)
+    while position < end:
+        char = text[position]
+        if char.isspace():
+            position += 1
+        elif char in "()[]":
+            yield char, char
+            position += 1
+        elif char == '"':
+            value: list[str] = []
+            position += 1
+            while position < end and text[position] != '"':
+                if text[position] == "\\" and position + 1 < end:
+                    position += 1
+                value.append(text[position])
+                position += 1
+            if position >= end:
+                raise FilterError("Unterminated string in filter.")
+            position += 1
+            yield "value", "".join(value)
         else:
-            yield "word", match.group("word")
+            start = position
+            while position < end and not text[position].isspace() and text[position] not in '()[]"':
+                position += 1
+            yield "word", text[start:position]
 
 
 class _Parser:

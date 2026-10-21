@@ -367,3 +367,19 @@ def test_groups_belong_to_their_token_and_admin_decisions_stick(
         {"schemas": [PATCH], "Operations": [{"op": "replace", "path": "active", "value": True}]},
     )
     assert blocked[0] == 403
+
+
+def test_filter_parser_edge_cases() -> None:
+    import time
+
+    from patchmanager.scim import filters
+    from patchmanager.scim.resources import USER_FILTERS
+
+    q = filters.parse(r'userName eq "say \"hi\""', USER_FILTERS)
+    assert 'say "hi"' in str(q)
+    with pytest.raises(filters.FilterError, match="Unterminated"):
+        filters.parse('userName eq "open', USER_FILTERS)
+    started = time.monotonic()
+    with pytest.raises(filters.FilterError):
+        filters.parse('"' + "\\" * 990, USER_FILTERS)
+    assert time.monotonic() - started < 1
