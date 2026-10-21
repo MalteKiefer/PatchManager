@@ -53,6 +53,8 @@ def test_search_respects_scope(kit, make_user) -> None:
         assert counts["device"] == 1
         assert "vlan" not in services.search(user, kit["tenant"], "Voice")[0]  # tenant VLAN, room grant
         assert "note" in services.search(user, kit["tenant"], "fuses")[0]
+        ports = services.search(user, kit["tenant"], "Gi1/0/1", kind="port")[0]["port"]
+        assert {str(h.obj.device) for h in ports} == {"core-sw-01"}
 
 
 def test_search_views_and_saved(kit, admin_client: Client, super_admin, make_user) -> None:

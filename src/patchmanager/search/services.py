@@ -32,6 +32,7 @@ class Source:
     fields: tuple[str, ...]
     path_field: str | None = "path"  # None: check each row in Python
     related: tuple[str, ...] = ()
+    parent: tuple[str, Any] | None = None  # governed by this relation's object (ports: their device)
 
 
 SOURCES = {
@@ -45,7 +46,7 @@ SOURCES = {
         Source("device", _("Devices"), Device, "dcim.device.view", ("name", "serial", "asset_tag"),
                related=("room", "rack", "device_type")),
         Source("port", _("Ports"), Port, "dcim.device.view", ("name", "label", "description", "mac_address"),
-               path_field="device__path", related=("device",)),
+               related=("device",), parent=("device", Device)),
         Source("cable", _("Cables"), Cable, "cabling.cable.view", ("label",)),
         Source("vlan", _("VLANs"), VLAN, "networks.vlan.view", ("name", "description"), path_field=None,
                related=("site",)),
@@ -97,7 +98,11 @@ def search(user: Any, tenant: Any, query: str, *, kind: str = "", limit: int = 2
         return results, counts
     for source in SOURCES.values():
         rows = _matches(source, query, tenant)
-        if source.path_field is not None:
+        if source.parent is not None:
+            relation, model = source.parent
+            allowed = policy.scope_queryset(user, source.permission, model.objects.filter(tenant=tenant))
+            visible = list(rows.filter(**{f"{relation}__in": allowed})[:CANDIDATES])
+        elif source.path_field is not None:
             visible = list(policy.scope_queryset(user, source.permission, rows, path_field=source.path_field)[:CANDIDATES])
         else:
             visible = [r for r in rows[:CANDIDATES] if policy.has_perm(user, source.permission, r)]
