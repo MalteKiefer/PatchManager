@@ -23,6 +23,8 @@ pyyaml 6.0.3, gettext 0.25, playwright 1.64.1, pytest-playwright 0.10.0.
 Added in 0.4.0: Pillow 13.0.0 (image re-encoding), nh3 0.3.7 (HTML sanitising),
 markdown-it-py 4.2.0 (notes), defusedxml 0.7.1 (SVG parsing).
 
+Added in 0.6.0: pypdfium2 5.13.0 (PDF floor plans to PNG).
+
 Front end assets (self hosted, no CDN at runtime):
 
 | Asset | Version | Integrity |

@@ -41,6 +41,8 @@ def test_connect_with_port_picker_and_trace(
 
     page.goto(f"{live_server.url}/devices/ports/{source.pk}/")
     page.get_by_role("link", name="Connect").click()
+    page.wait_for_load_state("load")  # HTMX is deferred; it binds the picker on DOMContentLoaded
+    page.wait_for_function("() => window.htmx !== undefined")
     page.locator("#id_device").select_option(label="pp1")
     port_select = page.locator("#id_port")
     expect(port_select.locator("option", has_text="F2")).to_have_count(1)  # filled by HTMX

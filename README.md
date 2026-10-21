@@ -4,9 +4,9 @@ Self-hosted documentation for network infrastructure: sites, buildings, floors, 
 racks, devices, ports, patch panels, cabling, VLANs and WLANs. Multi-tenant, with fine
 grained permissions, SSO and an API.
 
-> Status: Phase 4 (cabling and networks). Tenants, users, MFA, roles, the audit log,
-> locations, racks, devices, ports, cabling with path tracing, VLANs and WLANs work;
-> floor plans follow. See the [phase backlog](docs/plan/backlog.md).
+> Status: Phase 5 (floor plans). Tenants, users, MFA, roles, the audit log,
+> locations, racks, devices, ports, cabling with path tracing, VLANs, WLANs and floor
+> plans work; history, search, import and export follow. See the [phase backlog](docs/plan/backlog.md).
 
 ## Quick start (development)
 

@@ -4,6 +4,22 @@ All notable changes to this project are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the project uses
 [Semantic Versioning](https://semver.org/).
 
+## [0.6.0] - 2026-10-21
+
+### Added
+
+* Floor plans per floor: upload JPEG, PNG, WebP, GIF or PDF (first page rasterised),
+  replace, and set the scale from two points with a known distance.
+* Room outlines drawn as polygons on the plan.
+* Drag and drop placement of racks and floor devices, with keyboard moves; a floor
+  device dropped into another room's outline moves to that room.
+
+### Fixed
+
+* Cable scopes are recomputed when a device moves to another room or rack.
+* Deleting an attachment removes the stored file only after the database change is
+  committed; files in use (floor plans) cannot be deleted.
+
 ## [0.5.0] - 2026-10-21
 
 ### Added

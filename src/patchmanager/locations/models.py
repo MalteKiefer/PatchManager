@@ -108,6 +108,8 @@ class Room(HierarchyNode):
     name = models.CharField(_("name"), max_length=150)
     kind = models.CharField(_("kind"), max_length=20, choices=Kind.choices, default=Kind.OTHER)
     description = models.TextField(_("description"), blank=True)
+    # Polygon on the floor plan: [[x, y], ...] in plan pixels; empty when not drawn.
+    outline = models.JSONField(default=list, blank=True)
 
     parent_field = "floor"
     policy_object_type = "locations.room"

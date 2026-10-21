@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-21 16:23+0000\n"
+"POT-Creation-Date: 2026-10-21 17:18+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -58,7 +58,7 @@ msgstr "Die Passwörter stimmen nicht überein."
 msgid "Current password"
 msgstr "Aktuelles Passwort"
 
-#: accounts/forms.py:103 accounts/views/account.py:100
+#: accounts/forms.py:103 accounts/views/account.py:98
 #: templates/accounts/security.html:21 templates/accounts/security.html:31
 msgid "Authenticator app"
 msgstr "Authenticator-App"
@@ -123,7 +123,8 @@ msgstr "Name der Kopie"
 msgid "JSON or YAML file"
 msgstr "JSON- oder YAML-Datei"
 
-#: accounts/forms.py:183 metadata/uploads.py:175 metadata/views.py:65
+#: accounts/forms.py:183 floorplans/views.py:169 metadata/uploads.py:183
+#: metadata/views.py:65
 msgid "The file is too large."
 msgstr "Die Datei ist zu groß."
 
@@ -180,7 +181,7 @@ msgstr "Anzeigename"
 msgid "language"
 msgstr "Sprache"
 
-#: accounts/models.py:42 dcim/models.py:31 dcim/models.py:173
+#: accounts/models.py:42 dcim/models.py:31 dcim/models.py:178
 #: networks/models.py:15 templates/manage/tenants.html:8
 #: templates/manage/user_detail.html:6 templates/manage/users.html:13
 msgid "active"
@@ -191,14 +192,14 @@ msgid "locked until"
 msgstr "gesperrt bis"
 
 #: accounts/models.py:137 accounts/models.py:158 dcim/models.py:35
-#: dcim/models.py:183 dcim/models.py:220 library/models.py:25
+#: dcim/models.py:188 dcim/models.py:227 library/models.py:25
 #: library/models.py:177 locations/models.py:16 locations/models.py:58
 #: locations/models.py:78 locations/models.py:108 networks/models.py:30
 #: tenancy/models.py:21
 msgid "name"
 msgstr "Name"
 
-#: accounts/models.py:138 accounts/models.py:159 dcim/models.py:230
+#: accounts/models.py:138 accounts/models.py:159 dcim/models.py:237
 #: library/models.py:127 locations/models.py:35 locations/models.py:59
 #: locations/models.py:110 networks/models.py:34 networks/models.py:81
 msgid "description"
@@ -285,7 +286,7 @@ msgstr ""
 "Die Sicherheitsschlüssel-Anfrage ist abgelaufen. Versuchen Sie es erneut."
 
 #: accounts/services/mfa.py:181 accounts/services/mfa.py:234
-#: accounts/services/mfa.py:254 accounts/views/account.py:138
+#: accounts/services/mfa.py:254 accounts/views/account.py:136
 #: accounts/views/auth.py:104
 msgid "The security key could not be verified."
 msgstr "Der Sicherheitsschlüssel konnte nicht überprüft werden."
@@ -361,8 +362,10 @@ msgstr "Wählen Sie entweder einen Benutzer oder eine Gruppe."
 msgid "The last super admin cannot be removed."
 msgstr "Der letzte Super-Admin kann nicht entfernt werden."
 
-#: accounts/services/users.py:29 cabling/services.py:50 metadata/services.py:96
-#: metadata/services.py:164 networks/services.py:109 networks/services.py:139
+#: accounts/services/users.py:29 cabling/services.py:50
+#: floorplans/services.py:187 floorplans/views.py:192 metadata/services.py:98
+#: metadata/services.py:166 networks/services.py:109 networks/services.py:139
+#: networks/services.py:148
 msgid "You do not have permission to do that."
 msgstr "Sie haben keine Berechtigung dafür."
 
@@ -412,33 +415,33 @@ msgstr ""
 "Sie können nicht als Benutzer mit Rechten handeln, die Sie selbst nicht "
 "besitzen."
 
-#: accounts/views/account.py:46
+#: accounts/views/account.py:44
 msgid "Profile saved."
 msgstr "Profil gespeichert."
 
-#: accounts/views/account.py:65
+#: accounts/views/account.py:63
 msgid "Password changed. Other sessions were signed out."
 msgstr "Passwort geändert. Andere Sitzungen wurden abgemeldet."
 
-#: accounts/views/account.py:115
+#: accounts/views/account.py:113
 msgid "Authenticator app added."
 msgstr "Authenticator-App hinzugefügt."
 
-#: accounts/views/account.py:117
+#: accounts/views/account.py:115
 msgid "That code did not match. Scan the code again and retry."
 msgstr ""
 "Der Code stimmte nicht überein. Scannen Sie den Code erneut und versuchen "
 "Sie es noch einmal."
 
-#: accounts/views/account.py:140
+#: accounts/views/account.py:138
 msgid "Security key added."
 msgstr "Sicherheitsschlüssel hinzugefügt."
 
-#: accounts/views/account.py:150
+#: accounts/views/account.py:148
 msgid "Add a second factor first."
 msgstr "Fügen Sie zuerst einen zweiten Faktor hinzu."
 
-#: accounts/views/account.py:165
+#: accounts/views/account.py:163
 msgid ""
 "MFA is required for your account. Add another factor before removing this "
 "one."
@@ -446,11 +449,11 @@ msgstr ""
 "Für Ihr Konto ist MFA erforderlich. Fügen Sie einen weiteren Faktor hinzu, "
 "bevor Sie diesen entfernen."
 
-#: accounts/views/account.py:173
+#: accounts/views/account.py:171
 msgid "Factor removed."
 msgstr "Faktor entfernt."
 
-#: accounts/views/account.py:193
+#: accounts/views/account.py:191
 #, python-format
 msgid "%(count)s other sessions were signed out."
 msgstr "%(count)s andere Sitzungen wurden abgemeldet."
@@ -612,7 +615,7 @@ msgstr "Strom"
 msgid "other"
 msgstr "Sonstiges"
 
-#: cabling/models.py:34 dcim/models.py:30 dcim/models.py:172
+#: cabling/models.py:34 dcim/models.py:30 dcim/models.py:177
 msgid "planned"
 msgstr "geplant"
 
@@ -620,11 +623,11 @@ msgstr "geplant"
 msgid "installed"
 msgstr "installiert"
 
-#: cabling/models.py:36 dcim/models.py:175
+#: cabling/models.py:36 dcim/models.py:180
 msgid "decommissioned"
 msgstr "außer Betrieb genommen"
 
-#: cabling/models.py:38 dcim/models.py:222 library/models.py:180
+#: cabling/models.py:38 dcim/models.py:229 library/models.py:180
 #: locations/models.py:109
 msgid "kind"
 msgstr "Art"
@@ -645,16 +648,16 @@ msgstr "Verwenden Sie eine Hex-Farbe wie #2563eb."
 msgid "length (m)"
 msgstr "Länge (m)"
 
-#: cabling/models.py:55 dcim/models.py:114 dcim/models.py:229
+#: cabling/models.py:55 dcim/models.py:119 dcim/models.py:236
 msgid "label"
 msgstr "Bezeichnung"
 
-#: cabling/models.py:57 dcim/models.py:45 dcim/models.py:185
+#: cabling/models.py:57 dcim/models.py:45 dcim/models.py:190
 #: networks/models.py:32
 msgid "status"
 msgstr "Status"
 
-#: cabling/models.py:59 dcim/models.py:49 dcim/models.py:196
+#: cabling/models.py:59 dcim/models.py:49 dcim/models.py:201
 msgid "notes"
 msgstr "Notizen"
 
@@ -719,9 +722,9 @@ msgstr "Verbunden."
 msgid "Cable removed."
 msgstr "Kabel entfernt."
 
-#: cabling/views.py:152 dcim/device_views.py:289 dcim/device_views.py:357
+#: cabling/views.py:152 dcim/device_views.py:289 dcim/device_views.py:358
 #: dcim/views.py:99 library/views.py:213 locations/views.py:171
-#: networks/views.py:137
+#: networks/views.py:142
 msgid "Saved."
 msgstr "Gespeichert."
 
@@ -738,11 +741,11 @@ msgstr "Unterste Höheneinheit"
 msgid "Face"
 msgstr "Seite"
 
-#: dcim/device_views.py:61 dcim/device_views.py:88 dcim/models.py:101
+#: dcim/device_views.py:61 dcim/device_views.py:88 dcim/models.py:106
 msgid "front"
 msgstr "Vorderseite"
 
-#: dcim/device_views.py:61 dcim/device_views.py:88 dcim/models.py:102
+#: dcim/device_views.py:61 dcim/device_views.py:88 dcim/models.py:107
 msgid "rear"
 msgstr "Rückseite"
 
@@ -754,19 +757,19 @@ msgstr "Leer lassen, um die Namenskonvention des Typs zu verwenden."
 msgid "Room"
 msgstr "Raum"
 
-#: dcim/device_views.py:83 templates/locations/node.html:19
+#: dcim/device_views.py:83 templates/locations/node.html:20
 msgid "Rack"
 msgstr "Rack"
 
-#: dcim/device_views.py:127 dcim/models.py:243
+#: dcim/device_views.py:127 dcim/models.py:250
 msgid "VLAN mode"
 msgstr "VLAN-Modus"
 
-#: dcim/device_views.py:129 dcim/models.py:246
+#: dcim/device_views.py:129 dcim/models.py:253
 msgid "access"
 msgstr "Access"
 
-#: dcim/device_views.py:129 dcim/models.py:246 templates/dcim/device.html:20
+#: dcim/device_views.py:129 dcim/models.py:253 templates/dcim/device.html:20
 msgid "trunk"
 msgstr "Trunk"
 
@@ -788,11 +791,11 @@ msgid "Device moved."
 msgstr "Gerät verschoben."
 
 #: dcim/device_views.py:310 dcim/views.py:108 library/views.py:241
-#: locations/views.py:183 networks/views.py:133
+#: locations/views.py:183 networks/views.py:138
 msgid "Deleted."
 msgstr "Gelöscht."
 
-#: dcim/device_views.py:371
+#: dcim/device_views.py:372
 msgid "VLANs saved."
 msgstr "VLANs gespeichert."
 
@@ -824,11 +827,11 @@ msgstr "Rackgeräte benötigen einen Typ für den Rackeinbau und eine Position."
 msgid "The rack is not in this room."
 msgstr "Das Rack befindet sich nicht in diesem Raum."
 
-#: dcim/devices.py:218
+#: dcim/devices.py:223
 msgid "The rear port must belong to the same device."
 msgstr "Der Rückport muss zum selben Gerät gehören."
 
-#: dcim/devices.py:240 dcim/devices.py:246
+#: dcim/devices.py:245 dcim/devices.py:251
 msgid "This port name or rear position is already used."
 msgstr "Dieser Portname oder diese Rückposition wird bereits verwendet."
 
@@ -852,75 +855,75 @@ msgstr "Tiefe (mm)"
 msgid "number units from the top"
 msgstr "Höheneinheiten von oben nummerieren"
 
-#: dcim/models.py:47 dcim/models.py:191
+#: dcim/models.py:47 dcim/models.py:196
 msgid "serial number"
 msgstr "Seriennummer"
 
-#: dcim/models.py:48 dcim/models.py:192
+#: dcim/models.py:48 dcim/models.py:197
 msgid "asset tag"
 msgstr "Inventarnummer"
 
-#: dcim/models.py:103
+#: dcim/models.py:108
 msgid "front and rear"
 msgstr "Vorder- und Rückseite"
 
-#: dcim/models.py:111
+#: dcim/models.py:116
 msgid "face"
 msgstr "Seite"
 
-#: dcim/models.py:115 metadata/models.py:60
+#: dcim/models.py:120 metadata/models.py:60
 msgid "note"
 msgstr "Notiz"
 
-#: dcim/models.py:174
+#: dcim/models.py:179
 msgid "offline"
 msgstr "offline"
 
-#: dcim/models.py:181
+#: dcim/models.py:186
 msgid "device type"
 msgstr "Gerätetyp"
 
-#: dcim/models.py:193
+#: dcim/models.py:198
 msgid "purchase date"
 msgstr "Kaufdatum"
 
-#: dcim/models.py:194
+#: dcim/models.py:199
 msgid "in service since"
 msgstr "in Betrieb seit"
 
-#: dcim/models.py:195
+#: dcim/models.py:200
 msgid "responsible person"
 msgstr "Verantwortliche Person"
 
-#: dcim/models.py:225 library/models.py:183
+#: dcim/models.py:232 library/models.py:183
 msgid "connector"
 msgstr "Steckverbinder"
 
-#: dcim/models.py:227 library/models.py:185
+#: dcim/models.py:234 library/models.py:185
 msgid "speed (Mbit/s)"
 msgstr "Geschwindigkeit (Mbit/s)"
 
-#: dcim/models.py:228
+#: dcim/models.py:235
 msgid "enabled"
 msgstr "aktiviert"
 
-#: dcim/models.py:231
+#: dcim/models.py:238
 msgid "MAC address"
 msgstr "MAC-Adresse"
 
-#: dcim/models.py:232
+#: dcim/models.py:239
 msgid "positions"
 msgstr "Positionen"
 
-#: dcim/models.py:239
+#: dcim/models.py:246
 msgid "rear port"
 msgstr "Rückport"
 
-#: dcim/models.py:241
+#: dcim/models.py:248
 msgid "rear position"
 msgstr "Rückposition"
 
-#: dcim/models.py:254
+#: dcim/models.py:261
 msgid "untagged / native VLAN"
 msgstr "untagged / natives VLAN"
 
@@ -945,13 +948,120 @@ msgstr "Höhe (HE)"
 msgid "Units reserved."
 msgstr "Höheneinheiten reserviert."
 
-#: dcim/views.py:148
+#: dcim/views.py:148 floorplans/views.py:59 floorplans/views.py:61
 msgid "Invalid request."
 msgstr "Ungültige Anfrage."
 
 #: dcim/views.py:152
 msgid "These units are taken or outside the rack."
 msgstr "Diese Höheneinheiten sind belegt oder liegen außerhalb des Racks."
+
+#: floorplans/models.py:16
+msgid "pixels per metre"
+msgstr "Pixel pro Meter"
+
+#: floorplans/models.py:21 templates/floorplans/editor.html:18
+msgid "Plan"
+msgstr "Grundriss"
+
+#: floorplans/services.py:38
+msgid "The PDF could not be read."
+msgstr "Die PDF Datei konnte nicht gelesen werden."
+
+#: floorplans/services.py:41
+msgid "The PDF has no pages."
+msgstr "Die PDF Datei hat keine Seiten."
+
+#: floorplans/services.py:61 floorplans/services.py:67
+msgid "Floor plans must be JPEG, PNG, WebP, GIF or PDF."
+msgstr "Grundrisse müssen JPEG, PNG, WebP, GIF oder PDF sein."
+
+#: floorplans/services.py:64 templates/floorplans/editor.html:2
+#: templates/floorplans/editor.html:6 templates/floorplans/editor.html:8
+#: templates/locations/node.html:9
+msgid "Floor plan"
+msgstr "Grundriss"
+
+#: floorplans/services.py:94
+msgid "Invalid coordinates."
+msgstr "Ungültige Koordinaten."
+
+#: floorplans/services.py:96
+msgid "The point lies outside the plan."
+msgstr "Der Punkt liegt außerhalb des Grundrisses."
+
+#: floorplans/services.py:108
+msgid "Choose two distinct points and a positive distance."
+msgstr "Wählen Sie zwei verschiedene Punkte und eine positive Entfernung."
+
+#: floorplans/services.py:126
+msgid "The room is not on this floor."
+msgstr "Der Raum befindet sich nicht auf dieser Etage."
+
+#: floorplans/services.py:128
+#, python-format
+msgid "An outline needs 3 to %(max)s points."
+msgstr "Ein Umriss braucht 3 bis %(max)s Punkte."
+
+#: floorplans/services.py:131
+msgid "The outline is too small."
+msgstr "Der Raumumriss ist zu klein."
+
+#: floorplans/services.py:142
+msgid "hidden room"
+msgstr "verborgener Raum"
+
+#: floorplans/services.py:166
+msgid "This rack is on another floor."
+msgstr "Dieses Rack befindet sich auf einer anderen Etage."
+
+#: floorplans/services.py:180
+msgid "Only floor devices of this floor can be placed."
+msgstr "Nur Raumgeräte dieser Etage können auf dem Grundriss platziert werden."
+
+#: floorplans/views.py:33
+msgid "Plan (JPEG, PNG, WebP, GIF or PDF)"
+msgstr "Grundriss (JPEG, PNG, WebP, GIF oder PDF)"
+
+#: floorplans/views.py:51
+msgid "Upload a plan first."
+msgstr "Laden Sie zuerst einen Grundriss hoch."
+
+#: floorplans/views.py:164 metadata/views.py:59
+msgid "Choose a file to upload."
+msgstr "Wählen Sie eine Datei zum Hochladen."
+
+#: floorplans/views.py:178
+msgid "Plan uploaded. Set the scale next."
+msgstr "Grundriss hochgeladen. Legen Sie als Nächstes den Maßstab fest."
+
+#: floorplans/views.py:195
+msgid "Not possible."
+msgstr "Nicht möglich."
+
+#: floorplans/views.py:205
+msgid "Enter the distance in metres."
+msgstr "Geben Sie die Entfernung in Metern ein."
+
+#: floorplans/views.py:216
+msgid "Choose a room of this floor."
+msgstr "Wählen Sie einen Raum dieser Etage."
+
+#: floorplans/views.py:232
+msgid "Object not found on this floor."
+msgstr "Objekt auf dieser Etage nicht gefunden."
+
+#: floorplans/views.py:241
+#, python-format
+msgid "Several rooms overlap here (%(rooms)s). The room was not changed."
+msgstr ""
+"Hier überlappen sich mehrere Räume (%(rooms)s). Der Raum wurde nicht "
+"geändert."
+
+#: floorplans/views.py:244
+#, python-format
+msgid "%(item)s lies outside the outline of its room."
+msgstr "%(item)s liegt außerhalb des Raumumrisses seines Raums."
 
 #: library/interchange.py:105
 #, python-format
@@ -1248,7 +1358,7 @@ msgstr ""
 "Kabel verbinden diesen Standort mit anderen Standorten des Mandanten. "
 "Entfernen Sie diese zuerst."
 
-#: locations/services.py:125
+#: locations/services.py:126
 msgid ""
 "Ports in this site use tenant wide VLANs or WLANs. Remove those assignments "
 "first."
@@ -1256,11 +1366,11 @@ msgstr ""
 "Ports in diesem Standort verwenden mandantenweite VLANs oder WLANs. "
 "Entfernen Sie diese Zuweisungen zuerst."
 
-#: locations/services.py:139
+#: locations/services.py:140
 msgid "The site already belongs to this tenant."
 msgstr "Der Standort gehört bereits zu diesem Mandanten."
 
-#: locations/services.py:146
+#: locations/services.py:147
 msgid "Devices in this site use device types private to the current tenant."
 msgstr ""
 "Geräte an diesem Standort verwenden Gerätetypen, die nur für den aktuellen "
@@ -1314,15 +1424,19 @@ msgstr "Dateiname"
 msgid "caption"
 msgstr "Bildunterschrift"
 
-#: metadata/services.py:76
+#: metadata/services.py:78
 msgid "Files cannot be attached here."
 msgstr "Hier können keine Dateien angehängt werden."
 
-#: metadata/services.py:81
+#: metadata/services.py:83
 msgid "Object not found."
 msgstr "Objekt nicht gefunden."
 
-#: metadata/services.py:191 metadata/views.py:91
+#: metadata/services.py:183
+msgid "This file is in use, for example as a floor plan."
+msgstr "Diese Datei wird verwendet, zum Beispiel als Grundriss."
+
+#: metadata/services.py:199 metadata/views.py:91
 msgid "The note is empty."
 msgstr "Die Notiz ist leer."
 
@@ -1334,16 +1448,16 @@ msgstr "Die SVG-Datei ist ungültig."
 msgid "The image could not be read."
 msgstr "Das Bild konnte nicht gelesen werden."
 
-#: metadata/uploads.py:186
+#: metadata/uploads.py:191
 msgid "Only JPEG, PNG, GIF, WebP, SVG and PDF files are accepted."
 msgstr ""
 "Es werden nur JPEG-, PNG-, GIF-, WebP-, SVG- und PDF-Dateien akzeptiert."
 
-#: metadata/uploads.py:205
+#: metadata/uploads.py:210
 msgid "The virus scanner is not reachable. Try again later."
 msgstr "Der Virenscanner ist nicht erreichbar. Versuchen Sie es später erneut."
 
-#: metadata/uploads.py:207
+#: metadata/uploads.py:212
 msgid "The file was rejected by the virus scanner."
 msgstr "Die Datei wurde vom Virenscanner abgelehnt."
 
@@ -1362,10 +1476,6 @@ msgstr "Notiz"
 #: metadata/views.py:35
 msgid "Markdown is supported."
 msgstr "Markdown wird unterstützt."
-
-#: metadata/views.py:59
-msgid "Choose a file to upload."
-msgstr "Wählen Sie eine Datei zum Hochladen."
 
 #: metadata/views.py:79
 msgid "File attached."
@@ -1443,7 +1553,7 @@ msgstr "Access-Ports führen keine getaggten VLANs."
 msgid "Choose access or trunk to assign VLANs."
 msgstr "Wählen Sie Access oder Trunk, um VLANs zuzuweisen."
 
-#: networks/services.py:155
+#: networks/services.py:158
 msgid "The VLANs must belong to this tenant and to the device's site."
 msgstr ""
 "Die VLANs müssen zu diesem Mandanten und zum Standort des Geräts gehören."
@@ -1452,11 +1562,11 @@ msgstr ""
 msgid "All sites of the tenant"
 msgstr "Alle Standorte des Mandanten"
 
-#: networks/views.py:61
+#: networks/views.py:66
 msgid "Wireless port"
 msgstr "Funk-Port"
 
-#: networks/views.py:99
+#: networks/views.py:104
 msgid "VLAN created."
 msgstr "VLAN erstellt."
 
@@ -1539,7 +1649,7 @@ msgid "Verify"
 msgstr "Überprüfen"
 
 #: templates/accounts/mfa.html:18 templates/cabling/connect.html:19
-#: templates/locations/site_move.html:9
+#: templates/floorplans/editor.html:34 templates/locations/site_move.html:9
 msgid "Cancel"
 msgstr "Abbrechen"
 
@@ -1550,7 +1660,7 @@ msgstr "Profil"
 
 #: templates/accounts/profile.html:7 templates/cabling/cable.html:19
 #: templates/dcim/device.html:44 templates/library/type_detail.html:35
-#: templates/locations/node.html:53 templates/manage/audit.html:18
+#: templates/locations/node.html:54 templates/manage/audit.html:18
 #: templates/manage/group_detail.html:7 templates/networks/vlan.html:15
 #: templates/networks/wlan.html:16
 msgid "Details"
@@ -1559,7 +1669,7 @@ msgstr "Details"
 #: templates/accounts/profile.html:9 templates/cabling/cable.html:21
 #: templates/dcim/device.html:46 templates/dcim/port.html:37
 #: templates/dcim/rack.html:84 templates/library/type_detail.html:37
-#: templates/locations/node.html:55 templates/manage/group_detail.html:9
+#: templates/locations/node.html:56 templates/manage/group_detail.html:9
 #: templates/manage/role_detail.html:15 templates/manage/tenant_detail.html:7
 #: templates/networks/vlan.html:16 templates/networks/wlan.html:17
 msgid "Save"
@@ -1960,7 +2070,7 @@ msgid "Add port"
 msgstr "Port hinzufügen"
 
 #: templates/dcim/device.html:28 templates/library/type_detail.html:27
-#: templates/locations/node.html:32 templates/manage/_assignments.html:15
+#: templates/locations/node.html:33 templates/manage/_assignments.html:15
 msgid "Add"
 msgstr "Hinzufügen"
 
@@ -1984,7 +2094,7 @@ msgstr "Platzierung"
 msgid "Leave the rack empty for a floor device."
 msgstr "Rack leer lassen für ein Raumgerät."
 
-#: templates/dcim/device.html:53
+#: templates/dcim/device.html:53 templates/floorplans/editor.html:21
 msgid "Move"
 msgstr "Verschieben"
 
@@ -2019,7 +2129,7 @@ msgid "New device type"
 msgstr "Neuer Gerätetyp"
 
 #: templates/dcim/device_form.html:9 templates/library/type_form.html:8
-#: templates/locations/node.html:34 templates/locations/site_form.html:9
+#: templates/locations/node.html:35 templates/locations/site_form.html:9
 #: templates/manage/groups.html:13 templates/networks/vlans.html:12
 #: templates/networks/wlans.html:12
 msgid "Create"
@@ -2090,7 +2200,7 @@ msgid "Utilisation"
 msgstr "Auslastung"
 
 #: templates/dcim/rack.html:47 templates/dcim/rack.html:52
-#: templates/locations/node.html:19 templates/locations/node.html:22
+#: templates/locations/node.html:20 templates/locations/node.html:23
 msgid "Used"
 msgstr "Belegt"
 
@@ -2146,6 +2256,123 @@ msgstr "Dieses Rack und seine Reservierungen löschen?"
 msgid "Delete rack"
 msgstr "Rack löschen"
 
+#: templates/floorplans/editor.html:9
+#, python-format
+msgid "Scale: %(s)s px per metre"
+msgstr "Maßstab: %(s)s px pro Meter"
+
+#: templates/floorplans/editor.html:9
+msgid "no scale yet"
+msgstr "noch kein Maßstab"
+
+#: templates/floorplans/editor.html:12 templates/floorplans/editor.html:23
+msgid ""
+"Drag racks and devices. Focus one and use the arrow keys for fine moves."
+msgstr ""
+"Ziehen Sie Racks und Geräte. Fokussieren Sie eines und verwenden Sie die "
+"Pfeiltasten für Feinbewegungen."
+
+#: templates/floorplans/editor.html:13
+msgid "Click two points whose distance you know."
+msgstr "Klicken Sie auf zwei Punkte, deren Entfernung Sie kennen."
+
+#: templates/floorplans/editor.html:13
+msgid "Click the corners of the room, then finish."
+msgstr "Klicken Sie auf die Ecken des Raums und schließen Sie dann ab."
+
+#: templates/floorplans/editor.html:14
+msgid "Click where the item stands."
+msgstr "Klicken Sie dorthin, wo das Objekt steht."
+
+#: templates/floorplans/editor.html:14
+msgid "Click two points first."
+msgstr "Klicken Sie zuerst auf zwei Punkte."
+
+#: templates/floorplans/editor.html:15
+msgid "The change could not be saved."
+msgstr "Die Änderung konnte nicht gespeichert werden."
+
+#: templates/floorplans/editor.html:20
+msgid "Plan tools"
+msgstr "Grundriss-Werkzeuge"
+
+#: templates/floorplans/editor.html:22
+msgid "Set scale"
+msgstr "Maßstab festlegen"
+
+#: templates/floorplans/editor.html:27
+msgid "Distance between the two points (m)"
+msgstr "Entfernung zwischen den beiden Punkten (m)"
+
+#: templates/floorplans/editor.html:29
+msgid "Save scale"
+msgstr "Maßstab speichern"
+
+#: templates/floorplans/editor.html:33
+msgid "Finish outline"
+msgstr "Raumumriss abschließen"
+
+#: templates/floorplans/editor.html:38
+msgid "Floor plan editor"
+msgstr "Grundriss-Editor"
+
+#: templates/floorplans/editor.html:45
+msgid "This floor has no plan yet."
+msgstr "Diese Etage hat noch keinen Grundriss."
+
+#: templates/floorplans/editor.html:52
+msgid "Not on the plan"
+msgstr "Nicht auf dem Grundriss"
+
+#: templates/floorplans/editor.html:53
+msgid "Choose an item, then click on the plan."
+msgstr "Wählen Sie ein Objekt und klicken Sie dann auf den Grundriss."
+
+#: templates/floorplans/editor.html:57
+msgid "Everything is placed."
+msgstr "Alles ist platziert."
+
+#: templates/floorplans/editor.html:61
+msgid "Room outlines"
+msgstr "Raumumrisse"
+
+#: templates/floorplans/editor.html:62
+msgid "drawn"
+msgstr "gezeichnet"
+
+#: templates/floorplans/editor.html:63
+msgid "Draw"
+msgstr "Zeichnen"
+
+#: templates/floorplans/editor.html:64
+msgid "Clear"
+msgstr "Löschen"
+
+#: templates/floorplans/editor.html:65
+msgid "No rooms on this floor."
+msgstr "Keine Räume auf dieser Etage."
+
+#: templates/floorplans/editor.html:70
+msgid "Replace plan"
+msgstr "Grundriss ersetzen"
+
+#: templates/floorplans/editor.html:70
+msgid "Upload plan"
+msgstr "Grundriss hochladen"
+
+#: templates/floorplans/editor.html:72
+#, python-format
+msgid "PDFs use their first page. Up to %(n)s MB."
+msgstr "PDFs verwenden ihre erste Seite. Bis zu %(n)s MB."
+
+#: templates/floorplans/editor.html:72
+msgid "Replacing resets the scale."
+msgstr "Beim Ersetzen wird der Maßstab zurückgesetzt."
+
+#: templates/floorplans/editor.html:73 templates/metadata/_panel.html:28
+msgid "Upload"
+msgstr "Hochladen"
+
 #: templates/library/type_detail.html:4 templates/library/types.html:2
 #: templates/library/types.html:5
 msgid "Device library"
@@ -2191,7 +2418,7 @@ msgstr "Bilder speichern"
 msgid "Delete this device type?"
 msgstr "Diesen Gerätetyp löschen?"
 
-#: templates/library/type_detail.html:47 templates/locations/node.html:58
+#: templates/library/type_detail.html:47 templates/locations/node.html:59
 #: templates/metadata/_panel.html:11 templates/metadata/_panel.html:20
 #: templates/networks/vlan.html:17 templates/networks/wlan.html:18
 msgid "Delete"
@@ -2229,7 +2456,7 @@ msgstr "Modell"
 msgid "Category"
 msgstr "Kategorie"
 
-#: templates/library/types.html:17 templates/locations/node.html:19
+#: templates/library/types.html:17 templates/locations/node.html:20
 msgid "Height"
 msgstr "Höhe"
 
@@ -2261,7 +2488,7 @@ msgstr "Karte"
 msgid "The map is disabled on this instance."
 msgstr "Die Karte ist auf dieser Instanz deaktiviert."
 
-#: templates/locations/_tree.html:2 templates/locations/node.html:13
+#: templates/locations/_tree.html:2 templates/locations/node.html:14
 msgid "Buildings, floors and rooms"
 msgstr "Gebäude, Etagen und Räume"
 
@@ -2290,32 +2517,32 @@ msgstr "Noch keine Standorte."
 msgid "Move to tenant"
 msgstr "Zu Mandant verschieben"
 
-#: templates/locations/node.html:19 templates/manage/tenants.html:6
+#: templates/locations/node.html:20 templates/manage/tenants.html:6
 #: templates/manage/users.html:10 templates/networks/vlans.html:7
 msgid "Status"
 msgstr "Status"
 
-#: templates/locations/node.html:23
+#: templates/locations/node.html:24
 msgid "No racks yet."
 msgstr "Noch keine Racks."
 
-#: templates/locations/node.html:28
+#: templates/locations/node.html:29
 msgid "Nothing here yet."
 msgstr "Hier ist noch nichts."
 
-#: templates/locations/node.html:40
+#: templates/locations/node.html:41
 msgid "Floor devices"
 msgstr "Raumgeräte"
 
-#: templates/locations/node.html:41
+#: templates/locations/node.html:42
 msgid "Add device"
 msgstr "Gerät hinzufügen"
 
-#: templates/locations/node.html:44
+#: templates/locations/node.html:45
 msgid "No floor devices."
 msgstr "Keine Raumgeräte."
 
-#: templates/locations/node.html:58
+#: templates/locations/node.html:59
 msgid "Delete this object? It must be empty."
 msgstr "Dieses Objekt löschen? Es muss leer sein."
 
@@ -2781,10 +3008,6 @@ msgstr "Diese Datei löschen?"
 #: templates/metadata/_panel.html:20
 msgid "Delete this note?"
 msgstr "Diese Notiz löschen?"
-
-#: templates/metadata/_panel.html:28
-msgid "Upload"
-msgstr "Hochladen"
 
 #: templates/metadata/_panel.html:32
 msgid "Add note"

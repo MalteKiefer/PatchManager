@@ -21,6 +21,7 @@ urlpatterns = [
     path("meta/", include("patchmanager.metadata.urls")),
     path("cabling/", include("patchmanager.cabling.urls")),
     path("networks/", include("patchmanager.networks.urls")),
+    path("plans/", include("patchmanager.floorplans.urls")),
     path("", include("patchmanager.accounts.urls")),
     path("", include(core_patterns)),
 ]

@@ -8,6 +8,8 @@ import nh3
 from django.contrib.contenttypes.models import ContentType
 from django.core.files.base import ContentFile
 from django.core.files.storage import storages
+from django.db import transaction
+from django.db.models import ProtectedError
 from django.http import HttpRequest
 from django.utils.translation import gettext as _
 from markdown_it import MarkdownIt
@@ -173,7 +175,12 @@ def remove(request: HttpRequest, actor: User, attachment: Attachment) -> None:
         attachment.object_id,
     )
     _require(actor, target, "change")
-    storages["attachments"].delete(attachment.storage_name)
+    storage_name = attachment.storage_name
+    try:
+        with transaction.atomic():
+            attachment.delete()
+    except ProtectedError as exc:
+        raise ServiceError(_("This file is in use, for example as a floor plan.")) from exc
     audit.record(
         "metadata.attachment.removed",
         request=request,
@@ -181,7 +188,8 @@ def remove(request: HttpRequest, actor: User, attachment: Attachment) -> None:
         tenant_id=_tenant_id(target),
         data={"file": attachment.original_name},
     )
-    attachment.delete()
+    # only drop the file once the row is gone for good
+    transaction.on_commit(lambda: storages["attachments"].delete(storage_name))
 
 
 def add_note(request: HttpRequest, actor: User, target: Any, body: str) -> Note:

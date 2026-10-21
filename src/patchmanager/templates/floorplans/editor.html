@@ -1,0 +1,78 @@
+{% extends "base.html" %}{% load i18n static pm %}
+{% block title %}{% translate "Floor plan" %} {{ floor.name }}{% endblock %}
+{% block head %}<script type="module" src="{% static 'core/floorplan.js' %}"></script>{% endblock %}
+{% block main_class %}mx-auto max-w-[96rem] px-4 py-6{% endblock %}
+{% block content %}
+{% include "core/_breadcrumbs.html" with current=_("Floor plan") %}
+<div class="mb-4 flex flex-wrap items-center gap-3">
+  <h1 class="mr-auto">{% translate "Floor plan" %} · {{ floor.name }}</h1>
+  {% if plan %}<span class="text-sm text-slate-500">{% if plan.px_per_metre %}{% blocktranslate with s=plan.px_per_metre|floatformat:1 %}Scale: {{ s }} px per metre{% endblocktranslate %}{% else %}<span class="badge-warn">{% translate "no scale yet" %}</span>{% endif %}</span>{% endif %}
+</div>
+{{ scene|json_script:"plan-scene" }}
+<div id="plan-text" hidden data-move="{% translate 'Drag racks and devices. Focus one and use the arrow keys for fine moves.' %}"
+     data-scale="{% translate 'Click two points whose distance you know.' %}" data-outline="{% translate 'Click the corners of the room, then finish.' %}"
+     data-place="{% translate 'Click where the item stands.' %}" data-two-points="{% translate 'Click two points first.' %}"
+     data-failed="{% translate 'The change could not be saved.' %}"></div>
+<div class="grid gap-6 xl:grid-cols-[1fr_20rem]">
+  <section class="card overflow-hidden p-0" aria-labelledby="plan-h">
+    <h2 id="plan-h" class="sr-only">{% translate "Plan" %}</h2>
+    {% if plan %}
+    <div class="flex flex-wrap items-center gap-2 border-b border-slate-200 p-3 text-sm dark:border-slate-800" role="toolbar" aria-label="{% translate 'Plan tools' %}">
+      <button type="button" class="btn-secondary py-1" data-mode="move" aria-pressed="true">{% translate "Move" %}</button>
+      {% if can_change %}<button type="button" class="btn-secondary py-1" data-mode="scale" aria-pressed="false">{% translate "Set scale" %}</button>{% endif %}
+      <span id="plan-hint" class="ml-2 text-slate-500" aria-live="polite">{% translate "Drag racks and devices. Focus one and use the arrow keys for fine moves." %}</span>
+      <span id="plan-status" class="ml-auto text-red-600" role="alert" aria-live="assertive"></span>
+    </div>
+    <div id="scale-form" class="hidden items-center gap-2 border-b border-slate-200 p-3 text-sm dark:border-slate-800">
+      <label for="scale-metres">{% translate "Distance between the two points (m)" %}</label>
+      <input id="scale-metres" type="number" min="0.1" step="0.01" class="w-28 rounded border border-slate-300 px-2 py-1 dark:border-slate-700 dark:bg-slate-800">
+      <button type="button" id="scale-save" class="btn-primary py-1">{% translate "Save scale" %}</button>
+    </div>
+    <div id="outline-bar" class="hidden items-center gap-2 border-b border-slate-200 p-3 text-sm dark:border-slate-800">
+      <span id="outline-label"></span>
+      <button type="button" id="outline-save" class="btn-primary py-1">{% translate "Finish outline" %}</button>
+      <button type="button" id="outline-cancel" class="btn-secondary py-1">{% translate "Cancel" %}</button>
+    </div>
+    <div class="overflow-auto bg-slate-100 dark:bg-slate-950">
+      <svg id="plan" viewBox="0 0 {{ plan.width_px }} {{ plan.height_px }}" width="{{ plan.width_px }}" height="{{ plan.height_px }}"
+           class="block max-w-none select-none" role="application" aria-label="{% translate 'Floor plan editor' %}"
+           data-base="{% url 'floorplans:editor' floor.pk %}" data-width="{{ plan.width_px }}" data-height="{{ plan.height_px }}">
+        <image href="{% url 'metadata:download' plan.image_id %}" x="0" y="0" width="{{ plan.width_px }}" height="{{ plan.height_px }}"/>
+        <g id="layer-rooms"></g><g id="layer-items"></g><g id="layer-draft"></g>
+      </svg>
+    </div>
+    {% else %}
+    <p class="p-5 text-sm text-slate-500">{% translate "This floor has no plan yet." %}</p>
+    {% endif %}
+  </section>
+
+  <aside class="space-y-6">
+    {% if plan %}
+    <section class="card" aria-labelledby="unplaced-h">
+      <h2 id="unplaced-h" class="mb-2">{% translate "Not on the plan" %}</h2>
+      <p class="mb-3 text-xs text-slate-500">{% translate "Choose an item, then click on the plan." %}</p>
+      <ul class="space-y-1 text-sm">
+        {% for r in unplaced_racks %}<li><button type="button" class="nav-link w-full text-left" data-place="rack" data-id="{{ r.id }}" {% if not r.can_change %}disabled{% endif %}>▭ {{ r.name }}</button></li>{% endfor %}
+        {% for d in unplaced_devices %}<li><button type="button" class="nav-link w-full text-left" data-place="device" data-id="{{ d.id }}" {% if not d.can_change %}disabled{% endif %}>● {{ d.name }} <span class="text-xs text-slate-500">{{ d.room }}</span></button></li>{% endfor %}
+        {% if not unplaced_racks and not unplaced_devices %}<li class="text-slate-500">{% translate "Everything is placed." %}</li>{% endif %}
+      </ul>
+    </section>
+    <section class="card" aria-labelledby="rooms-h">
+      <h2 id="rooms-h" class="mb-3">{% translate "Room outlines" %}</h2>
+      <ul class="space-y-1 text-sm">{% for r in scene.rooms %}<li class="flex items-center justify-between gap-2"><span>{{ r.name }} {% if r.points %}<span class="badge-ok">{% translate "drawn" %}</span>{% endif %}</span>
+        {% if r.can_change %}<span class="flex gap-1"><button type="button" class="btn-secondary py-1" data-outline="{{ r.id }}" data-name="{{ r.name }}">{% translate "Draw" %}</button>
+        {% if r.points %}<button type="button" class="btn-secondary py-1" data-clear-outline="{{ r.id }}">{% translate "Clear" %}</button>{% endif %}</span>{% endif %}</li>
+      {% empty %}<li class="text-slate-500">{% translate "No rooms on this floor." %}</li>{% endfor %}</ul>
+    </section>
+    {% endif %}
+    {% if can_change %}
+    <form method="post" action="{% url 'floorplans:upload' floor.pk %}" enctype="multipart/form-data" class="card">{% csrf_token %}
+      <h2 class="mb-3">{% if plan %}{% translate "Replace plan" %}{% else %}{% translate "Upload plan" %}{% endif %}</h2>
+      {% include "core/_form.html" with form=upload_form %}
+      <p class="mb-3 text-xs text-slate-500">{% blocktranslate with n=max_upload_mb %}PDFs use their first page. Up to {{ n }} MB.{% endblocktranslate %}{% if plan %} {% translate "Replacing resets the scale." %}{% endif %}</p>
+      <button class="btn-primary">{% translate "Upload" %}</button>
+    </form>
+    {% endif %}
+  </aside>
+</div>
+{% endblock %}

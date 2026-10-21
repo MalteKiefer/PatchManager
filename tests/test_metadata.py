@@ -166,7 +166,9 @@ def test_markdown_is_sanitised() -> None:
 
 
 @pytest.mark.django_db
-def test_attach_download_and_remove(admin_client: Client, make_tree, system) -> None:
+def test_attach_download_and_remove(
+    admin_client: Client, make_tree, system, django_capture_on_commit_callbacks
+) -> None:
     t = make_tree()
     upload = SimpleUploadedFile("Rack front.JPG", image_bytes(exif=True), content_type="text/html")
     admin_client.post(
@@ -189,7 +191,8 @@ def test_attach_download_and_remove(admin_client: Client, make_tree, system) -> 
     assert response["Content-Disposition"].startswith("inline")
     assert response.content.startswith(b"\xff\xd8\xff")
     assert "Front" in admin_client.get(f"/racks/{t['rack'].pk}/", secure=True).content.decode()
-    admin_client.post(f"/meta/files/{attachment.pk}/delete/", {"next": "/"}, secure=True)
+    with django_capture_on_commit_callbacks(execute=True):
+        admin_client.post(f"/meta/files/{attachment.pk}/delete/", {"next": "/"}, secure=True)
     with system():
         assert not Attachment.objects.exists()
     assert not storages["attachments"].exists(attachment.storage_name)
