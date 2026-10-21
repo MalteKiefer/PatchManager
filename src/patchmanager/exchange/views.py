@@ -248,7 +248,7 @@ def report(request: HttpRequest, kind: str, pk: str) -> HttpResponse:
     same_type = permission.startswith(obj.policy_object_type + ".")
     allowed = (
         policy.has_perm(request.user, permission, obj)
-        if same_type  # other types: judged by the scope only, the object's fields mean nothing to them
+        if same_type  # other types: judged by scope only, the object's fields mean nothing there
         else policy.has_perm(request.user, permission, scope_path=obj.policy_path)
     )
     if not allowed:

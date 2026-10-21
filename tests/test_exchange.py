@@ -514,6 +514,7 @@ def test_viewers_cannot_export_reports(kit, make_user) -> None:
         )
     client = Client()
     login(client, viewer)
-    assert client.get(f"/exchange/reports/rack/{kit['rack'].pk}.pdf", secure=True).status_code == 404
+    rack_url = f"/exchange/reports/rack/{kit['rack'].pk}.pdf"
+    assert client.get(rack_url, secure=True).status_code == 404
     assert client.get(f"/exchange/reports/bom/{kit['site'].pk}.pdf", secure=True).status_code == 404
     assert b"sw1" not in client.get("/exchange/devices.csv", secure=True).content
