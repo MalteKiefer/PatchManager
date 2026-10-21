@@ -313,6 +313,8 @@ LOGGING = {
     "formatters": {"json": {"()": "patchmanager.core.logging.JsonFormatter"}},
     "handlers": {"console": {"class": "logging.StreamHandler", "formatter": "json"}},
     "root": {"handlers": ["console"], "level": env("PATCHMANAGER_LOG_LEVEL", "INFO")},
+    # pysaml2 logs whole assertions (personal data) below WARNING; xmlschema is chatty
+    "loggers": {"saml2": {"level": "WARNING"}, "xmlschema": {"level": "WARNING"}},
 }
 
 # REST API (ADR 0019)

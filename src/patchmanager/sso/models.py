@@ -41,13 +41,19 @@ class IdentityProvider(TimestampedModel):
 class ExternalIdentity(TimestampedModel):
     """A user's account at a provider (OIDC ``sub``, SAML NameID or LDAP entry id)."""
 
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="external_identities")
-    provider = models.ForeignKey(IdentityProvider, on_delete=models.CASCADE, related_name="identities")
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="external_identities"
+    )
+    provider = models.ForeignKey(
+        IdentityProvider, on_delete=models.CASCADE, related_name="identities"
+    )
     subject = models.CharField(max_length=500)
     last_login_at = models.DateTimeField(null=True)
 
     class Meta:
-        constraints = [models.UniqueConstraint(fields=["provider", "subject"], name="sso_identity_unique")]
+        constraints = [
+            models.UniqueConstraint(fields=["provider", "subject"], name="sso_identity_unique")
+        ]
 
     def __str__(self) -> str:
         return f"{self.provider}: {self.subject}"

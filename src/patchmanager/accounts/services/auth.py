@@ -4,6 +4,7 @@ import logging
 from dataclasses import dataclass
 from datetime import datetime, timedelta
 from enum import StrEnum
+from typing import TYPE_CHECKING
 
 from django.conf import settings
 from django.contrib.auth import authenticate, login, logout
@@ -20,6 +21,9 @@ from patchmanager.audit import services as audit
 from patchmanager.core import metrics, ratelimit
 from patchmanager.tenancy.models import Tenant
 from patchmanager.tenancy.rls import system_context
+
+if TYPE_CHECKING:
+    from patchmanager.sso.models import IdentityProvider
 
 logger = logging.getLogger(__name__)
 
@@ -63,6 +67,9 @@ def password_step(request: HttpRequest, email: str, password: str) -> LoginResul
         audit.record("auth.login.locked", request=request, obj=candidate)
         metrics.LOGINS.labels("locked").inc()
         return LoginResult(Outcome.LOCKED, _("This account is temporarily locked."))
+    directory = _directory_for(email, candidate)
+    if directory is not None:
+        return _directory_step(request, directory, email, password, candidate)
     user = authenticate(request, email=email, password=password)
     if user is None:
         if candidate is not None:
@@ -75,12 +82,63 @@ def password_step(request: HttpRequest, email: str, password: str) -> LoginResul
     assert isinstance(user, User)  # noqa: S101  # nosec B101: EmailBackend only returns User
     User.objects.filter(pk=user.pk).update(failed_login_count=0)
     if has_mfa(user):
-        request.session.cycle_key()
-        request.session[PENDING_USER] = str(user.pk)
-        request.session[PENDING_AT] = timezone.now().isoformat()
+        begin_second_factor(request, user)
         return LoginResult(Outcome.MFA)
     complete_login(request, user, method="password")
     return LoginResult(Outcome.OK)
+
+
+def _directory_for(email: str, candidate: User | None) -> IdentityProvider | None:
+    """The LDAP provider of the email's domain (break glass accounts keep their password)."""
+    from patchmanager.sso.models import IdentityProvider
+    from patchmanager.sso.services import provider_for
+
+    if candidate is not None and candidate.break_glass:
+        return None
+    return provider_for(email, IdentityProvider.Kind.LDAP)
+
+
+def _directory_step(
+    request: HttpRequest,
+    provider: IdentityProvider,
+    email: str,
+    password: str,
+    candidate: User | None,
+) -> LoginResult:
+    from patchmanager.accounts.services import ServiceError
+    from patchmanager.sso import ldap, services
+
+    try:
+        assertion = ldap.authenticate(provider, email, password)
+        if assertion is not None:
+            outcome = services.sign_in(request, provider, assertion)
+            return LoginResult(Outcome.MFA if outcome == "mfa" else Outcome.OK)
+    except ServiceError as exc:
+        audit.record(
+            "auth.login.failed",
+            request=request,
+            obj=candidate,
+            data={"email": email[:254], "ldap": str(exc)},
+        )
+        metrics.LOGINS.labels("failed").inc()
+        return LoginResult(Outcome.INVALID, str(exc))
+    if candidate is not None:
+        _register_failure(candidate)
+    audit.record(
+        "auth.login.failed",
+        request=request,
+        obj=candidate,
+        data={"email": email[:254], "ldap": True},
+    )
+    metrics.LOGINS.labels("failed").inc()
+    return LoginResult(Outcome.INVALID, _("Email or password is incorrect."))
+
+
+def begin_second_factor(request: HttpRequest, user: User) -> None:
+    """The first factor is done; the MFA step finishes the sign in."""
+    request.session.cycle_key()
+    request.session[PENDING_USER] = str(user.pk)
+    request.session[PENDING_AT] = timezone.now().isoformat()
 
 
 def _register_failure(user: User) -> None:
@@ -114,8 +172,14 @@ def clear_pending(request: HttpRequest) -> None:
     request.session.pop(PENDING_AT, None)
 
 
-def complete_login(request: HttpRequest, user: User, *, method: str) -> None:
-    """Start the authenticated session and record it."""
+def complete_login(
+    request: HttpRequest, user: User, *, method: str, mfa_done: bool = False
+) -> None:
+    """Start the authenticated session and record it.
+
+    Without a second factor (``password``, SSO, LDAP) users who need MFA must
+    enrol one first, unless ``mfa_done`` (an identity provider that enforces MFA).
+    """
     clear_pending(request)
     login(request, user, backend=BACKEND)
     now = timezone.now().isoformat()
@@ -124,7 +188,8 @@ def complete_login(request: HttpRequest, user: User, *, method: str) -> None:
     request.session[sessions.IP] = request.META.get("REMOTE_ADDR")
     request.session[sessions.USER_AGENT] = request.headers.get("User-Agent", "")[:300]
     request.session[MFA_METHOD] = method
-    if method == "password" and mfa_required(user):
+    single_factor = method == "password" or method.startswith(("sso:", "ldap:"))
+    if single_factor and not mfa_done and mfa_required(user):
         request.session[MFA_SETUP_REQUIRED] = True
     ratelimit.reset(f"login-ip:{_ip(request)}")
     audit.record(

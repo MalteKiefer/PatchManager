@@ -1,0 +1,14 @@
+{% extends "manage/_base.html" %}{% load i18n %}
+{% block title %}{% translate "Single sign on" %}{% endblock %}
+{% block manage %}
+<div class="mb-4 flex items-center gap-3"><h1 class="mr-auto">{% translate "Single sign on" %}</h1>
+  <a class="btn-primary" href="{% url 'sso:provider-create' %}">{% translate "New identity provider" %}</a></div>
+<div class="card overflow-x-auto p-0"><table class="table">
+  <thead><tr><th>{% translate "Name" %}</th><th>{% translate "Type" %}</th><th>{% translate "Domains" %}</th><th>{% translate "Status" %}</th></tr></thead>
+  <tbody>{% for p in providers %}<tr>
+    <td><a href="{% url 'sso:provider' p.pk %}">{{ p.name }}</a></td><td>{{ p.get_kind_display }}</td><td class="text-xs">{{ p.domains|join:", " }}</td>
+    <td>{% if p.enabled %}<span class="badge-ok">{% translate "enabled" %}</span>{% else %}<span class="badge-muted">{% translate "disabled" %}</span>{% endif %}{% if p.enforce %} <span class="badge-warn">{% translate "enforced" %}</span>{% endif %}</td>
+  </tr>{% empty %}<tr><td colspan="4" class="text-slate-500">{% translate "No identity providers yet." %}</td></tr>{% endfor %}</tbody>
+</table></div>
+<p class="mt-4 text-sm text-slate-500">{% blocktranslate %}Where SSO is enforced, accounts marked as break glass still sign in with their password. Keep at least one such super admin.{% endblocktranslate %}</p>
+{% endblock %}
