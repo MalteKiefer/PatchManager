@@ -80,6 +80,8 @@ def restore(request: HttpRequest, actor: User, change: Change) -> tuple[list[str
     for column in fields:
         field = columns[column]
         setattr(obj, field.attname, field.to_python(change.before.get(column)))
+    if not policy.has_perm(actor, f"{t.policy_type}.change", obj):  # the result must be allowed too
+        raise PermissionDeniedError(_("You do not have permission to do that."))
     try:
         obj.full_clean(exclude=[f.name for f in t.model._meta.concrete_fields if f.column not in fields])
     except ValidationError as exc:

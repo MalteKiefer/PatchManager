@@ -141,3 +141,18 @@ def test_tenant_delete_purges_history(make_tenant, super_admin) -> None:
         t["tenant"].save()
         tenancy.delete_tenant(t["request"], super_admin, t["tenant"], confirm_slug=t["tenant"].slug)
         assert not Change.objects.filter(tenant_id=t["tenant"].pk).exists()
+
+
+def test_restore_checks_resulting_state(make_tree, make_user, super_admin) -> None:
+    t = make_tree()
+    user = make_user()
+    with rls.system_context():
+        tree.update(t["request"], super_admin, t["rack"], status="planned")
+        tree.update(t["request"], super_admin, t["rack"], status="active")
+        change = _changes(t["rack"])[-1]  # planned -> active
+        Assignment.objects.create(role=Role.objects.get(key="editor"), user=user, tenant=t["tenant"],
+                                  scope_path=t["tenant"].policy_path,
+                                  conditions=[{"attr": "status", "op": "eq", "value": "active"}])
+        with pytest.raises(PermissionDeniedError):
+            services.restore(t["request"], user, change)  # would set status back to planned
+        assert Rack.objects.get(pk=t["rack"].pk).status == "active"
