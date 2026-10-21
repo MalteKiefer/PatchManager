@@ -184,3 +184,84 @@ def test_network_views(admin_client: Client, net, system) -> None:
     with system():
         assert not VLAN.objects.filter(pk=vlan.pk).exists()
         assert not WLAN.objects.exists()
+
+
+def test_scoped_user_sees_only_permitted_vlans_and_ports(
+    net, make_user, make_type, super_admin, client
+) -> None:
+    from patchmanager.accounts.models import Assignment, Role
+    from patchmanager.accounts.services import PermissionDeniedError
+    from tests.conftest import login
+
+    r, tenant = net["request"], net["tenant"]
+    with rls.system_context():
+        tenant_vlan = services.create_vlan(r, super_admin, tenant, vid=10, name="Tenant wide")
+        site_vlan = services.create_vlan(
+            r, super_admin, tenant, vid=20, name="HQ", site=net["site"]
+        )
+        other_room = tree.create(r, super_admin, Room, parent=net["floor"], name="Other room")
+        hidden = devices.create(
+            r,
+            super_admin,
+            device_type=net["device"].device_type,
+            room=other_room,
+            name="hidden-switch",
+        )
+        services.set_port_vlans(
+            r,
+            super_admin,
+            hidden.ports.get(name="ge1"),
+            mode="access",
+            untagged=site_vlan,
+            tagged=[],
+        )
+        port = net["device"].ports.get(name="ge1")
+    editor = make_user()
+    Assignment.objects.create(
+        role=Role.objects.get(key="editor"), user=editor, tenant=tenant, scope_path=net["site"].path
+    )
+    room_editor = make_user()
+    Assignment.objects.create(
+        role=Role.objects.get(key="editor"),
+        user=room_editor,
+        tenant=tenant,
+        scope_path=net["room"].path,
+    )
+    with rls.system_context():
+        assert set(services.vlans_for_port(port, editor)) == {site_vlan}
+        assert set(services.vlans_for_port(port, room_editor)) == set()
+        with pytest.raises(PermissionDeniedError):
+            services.set_port_vlans(
+                r, room_editor, port, mode="access", untagged=tenant_vlan, tagged=[]
+            )
+    login(client, editor)
+    page = client.get(f"/networks/vlans/{site_vlan.pk}/", secure=True).content.decode()
+    assert "hidden-switch" in page  # editor covers the whole site
+    viewer = make_user()
+    Assignment.objects.create(
+        role=Role.objects.get(key="viewer"), user=viewer, tenant=tenant, scope_path=net["site"].path
+    )
+    Assignment.objects.create(
+        role=Role.objects.get(key="viewer"),
+        user=viewer,
+        tenant=tenant,
+        scope_path=other_room.path,
+        effect="deny",
+    )
+    from django.test import Client
+
+    viewer_client = Client()
+    login(viewer_client, viewer)
+    page = viewer_client.get(f"/networks/vlans/{site_vlan.pk}/", secure=True).content.decode()
+    assert "hidden-switch" not in page
+
+
+def test_site_move_refused_when_wlan_bridges_site_vlan(net, make_tenant, super_admin) -> None:
+    r, tenant = net["request"], net["tenant"]
+    with rls.system_context():
+        site_vlan = services.create_vlan(
+            r, super_admin, tenant, vid=40, name="Site", site=net["site"]
+        )
+        services.create_wlan(r, super_admin, tenant, ssid="Site WiFi", vlan=site_vlan)
+        with pytest.raises(ServiceError, match="tenant wide VLANs or WLANs"):
+            tree.move_site(r, super_admin, net["site"], make_tenant())

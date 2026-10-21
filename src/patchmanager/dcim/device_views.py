@@ -138,13 +138,13 @@ class PortVLANForm(forms.Form):
         widget=forms.SelectMultiple(attrs={"size": 6}),
     )
 
-    def __init__(self, *args: Any, port: Port, **kwargs: Any) -> None:
-        """VLANs usable on this port."""
+    def __init__(self, *args: Any, port: Port, user: Any, **kwargs: Any) -> None:
+        """VLANs usable on this port that the user may see."""
         from patchmanager.networks.services import vlans_for_port
 
         super().__init__(*args, **kwargs)
         for name in ("untagged", "tagged"):
-            self.fields[name].queryset = vlans_for_port(port)  # type: ignore[attr-defined]
+            self.fields[name].queryset = vlans_for_port(port, user)  # type: ignore[attr-defined]
 
 
 class NewPortForm(forms.ModelForm):  # type: ignore[type-arg]
@@ -342,6 +342,7 @@ def port_detail(request: HttpRequest, pk: str) -> HttpResponse:
     vlan_form = PortVLANForm(
         request.POST if action == "vlans" else None,
         port=port,
+        user=actor,
         initial={
             "mode": port.vlan_mode,
             "untagged": port.untagged_vlan_id,

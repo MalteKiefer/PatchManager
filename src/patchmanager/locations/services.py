@@ -108,7 +108,7 @@ _TREE_TABLES = (
 def _check_site_is_self_contained(site: Any, device_model: Any) -> None:
     """Cables and tenant wide networks would otherwise end up spanning two tenants."""
     from patchmanager.cabling.models import CableEnd
-    from patchmanager.networks.models import VLAN, TaggedVLAN, WLANBroadcast
+    from patchmanager.networks.models import VLAN, WLAN, TaggedVLAN, WLANBroadcast
 
     inside_ports = device_model.objects.filter(path__descendant_of=site.path).values("ports")
     inside_cables = CableEnd.objects.filter(port__in=inside_ports).values("cable_id")
@@ -120,6 +120,7 @@ def _check_site_is_self_contained(site: Any, device_model: Any) -> None:
         WLANBroadcast.objects.filter(port__in=inside_ports).exists()
         or VLAN.objects.filter(site__isnull=True, untagged_on__in=inside_ports).exists()
         or TaggedVLAN.objects.filter(port__in=inside_ports, vlan__site__isnull=True).exists()
+        or WLAN.objects.filter(vlan__site=site).exists()
     ):
         raise ServiceError(
             _("Ports in this site use tenant wide VLANs or WLANs. Remove those assignments first.")

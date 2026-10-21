@@ -143,6 +143,9 @@ def set_port_vlans(
         raise ServiceError(_("Access ports carry no tagged VLANs."))
     if mode == "" and (untagged or tagged):
         raise ServiceError(_("Choose access or trunk to assign VLANs."))
+    for vlan in [untagged, *tagged]:
+        if vlan is not None and not policy.has_perm(actor, "networks.vlan.view", vlan):
+            raise PermissionDeniedError(_("You do not have permission to do that."))
     try:
         with transaction.atomic():
             Port.objects.filter(pk=port.pk).update(vlan_mode=mode, untagged_vlan=untagged)
@@ -167,11 +170,15 @@ def set_port_vlans(
     )
 
 
-def vlans_for_port(port: Port) -> Any:
-    """VLANs usable on ``port``: tenant wide ones and those of its site."""
+def vlans_for_port(port: Port, user: Any = None) -> Any:
+    """VLANs usable on ``port`` (tenant wide ones and those of its site) that ``user`` may see."""
     from django.db.models import Q
 
     site_label = str(port.device.path).split(".")[1]
-    return VLAN.objects.filter(tenant_id=port.tenant_id).filter(
+    candidates = VLAN.objects.filter(tenant_id=port.tenant_id).filter(
         Q(site__isnull=True) | Q(site__path=f"{str(port.device.path).split('.')[0]}.{site_label}")
     )
+    if user is None:
+        return candidates
+    allowed = [v.pk for v in candidates if policy.has_perm(user, "networks.vlan.view", v)]
+    return VLAN.objects.filter(pk__in=allowed)

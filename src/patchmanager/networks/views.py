@@ -55,19 +55,24 @@ class WLANForm(forms.ModelForm):  # type: ignore[type-arg]
         self.fields["vlan"].queryset = VLAN.objects.filter(tenant=tenant)  # type: ignore[attr-defined]
 
 
+def _visible_ports(user: Any, ports: Any, perm: str = "dcim.device.view") -> list[Port]:
+    """Ports whose device ``user`` may access with ``perm``."""
+    return [p for p in ports if policy.has_perm(user, perm, p.device)]
+
+
 class BroadcastForm(forms.Form):
     """Add a radio to a WLAN."""
 
     port = forms.ModelChoiceField(label=gettext_lazy("Wireless port"), queryset=Port.objects.none())
 
-    def __init__(self, *args: Any, tenant: Any, **kwargs: Any) -> None:
-        """Wireless ports of the tenant."""
+    def __init__(self, *args: Any, tenant: Any, user: Any, **kwargs: Any) -> None:
+        """Wireless ports of the tenant on devices the user may change."""
         super().__init__(*args, **kwargs)
         field = self.fields["port"]
         assert isinstance(field, forms.ModelChoiceField)  # noqa: S101  # nosec B101
-        field.queryset = Port.objects.filter(tenant=tenant, kind="wireless").select_related(
-            "device"
-        )
+        radios = Port.objects.filter(tenant=tenant, kind="wireless").select_related("device")
+        allowed = _visible_ports(user, radios, "dcim.device.change")
+        field.queryset = Port.objects.filter(pk__in=[p.pk for p in allowed])
 
 
 def _actor(request: HttpRequest) -> User:
@@ -147,12 +152,16 @@ def vlan_detail(request: HttpRequest, pk: str) -> HttpResponse:
         {
             "vlan": vlan,
             "form": form,
-            "access_ports": vlan.untagged_on.select_related("device").order_by(
-                "device__name", "order"
-            )[:500],
-            "trunk_ports": Port.objects.filter(tagged__vlan=vlan)
-            .select_related("device")
-            .order_by("device__name")[:500],
+            "access_ports": _visible_ports(
+                actor,
+                vlan.untagged_on.select_related("device").order_by("device__name", "order")[:500],
+            ),
+            "trunk_ports": _visible_ports(
+                actor,
+                Port.objects.filter(tagged__vlan=vlan)
+                .select_related("device")
+                .order_by("device__name")[:500],
+            ),
             "wlans": vlan.wlans.all(),
             "can_change": policy.has_perm(actor, "networks.vlan.change", vlan),
         },
@@ -202,7 +211,9 @@ def wlan_detail(request: HttpRequest, pk: str) -> HttpResponse:
         raise Http404
     action = request.POST.get("action")
     form = WLANForm(request.POST if action == "edit" else None, instance=wlan, tenant=wlan.tenant)
-    radio_form = BroadcastForm(request.POST if action == "radio" else None, tenant=wlan.tenant)
+    radio_form = BroadcastForm(
+        request.POST if action == "radio" else None, tenant=wlan.tenant, user=actor
+    )
     if request.method == "POST":
         try:
             if action == "edit" and form.is_valid():
@@ -229,7 +240,9 @@ def wlan_detail(request: HttpRequest, pk: str) -> HttpResponse:
             "wlan": wlan,
             "form": form,
             "radio_form": radio_form,
-            "radios": wlan.radios.select_related("device").order_by("device__name"),
+            "radios": _visible_ports(
+                actor, wlan.radios.select_related("device").order_by("device__name")
+            ),
             "can_change": policy.has_perm(actor, "networks.wlan.change", wlan),
         },
     )
