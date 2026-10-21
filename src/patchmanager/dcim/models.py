@@ -47,6 +47,11 @@ class Rack(HierarchyNode):
     serial = models.CharField(_("serial number"), max_length=100, blank=True)
     asset_tag = models.CharField(_("asset tag"), max_length=100, blank=True)
     notes = models.TextField(_("notes"), blank=True)
+    plan_x = models.FloatField(null=True, blank=True)
+    plan_y = models.FloatField(null=True, blank=True)
+    plan_rotation = models.PositiveSmallIntegerField(
+        default=0, choices=[(0, "0°"), (90, "90°"), (180, "180°"), (270, "270°")]
+    )
 
     parent_field = "room"
     policy_object_type = "dcim.rack"
@@ -194,6 +199,8 @@ class Device(HierarchyNode):
     in_service_date = models.DateField(_("in service since"), null=True, blank=True)
     responsible = models.CharField(_("responsible person"), max_length=150, blank=True)
     notes = models.TextField(_("notes"), blank=True)
+    plan_x = models.FloatField(null=True, blank=True)
+    plan_y = models.FloatField(null=True, blank=True)
 
     policy_object_type = "dcim.device"
     condition_attrs = frozenset({"created_by", "name", "status"})

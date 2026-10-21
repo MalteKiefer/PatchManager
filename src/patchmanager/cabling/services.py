@@ -111,3 +111,16 @@ def disconnect(request: HttpRequest, actor: User, cable: Cable) -> None:
     ends = [f"{e.port.device}:{e.port.name}" for e in cable.ends.select_related("port__device")]
     audit.record("cabling.cable.deleted", request=request, obj=cable, data={"ends": ends})
     cable.delete()
+
+
+def refresh_paths(device: Any) -> int:
+    """Recompute the scope of every cable on ``device`` after it moved."""
+    count = 0
+    for end in CableEnd.objects.filter(port__device=device).select_related("cable"):
+        ports = [e.port for e in end.cable.ends.select_related("port__device")]
+        if len(ports) == 2:
+            path = common_path(str(ports[0].device.path), str(ports[1].device.path))
+            if path != str(end.cable.path):
+                Cable.objects.filter(pk=end.cable_id).update(path=path)
+                count += 1
+    return count

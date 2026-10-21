@@ -72,6 +72,18 @@ webhook targets (SSRF risk).
 | E4 | Elevation of privilege | Container escape after RCE | Non-root, read only root fs, no shell, dropped capabilities, no-new-privileges | 0 |
 | E5 | Elevation of privilege | Supply chain (dependency, action, image) | Lockfile, digest pinning, Renovate, pip-audit, Trivy, CodeQL, signed images | 0 |
 
+## Phase 5 controls in place
+
+* T3: PDF plans are parsed by PDFium (pypdfium2) inside the upload limit; only the
+  first page is rendered, at most 6000 pixels per side, and only the PNG is kept.
+  Risk accepted for now: a PDFium flaw runs in the web process. Mitigation later:
+  rasterise in an isolated worker.
+* E1: plan, outline and placement changes need change permission on the floor,
+  room, rack or device; moving a device to another room also needs add permission
+  there.
+* I1: the editor lists only rooms, racks and devices the user may view; the image
+  is served through the permission checked attachment download.
+
 ## Phase 4 controls in place
 
 * T1: cable ends, VLAN use (untagged and tagged) and WLAN radios are checked by

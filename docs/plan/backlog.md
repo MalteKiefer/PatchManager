@@ -58,7 +58,7 @@ become GitHub issues under the phase milestone when the phase starts.
 
 ## Phase 5: Floor plans (v0.6.0)
 
-* Upload image or PDF plan, rasterise PDF, sanitise SVG
+* Upload image or PDF plan, rasterise PDF (SVG refused, see ADR 0017)
 * Scale by known distance, room outlines (rectangle and polygon)
 * Drag and drop placement of racks and floor devices, link to rooms
 

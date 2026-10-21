@@ -77,6 +77,17 @@ It is *complete* when it ends at active ports on both sides. A device page lists
 what each cabled port finally connects to. **Cables** lists and filters all
 cables of the tenant.
 
+## Floor plans
+
+Open a floor and choose **Floor plan**. Upload an image or a PDF (the first page
+is used). Choose **Set scale**, click two points whose distance you know and
+enter it in metres. Under **Room outlines** choose **Draw**, click the corners of
+the room and finish. Racks and floor devices not yet on the plan are listed on
+the right: choose one, then click where it stands. Drag symbols to move them, or
+focus one and use the arrow keys (Shift for bigger steps). Dropping a floor
+device into another room's outline moves it to that room. Double click a symbol
+to open it.
+
 ## VLANs and WLANs
 
 **Networks** holds VLANs (for the whole tenant or one site) and WLANs. On a
