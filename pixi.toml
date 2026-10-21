@@ -1,0 +1,90 @@
+[workspace]
+name = "patchmanager"
+version = "0.1.0"
+description = "Self-hosted network and rack documentation platform"
+authors = ["Malte Kiefer"]
+license = "AGPL-3.0-only"
+channels = ["conda-forge"]
+platforms = [{ name = "osx-arm64-macos13", platform = "osx-arm64", macos = "13.3" }, "linux-64", "linux-aarch64"]
+
+[activation.env]
+PYTHONPATH = "$PIXI_PROJECT_ROOT/src"
+DJANGO_SETTINGS_MODULE = "patchmanager.settings"
+
+# Runtime dependencies, shared by every environment.
+[dependencies]
+python = "3.14.*"
+django = ">=6.1.2,<6.2"
+psycopg = ">=3.3.4,<4"
+gunicorn = ">=26.2.0,<27"
+whitenoise = ">=6.12.0,<7"
+
+[tasks]
+check = "python -m django check --deploy --fail-level WARNING"
+
+# Local PostgreSQL and Redis from conda-forge, see docs/adr/0004.
+[feature.db.dependencies]
+postgresql = ">=18.6,<19"
+redis-server = ">=8.10.2,<9"
+
+[feature.db.activation.env]
+PGDATA = "$PIXI_PROJECT_ROOT/.pixi/pgdata"
+PGHOST = "$PIXI_PROJECT_ROOT/.pixi"
+PGPORT = "5433"
+PGUSER = "patchmanager"
+DATABASE_URL = "postgresql://patchmanager@/patchmanager?host=$PIXI_PROJECT_ROOT/.pixi&port=5433"
+
+[feature.db.tasks]
+db-init = { cmd = "test -d \"$PGDATA\" || (initdb --auth=trust --username=patchmanager --encoding=UTF8 -D \"$PGDATA\" && pg_ctl -D \"$PGDATA\" -o \"-k $PGHOST -p $PGPORT -c listen_addresses=''\" -l \"$PIXI_PROJECT_ROOT/.pixi/pg.log\" -w start && createdb patchmanager && pg_ctl -D \"$PGDATA\" -w stop)" }
+db-start = { cmd = "pg_ctl -D \"$PGDATA\" status >/dev/null || pg_ctl -D \"$PGDATA\" -o \"-k $PGHOST -p $PGPORT -c listen_addresses=''\" -l \"$PIXI_PROJECT_ROOT/.pixi/pg.log\" -w start", depends-on = ["db-init"] }
+db-stop = "pg_ctl -D \"$PGDATA\" -w stop"
+migrate = { cmd = "python -m django migrate", depends-on = ["db-start"] }
+
+[feature.dev.tasks]
+dev = { cmd = "python -m django runserver 127.0.0.1:8000", depends-on = ["migrate"], env = { PATCHMANAGER_DEBUG = "true", DJANGO_SECRET_KEY = "dev-only-insecure-key-never-use-in-production-0123456789" } }
+
+[feature.test.dependencies]
+pytest = ">=9.1.1,<10"
+pytest-django = ">=4.13.0,<5"
+pytest-cov = ">=7.1.0,<8"
+hypothesis = ">=6.170.5,<7"
+factory_boy = ">=3.3.3,<4"
+
+[feature.test.tasks]
+test = { cmd = "pytest", depends-on = ["db-start"], env = { DJANGO_SECRET_KEY = "test-only-insecure-key-0123456789-0123456789-0123456789" } }
+
+[feature.lint.dependencies]
+ruff = ">=0.17.1,<0.18"
+mypy = ">=2.4.0,<3"
+django-stubs = ">=6.1.2,<6.2"
+pre-commit = ">=4.7.0,<5"
+bandit = ">=1.9.4,<2"
+pip-audit = ">=2.10.1,<3"
+
+[feature.lint.tasks]
+lint = "ruff check . && ruff format --check ."
+fmt = "ruff check --fix . && ruff format ."
+typecheck = { cmd = "mypy", env = { DJANGO_SECRET_KEY = "typecheck-only-insecure-key-0123456789-0123456789-0123", DATABASE_URL = "postgresql://typecheck@localhost/typecheck" } }
+audit = "pip-audit --strict --progress-spinner off && bandit -c pyproject.toml -r src"
+pre-commit = "pre-commit run --all-files"
+
+[feature.docs.dependencies]
+mkdocs-material = ">=9.7.7,<10"
+
+[feature.docs.tasks]
+docs = "mkdocs serve"
+docs-build = "mkdocs build --strict"
+
+[feature.prod.tasks]
+serve = "gunicorn patchmanager.wsgi:application --config src/patchmanager/gunicorn_conf.py"
+
+[tasks.build]
+cmd = "docker buildx build --platform linux/amd64,linux/arm64 -t patchmanager:local ."
+
+[environments]
+default = { solve-group = "main" }
+prod = { features = ["prod"], solve-group = "main" }
+test = { features = ["test", "db"], solve-group = "main" }
+lint = { features = ["lint", "test"], solve-group = "main" }
+docs = { features = ["docs"], no-default-feature = true }
+dev = { features = ["dev", "db", "test", "lint", "docs"], solve-group = "main" }

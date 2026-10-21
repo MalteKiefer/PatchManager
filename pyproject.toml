@@ -1,0 +1,42 @@
+# Tool configuration only. Dependencies and tasks live in pixi.toml.
+
+[tool.ruff]
+line-length = 100
+target-version = "py314"
+src = ["src", "tests"]
+
+[tool.ruff.lint]
+select = ["E", "W", "F", "I", "B", "UP", "S", "DJ", "N", "C4", "SIM", "PT", "RUF", "ANN", "D"]
+ignore = ["D100", "D104", "D105", "D106", "D107", "D203", "D213", "ANN401"]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**" = ["S101", "S105", "D", "ANN"]
+"manage.py" = ["D"]
+"src/patchmanager/{urls,wsgi,gunicorn_conf}.py" = ["D"]
+"src/patchmanager/*/apps.py" = ["D"]
+
+[tool.mypy]
+strict = true
+python_version = "3.14"
+mypy_path = "src"
+files = ["src", "tests"]
+plugins = ["mypy_django_plugin.main"]
+
+[tool.django-stubs]
+django_settings_module = "patchmanager.settings"
+
+[tool.pytest.ini_options]
+DJANGO_SETTINGS_MODULE = "patchmanager.settings"
+pythonpath = ["src"]
+django_find_project = false
+testpaths = ["tests"]
+addopts = "--strict-markers --cov=patchmanager --cov-report=term-missing --cov-fail-under=90"
+# collectstatic only runs in the image build, not before tests.
+filterwarnings = ["error", "ignore:No directory at:UserWarning"]
+
+[tool.coverage.run]
+branch = true
+omit = ["src/patchmanager/wsgi.py", "src/patchmanager/gunicorn_conf.py"]
+
+[tool.bandit]
+exclude_dirs = ["tests"]
