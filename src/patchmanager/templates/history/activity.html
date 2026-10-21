@@ -1,0 +1,15 @@
+{% extends "base.html" %}{% load i18n %}
+{% block title %}{% translate "Activity" %}{% endblock %}
+{% block content %}
+<h1 class="mb-4">{% translate "Activity" %}{% if current_tenant %} · {{ current_tenant.name }}{% endif %}</h1>
+<form method="get" class="card mb-4 grid gap-3 sm:grid-cols-3 lg:grid-cols-7">
+  <div class="field mb-0 lg:col-span-2"><label for="h-q">{% translate "Object name" %}</label><input id="h-q" name="q" value="{{ filters.q }}"></div>
+  <div class="field mb-0"><label for="h-type">{% translate "Type" %}</label><select id="h-type" name="type"><option value="">-</option>{% for t in types %}<option value="{{ t }}" {% if filters.type == t %}selected{% endif %}>{{ t }}</option>{% endfor %}</select></div>
+  <div class="field mb-0"><label for="h-action">{% translate "Action" %}</label><select id="h-action" name="action"><option value="">-</option>{% for v, l in actions %}<option value="{{ v }}" {% if filters.action == v %}selected{% endif %}>{{ l }}</option>{% endfor %}</select></div>
+  <div class="field mb-0"><label for="h-actor">{% translate "By" %}</label><input id="h-actor" name="actor" value="{{ filters.actor }}"></div>
+  <div class="field mb-0"><label for="h-since">{% translate "From" %}</label><input id="h-since" name="since" type="date" value="{{ filters.since }}"></div>
+  <div class="field mb-0"><label for="h-until">{% translate "Until" %}</label><input id="h-until" name="until" type="date" value="{{ filters.until }}"></div>
+  <div class="self-end"><button class="btn-primary">{% translate "Filter" %}</button></div>
+</form>
+{% include "history/_table.html" with show_object=True %}
+{% endblock %}

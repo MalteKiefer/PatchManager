@@ -1,0 +1,9 @@
+{% extends "base.html" %}{% load i18n %}
+{% block title %}{% translate "History" %} {{ latest.label }}{% endblock %}
+{% block content %}
+<div class="mb-4 flex flex-wrap items-center gap-3">
+  <h1 class="mr-auto">{% translate "History" %} · {{ latest.label|default:latest.object_id }}</h1>
+  {% if object_url %}<a class="btn-secondary" href="{{ object_url }}">{% translate "Open object" %}</a>{% else %}<span class="badge-warn">{% translate "deleted" %}</span>{% endif %}
+</div>
+{% include "history/_table.html" with show_object=False %}
+{% endblock %}

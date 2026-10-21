@@ -208,12 +208,19 @@ def has_perm(user: Any, permission: str, obj: Any = None, *, scope_path: str | N
 
 
 def scope_queryset[M: Model](
-    user: Any, permission: str, queryset: QuerySet[M], *, path_field: str | None = "path"
+    user: Any,
+    permission: str,
+    queryset: QuerySet[M],
+    *,
+    path_field: str | None = "path",
+    strict_conditions: bool = False,
 ) -> QuerySet[M]:
     """Restrict ``queryset`` to rows ``user`` may access with ``permission``.
 
     ``path_field`` names the ltree column holding each row's ``policy_path``;
-    pass ``None`` for global objects that only global grants cover.
+    pass ``None`` for global objects that only global grants cover. With
+    ``strict_conditions`` (rows that are not the object itself, such as history),
+    conditional allows are ignored and conditional denies cover their whole scope.
     """
     if not _usable(user):
         return queryset.none()
@@ -230,12 +237,16 @@ def scope_queryset[M: Model](
             return Q(pk__in=[])
         return Q(**{f"{path_field}__descendant_of": g.scope_path})
 
+    if strict_conditions:
+        relevant = [g for g in relevant if g.effect == "deny" or not g.conditions]
+
     def grant_q(g: Grant) -> Q | None:
+        use_conditions = g.conditions and not strict_conditions
         parts = [
             q
             for q in (
                 scope_q(g),
-                conditions.to_q(list(g.conditions), user) if g.conditions else None,
+                conditions.to_q(list(g.conditions), user) if use_conditions else None,
             )
             if q
         ]

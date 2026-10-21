@@ -1,0 +1,19 @@
+{% extends "base.html" %}{% load i18n %}
+{% block title %}{% translate "Change" %} {{ change.label }}{% endblock %}
+{% block content %}
+<div class="mb-4 flex flex-wrap items-center gap-3">
+  <h1 class="mr-auto">{{ change.label|default:change.object_id }} · {{ change.get_action_display }}</h1>
+  <a class="btn-secondary" href="{% url 'history:object' change.object_type change.object_id %}">{% translate "All changes" %}</a>
+  {% if object_url %}<a class="btn-secondary" href="{{ object_url }}">{% translate "Open object" %}</a>{% endif %}
+  {% if can_restore %}<form method="post" action="{% url 'history:restore' change.pk %}">{% csrf_token %}<button class="btn-primary">{% translate "Restore earlier values" %}</button></form>{% endif %}
+</div>
+<p class="mb-4 text-sm text-slate-500">{{ change.occurred_at|date:"DATETIME_FORMAT" }} · {{ change.actor_label|default:_("system") }} · {{ change.object_type }}{% if change.request_id %} · <span class="font-mono">{{ change.request_id }}</span>{% endif %}</p>
+<div class="card overflow-x-auto p-0"><table class="table">
+  <thead><tr><th>{% translate "Field" %}</th><th>{% translate "Before" %}</th><th>{% translate "After" %}</th></tr></thead>
+  <tbody>{% for r in rows %}<tr>
+    <td class="font-mono text-xs">{{ r.field }}</td>
+    <td class="break-all bg-red-50 text-sm dark:bg-red-950/40">{{ r.before }}</td>
+    <td class="break-all bg-green-50 text-sm dark:bg-green-950/40">{{ r.after }}</td>
+  </tr>{% endfor %}</tbody>
+</table></div>
+{% endblock %}

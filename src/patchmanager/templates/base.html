@@ -36,11 +36,17 @@
         <noscript><button class="btn-secondary py-1">{% translate "Switch" %}</button></noscript>
       </form>
       {% endif %}
+      <form method="get" action="{% url 'search:search' %}" role="search" class="flex">
+        <label for="global-search" class="sr-only">{% translate "Search" %}</label>
+        <input id="global-search" name="q" type="search" minlength="2" maxlength="200" placeholder="{% translate 'Search' %}" class="w-36 rounded-md border border-slate-300 bg-white px-2 py-1.5 text-sm dark:border-slate-700 dark:bg-slate-800">
+      </form>
       <nav class="flex items-center gap-1" aria-label="{% translate 'Main' %}">
         <a class="nav-link" href="{% url 'locations:index' %}">{% translate "Locations" %}</a>
         <a class="nav-link" href="{% url 'library:types' %}">{% translate "Library" %}</a>
         <a class="nav-link" href="{% url 'cabling:cables' %}">{% translate "Cables" %}</a>
         <a class="nav-link" href="{% url 'networks:vlans' %}">{% translate "Networks" %}</a>
+        <a class="nav-link" href="{% url 'history:activity' %}">{% translate "Activity" %}</a>
+        <a class="nav-link" href="{% url 'exchange:index' %}">{% translate "Import/Export" %}</a>
         <a class="nav-link" href="{% url 'manage:dashboard' %}">{% translate "Administration" %}</a>
       </nav>
       <div x-data="themeToggle">

@@ -70,4 +70,9 @@ def delete_tenant(request: HttpRequest, actor: User, tenant: Tenant, *, confirm_
     if confirm_slug != tenant.slug:
         raise ServiceError(_("The identifier does not match."))
     audit.record("tenancy.tenant.deleted", request=request, obj=tenant, tenant_id=tenant.pk)
-    tenant.delete()
+    from patchmanager.history.models import Change
+
+    pk = tenant.pk
+    with transaction.atomic():
+        tenant.delete()
+        Change.objects.filter(tenant_id=pk).delete()  # the triggers recorded the cascade too

@@ -72,6 +72,20 @@ webhook targets (SSRF risk).
 | E4 | Elevation of privilege | Container escape after RCE | Non-root, read only root fs, no shell, dropped capabilities, no-new-privileges | 0 |
 | E5 | Elevation of privilege | Supply chain (dependency, action, image) | Lockfile, digest pinning, Renovate, pip-audit, Trivy, CodeQL, signed images | 0 |
 
+## Phase 6 controls in place
+
+* R1: history rows are written by database triggers, so no code path changes
+  tracked data unrecorded; actor and request id come from the request.
+* I1: history, search, exports and PDF reports only show objects the user may view;
+  conditional grants fail closed on history; hidden peers are shown as not visible.
+* E1: restore needs change permission on the current and the resulting state;
+  imports run through the domain services row by row.
+* T3: import files are parsed with size, row, cell and decompression limits;
+  openpyxl uses defusedxml. Exported cells that a spreadsheet would run as a
+  formula are prefixed with an apostrophe.
+* D1: exports are rate limited (60 per user per 10 minutes) and capped at 20 000
+  rows per table; search fetches at most 200 candidates per type.
+
 ## Phase 5 controls in place
 
 * T3: PDF plans are parsed by PDFium (pypdfium2) inside the upload limit; only the

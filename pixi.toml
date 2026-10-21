@@ -1,6 +1,6 @@
 [workspace]
 name = "patchmanager"
-version = "0.6.0"
+version = "0.7.0"
 description = "Self-hosted network and rack documentation platform"
 authors = ["Malte Kiefer"]
 license = "AGPL-3.0-only"
@@ -32,6 +32,8 @@ nh3 = ">=0.3.7,<0.4"
 markdown-it-py = ">=4.2.0,<5"
 defusedxml = ">=0.7.1,<0.8"
 pypdfium2 = ">=5.13.0,<6"
+openpyxl = ">=3.1.5,<4"
+reportlab = ">=5.0.1,<6"
 
 [tasks]
 check = "python -m django check --deploy --fail-level WARNING"

@@ -9,6 +9,8 @@ import hashlib
 import json
 import logging
 from collections.abc import Iterator
+from contextlib import contextmanager
+from contextvars import ContextVar
 from dataclasses import dataclass
 from typing import Any
 
@@ -55,6 +57,31 @@ def client_ip(request: HttpRequest | None) -> str | None:
     return request.META.get("REMOTE_ADDR") if request else None
 
 
+_deferred: ContextVar[list[tuple[str, dict[str, Any]]] | None] = ContextVar(
+    "audit_deferred", default=None
+)
+
+
+@contextmanager
+def deferred() -> Iterator[list[tuple[str, dict[str, Any]]]]:
+    """Collect events instead of writing them, so a long batch does not hold the chain lock.
+
+    The caller writes the collected events with :func:`flush` (or drops them).
+    """
+    events: list[tuple[str, dict[str, Any]]] = []
+    token = _deferred.set(events)
+    try:
+        yield events
+    finally:
+        _deferred.reset(token)
+
+
+def flush(events: list[tuple[str, dict[str, Any]]]) -> None:
+    """Write events collected by :func:`deferred`."""
+    for action, kwargs in events:
+        record(action, **kwargs)
+
+
 def record(
     action: str,
     *,
@@ -63,8 +90,23 @@ def record(
     obj: Any = None,
     tenant_id: Any = None,
     data: dict[str, Any] | None = None,
-) -> AuditEvent:
+) -> AuditEvent | None:
     """Append one event. Runs in its own atomic block and fails loudly."""
+    pending = _deferred.get()
+    if pending is not None:
+        pending.append(
+            (
+                action,
+                {
+                    "actor": actor,
+                    "request": request,
+                    "obj": obj,
+                    "tenant_id": tenant_id,
+                    "data": data,
+                },
+            )
+        )
+        return None
     if actor is None and request is not None and request.user.is_authenticated:
         actor = request.user
     with transaction.atomic():
@@ -93,7 +135,9 @@ def record(
         event.data = json.loads(json.dumps(event.data, default=str))
         event.hash = compute_hash(event)
         event.save(force_insert=True)
-    logger.info("audit", extra={"audit_action": action, "audit_seq": seq})
+    transaction.on_commit(
+        lambda: logger.info("audit", extra={"audit_action": action, "audit_seq": seq})
+    )
     return event
 
 

@@ -4,6 +4,7 @@
 {% include "core/_breadcrumbs.html" with current=device.name %}
 <div class="mb-6 flex flex-wrap items-center gap-3">
   <h1 class="mr-auto">{{ device.name }} <span class="text-base font-normal text-slate-500"><a href="{% url 'library:type' device.device_type.pk %}">{{ device.device_type }}</a></span></h1>
+  <a class="btn-secondary" href="{% url 'exchange:report' 'ports' device.pk %}">{% translate "Port list (PDF)" %}</a>
   <span class="badge-muted">{{ device.get_status_display }}</span>
   {% if space %}<span class="badge-muted">{{ device.rack.name }} · U{{ space.start }}{% if space.size > 1 %}–{{ space.end }}{% endif %} · {{ space.get_face_display }}</span>{% endif %}
 </div>
