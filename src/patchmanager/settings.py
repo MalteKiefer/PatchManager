@@ -71,6 +71,7 @@ BASE_URL = env(
     "PATCHMANAGER_BASE_URL", "http://localhost:8000" if DEBUG or TESTING else None
 ).rstrip("/")
 INSTANCE_NAME = env("PATCHMANAGER_INSTANCE_NAME", "PatchManager")
+BRAND_LOGO = env("PATCHMANAGER_BRAND_LOGO", "")  # PNG or JPEG file shown on exported PDFs
 DJANGO_ADMIN_ENABLED = env_bool("PATCHMANAGER_DJANGO_ADMIN", DEBUG)
 
 INSTALLED_APPS = [
@@ -92,6 +93,7 @@ INSTALLED_APPS = [
     "patchmanager.floorplans",
     "patchmanager.history",
     "patchmanager.search",
+    "patchmanager.exchange",
 ]
 if DJANGO_ADMIN_ENABLED:
     INSTALLED_APPS.insert(0, "django.contrib.admin")

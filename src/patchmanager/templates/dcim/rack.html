@@ -5,6 +5,7 @@
 {% include "core/_breadcrumbs.html" with current=rack.name %}
 <div class="mb-6 flex flex-wrap items-center gap-3">
   <h1 class="mr-auto">{{ rack.name }} <span class="text-base font-normal text-slate-500">{{ rack.u_height }} U · {{ rack.get_width_display }}</span></h1>
+  <a class="btn-secondary" href="{% url 'exchange:report' 'rack' rack.pk %}">{% translate "Elevation (PDF)" %}</a>
   <nav class="flex gap-1" aria-label="{% translate 'Rack face' %}">
     <a class="btn-secondary" href="?face=front" {% if face == "front" %}aria-current="page"{% endif %}>{% translate "Front" %}</a>
     <a class="btn-secondary" href="?face=rear" {% if face == "rear" %}aria-current="page"{% endif %}>{% translate "Rear" %}</a>

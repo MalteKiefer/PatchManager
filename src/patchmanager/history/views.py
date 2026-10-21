@@ -59,7 +59,9 @@ def _rows(change: Change) -> list[dict[str, Any]]:
 def activity(request: HttpRequest) -> HttpResponse:
     """Global activity log of the current tenant, filterable."""
     tenant = getattr(request, "tenant", None)
-    changes = services.visible(request.user, Change.objects.filter(tenant_id=getattr(tenant, "pk", None)))
+    changes = services.visible(
+        request.user, Change.objects.filter(tenant_id=getattr(tenant, "pk", None))
+    )
     params = request.GET
     if params.get("type") in TRACKED:
         changes = changes.filter(object_type=params["type"])
@@ -73,9 +75,16 @@ def activity(request: HttpRequest) -> HttpResponse:
         if day:
             changes = changes.filter(**{lookup: day})
     page = Paginator(changes, 50).get_page(params.get("page"))
-    return render(request, "history/activity.html", {
-        "page": page, "filters": params, "types": sorted(TRACKED), "actions": Change.Action.choices,
-    })
+    return render(
+        request,
+        "history/activity.html",
+        {
+            "page": page,
+            "filters": params,
+            "types": sorted(TRACKED),
+            "actions": Change.Action.choices,
+        },
+    )
 
 
 @login_required
@@ -90,9 +99,15 @@ def object_history(request: HttpRequest, object_type: str, pk: str) -> HttpRespo
         raise Http404
     page = Paginator(changes, 50).get_page(request.GET.get("page"))
     exists = services.tracked(object_type).model._default_manager.filter(pk=pk).exists()
-    return render(request, "history/object.html", {
-        "page": page, "latest": latest, "object_url": object_url(object_type, pk) if exists else None,
-    })
+    return render(
+        request,
+        "history/object.html",
+        {
+            "page": page,
+            "latest": latest,
+            "object_url": object_url(object_type, pk) if exists else None,
+        },
+    )
 
 
 @login_required
@@ -108,10 +123,18 @@ def change_detail(request: HttpRequest, pk: str) -> HttpResponse:
         and obj is not None
         and policy.has_perm(request.user, f"{t.policy_type}.change", obj)
     )
-    return render(request, "history/change.html", {
-        "change": change, "rows": _rows(change), "can_restore": can_restore,
-        "object_url": object_url(change.object_type, change.object_id) if obj is not None else None,
-    })
+    return render(
+        request,
+        "history/change.html",
+        {
+            "change": change,
+            "rows": _rows(change),
+            "can_restore": can_restore,
+            "object_url": object_url(change.object_type, change.object_id)
+            if obj is not None
+            else None,
+        },
+    )
 
 
 @login_required
@@ -130,5 +153,7 @@ def restore(request: HttpRequest, pk: str) -> HttpResponse:
         return redirect("history:change", change.pk)
     messages.success(request, _("Restored: %(fields)s.") % {"fields": ", ".join(fields)})
     if skipped:
-        messages.warning(request, _("Not restored (links): %(fields)s.") % {"fields": ", ".join(skipped)})
+        messages.warning(
+            request, _("Not restored (links): %(fields)s.") % {"fields": ", ".join(skipped)}
+        )
     return redirect("history:object", change.object_type, change.object_id)

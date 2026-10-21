@@ -52,7 +52,9 @@ TRIGGERS = "\n".join(
     f" FOR EACH ROW EXECUTE FUNCTION pm_history('{t.label}', '{t.name_column}', '{t.scope}');"
     for t in TRACKED.values()
 )
-DROP = "\n".join(f"DROP TRIGGER {_table(t.label)}_history ON {_table(t.label)};" for t in TRACKED.values())
+DROP = "\n".join(
+    f"DROP TRIGGER {_table(t.label)}_history ON {_table(t.label)};" for t in TRACKED.values()
+)
 
 
 class Migration(migrations.Migration):

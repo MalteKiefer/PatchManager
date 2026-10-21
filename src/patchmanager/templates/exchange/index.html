@@ -1,0 +1,36 @@
+{% extends "base.html" %}{% load i18n %}
+{% block title %}{% translate "Import and export" %}{% endblock %}
+{% block content %}
+<h1 class="mb-4">{% translate "Import and export" %}{% if current_tenant %} · {{ current_tenant.name }}{% endif %}</h1>
+<div class="grid gap-6 lg:grid-cols-2">
+  <form method="post" action="{% url 'exchange:upload' %}" enctype="multipart/form-data" class="card">{% csrf_token %}
+    <h2 class="mb-3">{% translate "Import" %}</h2>
+    {% include "core/_form.html" with form=form %}
+    <p class="mb-3 text-xs text-slate-500">{% blocktranslate with n=max_rows %}The file is checked first; nothing changes until you confirm. Up to {{ n }} rows. Existing objects with the same name are updated, empty cells keep their value.{% endblocktranslate %}</p>
+    <button class="btn-primary">{% translate "Check file" %}</button>
+  </form>
+  <section class="card" aria-labelledby="export-h">
+    <h2 id="export-h" class="mb-3">{% translate "Export" %}</h2>
+    <form method="get" class="mb-3 flex items-end gap-2" id="export-scope">
+      <div class="field mb-0"><label for="x-site">{% translate "Site" %}</label>
+        <select id="x-site" name="site"><option value="">{% translate "All sites" %}</option>{% for s in sites %}<option value="{{ s.pk }}" {% if request.GET.site == s.pk|stringformat:"s" %}selected{% endif %}>{{ s.name }}</option>{% endfor %}</select></div>
+      <button class="btn-secondary">{% translate "Apply" %}</button>
+    </form>
+    <table class="table"><tbody>{% for t in tables %}<tr>
+      <th scope="row">{{ t.title }}</th>
+      <td>
+        <a href="{% url 'exchange:export' t.kind 'csv' %}{% if request.GET.site %}?site={{ request.GET.site|urlencode }}{% endif %}">CSV</a> ·
+        <a href="{% url 'exchange:export' t.kind 'xlsx' %}{% if request.GET.site %}?site={{ request.GET.site|urlencode }}{% endif %}">XLSX</a> ·
+        <a href="{% url 'exchange:export' t.kind 'json' %}{% if request.GET.site %}?site={{ request.GET.site|urlencode }}{% endif %}">JSON</a></td>
+      <td class="text-xs">{% if t.handler %}{% translate "Template" %}: <a href="{% url 'exchange:template' t.kind 'csv' %}">CSV</a> · <a href="{% url 'exchange:template' t.kind 'xlsx' %}">XLSX</a>{% endif %}</td>
+    </tr>{% endfor %}</tbody></table>
+    <h3 class="mb-2 mt-4 text-sm font-semibold">{% translate "PDF reports per site" %}</h3>
+    <ul class="space-y-1 text-sm">{% for s in sites %}<li>{{ s.name }}:
+      <a href="{% url 'exchange:report' 'site' s.pk %}">{% translate "Site report" %}</a> ·
+      <a href="{% url 'exchange:report' 'patch-list' s.pk %}">{% translate "Patch list" %}</a> ·
+      <a href="{% url 'exchange:report' 'bom' s.pk %}">{% translate "Bill of materials" %}</a></li>
+    {% empty %}<li class="text-slate-500">{% translate "No sites." %}</li>{% endfor %}</ul>
+    <p class="mt-3 text-xs text-slate-500">{% translate "Rack elevations and port lists are on the rack and device pages." %}</p>
+  </section>
+</div>
+{% endblock %}

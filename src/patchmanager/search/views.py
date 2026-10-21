@@ -11,12 +11,18 @@ from django.utils.translation import gettext as _
 from django.utils.translation import gettext_lazy
 from django.views.decorators.http import require_POST
 
+from patchmanager.accounts.models import User
 from patchmanager.history.views import object_url
 from patchmanager.search import services
 from patchmanager.search.models import SavedSearch
 
 MAX_SAVED = 50
 TITLES = {**{k: s.title for k, s in services.SOURCES.items()}, "note": gettext_lazy("Notes")}
+
+
+def _actor(request: HttpRequest) -> User:
+    assert isinstance(request.user, User)  # noqa: S101  # nosec B101: views require login
+    return request.user
 
 
 def _kind(value: str) -> str:
@@ -40,11 +46,19 @@ def search(request: HttpRequest) -> HttpResponse:
         for k, hits in results.items()
     ]
     facets = [{"kind": k, "title": TITLES[k], "count": n} for k, n in counts.items()]
-    return render(request, "search/results.html", {
-        "query": query, "kind": kind, "groups": groups, "facets": facets, "types": TITLES,
-        "saved": request.user.saved_searches.all(),  # type: ignore[union-attr]
-        "cap": services.CANDIDATES,
-    })
+    return render(
+        request,
+        "search/results.html",
+        {
+            "query": query,
+            "kind": kind,
+            "groups": groups,
+            "facets": facets,
+            "types": TITLES,
+            "saved": request.user.saved_searches.all(),  # type: ignore[union-attr]
+            "cap": services.CANDIDATES,
+        },
+    )
 
 
 @login_required
@@ -60,7 +74,7 @@ def save(request: HttpRequest) -> HttpResponse:
         messages.error(request, _("You can keep up to %(n)s saved searches.") % {"n": MAX_SAVED})
     else:
         try:
-            SavedSearch.objects.create(user=request.user, name=name, query=query, kind=kind)
+            SavedSearch.objects.create(user=_actor(request), name=name, query=query, kind=kind)
             messages.success(request, _("Search saved."))
         except IntegrityError:
             messages.error(request, _("A saved search with this name exists."))

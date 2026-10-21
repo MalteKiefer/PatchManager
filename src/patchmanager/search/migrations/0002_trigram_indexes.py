@@ -17,7 +17,9 @@ CREATE = [
     f"CREATE INDEX {table}_{column}_trgm ON {table} USING gin ({column} gin_trgm_ops);"
     for table, columns in COLUMNS.items()
     for column in columns
-] + ["CREATE INDEX metadata_note_body_fts ON metadata_note USING gin (to_tsvector('simple', body));"]
+] + [
+    "CREATE INDEX metadata_note_body_fts ON metadata_note USING gin (to_tsvector('simple', body));"
+]
 DROP = [
     f"DROP INDEX {table}_{column}_trgm;" for table, columns in COLUMNS.items() for column in columns
 ] + ["DROP INDEX metadata_note_body_fts;"]
@@ -33,4 +35,4 @@ class Migration(migrations.Migration):
         ("metadata", "0001_initial"),
     ]
 
-    operations = [migrations.RunSQL(CREATE, DROP)]
+    operations = [migrations.RunSQL("\n".join(CREATE), "\n".join(DROP))]

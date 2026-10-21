@@ -1,0 +1,23 @@
+{% extends "base.html" %}{% load i18n %}
+{% block title %}{% translate "Check import" %}{% endblock %}
+{% block content %}
+<h1 class="mb-2">{% translate "Check import" %} · {{ table.title }}</h1>
+{% if name %}<p class="mb-4 text-sm text-slate-500">{{ name }}</p>{% endif %}
+<div class="card mb-4 flex flex-wrap items-center gap-4">
+  <span>{% translate "created" %}: <strong>{{ summary.created|default:0 }}</strong></span>
+  <span>{% translate "updated" %}: <strong>{{ summary.updated|default:0 }}</strong></span>
+  <span>{% translate "unchanged" %}: <strong>{{ summary.unchanged|default:0 }}</strong></span>
+  <span class="text-red-600">{% translate "errors" %}: <strong>{{ summary.error|default:0 }}</strong></span>
+  <span class="ml-auto flex gap-2">
+    <a class="btn-secondary" href="{% url 'exchange:index' %}">{% translate "Cancel" %}</a>
+    {% if not failed and token %}<form method="post" action="{% url 'exchange:apply' %}">{% csrf_token %}<input type="hidden" name="token" value="{{ token }}"><button class="btn-primary">{% translate "Import now" %}</button></form>{% endif %}
+  </span>
+</div>
+{% if failed %}<p role="alert" class="mb-4 text-red-600">{% translate "Fix the errors in the file and upload it again. Nothing was changed." %}</p>{% endif %}
+<div class="card overflow-x-auto p-0"><table class="table">
+  <thead><tr><th>{% translate "Line" %}</th><th>{% translate "Result" %}</th><th>{% translate "Message" %}</th></tr></thead>
+  <tbody>{% for r in results %}<tr {% if r.outcome == "error" %}class="bg-red-50 dark:bg-red-950/40"{% endif %}>
+    <td>{{ r.line }}</td><td>{% if r.outcome == "created" %}{% translate "created" %}{% elif r.outcome == "updated" %}{% translate "updated" %}{% elif r.outcome == "unchanged" %}{% translate "unchanged" %}{% else %}{% translate "error" %}{% endif %}</td><td>{{ r.message }}</td>
+  </tr>{% endfor %}</tbody>
+</table></div>
+{% endblock %}

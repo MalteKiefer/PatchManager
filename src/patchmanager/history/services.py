@@ -23,7 +23,9 @@ def visible(user: Any, changes: QuerySet[Change] | None = None) -> QuerySet[Chan
     result = changes.none()
     for t in TRACKED.values():
         result |= policy.scope_queryset(
-            user, f"{t.policy_type}.view", changes.filter(object_type=t.label),
+            user,
+            f"{t.policy_type}.view",
+            changes.filter(object_type=t.label),
             strict_conditions=True,
         )
     return result
@@ -72,21 +74,33 @@ def restore(request: HttpRequest, actor: User, change: Change) -> tuple[list[str
     if not fields:
         raise ServiceError(_("None of these fields can be restored."))
     with connection.cursor() as cursor:  # table name comes from the registry, not the request
-        cursor.execute(f'SELECT to_jsonb(t) FROM "{t.model._meta.db_table}" t WHERE id = %s', [obj.pk])
+        cursor.execute(
+            f'SELECT to_jsonb(t) FROM "{t.model._meta.db_table}" t WHERE id = %s',  # noqa: S608  # nosec B608
+            [obj.pk],
+        )
         raw = cursor.fetchone()[0]
     current = json.loads(raw) if isinstance(raw, str) else raw
-    if any(current.get(f) != change.after.get(f) for f in fields):
-        raise ServiceError(_("These fields were changed again since. Restore the later change first."))
+    if any(current.get(f) != (change.after or {}).get(f) for f in fields):
+        raise ServiceError(
+            _("These fields were changed again since. Restore the later change first.")
+        )
     for column in fields:
         field = columns[column]
-        setattr(obj, field.attname, field.to_python(change.before.get(column)))
+        setattr(obj, field.attname, field.to_python((change.before or {}).get(column)))
     if not policy.has_perm(actor, f"{t.policy_type}.change", obj):  # the result must be allowed too
         raise PermissionDeniedError(_("You do not have permission to do that."))
     try:
-        obj.full_clean(exclude=[f.name for f in t.model._meta.concrete_fields if f.column not in fields])
+        obj.full_clean(
+            exclude=[f.name for f in t.model._meta.concrete_fields if f.column not in fields]
+        )
     except ValidationError as exc:
         raise ServiceError("; ".join(exc.messages)) from exc
     with transaction.atomic():
         obj.save(update_fields=[columns[c].name for c in fields])
-    audit.record("history.restored", request=request, obj=obj, data={"change": str(change.pk), "fields": fields})
+    audit.record(
+        "history.restored",
+        request=request,
+        obj=obj,
+        data={"change": str(change.pk), "fields": fields},
+    )
     return fields, skipped
