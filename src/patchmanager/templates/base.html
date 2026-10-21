@@ -1,0 +1,74 @@
+{% load static i18n %}<!doctype html>
+{% get_current_language as LANGUAGE_CODE %}
+<html lang="{{ LANGUAGE_CODE }}" data-theme="{{ theme }}" class="{% if theme == 'dark' %}dark{% endif %}">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="csrf-token" content="{{ csrf_token }}">
+  <title>{% block title %}{{ instance_name }}{% endblock %} · {{ instance_name }}</title>
+  <link rel="stylesheet" href="{% static 'core/app.css' %}">
+  <script type="module" src="{% static 'core/app.js' %}"></script>
+  <script defer src="{% static 'vendor/alpine-csp-3.17.5.min.js' %}"></script>
+  <script defer src="{% static 'vendor/htmx-4.0.0.min.js' %}"></script>
+  {% block head %}{% endblock %}
+</head>
+<body hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}' class="min-h-screen">
+  <a href="#main" class="sr-only focus:not-sr-only focus:absolute focus:left-2 focus:top-2 focus:z-50 btn-primary">{% translate "Skip to content" %}</a>
+  {% if impersonator %}
+  <div role="alert" class="flex flex-wrap items-center justify-center gap-3 bg-amber-400 px-4 py-2 text-sm font-medium text-amber-950">
+    {% blocktranslate with user=user.email admin=impersonator.email %}You ({{ admin }}) are acting as {{ user }}. Every action is audited.{% endblocktranslate %}
+    <form method="post" action="{% url 'accounts:stop-impersonation' %}">{% csrf_token %}
+      <button class="btn-secondary py-1">{% translate "Stop impersonating" %}</button>
+    </form>
+  </div>
+  {% endif %}
+  {% if user.is_authenticated %}
+  <header class="border-b border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900">
+    <div class="mx-auto flex max-w-7xl flex-wrap items-center gap-3 px-4 py-3">
+      <a href="{% url 'core:home' %}" class="mr-auto text-base font-semibold text-slate-900 no-underline dark:text-white">{{ instance_name }}</a>
+      {% if available_tenants %}
+      <form method="post" action="{% url 'tenant-switch' %}" class="flex items-center gap-2">{% csrf_token %}
+        <label for="tenant-switch" class="sr-only">{% translate "Tenant" %}</label>
+        <input type="hidden" name="next" value="{{ request.get_full_path }}">
+        <select id="tenant-switch" name="tenant" data-autosubmit class="rounded-md border border-slate-300 bg-white px-2 py-1.5 text-sm dark:border-slate-700 dark:bg-slate-800">
+          {% for t in available_tenants %}<option value="{{ t.pk }}" {% if t.pk == current_tenant.pk %}selected{% endif %}>{{ t.name }}</option>{% endfor %}
+        </select>
+        <noscript><button class="btn-secondary py-1">{% translate "Switch" %}</button></noscript>
+      </form>
+      {% endif %}
+      <nav class="flex items-center gap-1" aria-label="{% translate 'Main' %}">
+        <a class="nav-link" href="{% url 'manage:dashboard' %}">{% translate "Administration" %}</a>
+      </nav>
+      <div x-data="themeToggle">
+        <button type="button" class="btn-secondary px-2" x-on:click="next" x-bind:aria-label="label" x-bind:title="label">
+          <svg aria-hidden="true" class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3a9 9 0 1 0 9 9 7 7 0 0 1-9-9z"/></svg>
+        </button>
+      </div>
+      <div class="relative" x-data="dropdown" x-on:keydown.escape="close" x-on:click.outside="close">
+        <button type="button" class="btn-secondary" x-on:click="toggle" aria-haspopup="true" x-bind:aria-expanded="open">{{ user.display_name|default:user.email }}</button>
+        <div x-show="open" x-cloak class="absolute right-0 z-20 mt-2 w-56 rounded-md border border-slate-200 bg-white p-1 shadow-lg dark:border-slate-700 dark:bg-slate-900">
+          <a class="nav-link" href="{% url 'accounts:profile' %}">{% translate "Profile" %}</a>
+          <a class="nav-link" href="{% url 'accounts:security' %}">{% translate "Security" %}</a>
+          <form method="post" action="{% url 'accounts:logout' %}">{% csrf_token %}
+            <button class="nav-link w-full text-left">{% translate "Sign out" %}</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </header>
+  {% endif %}
+  <main id="main" class="{% block main_class %}mx-auto max-w-7xl px-4 py-6{% endblock %}">
+    {% include "core/_messages.html" %}
+    {% block content %}{% endblock %}
+  </main>
+  <footer class="mx-auto max-w-7xl px-4 py-6 text-xs text-slate-500">
+    <form method="post" action="{% url 'set_language' %}" class="inline-flex items-center gap-2">{% csrf_token %}
+      <input type="hidden" name="next" value="{{ request.get_full_path }}">
+      <label for="lang">{% translate "Language" %}</label>
+      <select id="lang" name="language" data-autosubmit class="rounded border border-slate-300 bg-transparent px-1 py-0.5 dark:border-slate-700">
+        {% get_available_languages as LANGUAGES %}{% for code, name in LANGUAGES %}<option value="{{ code }}" {% if code == LANGUAGE_CODE %}selected{% endif %}>{{ name }}</option>{% endfor %}
+      </select>
+    </form>
+  </footer>
+</body>
+</html>

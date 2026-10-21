@@ -1,0 +1,9 @@
+{% extends "base.html" %}{% load i18n %}
+{% block title %}{{ title }}{% endblock %}
+{% block content %}
+<div class="card mx-auto mt-12 max-w-md text-center">
+  <p class="text-4xl font-semibold text-slate-400">{{ code }}</p>
+  <h1 class="mt-2">{% translate title %}</h1>
+  <p class="mt-4"><a href="/">{% translate "Back to start" %}</a></p>
+</div>
+{% endblock %}

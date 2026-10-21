@@ -1,0 +1,9 @@
+{% extends "manage/_base.html" %}{% load i18n %}
+{% block title %}{% translate "Invite user" %}{% endblock %}
+{% block manage %}
+<form method="post" class="card max-w-xl" novalidate>{% csrf_token %}
+  <h1 class="mb-4">{% translate "Invite user" %}</h1>
+  {% include "core/_form.html" %}
+  <button class="btn-primary">{% translate "Send invitation" %}</button>
+</form>
+{% endblock %}

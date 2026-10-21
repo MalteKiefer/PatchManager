@@ -1,0 +1,1377 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-10-21 13:35+0000\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: de\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#: accounts/forms.py:20 accounts/forms.py:48 accounts/forms.py:109
+#: templates/manage/users.html:10
+msgid "Email"
+msgstr "E-Mail"
+
+#: accounts/forms.py:24 accounts/forms.py:51 accounts/forms.py:69
+#: templates/accounts/profile.html:12
+msgid "Password"
+msgstr "Passwort"
+
+#: accounts/forms.py:32
+msgid "Code"
+msgstr "Code"
+
+#: accounts/forms.py:44
+msgid "Setup token"
+msgstr "Einrichtungstoken"
+
+#: accounts/forms.py:46
+msgid "Run the setup_token command to get one."
+msgstr "Führen Sie den Befehl setup_token aus, um eines zu erhalten."
+
+#: accounts/forms.py:49 accounts/forms.py:103 accounts/forms.py:110
+#: templates/manage/groups.html:6 templates/manage/roles.html:11
+#: templates/manage/tenants.html:6 templates/manage/users.html:10
+msgid "Name"
+msgstr "Name"
+
+#: accounts/forms.py:54 accounts/forms.py:72
+msgid "Repeat password"
+msgstr "Passwort wiederholen"
+
+#: accounts/forms.py:61 accounts/forms.py:79
+msgid "The passwords do not match."
+msgstr "Die Passwörter stimmen nicht überein."
+
+#: accounts/forms.py:87
+msgid "Current password"
+msgstr "Aktuelles Passwort"
+
+#: accounts/forms.py:103 accounts/views/account.py:97
+#: templates/accounts/security.html:21 templates/accounts/security.html:31
+msgid "Authenticator app"
+msgstr "Authenticator-App"
+
+#: accounts/forms.py:111 accounts/forms.py:128
+#: templates/manage/_assignments.html:3
+msgid "Role"
+msgstr "Rolle"
+
+#: accounts/forms.py:113 templates/base.html:31
+msgid "Tenant"
+msgstr "Mandant"
+
+#: accounts/forms.py:116
+msgid "All tenants (global)"
+msgstr "Alle Mandanten (global)"
+
+#: accounts/forms.py:130 templates/manage/_assignments.html:3
+msgid "Scope"
+msgstr "Geltungsbereich"
+
+#: accounts/forms.py:130
+msgid "Global"
+msgstr "Global"
+
+#: accounts/forms.py:133 templates/manage/_assignments.html:3
+msgid "Effect"
+msgstr "Wirkung"
+
+#: accounts/forms.py:136
+msgid "Conditions (JSON)"
+msgstr "Bedingungen (JSON)"
+
+#: accounts/forms.py:139
+msgid ""
+"Optional, e.g. [{\"attr\": \"status\", \"op\": \"ne\", \"value\": "
+"\"approved\"}]"
+msgstr ""
+"Optional, z. B. [{\"attr\": \"status\", \"op\": \"ne\", \"value\": "
+"\"approved\"}]"
+
+#: accounts/forms.py:141
+msgid "Conditions apply to"
+msgstr "Bedingungen gelten für"
+
+#: accounts/forms.py:163
+msgid "Name of the copy"
+msgstr "Name der Kopie"
+
+#: accounts/forms.py:169
+msgid "JSON or YAML file"
+msgstr "JSON- oder YAML-Datei"
+
+#: accounts/forms.py:175
+msgid "The file is too large."
+msgstr "Die Datei ist zu groß."
+
+#: accounts/forms.py:179
+msgid "The file must be UTF-8 text."
+msgstr "Die Datei muss UTF-8-Text enthalten."
+
+#: accounts/forms.py:194 templates/manage/group_detail.html:12
+#: templates/manage/groups.html:6
+msgid "Members"
+msgstr "Mitglieder"
+
+#: accounts/forms.py:204
+msgid "Add to group"
+msgstr "Zur Gruppe hinzufügen"
+
+#: accounts/forms.py:211
+msgid "Reason"
+msgstr "Grund"
+
+#: accounts/forms.py:218
+msgid "User"
+msgstr "Benutzer"
+
+#: accounts/forms.py:219 templates/manage/permissions.html:6
+msgid "Permission"
+msgstr "Berechtigung"
+
+#: accounts/forms.py:221
+msgid "On tenant"
+msgstr "Für Mandant"
+
+#: accounts/forms.py:224
+msgid "Global (no object)"
+msgstr "Global (kein Objekt)"
+
+#: accounts/middleware.py:44
+msgid "Your session expired. Please sign in again."
+msgstr "Ihre Sitzung ist abgelaufen. Bitte melden Sie sich erneut an."
+
+#: accounts/middleware.py:105
+msgid "Set up a second factor to continue."
+msgstr "Richten Sie einen zweiten Faktor ein, um fortzufahren."
+
+#: accounts/models.py:37
+msgid "email"
+msgstr "E-Mail"
+
+#: accounts/models.py:38
+msgid "display name"
+msgstr "Anzeigename"
+
+#: accounts/models.py:40
+msgid "language"
+msgstr "Sprache"
+
+#: accounts/models.py:42 templates/manage/tenants.html:8
+#: templates/manage/user_detail.html:6 templates/manage/users.html:13
+msgid "active"
+msgstr "aktiv"
+
+#: accounts/models.py:43
+msgid "locked until"
+msgstr "gesperrt bis"
+
+#: accounts/models.py:137 accounts/models.py:158 tenancy/models.py:20
+msgid "name"
+msgstr "Name"
+
+#: accounts/models.py:138 accounts/models.py:159
+msgid "description"
+msgstr "Beschreibung"
+
+#: accounts/models.py:162
+msgid "require MFA"
+msgstr "MFA erforderlich"
+
+#: accounts/models.py:198 templates/manage/_assignments.html:6
+msgid "allow"
+msgstr "erlauben"
+
+#: accounts/models.py:199 templates/manage/_assignments.html:6
+msgid "deny"
+msgstr "verweigern"
+
+#: accounts/roles.py:47
+msgid "Super Admin"
+msgstr "Super-Admin"
+
+#: accounts/roles.py:50
+msgid "Full access to the instance, including system settings."
+msgstr "Vollzugriff auf die Instanz, einschließlich Systemeinstellungen."
+
+#: accounts/roles.py:54
+msgid "Tenant Owner"
+msgstr "Mandanteneigentümer"
+
+#: accounts/roles.py:66
+msgid "Everything inside a tenant, including its members and roles."
+msgstr "Alles innerhalb eines Mandanten, einschließlich Mitgliedern und Rollen."
+
+#: accounts/roles.py:70
+msgid "Admin"
+msgstr "Admin"
+
+#: accounts/roles.py:79
+msgid "Manage all documentation objects; no identity or system settings."
+msgstr "Alle Dokumentationsobjekte verwalten; keine Identitäts- oder Systemeinstellungen."
+
+#: accounts/roles.py:83
+msgid "Editor"
+msgstr "Bearbeiter"
+
+#: accounts/roles.py:92
+msgid "Create, change and delete documentation objects."
+msgstr "Dokumentationsobjekte anlegen, ändern und löschen."
+
+#: accounts/roles.py:96
+msgid "Viewer"
+msgstr "Betrachter"
+
+#: accounts/roles.py:99
+msgid "Read only access to documentation objects."
+msgstr "Nur Lesezugriff auf Dokumentationsobjekte."
+
+#: accounts/roles.py:103
+msgid "Auditor"
+msgstr "Auditor"
+
+#: accounts/roles.py:106
+msgid "Read only access including the audit log."
+msgstr "Nur Lesezugriff, einschließlich Audit-Log."
+
+#: accounts/services/auth.py:60 accounts/services/mfa.py:229
+msgid "Too many attempts. Try again in a few minutes."
+msgstr "Zu viele Versuche. Versuchen Sie es in einigen Minuten erneut."
+
+#: accounts/services/auth.py:65
+msgid "This account is temporarily locked."
+msgstr "Dieses Konto ist vorübergehend gesperrt."
+
+#: accounts/services/auth.py:74
+msgid "Email or password is incorrect."
+msgstr "E-Mail oder Passwort ist falsch."
+
+#: accounts/services/mfa.py:163
+msgid "The security key request expired. Try again."
+msgstr ""
+"Die Sicherheitsschlüssel-Anfrage ist abgelaufen. Versuchen Sie es erneut."
+
+#: accounts/services/mfa.py:181 accounts/services/mfa.py:234
+#: accounts/services/mfa.py:254
+msgid "The security key could not be verified."
+msgstr "Der Sicherheitsschlüssel konnte nicht überprüft werden."
+
+#: accounts/services/mfa.py:185 templates/accounts/security.html:35
+msgid "Security key"
+msgstr "Sicherheitsschlüssel"
+
+#: accounts/services/mfa.py:239
+msgid "This security key is not registered."
+msgstr "Dieser Sicherheitsschlüssel ist nicht registriert."
+
+#: accounts/services/mfa.py:266
+msgid "Factor not found."
+msgstr "Faktor nicht gefunden."
+
+#: accounts/services/rbac.py:32
+#, python-format
+msgid "Unknown permissions: %(codes)s"
+msgstr "Unbekannte Berechtigungen: %(codes)s"
+
+#: accounts/services/rbac.py:47
+msgid "System roles cannot be changed."
+msgstr "Systemrollen können nicht geändert werden."
+
+#: accounts/services/rbac.py:120
+msgid "Remove the role's assignments first."
+msgstr "Entfernen Sie zuerst die Zuweisungen der Rolle."
+
+#: accounts/services/rbac.py:152
+msgid "The file is not valid JSON or YAML."
+msgstr "Die Datei ist kein gültiges JSON oder YAML."
+
+#: accounts/services/rbac.py:158
+msgid "Unsupported role file format."
+msgstr "Nicht unterstütztes Format der Rollendatei."
+
+#: accounts/services/rbac.py:163
+msgid "Every role needs a name."
+msgstr "Jede Rolle benötigt einen Namen."
+
+#: accounts/services/rbac.py:166
+msgid "Permissions must be a list."
+msgstr "Berechtigungen müssen eine Liste sein."
+
+#: accounts/services/rbac.py:191 accounts/services/rbac.py:206
+msgid "A group with this name already exists."
+msgstr "Eine Gruppe mit diesem Namen existiert bereits."
+
+#: accounts/services/rbac.py:254
+msgid "This would create a cycle of nested groups."
+msgstr "Dadurch würde ein Zyklus verschachtelter Gruppen entstehen."
+
+#: accounts/services/rbac.py:278
+msgid "Only super admins can grant the Super Admin role."
+msgstr "Nur Super-Admins können die Rolle Super-Admin vergeben."
+
+#: accounts/services/rbac.py:283
+msgid "You cannot grant permissions you do not hold yourself."
+msgstr ""
+"Sie können keine Berechtigungen vergeben, die Sie selbst nicht besitzen."
+
+#: accounts/services/rbac.py:300
+msgid "Choose either a user or a group."
+msgstr "Wählen Sie entweder einen Benutzer oder eine Gruppe."
+
+#: accounts/services/rbac.py:345
+msgid "The last super admin cannot be removed."
+msgstr "Der letzte Super-Admin kann nicht entfernt werden."
+
+#: accounts/services/users.py:29
+msgid "You do not have permission to do that."
+msgstr "Sie haben keine Berechtigung dafür."
+
+#: accounts/services/users.py:58
+msgid "The setup token is invalid or expired."
+msgstr "Das Einrichtungstoken ist ungültig oder abgelaufen."
+
+#: accounts/services/users.py:108
+msgid "A user with this email already exists."
+msgstr "Ein Benutzer mit dieser E-Mail-Adresse existiert bereits."
+
+#: accounts/services/users.py:137
+msgid "This invitation is invalid or expired."
+msgstr "Diese Einladung ist ungültig oder abgelaufen."
+
+#: accounts/services/users.py:153
+msgid "You cannot lock your own account."
+msgstr "Sie können Ihr eigenes Konto nicht sperren."
+
+#: accounts/services/users.py:168
+msgid "You cannot deactivate your own account."
+msgstr "Sie können Ihr eigenes Konto nicht deaktivieren."
+
+#: accounts/services/users.py:212
+msgid "Session not found."
+msgstr "Sitzung nicht gefunden."
+
+#: accounts/services/users.py:220
+msgid "The current password is incorrect."
+msgstr "Das aktuelle Passwort ist falsch."
+
+#: accounts/services/users.py:244
+msgid "A reason is required."
+msgstr "Ein Grund ist erforderlich."
+
+#: accounts/services/users.py:246
+msgid "This user cannot be impersonated."
+msgstr "Als dieser Benutzer kann nicht gehandelt werden."
+
+#: accounts/services/users.py:248
+msgid "Inactive or locked users cannot be impersonated."
+msgstr "Als inaktiver oder gesperrter Benutzer kann nicht gehandelt werden."
+
+#: accounts/views/account.py:43
+msgid "Profile saved."
+msgstr "Profil gespeichert."
+
+#: accounts/views/account.py:62
+msgid "Password changed. Other sessions were signed out."
+msgstr "Passwort geändert. Andere Sitzungen wurden abgemeldet."
+
+#: accounts/views/account.py:112
+msgid "Authenticator app added."
+msgstr "Authenticator-App hinzugefügt."
+
+#: accounts/views/account.py:114
+msgid "That code did not match. Scan the code again and retry."
+msgstr ""
+"Der Code stimmte nicht überein. Scannen Sie den Code erneut und versuchen "
+"Sie es noch einmal."
+
+#: accounts/views/account.py:136
+msgid "Security key added."
+msgstr "Sicherheitsschlüssel hinzugefügt."
+
+#: accounts/views/account.py:146
+msgid "Add a second factor first."
+msgstr "Fügen Sie zuerst einen zweiten Faktor hinzu."
+
+#: accounts/views/account.py:161
+msgid ""
+"MFA is required for your account. Add another factor before removing this "
+"one."
+msgstr ""
+"Für Ihr Konto ist MFA erforderlich. Fügen Sie einen weiteren Faktor hinzu, "
+"bevor Sie diesen entfernen."
+
+#: accounts/views/account.py:169
+msgid "Factor removed."
+msgstr "Faktor entfernt."
+
+#: accounts/views/account.py:189
+#, python-format
+msgid "%(count)s other sessions were signed out."
+msgstr "%(count)s andere Sitzungen wurden abgemeldet."
+
+#: accounts/views/auth.py:53
+msgid "Please sign in again."
+msgstr "Bitte melden Sie sich erneut an."
+
+#: accounts/views/auth.py:60
+msgid "Too many attempts. Please sign in again."
+msgstr "Zu viele Versuche. Bitte melden Sie sich erneut an."
+
+#: accounts/views/auth.py:74
+msgid "You used a recovery code. Generate new ones soon."
+msgstr ""
+"Sie haben einen Wiederherstellungscode verwendet. Erzeugen Sie bald neue."
+
+#: accounts/views/auth.py:77
+msgid "This code is not valid."
+msgstr "Dieser Code ist ungültig."
+
+#: accounts/views/auth.py:102
+msgid "This account cannot sign in."
+msgstr "Dieses Konto kann sich nicht anmelden."
+
+#: accounts/views/auth.py:111
+msgid "You have been signed out."
+msgstr "Sie wurden abgemeldet."
+
+#: accounts/views/auth.py:135
+msgid "Setup complete. Now protect your account with a second factor."
+msgstr ""
+"Einrichtung abgeschlossen. Schützen Sie Ihr Konto jetzt mit einem zweiten "
+"Faktor."
+
+#: accounts/views/auth.py:149
+msgid "Invitation invalid or expired"
+msgstr "Einladung ungültig oder abgelaufen"
+
+#: accounts/views/auth.py:161
+msgid "Your password is set. Please sign in."
+msgstr "Ihr Passwort wurde festgelegt. Bitte melden Sie sich an."
+
+#: accounts/views/manage.py:118
+#, python-format
+msgid "Invitation sent to %(email)s."
+msgstr "Einladung an %(email)s gesendet."
+
+#: accounts/views/manage.py:153
+msgid "Account locked."
+msgstr "Konto gesperrt."
+
+#: accounts/views/manage.py:157
+msgid "Account unlocked."
+msgstr "Konto entsperrt."
+
+#: accounts/views/manage.py:161
+msgid "Account deactivated."
+msgstr "Konto deaktiviert."
+
+#: accounts/views/manage.py:165
+msgid "Account reactivated."
+msgstr "Konto reaktiviert."
+
+#: accounts/views/manage.py:169
+msgid "Second factors removed."
+msgstr "Zweite Faktoren entfernt."
+
+#: accounts/views/manage.py:173
+msgid "Sessions signed out."
+msgstr "Sitzungen abgemeldet."
+
+#: accounts/views/manage.py:182
+#, python-format
+msgid "You are now acting as %(user)s."
+msgstr "Sie handeln jetzt als %(user)s."
+
+#: accounts/views/manage.py:210
+#, python-format
+msgid "Check the assignment: %(errors)s"
+msgstr "Prüfen Sie die Zuweisung: %(errors)s"
+
+#: accounts/views/manage.py:227
+msgid "Assignment added."
+msgstr "Zuweisung hinzugefügt."
+
+#: accounts/views/manage.py:245
+msgid "Assignment removed."
+msgstr "Zuweisung entfernt."
+
+#: accounts/views/manage.py:303
+msgid "Group saved."
+msgstr "Gruppe gespeichert."
+
+#: accounts/views/manage.py:311
+msgid "Members saved."
+msgstr "Mitglieder gespeichert."
+
+#: accounts/views/manage.py:317
+msgid "Group nested."
+msgstr "Gruppe verschachtelt."
+
+#: accounts/views/manage.py:327
+msgid "Nesting removed."
+msgstr "Verschachtelung entfernt."
+
+#: accounts/views/manage.py:330
+msgid "Group deleted."
+msgstr "Gruppe gelöscht."
+
+#: accounts/views/manage.py:399
+msgid "Role created."
+msgstr "Rolle erstellt."
+
+#: accounts/views/manage.py:429
+msgid "Role saved."
+msgstr "Rolle gespeichert."
+
+#: accounts/views/manage.py:457
+msgid "Role copied."
+msgstr "Rolle kopiert."
+
+#: accounts/views/manage.py:466
+msgid "Role deleted."
+msgstr "Rolle gelöscht."
+
+#: accounts/views/manage.py:499
+#, python-format
+msgid "%(count)s roles imported."
+msgstr "%(count)s Rollen importiert."
+
+#: audit/views.py:115
+#, python-format
+msgid "Chain intact: %(count)s events verified."
+msgstr "Kette intakt: %(count)s Ereignisse überprüft."
+
+#: audit/views.py:120
+#, python-format
+msgid "Chain broken at event %(seq)s: %(reason)s"
+msgstr "Kette unterbrochen bei Ereignis %(seq)s: %(reason)s"
+
+#: templates/accounts/email/invitation.txt:1
+#, python-format
+msgid "Hello %(name)s,"
+msgstr "Hallo %(name)s,"
+
+#: templates/accounts/email/invitation.txt:3
+#, python-format
+msgid "you have been invited to %(instance_name)s. Choose your password here:"
+msgstr ""
+"Sie wurden zu %(instance_name)s eingeladen. Wählen Sie hier Ihr Passwort:"
+
+#: templates/accounts/email/invitation.txt:7
+#, python-format
+msgid "The link is valid for %(hours)s hours."
+msgstr "Der Link ist %(hours)s Stunden gültig."
+
+#: templates/accounts/email/invitation_subject.txt:1
+#, python-format
+msgid "Your invitation to %(instance_name)s"
+msgstr "Ihre Einladung zu %(instance_name)s"
+
+#: templates/accounts/invitation.html:2
+msgid "Accept invitation"
+msgstr "Einladung annehmen"
+
+#: templates/accounts/invitation.html:4
+#, python-format
+msgid "Hello %(name)s"
+msgstr "Hallo %(name)s"
+
+#: templates/accounts/invitation.html:5
+#, python-format
+msgid "Choose a password for %(email)s."
+msgstr "Wählen Sie ein Passwort für %(email)s."
+
+#: templates/accounts/invitation.html:8
+msgid "Set password"
+msgstr "Passwort festlegen"
+
+#: templates/accounts/login.html:2 templates/accounts/login.html:5
+#: templates/accounts/login.html:8
+msgid "Sign in"
+msgstr "Anmelden"
+
+#: templates/accounts/login.html:10
+msgid "or"
+msgstr "oder"
+
+#: templates/accounts/login.html:13
+msgid "Sign in with a passkey"
+msgstr "Mit Passkey anmelden"
+
+#: templates/accounts/mfa.html:2
+msgid "Second factor"
+msgstr "Zweiter Faktor"
+
+#: templates/accounts/mfa.html:5
+msgid "Confirm it's you"
+msgstr "Bestätigen Sie, dass Sie es sind"
+
+#: templates/accounts/mfa.html:9
+msgid "Use security key or passkey"
+msgstr "Sicherheitsschlüssel oder Passkey verwenden"
+
+#: templates/accounts/mfa.html:15
+msgid "Enter the 6 digit code from your authenticator app, or a recovery code."
+msgstr ""
+"Geben Sie den 6-stelligen Code aus Ihrer Authenticator-App oder einen "
+"Wiederherstellungscode ein."
+
+#: templates/accounts/mfa.html:15
+msgid "Enter a recovery code."
+msgstr "Geben Sie einen Wiederherstellungscode ein."
+
+#: templates/accounts/mfa.html:16
+msgid "Verify"
+msgstr "Überprüfen"
+
+#: templates/accounts/mfa.html:18
+msgid "Cancel"
+msgstr "Abbrechen"
+
+#: templates/accounts/profile.html:2 templates/accounts/profile.html:4
+#: templates/base.html:50
+msgid "Profile"
+msgstr "Profil"
+
+#: templates/accounts/profile.html:7 templates/manage/audit.html:18
+#: templates/manage/group_detail.html:7
+msgid "Details"
+msgstr "Details"
+
+#: templates/accounts/profile.html:9 templates/manage/group_detail.html:9
+#: templates/manage/role_detail.html:15 templates/manage/tenant_detail.html:7
+msgid "Save"
+msgstr "Speichern"
+
+#: templates/accounts/profile.html:14
+msgid "Change password"
+msgstr "Passwort ändern"
+
+#: templates/accounts/security.html:2 templates/accounts/security.html:5
+#: templates/base.html:51
+msgid "Security"
+msgstr "Sicherheit"
+
+#: templates/accounts/security.html:6
+msgid "MFA required"
+msgstr "MFA erforderlich"
+
+#: templates/accounts/security.html:6
+msgid "Your account must use a second factor."
+msgstr "Ihr Konto muss einen zweiten Faktor verwenden."
+
+#: templates/accounts/security.html:10
+msgid "Your recovery codes"
+msgstr "Ihre Wiederherstellungscodes"
+
+#: templates/accounts/security.html:11
+msgid "Store them somewhere safe. Each works once. They are shown only now."
+msgstr ""
+"Bewahren Sie sie an einem sicheren Ort auf. Jeder Code funktioniert nur "
+"einmal. Sie werden nur jetzt angezeigt."
+
+#: templates/accounts/security.html:18
+msgid "Second factors"
+msgstr "Zweite Faktoren"
+
+#: templates/accounts/security.html:22 templates/accounts/security.html:26
+msgid "Remove this factor?"
+msgstr "Diesen Faktor entfernen?"
+
+#: templates/accounts/security.html:22 templates/accounts/security.html:26
+#: templates/manage/_assignments.html:8 templates/manage/group_detail.html:19
+msgid "Remove"
+msgstr "Entfernen"
+
+#: templates/accounts/security.html:25
+msgid "Security key / passkey"
+msgstr "Sicherheitsschlüssel / Passkey"
+
+#: templates/accounts/security.html:28
+msgid "No second factor yet."
+msgstr "Noch kein zweiter Faktor."
+
+#: templates/accounts/security.html:31
+msgid "Authenticator app name"
+msgstr "Name der Authenticator-App"
+
+#: templates/accounts/security.html:32 templates/accounts/totp_setup.html:2
+#: templates/accounts/totp_setup.html:5
+msgid "Add authenticator app"
+msgstr "Authenticator-App hinzufügen"
+
+#: templates/accounts/security.html:35
+msgid "Security key name"
+msgstr "Name des Sicherheitsschlüssels"
+
+#: templates/accounts/security.html:37
+msgid "Add security key or passkey"
+msgstr "Sicherheitsschlüssel oder Passkey hinzufügen"
+
+#: templates/accounts/security.html:41
+msgid "Old recovery codes stop working. Continue?"
+msgstr "Alte Wiederherstellungscodes funktionieren nicht mehr. Fortfahren?"
+
+#: templates/accounts/security.html:42
+#, python-format
+msgid "%(n)s recovery code left"
+msgid_plural "%(n)s recovery codes left"
+msgstr[0] "%(n)s Wiederherstellungscode übrig"
+msgstr[1] "%(n)s Wiederherstellungscodes übrig"
+
+#: templates/accounts/security.html:43
+msgid "New recovery codes"
+msgstr "Neue Wiederherstellungscodes"
+
+#: templates/accounts/security.html:48
+msgid "Active sessions"
+msgstr "Aktive Sitzungen"
+
+#: templates/accounts/security.html:50
+msgid "Device"
+msgstr "Gerät"
+
+#: templates/accounts/security.html:50 templates/manage/audit.html:18
+msgid "Address"
+msgstr "Adresse"
+
+#: templates/accounts/security.html:50
+msgid "Last active"
+msgstr "Zuletzt aktiv"
+
+#: templates/accounts/security.html:54
+msgid "This session"
+msgstr "Diese Sitzung"
+
+#: templates/accounts/security.html:55 templates/base.html:53
+msgid "Sign out"
+msgstr "Abmelden"
+
+#: templates/accounts/security.html:58
+msgid "Sign out all other sessions"
+msgstr "Alle anderen Sitzungen abmelden"
+
+#: templates/accounts/setup.html:2
+msgid "Setup"
+msgstr "Einrichtung"
+
+#: templates/accounts/setup.html:4
+msgid "Welcome to PatchManager"
+msgstr "Willkommen bei PatchManager"
+
+#: templates/accounts/setup.html:5
+msgid ""
+"Create the first administrator account. Get a setup token on the server with:"
+msgstr ""
+"Erstellen Sie das erste Administratorkonto. Ein Einrichtungstoken erhalten "
+"Sie auf dem Server mit:"
+
+#: templates/accounts/setup.html:9
+msgid "Create administrator"
+msgstr "Administrator erstellen"
+
+#: templates/accounts/totp_setup.html:7
+msgid "Scan this code with your authenticator app."
+msgstr "Scannen Sie diesen Code mit Ihrer Authenticator-App."
+
+#: templates/accounts/totp_setup.html:8
+msgid "Enter the 6 digit code it shows."
+msgstr "Geben Sie den 6-stelligen Code ein, den sie anzeigt."
+
+#: templates/accounts/totp_setup.html:10
+msgid "QR code"
+msgstr "QR-Code"
+
+#: templates/accounts/totp_setup.html:11
+msgid "Can't scan?"
+msgstr "Scannen nicht möglich?"
+
+#: templates/accounts/totp_setup.html:14
+msgid "Confirm"
+msgstr "Bestätigen"
+
+#: templates/base.html:16
+msgid "Skip to content"
+msgstr "Zum Inhalt springen"
+
+#: templates/base.html:19
+#, python-format
+msgid "You (%(admin)s) are acting as %(user)s. Every action is audited."
+msgstr ""
+"Sie (%(admin)s) handeln als %(user)s. Jede Aktion wird im Audit-Log erfasst."
+
+#: templates/base.html:21
+msgid "Stop impersonating"
+msgstr "Handeln als Benutzer beenden"
+
+#: templates/base.html:36
+msgid "Switch"
+msgstr "Wechseln"
+
+#: templates/base.html:39
+msgid "Main"
+msgstr "Hauptmenü"
+
+#: templates/base.html:40 templates/manage/_base.html:4
+#: templates/manage/dashboard.html:2 templates/manage/dashboard.html:4
+msgid "Administration"
+msgstr "Administration"
+
+#: templates/base.html:67
+msgid "Language"
+msgstr "Sprache"
+
+#: templates/core/error.html:7
+msgid "Back to start"
+msgstr "Zurück zum Start"
+
+#: templates/core/home.html:2
+msgid "Start"
+msgstr "Start"
+
+#: templates/core/home.html:4
+#, python-format
+msgid "Welcome, %(name)s"
+msgstr "Willkommen, %(name)s"
+
+#: templates/core/home.html:6
+#, python-format
+msgid "Current tenant: %(tenant)s"
+msgstr "Aktueller Mandant: %(tenant)s"
+
+#: templates/core/home.html:8
+msgid "You do not have access to any tenant yet."
+msgstr "Sie haben noch keinen Zugriff auf einen Mandanten."
+
+#: templates/core/home.html:11
+msgid "Getting started"
+msgstr "Erste Schritte"
+
+#: templates/core/home.html:12
+msgid ""
+"Sites, racks and devices arrive in the next release. Until then, set up "
+"tenants, users and roles in the administration area."
+msgstr ""
+"Standorte, Racks und Geräte folgen im nächsten Release. Richten Sie bis "
+"dahin Mandanten, Benutzer und Rollen im Administrationsbereich ein."
+
+#: templates/manage/_assignments.html:3
+msgid "Conditions"
+msgstr "Bedingungen"
+
+#: templates/manage/_assignments.html:8
+msgid "Remove this assignment?"
+msgstr "Diese Zuweisung entfernen?"
+
+#: templates/manage/_assignments.html:9
+msgid "No assignments."
+msgstr "Keine Zuweisungen."
+
+#: templates/manage/_assignments.html:11
+msgid "Add assignment"
+msgstr "Zuweisung hinzufügen"
+
+#: templates/manage/_assignments.html:15
+msgid "Add"
+msgstr "Hinzufügen"
+
+#: templates/manage/_base.html:7
+msgid "Overview"
+msgstr "Übersicht"
+
+#: templates/manage/_base.html:8 templates/manage/dashboard.html:6
+#: templates/manage/tenants.html:2 templates/manage/tenants.html:4
+msgid "Tenants"
+msgstr "Mandanten"
+
+#: templates/manage/_base.html:9 templates/manage/dashboard.html:7
+#: templates/manage/users.html:2 templates/manage/users.html:5
+msgid "Users"
+msgstr "Benutzer"
+
+#: templates/manage/_base.html:10 templates/manage/dashboard.html:8
+#: templates/manage/groups.html:2 templates/manage/groups.html:4
+#: templates/manage/user_detail.html:12
+msgid "Groups"
+msgstr "Gruppen"
+
+#: templates/manage/_base.html:11 templates/manage/dashboard.html:9
+#: templates/manage/roles.html:2 templates/manage/roles.html:5
+msgid "Roles"
+msgstr "Rollen"
+
+#: templates/manage/_base.html:12 templates/manage/permissions.html:2
+#: templates/manage/permissions.html:4
+msgid "Permission matrix"
+msgstr "Berechtigungsmatrix"
+
+#: templates/manage/_base.html:13 templates/manage/explain.html:2
+#: templates/manage/explain.html:4
+msgid "Explain access"
+msgstr "Zugriff erklären"
+
+#: templates/manage/_base.html:14 templates/manage/audit.html:2
+#: templates/manage/audit.html:5
+msgid "Audit log"
+msgstr "Audit-Log"
+
+#: templates/manage/_base.html:15 templates/manage/system.html:2
+#: templates/manage/system.html:4
+msgid "System"
+msgstr "System"
+
+#: templates/manage/_pager.html:2
+msgid "Pages"
+msgstr "Seiten"
+
+#: templates/manage/_pager.html:3
+msgid "Previous"
+msgstr "Zurück"
+
+#: templates/manage/_pager.html:4
+#, python-format
+msgid "Page %(n)s of %(total)s"
+msgstr "Seite %(n)s von %(total)s"
+
+#: templates/manage/_pager.html:5
+msgid "Next"
+msgstr "Weiter"
+
+#: templates/manage/audit.html:6
+msgid "Export CSV"
+msgstr "CSV exportieren"
+
+#: templates/manage/audit.html:7
+msgid "Verify integrity"
+msgstr "Integrität prüfen"
+
+#: templates/manage/audit.html:10
+msgid "Action starts with"
+msgstr "Aktion beginnt mit"
+
+#: templates/manage/audit.html:11 templates/manage/audit.html:18
+msgid "Actor"
+msgstr "Akteur"
+
+#: templates/manage/audit.html:12 templates/manage/audit.html:18
+msgid "Object"
+msgstr "Objekt"
+
+#: templates/manage/audit.html:13
+msgid "From"
+msgstr "Von"
+
+#: templates/manage/audit.html:14
+msgid "Until"
+msgstr "Bis"
+
+#: templates/manage/audit.html:15
+msgid "Filter"
+msgstr "Filtern"
+
+#: templates/manage/audit.html:18
+msgid "Time"
+msgstr "Zeit"
+
+#: templates/manage/audit.html:18
+msgid "Action"
+msgstr "Aktion"
+
+#: templates/manage/audit.html:23
+msgid "No events."
+msgstr "Keine Ereignisse."
+
+#: templates/manage/explain.html:7
+msgid "Explain"
+msgstr "Erklären"
+
+#: templates/manage/explain.html:11
+msgid "allowed"
+msgstr "erlaubt"
+
+#: templates/manage/explain.html:11
+msgid "denied"
+msgstr "verweigert"
+
+#: templates/manage/explain.html:12
+#, python-format
+msgid "Decided by role %(role)s at scope %(scope)s"
+msgstr "Entschieden durch Rolle %(role)s im Geltungsbereich %(scope)s"
+
+#: templates/manage/explain.html:12
+msgid "via group"
+msgstr "über Gruppe"
+
+#: templates/manage/explain.html:13
+msgid "Assignments considered"
+msgstr "Berücksichtigte Zuweisungen"
+
+#: templates/manage/explain.html:14
+msgid "via"
+msgstr "über"
+
+#: templates/manage/explain.html:14
+msgid "None that contain this permission and cover this object."
+msgstr "Keine, die diese Berechtigung enthalten und dieses Objekt abdecken."
+
+#: templates/manage/group_detail.html:14
+msgid "Save members"
+msgstr "Mitglieder speichern"
+
+#: templates/manage/group_detail.html:17
+msgid "Nested in"
+msgstr "Verschachtelt in"
+
+#: templates/manage/group_detail.html:20
+msgid "Not nested."
+msgstr "Nicht verschachtelt."
+
+#: templates/manage/group_detail.html:21
+msgid "Nest"
+msgstr "Verschachteln"
+
+#: templates/manage/group_detail.html:23 templates/manage/roles.html:11
+#: templates/manage/user_detail.html:9 templates/manage/users.html:10
+msgid "Assignments"
+msgstr "Zuweisungen"
+
+#: templates/manage/group_detail.html:27
+msgid "Delete this group and its assignments?"
+msgstr "Diese Gruppe und ihre Zuweisungen löschen?"
+
+#: templates/manage/group_detail.html:27
+msgid "Delete group"
+msgstr "Gruppe löschen"
+
+#: templates/manage/groups.html:6
+msgid "Member of"
+msgstr "Mitglied von"
+
+#: templates/manage/groups.html:8
+msgid "No groups yet."
+msgstr "Noch keine Gruppen."
+
+#: templates/manage/groups.html:11
+msgid "New group"
+msgstr "Neue Gruppe"
+
+#: templates/manage/groups.html:13
+msgid "Create"
+msgstr "Erstellen"
+
+#: templates/manage/permissions.html:8
+msgid "granted"
+msgstr "gewährt"
+
+#: templates/manage/permissions.html:8
+msgid "not granted"
+msgstr "nicht gewährt"
+
+#: templates/manage/role_detail.html:2 templates/manage/role_detail.html:4
+#: templates/manage/roles.html:8
+msgid "New role"
+msgstr "Neue Rolle"
+
+#: templates/manage/role_detail.html:5
+msgid "system role"
+msgstr "Systemrolle"
+
+#: templates/manage/role_detail.html:5
+msgid "System roles cannot be changed. Clone one to customise it."
+msgstr ""
+"Systemrollen können nicht geändert werden. Klonen Sie eine Rolle, um sie "
+"anzupassen."
+
+#: templates/manage/role_detail.html:8
+msgid "Permissions"
+msgstr "Berechtigungen"
+
+#: templates/manage/role_detail.html:10
+msgid "Object type"
+msgstr "Objekttyp"
+
+#: templates/manage/role_detail.html:20
+msgid "Clone"
+msgstr "Klonen"
+
+#: templates/manage/role_detail.html:23
+msgid "Delete this role?"
+msgstr "Diese Rolle löschen?"
+
+#: templates/manage/role_detail.html:23
+msgid "Delete role"
+msgstr "Rolle löschen"
+
+#: templates/manage/roles.html:6
+msgid "Export JSON"
+msgstr "JSON exportieren"
+
+#: templates/manage/roles.html:7
+msgid "Export YAML"
+msgstr "YAML exportieren"
+
+#: templates/manage/roles.html:11
+msgid "Type"
+msgstr "Typ"
+
+#: templates/manage/roles.html:11
+msgid "MFA"
+msgstr "MFA"
+
+#: templates/manage/roles.html:14
+msgid "system"
+msgstr "System"
+
+#: templates/manage/roles.html:14
+msgid "custom"
+msgstr "benutzerdefiniert"
+
+#: templates/manage/roles.html:15
+msgid "required"
+msgstr "erforderlich"
+
+#: templates/manage/roles.html:19
+msgid "Import roles"
+msgstr "Rollen importieren"
+
+#: templates/manage/roles.html:21
+msgid "Import"
+msgstr "Importieren"
+
+#: templates/manage/system.html:6
+msgid "Versions"
+msgstr "Versionen"
+
+#: templates/manage/system.html:8
+msgid "Security configuration"
+msgstr "Sicherheitskonfiguration"
+
+#: templates/manage/system.html:9
+msgid "Set through environment variables, see the deployment guide."
+msgstr "Wird über Umgebungsvariablen gesetzt, siehe Bereitstellungshandbuch."
+
+#: templates/manage/tenant_detail.html:2 templates/manage/tenant_detail.html:4
+#: templates/manage/tenants.html:4
+msgid "New tenant"
+msgstr "Neuer Mandant"
+
+#: templates/manage/tenant_detail.html:11
+msgid "Lifecycle"
+msgstr "Lebenszyklus"
+
+#: templates/manage/tenant_detail.html:13
+msgid "Restore"
+msgstr "Wiederherstellen"
+
+#: templates/manage/tenant_detail.html:15
+msgid "Delete this tenant and all its data permanently?"
+msgstr "Diesen Mandanten und alle seine Daten dauerhaft löschen?"
+
+#: templates/manage/tenant_detail.html:16
+#, python-format
+msgid "Type %(slug)s to confirm"
+msgstr "Zur Bestätigung %(slug)s eingeben"
+
+#: templates/manage/tenant_detail.html:17
+msgid "Delete permanently"
+msgstr "Dauerhaft löschen"
+
+#: templates/manage/tenant_detail.html:21
+msgid "Archive this tenant? Its members lose access until it is restored."
+msgstr ""
+"Diesen Mandanten archivieren? Seine Mitglieder verlieren den Zugriff, bis er "
+"wiederhergestellt wird."
+
+#: templates/manage/tenant_detail.html:21
+msgid "Archive"
+msgstr "Archivieren"
+
+#: templates/manage/tenants.html:6
+msgid "Identifier"
+msgstr "Kennung"
+
+#: templates/manage/tenants.html:6
+msgid "Contact"
+msgstr "Kontakt"
+
+#: templates/manage/tenants.html:6 templates/manage/users.html:10
+msgid "Status"
+msgstr "Status"
+
+#: templates/manage/tenants.html:8
+msgid "archived"
+msgstr "archiviert"
+
+#: templates/manage/tenants.html:9
+msgid "No tenants."
+msgstr "Keine Mandanten."
+
+#: templates/manage/user_detail.html:6 templates/manage/users.html:13
+msgid "deactivated"
+msgstr "deaktiviert"
+
+#: templates/manage/user_detail.html:6 templates/manage/users.html:13
+msgid "locked"
+msgstr "gesperrt"
+
+#: templates/manage/user_detail.html:7
+#, python-format
+msgid "%(n)s second factor"
+msgid_plural "%(n)s second factors"
+msgstr[0] "%(n)s zweiter Faktor"
+msgstr[1] "%(n)s zweite Faktoren"
+
+#: templates/manage/user_detail.html:8
+#, python-format
+msgid "%(n)s session"
+msgid_plural "%(n)s sessions"
+msgstr[0] "%(n)s Sitzung"
+msgstr[1] "%(n)s Sitzungen"
+
+#: templates/manage/user_detail.html:13
+msgid "No groups."
+msgstr "Keine Gruppen."
+
+#: templates/manage/user_detail.html:15
+msgid "Actions"
+msgstr "Aktionen"
+
+#: templates/manage/user_detail.html:18
+msgid "Unlock"
+msgstr "Entsperren"
+
+#: templates/manage/user_detail.html:20
+msgid "Lock this account?"
+msgstr "Dieses Konto sperren?"
+
+#: templates/manage/user_detail.html:20
+msgid "Lock"
+msgstr "Sperren"
+
+#: templates/manage/user_detail.html:23
+msgid "Deactivate this account?"
+msgstr "Dieses Konto deaktivieren?"
+
+#: templates/manage/user_detail.html:23
+msgid "Deactivate"
+msgstr "Deaktivieren"
+
+#: templates/manage/user_detail.html:25
+msgid "Reactivate"
+msgstr "Reaktivieren"
+
+#: templates/manage/user_detail.html:27
+msgid "Remove all second factors of this user?"
+msgstr "Alle zweiten Faktoren dieses Benutzers entfernen?"
+
+#: templates/manage/user_detail.html:27
+msgid "Reset MFA"
+msgstr "MFA zurücksetzen"
+
+#: templates/manage/user_detail.html:28
+msgid "Sign out everywhere"
+msgstr "Überall abmelden"
+
+#: templates/manage/user_detail.html:33
+msgid "Impersonate"
+msgstr "Als Benutzer handeln"
+
+#: templates/manage/user_detail.html:34
+msgid ""
+"A banner stays visible, the session ends after 30 minutes, and every action "
+"is audited."
+msgstr ""
+"Ein Banner bleibt sichtbar, die Sitzung endet nach 30 Minuten und jede "
+"Aktion wird im Audit-Log erfasst."
+
+#: templates/manage/user_invite.html:2 templates/manage/user_invite.html:5
+#: templates/manage/users.html:7
+msgid "Invite user"
+msgstr "Benutzer einladen"
+
+#: templates/manage/user_invite.html:7
+msgid "Send invitation"
+msgstr "Einladung senden"
+
+#: templates/manage/users.html:6
+msgid "Search"
+msgstr "Suchen"
+
+#: templates/manage/users.html:10
+msgid "Last login"
+msgstr "Letzte Anmeldung"
+
+#: templates/manage/users.html:13
+msgid "invited"
+msgstr "eingeladen"
+
+#: templates/manage/users.html:15
+msgid "No users found."
+msgstr "Keine Benutzer gefunden."
+
+#: tenancy/models.py:12
+msgid "Lowercase letters, digits, dashes."
+msgstr "Kleinbuchstaben, Ziffern, Bindestriche."
+
+#: tenancy/models.py:19
+msgid "identifier"
+msgstr "Kennung"
+
+#: tenancy/models.py:21
+msgid "address"
+msgstr "Adresse"
+
+#: tenancy/models.py:22
+msgid "contact person"
+msgstr "Ansprechpartner"
+
+#: tenancy/models.py:23
+msgid "contact email"
+msgstr "Kontakt-E-Mail"
+
+#: tenancy/models.py:24
+msgid "require MFA for members"
+msgstr "MFA für Mitglieder erforderlich"
+
+#: tenancy/models.py:25
+msgid "archived at"
+msgstr "archiviert am"
+
+#: tenancy/services.py:26 tenancy/services.py:43
+msgid "A tenant with this identifier already exists."
+msgstr "Ein Mandant mit dieser Kennung existiert bereits."
+
+#: tenancy/services.py:69
+msgid "Archive the tenant before deleting it."
+msgstr "Archivieren Sie den Mandanten, bevor Sie ihn löschen."
+
+#: tenancy/services.py:71
+msgid "The identifier does not match."
+msgstr "Die Kennung stimmt nicht überein."
+
+#: tenancy/views.py:75
+msgid "Tenant created."
+msgstr "Mandant erstellt."
+
+#: tenancy/views.py:88
+msgid "Not found"
+msgstr "Nicht gefunden"
+
+#: tenancy/views.py:96
+msgid "Tenant saved."
+msgstr "Mandant gespeichert."
+
+#: tenancy/views.py:105
+msgid "Tenant deleted."
+msgstr "Mandant gelöscht."

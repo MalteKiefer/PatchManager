@@ -1,0 +1,7 @@
+{% load i18n %}{% if page.has_other_pages %}
+<nav class="mt-4 flex items-center gap-3 text-sm" aria-label="{% translate 'Pages' %}">
+  {% if page.has_previous %}<a href="?{% for k, v in request.GET.items %}{% if k != 'page' %}{{ k }}={{ v|urlencode }}&{% endif %}{% endfor %}page={{ page.previous_page_number }}">{% translate "Previous" %}</a>{% endif %}
+  <span>{% blocktranslate with n=page.number total=page.paginator.num_pages %}Page {{ n }} of {{ total }}{% endblocktranslate %}</span>
+  {% if page.has_next %}<a href="?{% for k, v in request.GET.items %}{% if k != 'page' %}{{ k }}={{ v|urlencode }}&{% endif %}{% endfor %}page={{ page.next_page_number }}">{% translate "Next" %}</a>{% endif %}
+</nav>
+{% endif %}

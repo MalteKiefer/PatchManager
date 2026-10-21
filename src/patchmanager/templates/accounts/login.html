@@ -1,0 +1,16 @@
+{% extends "accounts/_auth_base.html" %}{% load i18n static %}
+{% block title %}{% translate "Sign in" %}{% endblock %}
+{% block head %}<script type="module" src="{% static 'core/webauthn.js' %}"></script>{% endblock %}
+{% block card %}
+<h1 class="mb-4">{% translate "Sign in" %}</h1>
+<form method="post" novalidate>{% csrf_token %}
+  {% include "core/_form.html" %}
+  <button class="btn-primary w-full">{% translate "Sign in" %}</button>
+</form>
+<div class="my-4 flex items-center gap-3 text-xs text-slate-500"><span class="h-px flex-1 bg-slate-200 dark:bg-slate-800"></span>{% translate "or" %}<span class="h-px flex-1 bg-slate-200 dark:bg-slate-800"></span></div>
+<button type="button" class="btn-secondary w-full" data-webauthn="login"
+        data-options-url="{% url 'accounts:webauthn-login-options' %}" data-verify-url="{% url 'accounts:webauthn-login-verify' %}">
+  {% translate "Sign in with a passkey" %}
+</button>
+<p id="webauthn-status" class="mt-2 text-sm text-red-600" role="alert" aria-live="polite"></p>
+{% endblock %}

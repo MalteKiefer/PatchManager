@@ -1,0 +1,7 @@
+{% load i18n %}{% blocktranslate with name=user.display_name %}Hello {{ name }},{% endblocktranslate %}
+
+{% blocktranslate %}you have been invited to {{ instance_name }}. Choose your password here:{% endblocktranslate %}
+
+{{ link }}
+
+{% blocktranslate %}The link is valid for {{ hours }} hours.{% endblocktranslate %}

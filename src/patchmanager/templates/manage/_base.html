@@ -1,0 +1,21 @@
+{% extends "base.html" %}{% load i18n %}
+{% block content %}
+<div class="flex flex-col gap-6 md:flex-row">
+  <nav class="md:w-52 md:shrink-0" aria-label="{% translate 'Administration' %}">
+    {% with p=request.path %}
+    <ul class="flex gap-1 overflow-x-auto md:flex-col">
+      <li><a class="nav-link" href="{% url 'manage:dashboard' %}" {% if p == '/manage/' %}aria-current="page"{% endif %}>{% translate "Overview" %}</a></li>
+      <li><a class="nav-link" href="{% url 'manage:tenants' %}" {% if '/manage/tenants' in p %}aria-current="page"{% endif %}>{% translate "Tenants" %}</a></li>
+      <li><a class="nav-link" href="{% url 'manage:users' %}" {% if '/manage/users' in p %}aria-current="page"{% endif %}>{% translate "Users" %}</a></li>
+      <li><a class="nav-link" href="{% url 'manage:groups' %}" {% if '/manage/groups' in p %}aria-current="page"{% endif %}>{% translate "Groups" %}</a></li>
+      <li><a class="nav-link" href="{% url 'manage:roles' %}" {% if '/manage/roles' in p %}aria-current="page"{% endif %}>{% translate "Roles" %}</a></li>
+      <li><a class="nav-link" href="{% url 'manage:permissions' %}" {% if '/manage/permissions' in p %}aria-current="page"{% endif %}>{% translate "Permission matrix" %}</a></li>
+      <li><a class="nav-link" href="{% url 'manage:explain' %}" {% if '/manage/explain' in p %}aria-current="page"{% endif %}>{% translate "Explain access" %}</a></li>
+      <li><a class="nav-link" href="{% url 'manage:audit' %}" {% if '/manage/audit' in p %}aria-current="page"{% endif %}>{% translate "Audit log" %}</a></li>
+      <li><a class="nav-link" href="{% url 'manage:system' %}" {% if '/manage/system' in p %}aria-current="page"{% endif %}>{% translate "System" %}</a></li>
+    </ul>
+    {% endwith %}
+  </nav>
+  <div class="min-w-0 flex-1">{% include "core/_messages.html" %}{% block manage %}{% endblock %}</div>
+</div>
+{% endblock %}

@@ -1,0 +1,26 @@
+{% extends "manage/_base.html" %}{% load i18n %}
+{% block title %}{% translate "Audit log" %}{% endblock %}
+{% block manage %}
+<div class="mb-4 flex flex-wrap items-center gap-2">
+  <h1 class="mr-auto">{% translate "Audit log" %}</h1>
+  {% if can_export %}<a class="btn-secondary" href="{% url 'manage:audit-export' %}?{{ request.GET.urlencode }}">{% translate "Export CSV" %}</a>{% endif %}
+  {% if can_verify %}<form method="post" action="{% url 'manage:audit-verify' %}">{% csrf_token %}<button class="btn-secondary">{% translate "Verify integrity" %}</button></form>{% endif %}
+</div>
+<form method="get" class="card mb-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
+  <div class="field mb-0"><label for="f-action">{% translate "Action starts with" %}</label><input id="f-action" name="action" value="{{ filters.action }}"></div>
+  <div class="field mb-0"><label for="f-actor">{% translate "Actor" %}</label><input id="f-actor" name="actor" value="{{ filters.actor }}"></div>
+  <div class="field mb-0"><label for="f-object">{% translate "Object" %}</label><input id="f-object" name="object" value="{{ filters.object }}"></div>
+  <div class="field mb-0"><label for="f-since">{% translate "From" %}</label><input id="f-since" type="date" name="since" value="{{ filters.since }}"></div>
+  <div class="field mb-0"><label for="f-until">{% translate "Until" %}</label><input id="f-until" type="date" name="until" value="{{ filters.until }}"></div>
+  <div class="sm:col-span-2 lg:col-span-5"><button class="btn-primary">{% translate "Filter" %}</button></div>
+</form>
+<div class="card overflow-x-auto p-0"><table class="table">
+  <thead><tr><th>#</th><th>{% translate "Time" %}</th><th>{% translate "Action" %}</th><th>{% translate "Actor" %}</th><th>{% translate "Object" %}</th><th>{% translate "Address" %}</th><th>{% translate "Details" %}</th></tr></thead>
+  <tbody>{% for e in page %}<tr>
+    <td class="font-mono text-xs">{{ e.seq }}</td><td class="whitespace-nowrap">{{ e.occurred_at|date:"Y-m-d H:i:s" }}</td>
+    <td class="font-mono text-xs">{{ e.action }}</td><td>{{ e.actor_label|default:"-" }}</td><td>{{ e.object_label|default:"-" }}</td>
+    <td>{{ e.ip_address|default:"-" }}</td><td class="max-w-xs truncate font-mono text-xs" title="{{ e.data }}">{% if e.data %}{{ e.data }}{% endif %}</td>
+  </tr>{% empty %}<tr><td colspan="7">{% translate "No events." %}</td></tr>{% endfor %}</tbody>
+</table></div>
+{% include "manage/_pager.html" %}
+{% endblock %}

@@ -1,0 +1,38 @@
+{% extends "manage/_base.html" %}{% load i18n %}
+{% block title %}{{ subject.email }}{% endblock %}
+{% block manage %}
+<h1>{{ subject.display_name }}</h1>
+<p class="mb-6 text-sm text-slate-500">{{ subject.email }} ·
+  {% if not subject.is_active %}<span class="badge-bad">{% translate "deactivated" %}</span>{% elif subject.is_locked %}<span class="badge-warn">{% translate "locked" %}</span>{% else %}<span class="badge-ok">{% translate "active" %}</span>{% endif %}
+  · {% blocktranslate count n=factor_count %}{{ n }} second factor{% plural %}{{ n }} second factors{% endblocktranslate %}
+  · {% blocktranslate count n=session_count %}{{ n }} session{% plural %}{{ n }} sessions{% endblocktranslate %}</p>
+<section class="card mb-6"><h2 class="mb-3">{% translate "Assignments" %}</h2>
+  {% include "manage/_assignments.html" with principal=subject principal_field="user" %}
+</section>
+<section class="card mb-6"><h2 class="mb-3">{% translate "Groups" %}</h2>
+  <ul class="text-sm">{% for g in groups %}<li><a href="{% url 'manage:group' g.pk %}">{{ g.name }}</a></li>{% empty %}<li>{% translate "No groups." %}</li>{% endfor %}</ul>
+</section>
+<section class="card"><h2 class="mb-3">{% translate "Actions" %}</h2>
+  <div class="flex flex-wrap gap-2">
+    {% if subject.is_locked %}
+    <form method="post" action="{% url 'manage:user-action' subject.pk 'unlock' %}">{% csrf_token %}<button class="btn-secondary">{% translate "Unlock" %}</button></form>
+    {% else %}
+    <form method="post" action="{% url 'manage:user-action' subject.pk 'lock' %}" data-confirm="{% translate 'Lock this account?' %}">{% csrf_token %}<button class="btn-secondary">{% translate "Lock" %}</button></form>
+    {% endif %}
+    {% if subject.is_active %}
+    <form method="post" action="{% url 'manage:user-action' subject.pk 'deactivate' %}" data-confirm="{% translate 'Deactivate this account?' %}">{% csrf_token %}<button class="btn-danger">{% translate "Deactivate" %}</button></form>
+    {% else %}
+    <form method="post" action="{% url 'manage:user-action' subject.pk 'activate' %}">{% csrf_token %}<button class="btn-secondary">{% translate "Reactivate" %}</button></form>
+    {% endif %}
+    <form method="post" action="{% url 'manage:user-action' subject.pk 'reset-mfa' %}" data-confirm="{% translate 'Remove all second factors of this user?' %}">{% csrf_token %}<button class="btn-secondary">{% translate "Reset MFA" %}</button></form>
+    <form method="post" action="{% url 'manage:user-action' subject.pk 'revoke-sessions' %}">{% csrf_token %}<button class="btn-secondary">{% translate "Sign out everywhere" %}</button></form>
+  </div>
+  {% if not is_super_admin and subject.pk != user.pk %}
+  <form method="post" action="{% url 'manage:user-action' subject.pk 'impersonate' %}" class="mt-4 max-w-lg">{% csrf_token %}
+    {% include "core/_form.html" with form=reason_form %}
+    <button class="btn-secondary">{% translate "Impersonate" %}</button>
+    <p class="help mt-1 text-xs text-slate-500">{% translate "A banner stays visible, the session ends after 30 minutes, and every action is audited." %}</p>
+  </form>
+  {% endif %}
+</section>
+{% endblock %}

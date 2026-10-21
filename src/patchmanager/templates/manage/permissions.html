@@ -1,0 +1,11 @@
+{% extends "manage/_base.html" %}{% load i18n %}
+{% block title %}{% translate "Permission matrix" %}{% endblock %}
+{% block manage %}
+<div class="mb-4 flex items-center"><h1 class="mr-auto">{% translate "Permission matrix" %}</h1><a href="{% url 'manage:permission-registry' %}">permissions.json</a></div>
+<div class="card overflow-x-auto p-0"><table class="table">
+  <thead><tr><th>{% translate "Permission" %}</th>{% for r in roles %}<th class="text-center"><a href="{% url 'manage:role' r.pk %}">{{ r.label }}</a></th>{% endfor %}</tr></thead>
+  <tbody>{% for row in rows %}<tr><th scope="row" class="font-mono text-xs font-normal">{{ row.code }}</th>
+    {% for on in row.cells %}<td class="text-center">{% if on %}<span aria-label="{% translate 'granted' %}">●</span>{% else %}<span class="text-slate-300 dark:text-slate-700" aria-label="{% translate 'not granted' %}">·</span>{% endif %}</td>{% endfor %}
+  </tr>{% endfor %}</tbody>
+</table></div>
+{% endblock %}

@@ -1,0 +1,1 @@
+{% load i18n %}{% blocktranslate %}Your invitation to {{ instance_name }}{% endblocktranslate %}

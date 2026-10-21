@@ -1,0 +1,11 @@
+{% extends "accounts/_auth_base.html" %}{% load i18n %}
+{% block title %}{% translate "Setup" %}{% endblock %}
+{% block card %}
+<h1 class="mb-2">{% translate "Welcome to PatchManager" %}</h1>
+<p class="mb-4 text-sm text-slate-600 dark:text-slate-400">{% translate "Create the first administrator account. Get a setup token on the server with:" %}</p>
+<pre class="mb-4 overflow-x-auto rounded bg-slate-100 p-2 text-xs dark:bg-slate-800">python -m django setup_token</pre>
+<form method="post" novalidate>{% csrf_token %}
+  {% include "core/_form.html" %}
+  <button class="btn-primary w-full">{% translate "Create administrator" %}</button>
+</form>
+{% endblock %}

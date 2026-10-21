@@ -1,0 +1,75 @@
+import pytest
+from django.test import Client
+
+from patchmanager.accounts.models import Assignment
+from patchmanager.core import ratelimit
+from patchmanager.tenancy.rls import EnableRowLevelSecurity
+
+
+def test_metrics_requires_token(client: Client, monkeypatch) -> None:
+    assert client.get("/metrics", secure=True).status_code == 404
+    monkeypatch.setenv("PATCHMANAGER_METRICS_TOKEN", "s3cret")
+    assert (
+        client.get("/metrics", secure=True, headers={"Authorization": "Bearer wrong"}).status_code
+        == 404
+    )
+    response = client.get("/metrics", secure=True, headers={"Authorization": "Bearer s3cret"})
+    assert response.status_code == 200
+    assert b"patchmanager_http_requests_total" in response.content
+
+
+def test_metrics_multiprocess(client: Client, monkeypatch, tmp_path) -> None:
+    monkeypatch.setenv("PATCHMANAGER_METRICS_TOKEN", "t")
+    monkeypatch.setenv("PROMETHEUS_MULTIPROC_DIR", str(tmp_path))
+    assert (
+        client.get("/metrics", secure=True, headers={"Authorization": "Bearer t"}).status_code
+        == 200
+    )
+
+
+def test_request_id_roundtrip(client: Client) -> None:
+    assert (
+        client.get("/health/live", secure=True, headers={"X-Request-ID": "abcdef1234"})[
+            "X-Request-ID"
+        ]
+        == "abcdef1234"
+    )
+    assert (
+        len(
+            client.get("/health/live", secure=True, headers={"X-Request-ID": "bad id!"})[
+                "X-Request-ID"
+            ]
+        )
+        == 16
+    )
+
+
+def test_ratelimit_window() -> None:
+    for _ in range(3):
+        assert ratelimit.hit("k", limit=3, window=60)
+    assert not ratelimit.hit("k", limit=3, window=60)
+    ratelimit.reset("k")
+    assert ratelimit.hit("k", limit=3, window=60)
+
+
+@pytest.mark.django_db
+def test_ltree_descendant_lookup(make_user, grant, make_tenant) -> None:
+    tenant = make_tenant()
+    grant(make_user(), "viewer", tenant)
+    assert Assignment.objects.filter(scope_path__descendant_of=tenant.policy_path).count() == 1
+    assert Assignment.objects.filter(scope_path__descendant_of="ffff").count() == 0
+
+
+def test_rls_operation_metadata() -> None:
+    op = EnableRowLevelSecurity("tenant", column="id")
+    assert op.describe() == "Enable row level security on tenant"
+    assert op.deconstruct() == ("EnableRowLevelSecurity", ["tenant"], {"column": "id"})
+
+
+def test_error_pages(client: Client, db) -> None:
+    from patchmanager.accounts.middleware import SetupRequiredMiddleware
+
+    SetupRequiredMiddleware._done = True
+    assert client.get("/does-not-exist/", secure=True).status_code == 404
+    csrf_client = Client(enforce_csrf_checks=True)
+    assert csrf_client.post("/auth/login/", {}, secure=True).status_code == 403

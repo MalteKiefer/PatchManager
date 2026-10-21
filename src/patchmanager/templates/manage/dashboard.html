@@ -1,0 +1,11 @@
+{% extends "manage/_base.html" %}{% load i18n %}
+{% block title %}{% translate "Administration" %}{% endblock %}
+{% block manage %}
+<h1 class="mb-6">{% translate "Administration" %}</h1>
+<dl class="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+  <div class="card"><dt class="text-sm text-slate-500">{% translate "Tenants" %}</dt><dd class="text-3xl font-semibold">{{ tenant_count }}</dd></div>
+  <div class="card"><dt class="text-sm text-slate-500">{% translate "Users" %}</dt><dd class="text-3xl font-semibold">{{ user_count }}</dd></div>
+  <div class="card"><dt class="text-sm text-slate-500">{% translate "Groups" %}</dt><dd class="text-3xl font-semibold">{{ group_count }}</dd></div>
+  <div class="card"><dt class="text-sm text-slate-500">{% translate "Roles" %}</dt><dd class="text-3xl font-semibold">{{ role_count }}</dd></div>
+</dl>
+{% endblock %}

@@ -1,0 +1,6 @@
+{% extends "base.html" %}
+{% block main_class %}mx-auto max-w-md px-4 py-12{% endblock %}
+{% block content %}
+<p class="mb-6 text-center text-lg font-semibold">{{ instance_name }}</p>
+<div class="card">{% block card %}{% endblock %}</div>
+{% endblock %}

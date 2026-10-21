@@ -1,0 +1,28 @@
+{% extends "manage/_base.html" %}{% load i18n %}
+{% block title %}{{ group.name }}{% endblock %}
+{% block manage %}
+<h1 class="mb-6">{{ group.name }}</h1>
+<div class="grid gap-6 lg:grid-cols-2">
+  <form method="post" class="card">{% csrf_token %}
+    <h2 class="mb-3">{% translate "Details" %}</h2>
+    {% include "core/_form.html" %}
+    <button name="action" value="details" class="btn-primary">{% translate "Save" %}</button>
+  </form>
+  <form method="post" class="card">{% csrf_token %}
+    <h2 class="mb-3">{% translate "Members" %}</h2>
+    {% include "core/_form.html" with form=members %}
+    <button name="action" value="members" class="btn-primary">{% translate "Save members" %}</button>
+  </form>
+  <section class="card">
+    <h2 class="mb-3">{% translate "Nested in" %}</h2>
+    <ul class="mb-3 text-sm">{% for p in group.parents.all %}<li class="flex items-center justify-between py-1"><a href="{% url 'manage:group' p.pk %}">{{ p.name }}</a>
+      <form method="post">{% csrf_token %}<input type="hidden" name="group" value="{{ p.pk }}"><button name="action" value="remove_parent" class="btn-secondary py-1">{% translate "Remove" %}</button></form></li>
+    {% empty %}<li>{% translate "Not nested." %}</li>{% endfor %}</ul>
+    <form method="post">{% csrf_token %}{% include "core/_form.html" with form=parent_form %}<button name="action" value="parent" class="btn-secondary">{% translate "Nest" %}</button></form>
+  </section>
+  <section class="card lg:col-span-2"><h2 class="mb-3">{% translate "Assignments" %}</h2>
+    {% include "manage/_assignments.html" with principal=group principal_field="group" %}
+  </section>
+</div>
+<form method="post" class="mt-6" data-confirm="{% translate 'Delete this group and its assignments?' %}">{% csrf_token %}<button name="action" value="delete" class="btn-danger">{% translate "Delete group" %}</button></form>
+{% endblock %}

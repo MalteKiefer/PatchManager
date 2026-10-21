@@ -1,0 +1,14 @@
+{% extends "base.html" %}{% load i18n %}
+{% block title %}{% translate "Start" %}{% endblock %}
+{% block content %}
+<h1>{% blocktranslate with name=user.display_name %}Welcome, {{ name }}{% endblocktranslate %}</h1>
+{% if current_tenant %}
+<p class="mt-2 text-slate-600 dark:text-slate-400">{% blocktranslate with tenant=current_tenant.name %}Current tenant: {{ tenant }}{% endblocktranslate %}</p>
+{% else %}
+<p class="mt-2 text-slate-600 dark:text-slate-400">{% translate "You do not have access to any tenant yet." %}</p>
+{% endif %}
+<div class="card mt-6">
+  <h2>{% translate "Getting started" %}</h2>
+  <p class="mt-2 text-sm">{% translate "Sites, racks and devices arrive in the next release. Until then, set up tenants, users and roles in the administration area." %}</p>
+</div>
+{% endblock %}
