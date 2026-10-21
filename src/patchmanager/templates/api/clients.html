@@ -1,0 +1,24 @@
+{% extends "manage/_base.html" %}{% load i18n %}
+{% block title %}{% translate "API clients" %}{% endblock %}
+{% block manage %}
+<h1 class="mb-2">{% translate "API clients" %}</h1>
+<p class="mb-6 text-sm text-slate-500">{% blocktranslate %}Clients get access tokens from /api/oauth/token/ with the client credentials grant. Each client has its own service user: give it roles under Users like any person.{% endblocktranslate %}</p>
+{% include "api/_secret.html" %}
+<div class="grid gap-6 lg:grid-cols-[1fr_20rem]">
+  <div class="card overflow-x-auto p-0"><table class="table">
+    <thead><tr><th>{% translate "Name" %}</th><th>client_id</th><th>{% translate "Access" %}</th><th>{% translate "Last used" %}</th><th></th></tr></thead>
+    <tbody>{% for c in clients %}<tr>
+      <td><a href="{% url 'manage:user' c.user_id %}">{{ c.name }}</a></td><td class="font-mono text-xs">{{ c.client_id }}</td>
+      <td>{{ c.scopes|join:", " }}</td><td class="text-xs">{{ c.last_used_at|date:"SHORT_DATETIME_FORMAT"|default:_("never") }}</td>
+      <td>{% if c.revoked_at %}<span class="badge-muted">{% translate "revoked" %}</span>{% else %}<span class="flex gap-1">
+        <form method="post" action="{% url 'api-ui:client-action' c.pk 'rotate' %}" data-confirm="{% translate 'Issue a new secret? The old one stops working.' %}">{% csrf_token %}<button class="btn-secondary py-1">{% translate "New secret" %}</button></form>
+        <form method="post" action="{% url 'api-ui:client-action' c.pk 'revoke' %}" data-confirm="{% translate 'Revoke this client for good?' %}">{% csrf_token %}<button class="btn-secondary py-1">{% translate "Revoke" %}</button></form></span>{% endif %}</td>
+    </tr>{% empty %}<tr><td colspan="5" class="text-slate-500">{% translate "No clients yet." %}</td></tr>{% endfor %}</tbody>
+  </table></div>
+  <form method="post" class="card">{% csrf_token %}
+    <h2 class="mb-3">{% translate "New client" %}</h2>
+    {% include "core/_form.html" with form=form %}
+    <button class="btn-primary">{% translate "Create client" %}</button>
+  </form>
+</div>
+{% endblock %}

@@ -43,6 +43,9 @@ class User(AbstractBaseUser, TimestampedModel):
     locked_until = models.DateTimeField(_("locked until"), null=True, blank=True)
     failed_login_count = models.PositiveIntegerField(default=0)
     deactivated_at = models.DateTimeField(null=True, blank=True)
+    is_service = models.BooleanField(
+        default=False
+    )  # API client principal: no password, no web sign in
 
     objects: ClassVar[UserManager] = UserManager()
 

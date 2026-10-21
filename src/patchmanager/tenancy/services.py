@@ -43,6 +43,10 @@ def update_tenant(request: HttpRequest, actor: User, tenant: Tenant, **values: o
         raise ServiceError(_("A tenant with this identifier already exists.")) from exc
     after = {f: getattr(tenant, f) for f in FIELDS}
     changed = {k: [before[k], after[k]] for k in FIELDS if before[k] != after[k]}
+    if "requires_mfa" in changed:
+        from patchmanager.accounts import policy
+
+        policy.bump_version()  # grants of API clients depend on it
     audit.record(
         "tenancy.tenant.changed",
         request=request,

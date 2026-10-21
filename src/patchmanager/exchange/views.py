@@ -37,11 +37,11 @@ CONTENT_TYPES = {
     "pdf": "application/pdf",
 }
 REPORTS: dict[str, tuple[Any, str, Callable[[Any, Any], bytes]]] = {
-    "site": (Site, "locations.site.view", pdf.site_report),
-    "patch-list": (Site, "locations.site.view", pdf.patch_list),
-    "bom": (Site, "locations.site.view", pdf.bill_of_materials),
-    "rack": (Rack, "dcim.rack.view", pdf.rack_elevation),
-    "ports": (Device, "dcim.device.view", pdf.port_list),
+    "site": (Site, "locations.site.export", pdf.site_report),
+    "patch-list": (Site, "cabling.cable.export", pdf.patch_list),
+    "bom": (Site, "dcim.device.export", pdf.bill_of_materials),
+    "rack": (Rack, "dcim.rack.export", pdf.rack_elevation),
+    "ports": (Device, "dcim.device.export", pdf.port_list),
 }
 
 
@@ -245,7 +245,13 @@ def report(request: HttpRequest, kind: str, pk: str) -> HttpResponse:
         raise Http404
     model, permission, build = REPORTS[kind]
     obj = get_object_or_404(model, pk=pk)  # RLS hides other tenants
-    if not policy.has_perm(request.user, permission, obj):
+    same_type = permission.startswith(obj.policy_object_type + ".")
+    allowed = (
+        policy.has_perm(request.user, permission, obj)
+        if same_type  # other types: judged by scope only, the object's fields mean nothing there
+        else policy.has_perm(request.user, permission, scope_path=obj.policy_path)
+    )
+    if not allowed or not policy.has_perm(request.user, f"{obj.policy_object_type}.view", obj):
         raise Http404
     if _limited(request):
         return HttpResponse(_("Too many exports. Try again in a few minutes."), status=429)

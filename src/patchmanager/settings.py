@@ -94,6 +94,10 @@ INSTALLED_APPS = [
     "patchmanager.history",
     "patchmanager.search",
     "patchmanager.exchange",
+    "rest_framework",
+    "drf_spectacular",
+    "patchmanager.api",
+    "patchmanager.integrations",
 ]
 if DJANGO_ADMIN_ENABLED:
     INSTALLED_APPS.insert(0, "django.contrib.admin")
@@ -172,7 +176,16 @@ CELERY_BEAT_SCHEDULE = {
         "task": "patchmanager.accounts.tasks.clear_expired_sessions",
         "schedule": 86400,
     },
+    "deliver-webhooks": {"task": "patchmanager.integrations.tasks.deliver", "schedule": 10},
+    "prune-webhook-deliveries": {
+        "task": "patchmanager.integrations.tasks.prune",
+        "schedule": 86400,
+    },
 }
+
+# Webhooks: only public addresses unless listed here (CIDRs, e.g. "10.0.0.0/8")
+WEBHOOK_ALLOWED_NETWORKS = env_list("PATCHMANAGER_WEBHOOK_ALLOWED_NETWORKS")
+WEBHOOK_ALLOW_HTTP = env_bool("PATCHMANAGER_WEBHOOK_ALLOW_HTTP", False)
 
 # Mail
 _MAIL_BACKEND = env(
@@ -299,4 +312,30 @@ LOGGING = {
     "formatters": {"json": {"()": "patchmanager.core.logging.JsonFormatter"}},
     "handlers": {"console": {"class": "logging.StreamHandler", "formatter": "json"}},
     "root": {"handlers": ["console"], "level": env("PATCHMANAGER_LOG_LEVEL", "INFO")},
+}
+
+# REST API (ADR 0019)
+REST_FRAMEWORK = {
+    "DEFAULT_AUTHENTICATION_CLASSES": [
+        "patchmanager.api.authentication.TokenAuthentication",
+        "rest_framework.authentication.SessionAuthentication",  # enforces CSRF
+    ],
+    "DEFAULT_PERMISSION_CLASSES": ["patchmanager.api.core.TokenScopes"],
+    "DEFAULT_PAGINATION_CLASS": "patchmanager.api.core.Pagination",
+    "DEFAULT_RENDERER_CLASSES": ["rest_framework.renderers.JSONRenderer"],
+    "DEFAULT_PARSER_CLASSES": ["rest_framework.parsers.JSONParser"],
+    "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
+    "DEFAULT_THROTTLE_CLASSES": ["rest_framework.throttling.UserRateThrottle"],
+    "DEFAULT_THROTTLE_RATES": {"user": env("PATCHMANAGER_API_RATE", "1200/minute")},
+    "EXCEPTION_HANDLER": "patchmanager.api.core.exception_handler",
+    "UNAUTHENTICATED_USER": "django.contrib.auth.models.AnonymousUser",
+}
+SPECTACULAR_SETTINGS = {
+    "TITLE": "PatchManager API",
+    "VERSION": "1",
+    "OAS_VERSION": "3.1.0",
+    "SERVE_INCLUDE_SCHEMA": False,
+    "SERVE_PERMISSIONS": ["rest_framework.permissions.IsAuthenticated"],
+    "COMPONENT_SPLIT_REQUEST": True,
+    "SCHEMA_PATH_PREFIX": "/api/v1",
 }

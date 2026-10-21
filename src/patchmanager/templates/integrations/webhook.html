@@ -1,0 +1,37 @@
+{% extends "base.html" %}{% load i18n %}
+{% block title %}{{ hook.name }}{% endblock %}
+{% block content %}
+<div class="mb-4 flex flex-wrap items-center gap-3">
+  <h1 class="mr-auto">{{ hook.name }}</h1>
+  <a class="btn-secondary" href="{% url 'integrations:webhooks' %}">{% translate "All webhooks" %}</a>
+  {% if can_manage %}
+  <form method="post" action="{% url 'integrations:webhook-action' hook.pk 'ping' %}">{% csrf_token %}<button class="btn-secondary">{% translate "Send test event" %}</button></form>
+  <form method="post" action="{% url 'integrations:webhook-action' hook.pk 'rotate' %}" data-confirm="{% translate 'Issue a new secret? Receivers must update it.' %}">{% csrf_token %}<button class="btn-secondary">{% translate "New secret" %}</button></form>
+  <form method="post" action="{% url 'integrations:webhook-action' hook.pk 'delete' %}" data-confirm="{% translate 'Delete this webhook?' %}">{% csrf_token %}<button class="btn-secondary">{% translate "Delete" %}</button></form>
+  {% endif %}
+</div>
+{% if secret %}
+<section class="card mb-6 border-amber-300 dark:border-amber-700" role="alert" aria-labelledby="secret-h">
+  <h2 id="secret-h">{% translate "Signing secret" %}</h2>
+  <p class="mt-1 text-sm">{% blocktranslate %}Shown only once. Verify the PatchManager-Signature header: HMAC-SHA256 of "&lt;t&gt;.&lt;body&gt;" with this secret must equal v1.{% endblocktranslate %}</p>
+  <p class="mt-3 break-all rounded bg-slate-100 px-2 py-1 font-mono text-sm dark:bg-slate-800">{{ secret }}</p>
+</section>
+{% endif %}
+<div class="grid gap-6 lg:grid-cols-[1fr_22rem]">
+  <section class="card overflow-x-auto p-0" aria-labelledby="d-h">
+    <h2 id="d-h" class="p-4">{% translate "Recent deliveries" %}</h2>
+    <table class="table"><thead><tr><th>{% translate "When" %}</th><th>{% translate "Event" %}</th><th>{% translate "Status" %}</th><th>{% translate "Attempts" %}</th><th>{% translate "Result" %}</th><th></th></tr></thead>
+    <tbody>{% for d in deliveries %}<tr>
+      <td class="whitespace-nowrap text-xs">{{ d.created_at|date:"SHORT_DATETIME_FORMAT" }}</td><td class="font-mono text-xs">{{ d.event }}</td>
+      <td>{% if d.status == "sent" %}<span class="badge-ok">{{ d.get_status_display }}</span>{% elif d.status == "failed" %}<span class="badge-warn">{{ d.get_status_display }}</span>{% else %}{{ d.get_status_display }}{% endif %}</td>
+      <td>{{ d.attempts }}</td><td class="text-xs">{{ d.last_error|default:d.last_status_code|default:"" }}</td>
+      <td>{% if can_manage and d.status != "pending" %}<form method="post" action="{% url 'integrations:redeliver' d.pk %}">{% csrf_token %}<button class="btn-secondary py-1">{% translate "Send again" %}</button></form>{% endif %}</td>
+    </tr>{% empty %}<tr><td colspan="6" class="text-slate-500">{% translate "Nothing sent yet." %}</td></tr>{% endfor %}</tbody></table>
+  </section>
+  {% if can_manage %}<form method="post" class="card">{% csrf_token %}
+    <h2 class="mb-3">{% translate "Settings" %}</h2>
+    {% include "core/_form.html" with form=form %}
+    <button class="btn-primary">{% translate "Save" %}</button>
+  </form>{% endif %}
+</div>
+{% endblock %}

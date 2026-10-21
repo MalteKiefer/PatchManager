@@ -9,7 +9,7 @@ from openpyxl import Workbook, load_workbook
 from PIL import Image
 
 from patchmanager.accounts.models import Assignment, Role
-from patchmanager.accounts.services import ServiceError
+from patchmanager.accounts.services import PermissionDeniedError, ServiceError
 from patchmanager.cabling import services as cabling
 from patchmanager.cabling.models import Cable
 from patchmanager.dcim import devices
@@ -256,11 +256,13 @@ def test_import_respects_permissions(kit, make_user) -> None:
             tenant=kit["tenant"],
             scope_path=kit["tenant"].policy_path,
         )
-        results = importer.run(
-            kit["request"], user, kit["tenant"], "locations", [{"site": "New"}], apply=True
-        )
-        assert results[0].outcome == "error" and "permission" in results[0].message
+        with pytest.raises(PermissionDeniedError):  # viewers lack locations.site.import
+            importer.run(
+                kit["request"], user, kit["tenant"], "locations", [{"site": "New"}], apply=True
+            )
         assert not Site.objects.filter(name="New").exists()
+        assert list(TABLES["devices"].export(user, kit["tenant"], None)) == []  # nor *.export
+        assert pdf  # reports are gated in the view, see test_views
 
 
 def test_exports_match_import_columns_and_scope(kit, super_admin, make_user) -> None:
@@ -299,7 +301,7 @@ def test_exports_match_import_columns_and_scope(kit, super_admin, make_user) -> 
             kit["request"], super_admin, device_type=kit["switch"], room=secret, name="hidden"
         )
         Assignment.objects.create(
-            role=Role.objects.get(key="viewer"),
+            role=Role.objects.get(key="editor"),
             user=user,
             tenant=kit["tenant"],
             scope_path=kit["room"].path,
@@ -499,3 +501,40 @@ def test_import_never_creates_below_hidden_location(kit, make_user) -> None:
             ].outcome
             == "created"
         )
+
+
+def test_viewers_cannot_export_reports(kit, make_user) -> None:
+    viewer = make_user()
+    with rls.system_context():
+        Assignment.objects.create(
+            role=Role.objects.get(key="viewer"),
+            user=viewer,
+            tenant=kit["tenant"],
+            scope_path=kit["tenant"].policy_path,
+        )
+    client = Client()
+    login(client, viewer)
+    rack_url = f"/exchange/reports/rack/{kit['rack'].pk}.pdf"
+    assert client.get(rack_url, secure=True).status_code == 404
+    assert client.get(f"/exchange/reports/bom/{kit['site'].pk}.pdf", secure=True).status_code == 404
+    assert b"sw1" not in client.get("/exchange/devices.csv", secure=True).content
+
+
+def test_report_content_respects_export_denies(kit, make_user, super_admin) -> None:
+    user = make_user()
+    with rls.system_context():
+        Assignment.objects.create(
+            role=Role.objects.get(key="editor"),
+            user=user,
+            tenant=kit["tenant"],
+            scope_path=kit["tenant"].policy_path,
+        )
+        Assignment.objects.create(
+            role=Role.objects.get(key="editor"),
+            user=user,
+            tenant=kit["tenant"],
+            scope_path=kit["room"].path,
+            effect="deny",
+        )
+        assert pdf._visible(user, "dcim.device.view", Device.objects.all()).count() == 0
+        assert pdf._visible(super_admin, "dcim.device.view", Device.objects.all()).count() == 2

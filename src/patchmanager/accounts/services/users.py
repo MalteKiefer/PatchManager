@@ -237,6 +237,24 @@ def update_profile(request: HttpRequest, user: User, *, display_name: str, langu
 # --- Impersonation --------------------------------------------------------
 
 
+def require_rights_of(actor: User, target: User) -> None:
+    """Acting as ``target`` (or holding its credentials) must not yield more than ``actor`` holds.
+
+    The target's grants include nested groups, and filters such as the MFA rule
+    for API clients are ignored: those grants count as soon as the rule changes.
+    """
+    if policy.is_super_admin(actor):
+        return
+    for grant in policy._compile(target, unfiltered=True):
+        if grant.effect != "allow":
+            continue
+        if grant.role_key == SUPER_ADMIN or any(
+            not policy.has_perm(actor, perm, scope_path=grant.scope_path)
+            for perm in grant.permissions
+        ):
+            raise PermissionDeniedError(_("You cannot act as a user with rights you do not hold."))
+
+
 def start_impersonation(request: HttpRequest, actor: User, target: User, reason: str) -> None:
     """Act as ``target`` for at most 30 minutes, with a visible banner. Audited."""
     require(actor, "accounts.user.impersonate", target)
@@ -246,19 +264,7 @@ def start_impersonation(request: HttpRequest, actor: User, target: User, reason:
         raise ServiceError(_("This user cannot be impersonated."))
     if not target.is_active or target.is_locked:
         raise ServiceError(_("Inactive or locked users cannot be impersonated."))
-    # Acting as someone must never yield more than the actor could grant them.
-    # The target's effective grants include nested groups.
-    if not policy.is_super_admin(actor):
-        for grant in policy.grants_for(target):
-            if grant.effect != "allow":
-                continue
-            if grant.role_key == SUPER_ADMIN or any(
-                not policy.has_perm(actor, perm, scope_path=grant.scope_path)
-                for perm in grant.permissions
-            ):
-                raise PermissionDeniedError(
-                    _("You cannot act as a user with rights you do not hold.")
-                )
+    require_rights_of(actor, target)
     from django.contrib.auth import login
 
     from patchmanager.accounts.services.auth import BACKEND

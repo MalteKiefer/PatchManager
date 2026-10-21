@@ -308,6 +308,13 @@ def check_can_grant(actor: User, role: Role, scope_path: str | None) -> None:
         raise PermissionDeniedError(_("You cannot grant permissions you do not hold yourself."))
 
 
+def _needs_mfa(role: Role) -> bool:
+    from patchmanager.accounts.roles import SYSTEM_ROLES
+
+    system = SYSTEM_ROLES.get(role.key)
+    return role.requires_mfa or bool(system and system.requires_mfa)
+
+
 def assign(
     request: HttpRequest,
     actor: User,
@@ -327,6 +334,13 @@ def assign(
     """
     if (user is None) == (group is None):
         raise ServiceError(_("Choose either a user or a group."))
+    if (
+        user is not None
+        and user.is_service
+        and effect == Assignment.Effect.ALLOW
+        and _needs_mfa(role)
+    ):
+        raise ServiceError(_("API clients cannot hold roles that require MFA."))
     if node is not None:
         tenant = node.tenant
     scope = node.policy_path if node is not None else tenant.policy_path if tenant else None

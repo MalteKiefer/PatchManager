@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-21 18:20+0000\n"
+"POT-Creation-Date: 2026-10-21 19:05+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -27,7 +27,7 @@ msgstr "E-Mail"
 msgid "Password"
 msgstr "Passwort"
 
-#: accounts/forms.py:32 exchange/pdf.py:147
+#: accounts/forms.py:32 exchange/pdf.py:150
 msgid "Code"
 msgstr "Code"
 
@@ -40,7 +40,9 @@ msgid "Run the setup_token command to get one."
 msgstr "Führen Sie den Befehl setup_token aus, um eines zu erhalten."
 
 #: accounts/forms.py:49 accounts/forms.py:103 accounts/forms.py:110
-#: exchange/pdf.py:200 templates/manage/groups.html:6
+#: api/ui.py:31 api/ui.py:54 exchange/pdf.py:203 integrations/views.py:26
+#: templates/api/clients.html:9 templates/api/tokens.html:9
+#: templates/integrations/webhooks.html:8 templates/manage/groups.html:6
 #: templates/manage/roles.html:11 templates/manage/tenants.html:6
 #: templates/manage/users.html:10 templates/networks/vlans.html:7
 #: templates/search/results.html:35 templates/search/results.html:36
@@ -69,7 +71,8 @@ msgstr "Authenticator-App"
 msgid "Role"
 msgstr "Rolle"
 
-#: accounts/forms.py:113 templates/base.html:31
+#: accounts/forms.py:113 api/ui.py:41 templates/api/tokens.html:9
+#: templates/base.html:31
 msgid "Tenant"
 msgstr "Mandant"
 
@@ -77,7 +80,7 @@ msgstr "Mandant"
 msgid "All tenants (global)"
 msgstr "Alle Mandanten (global)"
 
-#: accounts/forms.py:130 exchange/pdf.py:200 templates/library/types.html:17
+#: accounts/forms.py:130 exchange/pdf.py:203 templates/library/types.html:17
 #: templates/manage/_assignments.html:3
 msgid "Scope"
 msgstr "Geltungsbereich"
@@ -183,8 +186,9 @@ msgid "language"
 msgstr "Sprache"
 
 #: accounts/models.py:42 dcim/models.py:31 dcim/models.py:178
-#: networks/models.py:15 templates/manage/tenants.html:8
-#: templates/manage/user_detail.html:6 templates/manage/users.html:13
+#: integrations/models.py:22 networks/models.py:15
+#: templates/manage/tenants.html:8 templates/manage/user_detail.html:6
+#: templates/manage/users.html:13
 msgid "active"
 msgstr "aktiv"
 
@@ -192,29 +196,30 @@ msgstr "aktiv"
 msgid "locked until"
 msgstr "gesperrt bis"
 
-#: accounts/models.py:137 accounts/models.py:158 dcim/models.py:35
-#: dcim/models.py:188 dcim/models.py:227 library/models.py:25
-#: library/models.py:177 locations/models.py:16 locations/models.py:58
-#: locations/models.py:78 locations/models.py:108 networks/models.py:30
-#: search/models.py:16 tenancy/models.py:21
+#: accounts/models.py:140 accounts/models.py:161 api/models.py:16
+#: api/models.py:56 dcim/models.py:35 dcim/models.py:188 dcim/models.py:227
+#: integrations/models.py:16 library/models.py:25 library/models.py:177
+#: locations/models.py:16 locations/models.py:58 locations/models.py:78
+#: locations/models.py:108 networks/models.py:30 search/models.py:16
+#: tenancy/models.py:21
 msgid "name"
 msgstr "Name"
 
-#: accounts/models.py:138 accounts/models.py:159 dcim/models.py:237
+#: accounts/models.py:141 accounts/models.py:162 dcim/models.py:237
 #: library/models.py:127 locations/models.py:35 locations/models.py:59
 #: locations/models.py:110 networks/models.py:34 networks/models.py:81
 msgid "description"
 msgstr "Beschreibung"
 
-#: accounts/models.py:162
+#: accounts/models.py:165
 msgid "require MFA"
 msgstr "MFA erforderlich"
 
-#: accounts/models.py:198 templates/manage/_assignments.html:6
+#: accounts/models.py:201 templates/manage/_assignments.html:6
 msgid "allow"
 msgstr "erlauben"
 
-#: accounts/models.py:199 templates/manage/_assignments.html:6
+#: accounts/models.py:202 templates/manage/_assignments.html:6
 msgid "deny"
 msgstr "verweigern"
 
@@ -355,18 +360,24 @@ msgid "You cannot grant permissions you do not hold yourself."
 msgstr ""
 "Sie können keine Berechtigungen vergeben, die Sie selbst nicht besitzen."
 
-#: accounts/services/rbac.py:329
+#: accounts/services/rbac.py:336
 msgid "Choose either a user or a group."
 msgstr "Wählen Sie entweder einen Benutzer oder eine Gruppe."
 
-#: accounts/services/rbac.py:379
+#: accounts/services/rbac.py:343
+msgid "API clients cannot hold roles that require MFA."
+msgstr "API-Clients können keine Rollen erhalten, die MFA erfordern."
+
+#: accounts/services/rbac.py:393
 msgid "The last super admin cannot be removed."
 msgstr "Der letzte Super-Admin kann nicht entfernt werden."
 
-#: accounts/services/users.py:29 cabling/services.py:50 exchange/importer.py:67
-#: floorplans/services.py:187 floorplans/views.py:192 history/services.py:76
-#: history/services.py:97 metadata/services.py:98 metadata/services.py:166
-#: networks/services.py:109 networks/services.py:139 networks/services.py:148
+#: accounts/services/users.py:29 api/core.py:28 api/tokens.py:88
+#: api/tokens.py:123 cabling/services.py:50 exchange/importer.py:54
+#: exchange/importer.py:70 floorplans/services.py:187 floorplans/views.py:192
+#: history/services.py:76 history/services.py:97 integrations/services.py:69
+#: metadata/services.py:98 metadata/services.py:166 networks/services.py:109
+#: networks/services.py:139 networks/services.py:148
 msgid "You do not have permission to do that."
 msgstr "Sie haben keine Berechtigung dafür."
 
@@ -398,23 +409,23 @@ msgstr "Sitzung nicht gefunden."
 msgid "The current password is incorrect."
 msgstr "Das aktuelle Passwort ist falsch."
 
-#: accounts/services/users.py:244
-msgid "A reason is required."
-msgstr "Ein Grund ist erforderlich."
-
-#: accounts/services/users.py:246
-msgid "This user cannot be impersonated."
-msgstr "Als dieser Benutzer kann nicht gehandelt werden."
-
-#: accounts/services/users.py:248
-msgid "Inactive or locked users cannot be impersonated."
-msgstr "Als inaktiver oder gesperrter Benutzer kann nicht gehandelt werden."
-
-#: accounts/services/users.py:260
+#: accounts/services/users.py:255
 msgid "You cannot act as a user with rights you do not hold."
 msgstr ""
 "Sie können nicht als Benutzer mit Rechten handeln, die Sie selbst nicht "
 "besitzen."
+
+#: accounts/services/users.py:262
+msgid "A reason is required."
+msgstr "Ein Grund ist erforderlich."
+
+#: accounts/services/users.py:264
+msgid "This user cannot be impersonated."
+msgstr "Als dieser Benutzer kann nicht gehandelt werden."
+
+#: accounts/services/users.py:266
+msgid "Inactive or locked users cannot be impersonated."
+msgstr "Als inaktiver oder gesperrter Benutzer kann nicht gehandelt werden."
 
 #: accounts/views/account.py:44
 msgid "Profile saved."
@@ -586,6 +597,97 @@ msgstr "Rolle gelöscht."
 msgid "%(count)s roles imported."
 msgstr "%(count)s Rollen importiert."
 
+#: api/authentication.py:26
+msgid "Invalid or expired token."
+msgstr "Token ungültig oder abgelaufen."
+
+#: api/core.py:65
+msgid "Not a valid id."
+msgstr "Keine gültige ID."
+
+#: api/core.py:70
+msgid "Not a valid value."
+msgstr "Kein gültiger Wert."
+
+#: api/core.py:102
+msgid "Not found."
+msgstr "Nicht gefunden."
+
+#: api/models.py:10
+msgid "Read"
+msgstr "Lesen"
+
+#: api/models.py:10
+msgid "Write"
+msgstr "Schreiben"
+
+#: api/models.py:46
+msgid "personal token"
+msgstr "persönlicher Token"
+
+#: api/models.py:47
+msgid "OAuth access token"
+msgstr "OAuth-Zugriffstoken"
+
+#: api/tokens.py:48
+msgid "Choose read, write or both."
+msgstr "Wählen Sie Lesen, Schreiben oder beides."
+
+#: api/tokens.py:57
+msgid "Service accounts use their client credentials."
+msgstr "Dienstkonten verwenden ihre Client-Zugangsdaten."
+
+#: api/tokens.py:61
+msgid "Tokens cannot be created while acting as another user."
+msgstr ""
+"Token können nicht erstellt werden, solange Sie als anderer Benutzer handeln."
+
+#: api/tokens.py:63 api/tokens.py:135
+msgid "Enter a name."
+msgstr "Geben Sie einen Namen ein."
+
+#: api/tokens.py:65
+#, python-format
+msgid "Tokens expire after 1 to %(n)s days."
+msgstr "Token laufen nach 1 bis %(n)s Tagen ab."
+
+#: api/ui.py:21
+msgid "7 days"
+msgstr "7 Tage"
+
+#: api/ui.py:22
+msgid "30 days"
+msgstr "30 Tage"
+
+#: api/ui.py:23
+msgid "90 days"
+msgstr "90 Tage"
+
+#: api/ui.py:24
+msgid "1 year"
+msgstr "1 Jahr"
+
+#: api/ui.py:33 api/ui.py:56 templates/api/clients.html:9
+#: templates/api/tokens.html:9
+msgid "Access"
+msgstr "Zugriff"
+
+#: api/ui.py:39
+msgid "Expires after"
+msgstr "Läuft ab nach"
+
+#: api/ui.py:48
+msgid "All my tenants"
+msgstr "Alle meine Mandanten"
+
+#: api/ui.py:111
+msgid "Token revoked."
+msgstr "Token widerrufen."
+
+#: api/ui.py:153
+msgid "Client revoked."
+msgstr "Client widerrufen."
+
 #: audit/views.py:115
 #, python-format
 msgid "Chain intact: %(count)s events verified."
@@ -710,7 +812,7 @@ msgstr "Diese Ports können nicht verbunden werden."
 msgid "Device"
 msgstr "Gerät"
 
-#: cabling/views.py:44 exchange/pdf.py:265 templates/dcim/device.html:16
+#: cabling/views.py:44 exchange/pdf.py:268 templates/dcim/device.html:16
 #: templates/dcim/port.html:35
 msgid "Port"
 msgstr "Port"
@@ -754,7 +856,7 @@ msgstr "Rückseite"
 msgid "Leave empty to use the type's naming convention."
 msgstr "Leer lassen, um die Namenskonvention des Typs zu verwenden."
 
-#: dcim/device_views.py:81 exchange/pdf.py:184
+#: dcim/device_views.py:81 exchange/pdf.py:187
 msgid "Room"
 msgstr "Raum"
 
@@ -937,7 +1039,7 @@ msgstr "Die Höheneinheiten müssen zwischen 1 und %(height)s liegen."
 msgid "Move or delete the device instead."
 msgstr "Verschieben oder löschen Sie stattdessen das Gerät."
 
-#: dcim/views.py:31 exchange/pdf.py:270 templates/dcim/device.html:16
+#: dcim/views.py:31 exchange/pdf.py:273 templates/dcim/device.html:16
 #: templates/dcim/rack.html:68
 msgid "Label"
 msgstr "Bezeichnung"
@@ -989,30 +1091,30 @@ msgstr "Die Arbeitsmappe ist zu groß."
 msgid "The workbook could not be read."
 msgstr "Die Arbeitsmappe konnte nicht gelesen werden."
 
-#: exchange/importer.py:29
+#: exchange/importer.py:30
 msgid "This table cannot be imported."
 msgstr "Diese Tabelle kann nicht importiert werden."
 
-#: exchange/importer.py:31
+#: exchange/importer.py:32
 msgid "The file has no rows."
 msgstr "Die Datei enthält keine Zeilen."
 
-#: exchange/importer.py:36
+#: exchange/importer.py:37
 #, python-format
 msgid "Missing columns: %(cols)s."
 msgstr "Fehlende Spalten: %(cols)s."
 
-#: exchange/importer.py:38
+#: exchange/importer.py:39
 #, python-format
 msgid "Unknown columns: %(cols)s."
 msgstr "Unbekannte Spalten: %(cols)s."
 
-#: exchange/importer.py:60
+#: exchange/importer.py:63
 #, python-format
 msgid "Empty: %(cols)s."
 msgstr "Leer: %(cols)s."
 
-#: exchange/importer.py:71
+#: exchange/importer.py:74
 msgid "The database refused this row."
 msgstr "Die Datenbank hat diese Zeile abgelehnt."
 
@@ -1026,250 +1128,250 @@ msgstr "%(name)s · %(user)s · %(time)s"
 msgid "Page %(n)s"
 msgstr "Seite %(n)s"
 
-#: exchange/pdf.py:147 templates/accounts/security.html:50
+#: exchange/pdf.py:150 templates/accounts/security.html:50
 #: templates/manage/audit.html:18
 msgid "Address"
 msgstr "Adresse"
 
-#: exchange/pdf.py:147
+#: exchange/pdf.py:150
 msgid "Description"
 msgstr "Beschreibung"
 
-#: exchange/pdf.py:183 exchange/tables.py:525 templates/base.html:44
+#: exchange/pdf.py:186 exchange/tables.py:530 templates/base.html:44
 #: templates/core/_breadcrumbs.html:4 templates/locations/index.html:2
 #: templates/locations/index.html:6
 msgid "Locations"
 msgstr "Orte"
 
-#: exchange/pdf.py:184
+#: exchange/pdf.py:187
 msgid "Building"
 msgstr "Gebäude"
 
-#: exchange/pdf.py:184
+#: exchange/pdf.py:187
 msgid "Floor"
 msgstr "Etage"
 
-#: exchange/pdf.py:184 exchange/pdf.py:266 exchange/pdf.py:310
+#: exchange/pdf.py:187 exchange/pdf.py:269 exchange/pdf.py:313
 #: templates/cabling/cables.html:7 templates/cabling/cables.html:12
 #: templates/dcim/device.html:16 templates/library/type_detail.html:16
 msgid "Kind"
 msgstr "Art"
 
-#: exchange/pdf.py:184 exchange/tables.py:533 locations/views.py:52
+#: exchange/pdf.py:187 exchange/tables.py:539 locations/views.py:52
 #: search/services.py:58
 msgid "Racks"
 msgstr "Racks"
 
-#: exchange/pdf.py:184 exchange/tables.py:541 search/services.py:66
+#: exchange/pdf.py:187 exchange/tables.py:548 search/services.py:66
 #: templates/dcim/rack.html:57 templates/library/types.html:17
 msgid "Devices"
 msgstr "Geräte"
 
-#: exchange/pdf.py:186
+#: exchange/pdf.py:189
 #, python-format
 msgid "Totals: %(r)s racks, %(d)s devices"
 msgstr "Summen: %(r)s Racks, %(d)s Geräte"
 
-#: exchange/pdf.py:198 exchange/tables.py:560 search/services.py:84
+#: exchange/pdf.py:201 exchange/tables.py:568 search/services.py:84
 msgid "VLANs"
 msgstr "VLANs"
 
-#: exchange/pdf.py:200
+#: exchange/pdf.py:203
 msgid "VID"
 msgstr "VID"
 
-#: exchange/pdf.py:200 templates/locations/node.html:21
-#: templates/manage/tenants.html:6 templates/manage/users.html:10
-#: templates/networks/vlans.html:7
+#: exchange/pdf.py:203 templates/integrations/webhook.html:23
+#: templates/locations/node.html:21 templates/manage/tenants.html:6
+#: templates/manage/users.html:10 templates/networks/vlans.html:7
 msgid "Status"
 msgstr "Status"
 
-#: exchange/pdf.py:202
+#: exchange/pdf.py:205
 msgid "tenant"
 msgstr "Mandant"
 
-#: exchange/pdf.py:207
+#: exchange/pdf.py:210
 #, python-format
 msgid "Site report: %(name)s"
 msgstr "Standortbericht: %(name)s"
 
-#: exchange/pdf.py:217 networks/models.py:16
+#: exchange/pdf.py:220 networks/models.py:16
 msgid "reserved"
 msgstr "reserviert"
 
-#: exchange/pdf.py:217 exchange/pdf.py:249 exchange/pdf.py:297
+#: exchange/pdf.py:220 exchange/pdf.py:252 exchange/pdf.py:300
 #: templates/cabling/trace.html:18
 msgid "not visible"
 msgstr "nicht sichtbar"
 
-#: exchange/pdf.py:226
+#: exchange/pdf.py:229
 msgid "Unit"
 msgstr "Höheneinheit"
 
-#: exchange/pdf.py:226 templates/dcim/rack.html:10 templates/dcim/rack.html:50
+#: exchange/pdf.py:229 templates/dcim/rack.html:10 templates/dcim/rack.html:50
 msgid "Front"
 msgstr "Vorderseite"
 
-#: exchange/pdf.py:226 templates/dcim/device.html:16
+#: exchange/pdf.py:229 templates/dcim/device.html:16
 #: templates/dcim/rack.html:11 templates/dcim/rack.html:51
 msgid "Rear"
 msgstr "Rückseite"
 
-#: exchange/pdf.py:228
+#: exchange/pdf.py:231
 #, python-format
 msgid "%(n)s units used"
 msgstr "%(n)s Höheneinheiten belegt"
 
-#: exchange/pdf.py:229
+#: exchange/pdf.py:232
 #, python-format
 msgid "Rack %(name)s"
 msgstr "Rack %(name)s"
 
-#: exchange/pdf.py:267 templates/dcim/device.html:16
+#: exchange/pdf.py:270 templates/dcim/device.html:16
 #: templates/library/type_detail.html:16
 msgid "Connector"
 msgstr "Steckverbinder"
 
-#: exchange/pdf.py:268
+#: exchange/pdf.py:271
 msgid "Mbit/s"
 msgstr "Mbit/s"
 
-#: exchange/pdf.py:269 networks/models.py:75
+#: exchange/pdf.py:272 networks/models.py:75
 msgid "VLAN"
 msgstr "VLAN"
 
-#: exchange/pdf.py:271 templates/dcim/device.html:35
+#: exchange/pdf.py:274 templates/dcim/device.html:35
 #: templates/dcim/port.html:16
 msgid "Connected to"
 msgstr "Verbunden mit"
 
-#: exchange/pdf.py:276
+#: exchange/pdf.py:279
 #, python-format
 msgid "Ports of %(name)s"
 msgstr "Ports von %(name)s"
 
-#: exchange/pdf.py:310 templates/cabling/cable.html:2
+#: exchange/pdf.py:313 templates/cabling/cable.html:2
 #: templates/cabling/cable.html:6 templates/cabling/cables.html:12
 #: templates/dcim/device.html:16 templates/dcim/port.html:14
 msgid "Cable"
 msgstr "Kabel"
 
-#: exchange/pdf.py:310 templates/cabling/cables.html:8
+#: exchange/pdf.py:313 templates/cabling/cables.html:8
 #: templates/cabling/cables.html:12
 msgid "Media"
 msgstr "Medium"
 
-#: exchange/pdf.py:310
+#: exchange/pdf.py:313
 msgid "Length (m)"
 msgstr "Länge (m)"
 
-#: exchange/pdf.py:310 templates/cabling/cables.html:12
+#: exchange/pdf.py:313 templates/cabling/cables.html:12
 msgid "A"
 msgstr "A"
 
-#: exchange/pdf.py:310 templates/cabling/cables.html:12
+#: exchange/pdf.py:313 templates/cabling/cables.html:12
 msgid "B"
 msgstr "B"
 
-#: exchange/pdf.py:312
+#: exchange/pdf.py:315
 #, python-format
 msgid "Patch list: %(name)s"
 msgstr "Patchliste: %(name)s"
 
-#: exchange/pdf.py:329 library/views.py:39 templates/library/types.html:17
+#: exchange/pdf.py:332 library/views.py:39 templates/library/types.html:17
 msgid "Vendor"
 msgstr "Hersteller"
 
-#: exchange/pdf.py:329 templates/library/types.html:17
+#: exchange/pdf.py:332 templates/library/types.html:17
 msgid "Model"
 msgstr "Modell"
 
-#: exchange/pdf.py:329
+#: exchange/pdf.py:332
 msgid "Part number"
 msgstr "Artikelnummer"
 
-#: exchange/pdf.py:329
+#: exchange/pdf.py:332
 msgid "Quantity"
 msgstr "Menge"
 
-#: exchange/pdf.py:331
+#: exchange/pdf.py:334
 #, python-format
 msgid "Bill of materials: %(name)s"
 msgstr "Stückliste: %(name)s"
 
-#: exchange/pdf.py:333
+#: exchange/pdf.py:336
 #, python-format
 msgid "Total: %(n)s devices"
 msgstr "Gesamt: %(n)s Geräte"
 
-#: exchange/tables.py:61 exchange/tables.py:74
+#: exchange/tables.py:62 exchange/tables.py:75
 #, python-format
 msgid "%(col)s must be a number."
 msgstr "%(col)s muss eine Zahl sein."
 
-#: exchange/tables.py:63
+#: exchange/tables.py:64
 #, python-format
 msgid "%(col)s must be a whole number."
 msgstr "%(col)s muss eine ganze Zahl sein."
 
-#: exchange/tables.py:86
+#: exchange/tables.py:87
 #, python-format
 msgid "%(col)s must be one of: %(allowed)s."
 msgstr "%(col)s muss einer der folgenden Werte sein: %(allowed)s."
 
-#: exchange/tables.py:102
+#: exchange/tables.py:103
 #, python-format
 msgid "%(name)s not found."
 msgstr "%(name)s nicht gefunden."
 
-#: exchange/tables.py:115
+#: exchange/tables.py:116
 #, python-format
 msgid "Location %(path)s not found."
 msgstr "Ort %(path)s nicht gefunden."
 
-#: exchange/tables.py:141
+#: exchange/tables.py:146
 msgid "The site is missing."
 msgstr "Der Standort fehlt."
 
-#: exchange/tables.py:234
+#: exchange/tables.py:239
 msgid "Racks need a room."
 msgstr "Racks benötigen einen Raum."
 
-#: exchange/tables.py:290
+#: exchange/tables.py:295
 #, python-format
 msgid "Device type %(v)s %(m)s not found."
 msgstr "Gerätetyp %(v)s %(m)s nicht gefunden."
 
-#: exchange/tables.py:299
+#: exchange/tables.py:304
 msgid "Devices need a room."
 msgstr "Geräte benötigen einen Raum."
 
-#: exchange/tables.py:309
+#: exchange/tables.py:314
 #, python-format
 msgid "Rack %(name)s not found."
 msgstr "Rack %(name)s nicht gefunden."
 
-#: exchange/tables.py:393
+#: exchange/tables.py:398
 #, python-format
 msgid "Site %(name)s not found."
 msgstr "Standort %(name)s nicht gefunden."
 
-#: exchange/tables.py:396
+#: exchange/tables.py:401
 msgid "vid must be a number."
 msgstr "vid muss eine Zahl sein."
 
-#: exchange/tables.py:453
+#: exchange/tables.py:458
 #, python-format
 msgid "Port %(d)s %(p)s not found."
 msgstr "Port %(d)s %(p)s nicht gefunden."
 
-#: exchange/tables.py:568 search/services.py:81 templates/base.html:46
+#: exchange/tables.py:577 search/services.py:81 templates/base.html:46
 #: templates/cabling/cable.html:4 templates/cabling/cables.html:2
 #: templates/cabling/cables.html:4
 msgid "Cables"
 msgstr "Kabel"
 
-#: exchange/tables.py:587 search/services.py:74 templates/dcim/device.html:14
+#: exchange/tables.py:597 search/services.py:74 templates/dcim/device.html:14
 #: templates/library/type_detail.html:14
 msgid "Ports"
 msgstr "Ports"
@@ -1304,7 +1406,7 @@ msgstr ""
 msgid "Imported: %(c)s created, %(u)s updated, %(n)s unchanged."
 msgstr "Importiert: %(c)s angelegt, %(u)s aktualisiert, %(n)s unverändert."
 
-#: exchange/views.py:208 exchange/views.py:251
+#: exchange/views.py:208 exchange/views.py:257
 msgid "Too many exports. Try again in a few minutes."
 msgstr "Zu viele Exporte. Versuchen Sie es in einigen Minuten erneut."
 
@@ -1465,6 +1567,75 @@ msgstr "Wiederhergestellt: %(fields)s."
 #, python-format
 msgid "Not restored (links): %(fields)s."
 msgstr "Nicht wiederhergestellt (Verknüpfungen): %(fields)s."
+
+#: integrations/http.py:60
+msgid "Webhook URLs must use https."
+msgstr "Webhook-URLs müssen https verwenden."
+
+#: integrations/http.py:62
+msgid "Enter a URL with a host and without credentials."
+msgstr "Geben Sie eine URL mit Host und ohne Zugangsdaten ein."
+
+#: integrations/http.py:66
+msgid "Enter a valid port."
+msgstr "Geben Sie einen gültigen Port ein."
+
+#: integrations/http.py:70
+msgid "The host cannot be resolved."
+msgstr "Der Host kann nicht aufgelöst werden."
+
+#: integrations/http.py:73
+msgid "This address is not allowed for webhooks."
+msgstr "Diese Adresse ist für Webhooks nicht erlaubt."
+
+#: integrations/models.py:17 integrations/views.py:27
+#: templates/integrations/webhooks.html:8
+msgid "URL"
+msgstr "URL"
+
+#: integrations/models.py:45
+msgid "pending"
+msgstr "ausstehend"
+
+#: integrations/models.py:46
+msgid "sent"
+msgstr "gesendet"
+
+#: integrations/models.py:47
+msgid "failed"
+msgstr "fehlgeschlagen"
+
+#: integrations/services.py:81
+msgid "Events are patterns like dcim.device.*, cabling.cable.insert or *."
+msgstr "Ereignisse sind Muster wie dcim.device.*, cabling.cable.insert oder *."
+
+#: integrations/views.py:29 templates/integrations/webhooks.html:8
+msgid "Events"
+msgstr "Ereignisse"
+
+#: integrations/views.py:32
+msgid "Comma separated, for example dcim.device.*, cabling.cable.insert or *"
+msgstr "Kommagetrennt, zum Beispiel dcim.device.*, cabling.cable.insert oder *"
+
+#: integrations/views.py:35 templates/integrations/webhooks.html:8
+msgid "Active"
+msgstr "Aktiv"
+
+#: integrations/views.py:126
+msgid "Webhook saved."
+msgstr "Webhook gespeichert."
+
+#: integrations/views.py:149
+msgid "Test event queued."
+msgstr "Testereignis eingereiht."
+
+#: integrations/views.py:154
+msgid "Webhook deleted."
+msgstr "Webhook gelöscht."
+
+#: integrations/views.py:172
+msgid "Delivery queued again."
+msgstr "Zustellung erneut eingereiht."
 
 #: library/interchange.py:105
 #, python-format
@@ -2085,11 +2256,11 @@ msgstr "Details"
 
 #: templates/accounts/profile.html:9 templates/cabling/cable.html:22
 #: templates/dcim/device.html:47 templates/dcim/port.html:37
-#: templates/dcim/rack.html:85 templates/library/type_detail.html:37
-#: templates/locations/node.html:57 templates/manage/group_detail.html:9
-#: templates/manage/role_detail.html:15 templates/manage/tenant_detail.html:7
-#: templates/networks/vlan.html:16 templates/networks/wlan.html:17
-#: templates/search/results.html:37
+#: templates/dcim/rack.html:85 templates/integrations/webhook.html:34
+#: templates/library/type_detail.html:37 templates/locations/node.html:57
+#: templates/manage/group_detail.html:9 templates/manage/role_detail.html:15
+#: templates/manage/tenant_detail.html:7 templates/networks/vlan.html:16
+#: templates/networks/wlan.html:17 templates/search/results.html:37
 msgid "Save"
 msgstr "Speichern"
 
@@ -2186,7 +2357,7 @@ msgstr "Zuletzt aktiv"
 msgid "This session"
 msgstr "Diese Sitzung"
 
-#: templates/accounts/security.html:55 templates/base.html:63
+#: templates/accounts/security.html:55 templates/base.html:64
 msgid "Sign out"
 msgstr "Abmelden"
 
@@ -2228,6 +2399,108 @@ msgstr "QR-Code"
 #: templates/accounts/totp_setup.html:11
 msgid "Can't scan?"
 msgstr "Scannen nicht möglich?"
+
+#: templates/api/_secret.html:3
+msgid "Copy it now"
+msgstr "Jetzt kopieren"
+
+#: templates/api/_secret.html:4
+msgid "It is shown only once. Store it in a secret manager."
+msgstr ""
+"Es wird nur einmal angezeigt. Speichern Sie es in einem Passwortmanager."
+
+#: templates/api/clients.html:2 templates/api/clients.html:4
+#: templates/manage/_base.html:15
+msgid "API clients"
+msgstr "API-Clients"
+
+#: templates/api/clients.html:5
+msgid ""
+"Clients get access tokens from /api/oauth/token/ with the client credentials "
+"grant. Each client has its own service user: give it roles under Users like "
+"any person."
+msgstr ""
+"Clients erhalten Zugriffstoken von /api/oauth/token/ mit dem Client-"
+"Credentials-Grant. Jeder Client hat einen eigenen Dienstbenutzer: Weisen Sie "
+"ihm unter Benutzer Rollen zu wie jeder Person."
+
+#: templates/api/clients.html:9 templates/api/tokens.html:9
+msgid "Last used"
+msgstr "Zuletzt verwendet"
+
+#: templates/api/clients.html:12 templates/api/tokens.html:14
+msgid "never"
+msgstr "nie"
+
+#: templates/api/clients.html:13 templates/api/tokens.html:13
+msgid "revoked"
+msgstr "widerrufen"
+
+#: templates/api/clients.html:14
+msgid "Issue a new secret? The old one stops working."
+msgstr "Neues Geheimnis ausstellen? Das alte funktioniert dann nicht mehr."
+
+#: templates/api/clients.html:14 templates/integrations/webhook.html:9
+msgid "New secret"
+msgstr "Neues Geheimnis"
+
+#: templates/api/clients.html:15
+msgid "Revoke this client for good?"
+msgstr "Diesen Client endgültig widerrufen?"
+
+#: templates/api/clients.html:15 templates/api/tokens.html:15
+msgid "Revoke"
+msgstr "Widerrufen"
+
+#: templates/api/clients.html:16
+msgid "No clients yet."
+msgstr "Noch keine Clients."
+
+#: templates/api/clients.html:19
+msgid "New client"
+msgstr "Neuer Client"
+
+#: templates/api/clients.html:21
+msgid "Create client"
+msgstr "Client erstellen"
+
+#: templates/api/tokens.html:2 templates/api/tokens.html:4
+#: templates/base.html:62
+msgid "API tokens"
+msgstr "API-Token"
+
+#: templates/api/tokens.html:5
+msgid ""
+"Tokens act with your permissions. Send them as <code>Authorization: Bearer …"
+"</code>. The API is described at /api/schema/."
+msgstr ""
+"Token handeln mit Ihren Berechtigungen. Senden Sie sie als "
+"<code>Authorization: Bearer …</code>. Die API ist unter /api/schema/ "
+"beschrieben."
+
+#: templates/api/tokens.html:9
+msgid "Expires"
+msgstr "Läuft ab"
+
+#: templates/api/tokens.html:12 templates/networks/vlans.html:9
+msgid "all"
+msgstr "alle"
+
+#: templates/api/tokens.html:15
+msgid "Revoke this token?"
+msgstr "Diesen Token widerrufen?"
+
+#: templates/api/tokens.html:16
+msgid "No tokens yet."
+msgstr "Noch keine Token."
+
+#: templates/api/tokens.html:19
+msgid "New token"
+msgstr "Neuer Token"
+
+#: templates/api/tokens.html:21
+msgid "Create token"
+msgstr "Token erstellen"
 
 #: templates/base.html:16
 msgid "Skip to content"
@@ -2279,7 +2552,7 @@ msgstr "Import/Export"
 msgid "Administration"
 msgstr "Administration"
 
-#: templates/base.html:77
+#: templates/base.html:78
 msgid "Language"
 msgstr "Sprache"
 
@@ -2443,11 +2716,11 @@ msgstr "Geschwindigkeit"
 msgid "Enabled"
 msgstr "Aktiviert"
 
-#: templates/dcim/device.html:23
+#: templates/dcim/device.html:23 templates/integrations/webhooks.html:11
 msgid "yes"
 msgstr "ja"
 
-#: templates/dcim/device.html:23
+#: templates/dcim/device.html:23 templates/integrations/webhooks.html:11
 msgid "no"
 msgstr "nein"
 
@@ -2736,7 +3009,7 @@ msgstr ""
 msgid "Line"
 msgstr "Zeile"
 
-#: templates/exchange/preview.html:18
+#: templates/exchange/preview.html:18 templates/integrations/webhook.html:23
 msgid "Result"
 msgstr "Ergebnis"
 
@@ -2865,7 +3138,7 @@ msgstr "Beim Ersetzen wird der Maßstab zurückgesetzt."
 msgid "Upload"
 msgstr "Hochladen"
 
-#: templates/history/_table.html:2
+#: templates/history/_table.html:2 templates/integrations/webhook.html:23
 msgid "When"
 msgstr "Wann"
 
@@ -2941,6 +3214,91 @@ msgstr "Vorher"
 msgid "After"
 msgstr "Nachher"
 
+#: templates/integrations/webhook.html:6
+msgid "All webhooks"
+msgstr "Alle Webhooks"
+
+#: templates/integrations/webhook.html:8
+msgid "Send test event"
+msgstr "Testereignis senden"
+
+#: templates/integrations/webhook.html:9
+msgid "Issue a new secret? Receivers must update it."
+msgstr "Neues Geheimnis ausstellen? Empfänger müssen es aktualisieren."
+
+#: templates/integrations/webhook.html:10
+msgid "Delete this webhook?"
+msgstr "Diesen Webhook löschen?"
+
+#: templates/integrations/webhook.html:10 templates/library/type_detail.html:47
+#: templates/locations/node.html:60 templates/metadata/_panel.html:12
+#: templates/metadata/_panel.html:21 templates/networks/vlan.html:17
+#: templates/networks/wlan.html:18 templates/search/results.html:31
+msgid "Delete"
+msgstr "Löschen"
+
+#: templates/integrations/webhook.html:15
+msgid "Signing secret"
+msgstr "Signaturschlüssel"
+
+#: templates/integrations/webhook.html:16
+msgid ""
+"Shown only once. Verify the PatchManager-Signature header: HMAC-SHA256 of "
+"\"&lt;t&gt;.&lt;body&gt;\" with this secret must equal v1."
+msgstr ""
+"Wird nur einmal angezeigt. Prüfen Sie den Header PatchManager-Signature: "
+"HMAC-SHA256 von \"&lt;t&gt;.&lt;body&gt;\" mit diesem Geheimnis muss v1 "
+"entsprechen."
+
+#: templates/integrations/webhook.html:22
+msgid "Recent deliveries"
+msgstr "Letzte Zustellungen"
+
+#: templates/integrations/webhook.html:23
+msgid "Event"
+msgstr "Ereignis"
+
+#: templates/integrations/webhook.html:23
+msgid "Attempts"
+msgstr "Versuche"
+
+#: templates/integrations/webhook.html:28
+msgid "Send again"
+msgstr "Erneut senden"
+
+#: templates/integrations/webhook.html:29
+msgid "Nothing sent yet."
+msgstr "Noch nichts gesendet."
+
+#: templates/integrations/webhook.html:32
+msgid "Settings"
+msgstr "Einstellungen"
+
+#: templates/integrations/webhooks.html:2
+#: templates/integrations/webhooks.html:4 templates/manage/_base.html:14
+msgid "Webhooks"
+msgstr "Webhooks"
+
+#: templates/integrations/webhooks.html:5
+msgid ""
+"Every change in this tenant is sent as a signed JSON POST to the matching "
+"webhooks, with retries."
+msgstr ""
+"Jede Änderung in diesem Mandanten wird als signierter JSON-POST an die "
+"passenden Webhooks gesendet, mit Wiederholungen."
+
+#: templates/integrations/webhooks.html:12
+msgid "No webhooks yet."
+msgstr "Noch keine Webhooks."
+
+#: templates/integrations/webhooks.html:15
+msgid "New webhook"
+msgstr "Neuer Webhook"
+
+#: templates/integrations/webhooks.html:17
+msgid "Create webhook"
+msgstr "Webhook erstellen"
+
 #: templates/library/type_detail.html:4 templates/library/types.html:2
 #: templates/library/types.html:5
 msgid "Device library"
@@ -2985,13 +3343,6 @@ msgstr "Bilder speichern"
 #: templates/library/type_detail.html:47
 msgid "Delete this device type?"
 msgstr "Diesen Gerätetyp löschen?"
-
-#: templates/library/type_detail.html:47 templates/locations/node.html:60
-#: templates/metadata/_panel.html:12 templates/metadata/_panel.html:21
-#: templates/networks/vlan.html:17 templates/networks/wlan.html:18
-#: templates/search/results.html:31
-msgid "Delete"
-msgstr "Löschen"
 
 #: templates/library/type_form.html:7
 msgid ""
@@ -3171,12 +3522,12 @@ msgstr "Berechtigungsmatrix"
 msgid "Explain access"
 msgstr "Zugriff erklären"
 
-#: templates/manage/_base.html:14 templates/manage/audit.html:2
+#: templates/manage/_base.html:16 templates/manage/audit.html:2
 #: templates/manage/audit.html:5
 msgid "Audit log"
 msgstr "Audit-Log"
 
-#: templates/manage/_base.html:15 templates/manage/system.html:2
+#: templates/manage/_base.html:17 templates/manage/system.html:2
 #: templates/manage/system.html:4
 msgid "System"
 msgstr "System"
@@ -3570,10 +3921,6 @@ msgstr "Access-Ports"
 msgid "Trunks"
 msgstr "Trunks"
 
-#: templates/networks/vlans.html:9
-msgid "all"
-msgstr "alle"
-
 #: templates/networks/vlans.html:10
 msgid "No VLANs yet."
 msgstr "Noch keine VLANs."
@@ -3667,11 +4014,11 @@ msgstr "archiviert am"
 msgid "A tenant with this identifier already exists."
 msgstr "Ein Mandant mit dieser Kennung existiert bereits."
 
-#: tenancy/services.py:69
+#: tenancy/services.py:73
 msgid "Archive the tenant before deleting it."
 msgstr "Archivieren Sie den Mandanten, bevor Sie ihn löschen."
 
-#: tenancy/services.py:71
+#: tenancy/services.py:75
 msgid "The identifier does not match."
 msgstr "Die Kennung stimmt nicht überein."
 

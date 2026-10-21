@@ -80,6 +80,16 @@ included in the daily backup archive. Limits and scanning:
 | `PATCHMANAGER_UPLOAD_MAX_MB` | `20` | Maximum upload size (Caddy limits request bodies to 25 MB) |
 | `PATCHMANAGER_CLAMD_HOST` / `PATCHMANAGER_CLAMD_PORT` | unset / `3310` | Scan uploads with clamd; uploads fail while it is unreachable |
 
+## API and webhooks
+
+| Variable | Default | Meaning |
+|---|---|---|
+| `PATCHMANAGER_API_RATE` | `1200/minute` | Requests per user and time unit |
+| `PATCHMANAGER_WEBHOOK_ALLOWED_NETWORKS` | empty | Comma separated CIDRs webhooks may reach besides public addresses |
+| `PATCHMANAGER_WEBHOOK_ALLOW_HTTP` | `false` | Allow plain http webhook URLs |
+
+Webhooks are sent by the `beat` and `worker` services; both must run.
+
 ## Reports
 
 PDF reports show the instance name (`PATCHMANAGER_INSTANCE_NAME`). Set
