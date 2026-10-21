@@ -1,0 +1,10 @@
+{% extends "accounts/_auth_base.html" %}{% load i18n %}
+{% block title %}{% translate "Accept invitation" %}{% endblock %}
+{% block card %}
+<h1 class="mb-2">{% blocktranslate with name=invited.display_name %}Hello {{ name }}{% endblocktranslate %}</h1>
+<p class="mb-4 text-sm">{% blocktranslate with email=invited.email %}Choose a password for {{ email }}.{% endblocktranslate %}</p>
+<form method="post" novalidate>{% csrf_token %}
+  {% include "core/_form.html" %}
+  <button class="btn-primary w-full">{% translate "Set password" %}</button>
+</form>
+{% endblock %}

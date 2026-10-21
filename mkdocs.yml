@@ -47,3 +47,6 @@ nav:
       - adr/0008-license-agpl.md
       - adr/0009-object-storage.md
       - adr/0010-metrics.md
+      - adr/0011-authorization-model.md
+      - adr/0012-authentication-and-sessions.md
+      - adr/0013-database-roles.md

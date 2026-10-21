@@ -10,3 +10,18 @@ timeout = 60
 graceful_timeout = 30
 forwarded_allow_ips = os.environ.get("PATCHMANAGER_FORWARDED_ALLOW_IPS", "127.0.0.1")
 accesslog = "-"
+
+
+def on_starting(server: object) -> None:
+    """Prepare the shared directory for multi process Prometheus metrics."""
+    directory = os.environ.get("PROMETHEUS_MULTIPROC_DIR")
+    if directory:
+        os.makedirs(directory, exist_ok=True)
+
+
+def child_exit(server: object, worker: object) -> None:
+    """Drop metrics files of exited workers."""
+    if os.environ.get("PROMETHEUS_MULTIPROC_DIR"):
+        from prometheus_client import multiprocess
+
+        multiprocess.mark_process_dead(worker.pid)  # type: ignore[attr-defined,no-untyped-call]

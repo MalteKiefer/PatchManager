@@ -1,0 +1,19 @@
+{% extends "accounts/_auth_base.html" %}{% load i18n static %}
+{% block title %}{% translate "Second factor" %}{% endblock %}
+{% block head %}<script type="module" src="{% static 'core/webauthn.js' %}"></script>{% endblock %}
+{% block card %}
+<h1 class="mb-4">{% translate "Confirm it's you" %}</h1>
+{% if has_webauthn %}
+<button type="button" class="btn-primary mb-4 w-full" data-webauthn="login"
+        data-options-url="{% url 'accounts:webauthn-login-options' %}" data-verify-url="{% url 'accounts:webauthn-login-verify' %}">
+  {% translate "Use security key or passkey" %}
+</button>
+<p id="webauthn-status" class="mb-4 text-sm text-red-600" role="alert" aria-live="polite"></p>
+{% endif %}
+<form method="post" novalidate>{% csrf_token %}
+  {% include "core/_form.html" %}
+  <p class="mb-4 text-xs text-slate-500">{% if has_totp %}{% translate "Enter the 6 digit code from your authenticator app, or a recovery code." %}{% else %}{% translate "Enter a recovery code." %}{% endif %}</p>
+  <button class="btn-secondary w-full">{% translate "Verify" %}</button>
+</form>
+<p class="mt-4 text-center text-sm"><a href="{% url 'accounts:login' %}">{% translate "Cancel" %}</a></p>
+{% endblock %}

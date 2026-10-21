@@ -1,0 +1,17 @@
+{% extends "base.html" %}{% load i18n %}
+{% block title %}{% translate "Profile" %}{% endblock %}
+{% block content %}
+<h1 class="mb-6">{% translate "Profile" %}</h1>
+<div class="grid gap-6 md:grid-cols-2">
+  <form method="post" class="card">{% csrf_token %}
+    <h2 class="mb-4">{% translate "Details" %}</h2>
+    {% include "core/_form.html" with form=profile %}
+    <button name="action" value="profile" class="btn-primary">{% translate "Save" %}</button>
+  </form>
+  <form method="post" class="card">{% csrf_token %}
+    <h2 class="mb-4">{% translate "Password" %}</h2>
+    {% include "core/_form.html" with form=password %}
+    <button name="action" value="password" class="btn-primary">{% translate "Change password" %}</button>
+  </form>
+</div>
+{% endblock %}

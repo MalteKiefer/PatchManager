@@ -1,6 +1,6 @@
 [workspace]
 name = "patchmanager"
-version = "0.1.0"
+version = "0.2.0"
 description = "Self-hosted network and rack documentation platform"
 authors = ["Malte Kiefer"]
 license = "AGPL-3.0-only"
@@ -18,9 +18,19 @@ django = ">=6.1.2,<6.2"
 psycopg = ">=3.3.4,<4"
 gunicorn = ">=26.2.0,<27"
 whitenoise = ">=6.12.0,<7"
+argon2-cffi = ">=25.1.0,<26"
+pyotp = ">=2.10.0,<3"
+webauthn = ">=3.0.1,<4"
+qrcode = ">=8.2,<9"
+cryptography = "*"
+celery = ">=5.6.3,<6"
+redis-py = ">=8.1.0,<9"
+prometheus_client = ">=0.26.0,<0.27"
+pyyaml = ">=6.0.3,<7"
 
 [tasks]
 check = "python -m django check --deploy --fail-level WARNING"
+makemigrations = "python -m django makemigrations"
 
 # Local PostgreSQL and Redis from conda-forge, see docs/adr/0004.
 [feature.db.dependencies]
@@ -35,13 +45,20 @@ PGUSER = "patchmanager"
 DATABASE_URL = "postgresql://patchmanager@/patchmanager?host=$PIXI_PROJECT_ROOT/.pixi&port=5433"
 
 [feature.db.tasks]
-db-init = { cmd = "test -d \"$PGDATA\" || (initdb --auth=trust --username=patchmanager --encoding=UTF8 -D \"$PGDATA\" && pg_ctl -D \"$PGDATA\" -o \"-k $PGHOST -p $PGPORT -c listen_addresses=''\" -l \"$PIXI_PROJECT_ROOT/.pixi/pg.log\" -w start && createdb patchmanager && pg_ctl -D \"$PGDATA\" -w stop)" }
-db-start = { cmd = "pg_ctl -D \"$PGDATA\" status >/dev/null || pg_ctl -D \"$PGDATA\" -o \"-k $PGHOST -p $PGPORT -c listen_addresses=''\" -l \"$PIXI_PROJECT_ROOT/.pixi/pg.log\" -w start", depends-on = ["db-init"] }
-db-stop = "pg_ctl -D \"$PGDATA\" -w stop"
+db-init = "sh scripts/db.sh init"
+db-start = { cmd = "sh scripts/db.sh start", depends-on = ["db-init"] }
+db-stop = "sh scripts/db.sh stop"
 migrate = { cmd = "python -m django migrate", depends-on = ["db-start"] }
 
+# Insecure, publicly known values for local development only.
+[feature.dev.activation.env]
+PATCHMANAGER_DEBUG = "true"
+DJANGO_SECRET_KEY = "dev-only-insecure-key-never-use-in-production-0123456789"
+PATCHMANAGER_ENCRYPTION_KEYS = "MDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDA="
+
 [feature.dev.tasks]
-dev = { cmd = "python -m django runserver 127.0.0.1:8000", depends-on = ["migrate"], env = { PATCHMANAGER_DEBUG = "true", DJANGO_SECRET_KEY = "dev-only-insecure-key-never-use-in-production-0123456789" } }
+dev = { cmd = "python -m django runserver 127.0.0.1:8000", depends-on = ["migrate", "css"] }
+worker = "celery -A patchmanager.worker worker --loglevel INFO"
 
 [feature.test.dependencies]
 pytest = ">=9.1.1,<10"
@@ -51,7 +68,16 @@ hypothesis = ">=6.170.5,<7"
 factory_boy = ">=3.3.3,<4"
 
 [feature.test.tasks]
-test = { cmd = "pytest", depends-on = ["db-start"], env = { DJANGO_SECRET_KEY = "test-only-insecure-key-0123456789-0123456789-0123456789" } }
+test = { cmd = "pytest", depends-on = ["db-start", "compilemessages"], env = { DJANGO_SETTINGS_MODULE = "tests.settings", PATCHMANAGER_TESTING = "true", PATCHMANAGER_DEBUG = "false", DJANGO_SECRET_KEY = "test-only-insecure-key-0123456789-0123456789-0123456789", PATCHMANAGER_ENCRYPTION_KEYS = "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=" } }
+
+# Browser end to end tests (Playwright, Chromium).
+[feature.e2e.dependencies]
+playwright = ">=1.64.1,<2"
+pytest-playwright = ">=0.10.0,<0.11"
+
+[feature.e2e.tasks]
+e2e-install = "playwright install chromium"
+e2e = { cmd = "pytest -m e2e tests/e2e --no-cov -p no:cacheprovider", depends-on = ["db-start", "css", "compilemessages"], env = { DJANGO_SETTINGS_MODULE = "tests.settings_e2e", DJANGO_ALLOW_ASYNC_UNSAFE = "true", PATCHMANAGER_TESTING = "true", PATCHMANAGER_DEBUG = "false", DJANGO_SECRET_KEY = "test-only-insecure-key-0123456789-0123456789-0123456789", PATCHMANAGER_ENCRYPTION_KEYS = "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=" } }
 
 [feature.lint.dependencies]
 ruff = ">=0.17.1,<0.18"
@@ -64,7 +90,7 @@ pip-audit = ">=2.10.1,<3"
 [feature.lint.tasks]
 lint = "ruff check . && ruff format --check ."
 fmt = "ruff check --fix . && ruff format ."
-typecheck = { cmd = "mypy", env = { DJANGO_SECRET_KEY = "typecheck-only-insecure-key-0123456789-0123456789-0123", DATABASE_URL = "postgresql://typecheck@localhost/typecheck" } }
+typecheck = { cmd = "mypy", env = { PATCHMANAGER_TESTING = "true", PATCHMANAGER_ENCRYPTION_KEYS = "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=", DJANGO_SECRET_KEY = "typecheck-only-insecure-key-0123456789-0123456789-0123", DATABASE_URL = "postgresql://typecheck@localhost/typecheck" } }
 audit = "pip-audit --strict --progress-spinner off && bandit -c pyproject.toml -r src"
 pre-commit = "pre-commit run --all-files"
 
@@ -78,13 +104,27 @@ docs-build = "mkdocs build --strict"
 [feature.prod.tasks]
 serve = "gunicorn patchmanager.wsgi:application --config src/patchmanager/gunicorn_conf.py"
 
+# Asset build: translations and Tailwind CSS. Used by dev, test and the image build.
+[feature.build.dependencies]
+gettext = ">=0.25,<1"
+
+[feature.build.tasks]
+css = "python scripts/tailwind.py -i src/patchmanager/core/assets/app.css -o src/patchmanager/core/static/core/app.css --minify"
+css-watch = "python scripts/tailwind.py -i src/patchmanager/core/assets/app.css -o src/patchmanager/core/static/core/app.css --watch"
+messages = "cd src/patchmanager && django-admin makemessages -l de --ignore 'static/*' --ignore 'core/static/*'"
+# No settings needed: compiles every catalog below the current directory.
+compilemessages = { cmd = "cd src/patchmanager && django-admin compilemessages", env = { DJANGO_SETTINGS_MODULE = "" } }
+assets = { depends-on = ["css", "compilemessages"] }
+
 [tasks.build]
 cmd = "docker buildx build --platform linux/amd64,linux/arm64 -t patchmanager:local ."
 
 [environments]
 default = { solve-group = "main" }
 prod = { features = ["prod"], solve-group = "main" }
-test = { features = ["test", "db"], solve-group = "main" }
-lint = { features = ["lint", "test"], solve-group = "main" }
+build = { features = ["build"], solve-group = "main" }
+test = { features = ["test", "db", "build"], solve-group = "main" }
+e2e = { features = ["test", "db", "build", "e2e"], solve-group = "main" }
+lint = { features = ["lint", "test", "e2e"], solve-group = "main" }
 docs = { features = ["docs"], no-default-feature = true }
-dev = { features = ["dev", "db", "test", "lint", "docs"], solve-group = "main" }
+dev = { features = ["dev", "db", "test", "lint", "docs", "build", "e2e"], solve-group = "main" }

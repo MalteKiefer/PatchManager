@@ -19,9 +19,9 @@
 		-Server
 	}
 
-	# Liveness/readiness stay internal.
-	@health path /health/*
-	respond @health 404
+	# Liveness/readiness and metrics stay internal.
+	@internal path /health/* /metrics
+	respond @internal 404
 
 	request_body {
 		max_size 50MB

@@ -19,14 +19,14 @@ def test_database_url_rejects_other_engines() -> None:
         database_from_url("sqlite:///db.sqlite3")
 
 
-def test_env_reads_secret_file(tmp_path, monkeypatch) -> None:  # type: ignore[no-untyped-def]
+def test_env_reads_secret_file(tmp_path, monkeypatch) -> None:
     secret = tmp_path / "secret"
     secret.write_text("from-file\n", encoding="utf-8")
     monkeypatch.setenv("SOME_SECRET_FILE", str(secret))
     assert env("SOME_SECRET") == "from-file"
 
 
-def test_env_missing_required_value(monkeypatch) -> None:  # type: ignore[no-untyped-def]
+def test_env_missing_required_value(monkeypatch) -> None:
     monkeypatch.delenv("NOT_SET_ANYWHERE", raising=False)
     with pytest.raises(ImproperlyConfigured):
         env("NOT_SET_ANYWHERE")

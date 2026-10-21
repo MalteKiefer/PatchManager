@@ -1,0 +1,11 @@
+{% extends "manage/_base.html" %}{% load i18n %}
+{% block title %}{% translate "Tenants" %}{% endblock %}
+{% block manage %}
+<div class="mb-4 flex items-center"><h1 class="mr-auto">{% translate "Tenants" %}</h1>{% if can_add %}<a class="btn-primary" href="{% url 'manage:tenant-create' %}">{% translate "New tenant" %}</a>{% endif %}</div>
+<div class="card overflow-x-auto p-0"><table class="table">
+  <thead><tr><th>{% translate "Name" %}</th><th>{% translate "Identifier" %}</th><th>{% translate "Contact" %}</th><th>{% translate "Status" %}</th></tr></thead>
+  <tbody>{% for t in tenants %}<tr><td><a href="{% url 'manage:tenant' t.pk %}">{{ t.name }}</a></td><td class="font-mono text-xs">{{ t.slug }}</td><td>{{ t.contact_name|default:"-" }}</td>
+    <td>{% if t.archived_at %}<span class="badge-muted">{% translate "archived" %}</span>{% else %}<span class="badge-ok">{% translate "active" %}</span>{% endif %}{% if t.requires_mfa %} <span class="badge-warn">MFA</span>{% endif %}</td></tr>
+  {% empty %}<tr><td colspan="4">{% translate "No tenants." %}</td></tr>{% endfor %}</tbody>
+</table></div>
+{% endblock %}

@@ -1,0 +1,14 @@
+{% if form.non_field_errors %}<div class="mb-4 rounded-md border border-red-200 bg-red-50 px-4 py-2 text-sm text-red-800 dark:border-red-900 dark:bg-red-950 dark:text-red-200" role="alert">{{ form.non_field_errors }}</div>{% endif %}
+{% for field in form.hidden_fields %}{{ field }}{% endfor %}
+{% for field in form.visible_fields %}
+<div class="field">
+  {% if field.widget_type == "checkbox" %}
+  <label class="flex items-center">{{ field }} {{ field.label }}</label>
+  {% else %}
+  {{ field.label_tag }}
+  {{ field }}
+  {% endif %}
+  {% if field.help_text %}<p class="help" id="{{ field.auto_id }}_help">{{ field.help_text }}</p>{% endif %}
+  {{ field.errors }}
+</div>
+{% endfor %}

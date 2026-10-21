@@ -1,0 +1,17 @@
+{% extends "manage/_base.html" %}{% load i18n %}
+{% block title %}{% translate "Explain access" %}{% endblock %}
+{% block manage %}
+<h1 class="mb-4">{% translate "Explain access" %}</h1>
+<form method="get" class="card mb-6 grid gap-x-4 md:grid-cols-3">
+  {% include "core/_form.html" %}
+  <div class="md:col-span-3"><button class="btn-primary">{% translate "Explain" %}</button></div>
+</form>
+{% if decision %}
+<section class="card" aria-live="polite">
+  <h2>{% if decision.allowed %}<span class="badge-ok">{% translate "allowed" %}</span>{% else %}<span class="badge-bad">{% translate "denied" %}</span>{% endif %} {{ decision.reason }}</h2>
+  {% if decision.grant %}<p class="mt-2 text-sm">{% blocktranslate with role=decision.grant.role_name scope=decision.grant.scope_label|default:"global" %}Decided by role {{ role }} at scope {{ scope }}{% endblocktranslate %}{% if decision.grant.via_group %} ({% translate "via group" %} {{ decision.grant.via_group }}){% endif %}.</p>{% endif %}
+  <h3 class="mt-4 text-sm font-semibold">{% translate "Assignments considered" %}</h3>
+  <ul class="mt-2 text-sm">{% for g in decision.considered %}<li>{{ g.effect }} · {{ g.role_name }} · {{ g.scope_label|default:"global" }}{% if g.via_group %} · {% translate "via" %} {{ g.via_group }}{% endif %}{% if g.conditions %} · <code>{{ g.conditions }}</code>{% endif %}</li>{% empty %}<li>{% translate "None that contain this permission and cover this object." %}</li>{% endfor %}</ul>
+</section>
+{% endif %}
+{% endblock %}

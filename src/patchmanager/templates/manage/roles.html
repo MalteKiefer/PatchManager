@@ -1,0 +1,23 @@
+{% extends "manage/_base.html" %}{% load i18n %}
+{% block title %}{% translate "Roles" %}{% endblock %}
+{% block manage %}
+<div class="mb-4 flex flex-wrap items-center gap-2">
+  <h1 class="mr-auto">{% translate "Roles" %}</h1>
+  <a class="btn-secondary" href="{% url 'manage:role-export' %}?format=json">{% translate "Export JSON" %}</a>
+  <a class="btn-secondary" href="{% url 'manage:role-export' %}?format=yaml">{% translate "Export YAML" %}</a>
+  <a class="btn-primary" href="{% url 'manage:role-create' %}">{% translate "New role" %}</a>
+</div>
+<div class="card mb-6 overflow-x-auto p-0"><table class="table">
+  <thead><tr><th>{% translate "Name" %}</th><th>{% translate "Type" %}</th><th>{% translate "MFA" %}</th><th>{% translate "Assignments" %}</th></tr></thead>
+  <tbody>{% for r in roles %}<tr>
+    <td><a href="{% url 'manage:role' r.pk %}">{{ r.label }}</a><p class="text-xs text-slate-500">{{ r.summary }}</p></td>
+    <td>{% if r.is_system %}<span class="badge-muted">{% translate "system" %}</span>{% else %}{% translate "custom" %}{% endif %}</td>
+    <td>{% if r.requires_mfa %}<span class="badge-warn">{% translate "required" %}</span>{% endif %}</td><td>{{ r.assignment_count }}</td>
+  </tr>{% endfor %}</tbody>
+</table></div>
+<form method="post" action="{% url 'manage:role-import' %}" enctype="multipart/form-data" class="card max-w-xl">{% csrf_token %}
+  <h2 class="mb-3">{% translate "Import roles" %}</h2>
+  {% include "core/_form.html" with form=import_form %}
+  <button class="btn-secondary">{% translate "Import" %}</button>
+</form>
+{% endblock %}

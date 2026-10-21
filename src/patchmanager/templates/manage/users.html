@@ -1,0 +1,18 @@
+{% extends "manage/_base.html" %}{% load i18n %}
+{% block title %}{% translate "Users" %}{% endblock %}
+{% block manage %}
+<div class="mb-4 flex flex-wrap items-center gap-3">
+  <h1 class="mr-auto">{% translate "Users" %}</h1>
+  <form method="get" role="search"><label for="q" class="sr-only">{% translate "Search" %}</label><input id="q" name="q" value="{{ q }}" placeholder="{% translate 'Search' %}" class="rounded-md border border-slate-300 px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-800"></form>
+  <a class="btn-primary" href="{% url 'manage:user-invite' %}">{% translate "Invite user" %}</a>
+</div>
+<div class="card overflow-x-auto p-0"><table class="table">
+  <thead><tr><th>{% translate "Email" %}</th><th>{% translate "Name" %}</th><th>{% translate "Status" %}</th><th>{% translate "Assignments" %}</th><th>{% translate "Last login" %}</th></tr></thead>
+  <tbody>{% for u in page %}<tr>
+    <td><a href="{% url 'manage:user' u.pk %}">{{ u.email }}</a></td><td>{{ u.display_name }}</td>
+    <td>{% if not u.is_active %}<span class="badge-bad">{% translate "deactivated" %}</span>{% elif u.is_locked %}<span class="badge-warn">{% translate "locked" %}</span>{% elif not u.has_usable_password %}<span class="badge-muted">{% translate "invited" %}</span>{% else %}<span class="badge-ok">{% translate "active" %}</span>{% endif %}</td>
+    <td>{{ u.assignment_count }}</td><td>{{ u.last_login|default:"-" }}</td>
+  </tr>{% empty %}<tr><td colspan="5">{% translate "No users found." %}</td></tr>{% endfor %}</tbody>
+</table></div>
+{% include "manage/_pager.html" %}
+{% endblock %}

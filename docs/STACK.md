@@ -16,18 +16,27 @@ for Python dependencies; Renovate keeps it current.
 | PostgreSQL | 18.6 | conda-forge (local), `postgres:18.6-trixie` (containers) | only supported database |
 | Redis | 8.10.2 | conda-forge (local), `redis:8.10.2-alpine` | cache, rate limits, task broker |
 
+Added in 0.2.0: argon2-cffi 25.1.0, pyotp 2.10.0, webauthn 3.0.1, qrcode 8.2,
+cryptography (Fernet), celery 5.6.3, redis-py 8.1.0, prometheus_client 0.26.0,
+pyyaml 6.0.3, gettext 0.25, playwright 1.64.1, pytest-playwright 0.10.0.
+
+Front end assets (self hosted, no CDN at runtime):
+
+| Asset | Version | Integrity |
+|---|---|---|
+| HTMX | 4.0.0 | `sha256:e484d9171a9db30a39c8f16e3d709d4137f3211c659f8e6125816635033d593f` (vendored) |
+| Alpine.js CSP build | 3.17.5 | `sha256:48c170c92032e527cbae71b8ce75cf1f96ca06fa869a6120ef0fe438d8e92c36` (vendored) |
+| Tailwind CSS standalone CLI | 4.3.3 | checksums pinned in `scripts/tailwind.py` |
+
+`django-otp` was not used: TOTP needs a few lines on top of pyotp, and WebAuthn
+comes from py_webauthn directly.
+
 ## Planned per phase (not yet in the lockfile)
 
 | Component | Latest stable | Phase |
 |---|---|---|
-| Django REST Framework | 3.18.3 | 1 |
-| drf-spectacular (OpenAPI 3.1) | 0.30.0 | 1 |
-| Celery | 5.6.3 | 1 |
-| django-otp / webauthn | 1.7.5 / 3.0.1 | 1 |
-| HTMX | 4.0.0 | 1 |
-| Alpine.js | 3.17.5 | 1 |
-| Tailwind CSS | 4.3.3 | 1 |
-| Playwright (Python) | 1.64.0 | 1 |
+| Django REST Framework | 3.18.3 | 7 |
+| drf-spectacular (OpenAPI 3.1) | 0.30.0 | 7 |
 | Leaflet | 1.9.4 | 2 |
 | nh3 (HTML sanitising) | 0.3.7 | 3 |
 | WeasyPrint | 69.0 | 6 |

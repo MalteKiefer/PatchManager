@@ -1,0 +1,17 @@
+{% extends "base.html" %}{% load i18n %}
+{% block title %}{% translate "Add authenticator app" %}{% endblock %}
+{% block content %}
+<div class="card mx-auto max-w-lg">
+  <h1 class="mb-4">{% translate "Add authenticator app" %}</h1>
+  <ol class="mb-4 list-decimal space-y-1 pl-5 text-sm">
+    <li>{% translate "Scan this code with your authenticator app." %}</li>
+    <li>{% translate "Enter the 6 digit code it shows." %}</li>
+  </ol>
+  <div class="mx-auto mb-4 w-56 rounded bg-white p-2" role="img" aria-label="{% translate 'QR code' %}">{{ qr|safe }}</div>
+  <details class="mb-4 text-xs"><summary>{% translate "Can't scan?" %}</summary><code class="break-all">{{ secret_uri }}</code></details>
+  <form method="post" action="{% url 'accounts:totp-setup' %}">{% csrf_token %}
+    {% include "core/_form.html" %}
+    <button class="btn-primary">{% translate "Confirm" %}</button>
+  </form>
+</div>
+{% endblock %}

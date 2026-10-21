@@ -1,0 +1,12 @@
+{% extends "manage/_base.html" %}{% load i18n %}
+{% block title %}{% translate "System" %}{% endblock %}
+{% block manage %}
+<h1 class="mb-4">{% translate "System" %}</h1>
+<div class="grid gap-6 lg:grid-cols-2">
+  <section class="card"><h2 class="mb-3">{% translate "Versions" %}</h2>
+    <dl class="grid grid-cols-2 gap-1 text-sm">{% for k, v in versions.items %}<dt class="text-slate-500">{{ k }}</dt><dd class="font-mono">{{ v }}</dd>{% endfor %}</dl></section>
+  <section class="card"><h2 class="mb-1">{% translate "Security configuration" %}</h2>
+    <p class="mb-3 text-xs text-slate-500">{% translate "Set through environment variables, see the deployment guide." %}</p>
+    <dl class="grid grid-cols-2 gap-1 text-sm">{% for k, v in security.items %}<dt class="text-slate-500">{{ k }}</dt><dd class="font-mono">{{ v }}</dd>{% endfor %}</dl></section>
+</div>
+{% endblock %}

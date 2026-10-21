@@ -1,0 +1,61 @@
+{% extends "base.html" %}{% load i18n static %}
+{% block title %}{% translate "Security" %}{% endblock %}
+{% block head %}<script type="module" src="{% static 'core/webauthn.js' %}"></script>{% endblock %}
+{% block content %}
+<h1 class="mb-2">{% translate "Security" %}</h1>
+{% if mfa_required %}<p class="mb-6 text-sm"><span class="badge-warn">{% translate "MFA required" %}</span> {% translate "Your account must use a second factor." %}</p>{% endif %}
+
+{% if new_codes %}
+<section class="card mb-6 border-amber-300 dark:border-amber-700" aria-labelledby="codes-h">
+  <h2 id="codes-h">{% translate "Your recovery codes" %}</h2>
+  <p class="mt-1 text-sm">{% translate "Store them somewhere safe. Each works once. They are shown only now." %}</p>
+  <ul class="mt-3 grid grid-cols-2 gap-2 font-mono text-sm sm:grid-cols-5">{% for code in new_codes %}<li class="rounded bg-slate-100 px-2 py-1 dark:bg-slate-800">{{ code }}</li>{% endfor %}</ul>
+</section>
+{% endif %}
+
+<div class="grid gap-6 lg:grid-cols-2">
+  <section class="card" aria-labelledby="factors-h">
+    <h2 id="factors-h" class="mb-4">{% translate "Second factors" %}</h2>
+    <ul class="mb-4 divide-y divide-slate-100 dark:divide-slate-800">
+      {% for d in totp_devices %}
+      <li class="flex items-center justify-between py-2 text-sm"><span>{{ d.name }} <span class="badge-muted">{% translate "Authenticator app" %}</span></span>
+        <form method="post" action="{% url 'accounts:remove-factor' 'totp' d.pk %}" data-confirm="{% translate 'Remove this factor?' %}">{% csrf_token %}<button class="btn-secondary py-1">{% translate "Remove" %}</button></form></li>
+      {% endfor %}
+      {% for c in credentials %}
+      <li class="flex items-center justify-between py-2 text-sm"><span>{{ c.name }} <span class="badge-muted">{% translate "Security key / passkey" %}</span></span>
+        <form method="post" action="{% url 'accounts:remove-factor' 'webauthn' c.pk %}" data-confirm="{% translate 'Remove this factor?' %}">{% csrf_token %}<button class="btn-secondary py-1">{% translate "Remove" %}</button></form></li>
+      {% endfor %}
+      {% if not totp_devices and not credentials %}<li class="py-2 text-sm text-slate-500">{% translate "No second factor yet." %}</li>{% endif %}
+    </ul>
+    <form method="post" action="{% url 'accounts:totp-setup' %}" class="mb-4 flex flex-wrap items-end gap-2">{% csrf_token %}
+      <div class="field mb-0 flex-1"><label for="totp-name">{% translate "Authenticator app name" %}</label><input id="totp-name" name="name" maxlength="100" value="{% translate 'Authenticator app' %}"></div>
+      <button class="btn-primary">{% translate "Add authenticator app" %}</button>
+    </form>
+    <div class="flex flex-wrap items-end gap-2">
+      <div class="field mb-0 flex-1"><label for="key-name">{% translate "Security key name" %}</label><input id="key-name" maxlength="100" value="{% translate 'Security key' %}"></div>
+      <button type="button" class="btn-primary" data-webauthn="register" data-name-input="key-name"
+              data-options-url="{% url 'accounts:webauthn-register-options' %}" data-verify-url="{% url 'accounts:webauthn-register' %}">{% translate "Add security key or passkey" %}</button>
+    </div>
+    <p id="webauthn-status" class="mt-2 text-sm text-red-600" role="alert" aria-live="polite"></p>
+    <hr class="my-4 border-slate-200 dark:border-slate-800">
+    <form method="post" action="{% url 'accounts:recovery-codes' %}" class="flex items-center justify-between gap-2" data-confirm="{% translate 'Old recovery codes stop working. Continue?' %}">{% csrf_token %}
+      <span class="text-sm">{% blocktranslate count n=recovery_left %}{{ n }} recovery code left{% plural %}{{ n }} recovery codes left{% endblocktranslate %}</span>
+      <button class="btn-secondary">{% translate "New recovery codes" %}</button>
+    </form>
+  </section>
+
+  <section class="card" aria-labelledby="sessions-h">
+    <h2 id="sessions-h" class="mb-4">{% translate "Active sessions" %}</h2>
+    <div class="overflow-x-auto"><table class="table">
+      <thead><tr><th>{% translate "Device" %}</th><th>{% translate "Address" %}</th><th>{% translate "Last active" %}</th><th></th></tr></thead>
+      <tbody>{% for s in sessions %}<tr>
+        <td class="max-w-[16rem] truncate" title="{{ s.user_agent }}">{{ s.user_agent|default:"-"|truncatechars:60 }}</td>
+        <td>{{ s.ip_address|default:"-" }}</td><td>{{ s.last_activity|default:s.created_at|timesince }}</td>
+        <td>{% if s.session_key == current_key %}<span class="badge-ok">{% translate "This session" %}</span>{% else %}
+          <form method="post" action="{% url 'accounts:revoke-session' s.session_key %}">{% csrf_token %}<button class="btn-secondary py-1">{% translate "Sign out" %}</button></form>{% endif %}</td>
+      </tr>{% endfor %}</tbody>
+    </table></div>
+    <form method="post" action="{% url 'accounts:revoke-others' %}" class="mt-4">{% csrf_token %}<button class="btn-secondary">{% translate "Sign out all other sessions" %}</button></form>
+  </section>
+</div>
+{% endblock %}

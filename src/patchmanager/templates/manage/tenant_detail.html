@@ -1,0 +1,25 @@
+{% extends "manage/_base.html" %}{% load i18n %}
+{% block title %}{% if tenant %}{{ tenant.name }}{% else %}{% translate "New tenant" %}{% endif %}{% endblock %}
+{% block manage %}
+<h1 class="mb-4">{% if tenant %}{{ tenant.name }}{% else %}{% translate "New tenant" %}{% endif %}</h1>
+<form method="post" class="card mb-6 max-w-2xl" novalidate>{% csrf_token %}
+  {% include "core/_form.html" %}
+  {% if not tenant or can_change %}<button name="save" value="1" class="btn-primary">{% translate "Save" %}</button>{% endif %}
+</form>
+{% if tenant and can_change %}
+<section class="card max-w-2xl">
+  <h2 class="mb-3">{% translate "Lifecycle" %}</h2>
+  {% if tenant.archived_at %}
+  <form method="post" class="mb-4">{% csrf_token %}<button name="restore" value="1" class="btn-secondary">{% translate "Restore" %}</button></form>
+  {% if can_delete %}
+  <form method="post" class="flex flex-wrap items-end gap-2" data-confirm="{% translate 'Delete this tenant and all its data permanently?' %}">{% csrf_token %}
+    <div class="field mb-0"><label for="confirm">{% blocktranslate with slug=tenant.slug %}Type {{ slug }} to confirm{% endblocktranslate %}</label><input id="confirm" name="confirm" autocomplete="off"></div>
+    <button name="delete" value="1" class="btn-danger">{% translate "Delete permanently" %}</button>
+  </form>
+  {% endif %}
+  {% else %}
+  <form method="post" data-confirm="{% translate 'Archive this tenant? Its members lose access until it is restored.' %}">{% csrf_token %}<button name="archive" value="1" class="btn-secondary">{% translate "Archive" %}</button></form>
+  {% endif %}
+</section>
+{% endif %}
+{% endblock %}

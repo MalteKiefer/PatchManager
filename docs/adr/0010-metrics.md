@@ -1,6 +1,6 @@
 # 10. Prometheus metrics
 
-* Status: proposed (decided in Phase 1)
+* Status: accepted
 * Date: 2026-10-21
 
 ## Context

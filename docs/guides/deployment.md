@@ -1,7 +1,7 @@
 # Deployment
 
-PatchManager runs as a Docker Compose stack: Caddy (TLS), app, PostgreSQL 18, Redis and a
-backup job. Only Caddy is reachable from outside; everything else sits on an internal
+PatchManager runs as a Docker Compose stack: Caddy (TLS), app, worker, scheduler,
+PostgreSQL 18, Redis and a backup job. Only Caddy is reachable from outside; everything else sits on an internal
 network.
 
 ## Requirements
@@ -18,14 +18,29 @@ network.
 git clone https://github.com/MalteKiefer/PatchManager.git
 cd PatchManager
 mkdir -p secrets && chmod 700 secrets
-openssl rand -base64 48 > secrets/postgres_password
+openssl rand -base64 48 | tr -d '/+=' > secrets/postgres_password
+openssl rand -base64 48 | tr -d '/+=' > secrets/postgres_superuser_password
 openssl rand -base64 64 > secrets/django_secret_key
+# Fernet key: 32 random bytes, URL safe base64
+openssl rand -base64 32 | tr '+/' '-_' > secrets/encryption_keys
+printf '%s' 'your-smtp-password' > secrets/email_password   # empty file if SMTP needs no auth
 chmod 600 secrets/*
-cp .env.example .env    # set PATCHMANAGER_DOMAIN and the image tag
+cp .env.example .env    # set PATCHMANAGER_DOMAIN, SMTP settings and the image tag
 docker compose -f compose.prod.yaml up -d
+docker compose -f compose.prod.yaml exec app /app/.pixi/envs/prod/bin/python -m django setup_token
 ```
 
-The `migrate` service applies database migrations before `app` starts.
+The `migrate` service applies database migrations before `app` starts. Open
+`https://<your domain>/` and complete the setup with the printed token (see the
+[administration guide](admin.md)).
+
+`encryption_keys` protects MFA secrets in the database. Keep a copy outside the
+host: without it, users must re-enrol their second factors. To rotate, put the new
+key first and the old one second (comma separated), then restart.
+
+The database cluster superuser (`postgres`) is used only for initialisation and
+backups. The application connects as `patchmanager`, which is subject to Row
+Level Security ([ADR 0013](../adr/0013-database-roles.md)).
 
 ## Verify the image
 
@@ -57,5 +72,6 @@ docker compose -f compose.prod.yaml up -d
 
 ## Health
 
-`/health/live` and `/health/ready` are used by container healthchecks and are blocked at
-the proxy. Logs are JSON lines on stdout: `docker compose -f compose.prod.yaml logs app`.
+`/health/live` and `/health/ready` are used by container healthchecks; `/metrics`
+(Prometheus, requires `PATCHMANAGER_METRICS_TOKEN`) is for scrapers on the internal
+network. All three are blocked at the proxy. Logs are JSON lines on stdout: `docker compose -f compose.prod.yaml logs app`.

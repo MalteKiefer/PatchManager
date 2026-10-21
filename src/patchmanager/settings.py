@@ -66,20 +66,126 @@ if len(SECRET_KEY) < 50:
 ALLOWED_HOSTS = [*env_list("PATCHMANAGER_ALLOWED_HOSTS", "127.0.0.1"), "localhost"]
 CSRF_TRUSTED_ORIGINS = env_list("PATCHMANAGER_CSRF_TRUSTED_ORIGINS")
 
+TESTING = env_bool("PATCHMANAGER_TESTING")
+BASE_URL = env(
+    "PATCHMANAGER_BASE_URL", "http://localhost:8000" if DEBUG or TESTING else None
+).rstrip("/")
+INSTANCE_NAME = env("PATCHMANAGER_INSTANCE_NAME", "PatchManager")
+DJANGO_ADMIN_ENABLED = env_bool("PATCHMANAGER_DJANGO_ADMIN", DEBUG)
+
 INSTALLED_APPS = [
     "django.contrib.contenttypes",
+    "django.contrib.auth",
+    "django.contrib.messages",
     "django.contrib.staticfiles",
+    "django.contrib.postgres",
     "patchmanager.core",
+    "patchmanager.tenancy",
+    "patchmanager.accounts",
+    "patchmanager.audit",
 ]
+if DJANGO_ADMIN_ENABLED:
+    INSTALLED_APPS.insert(0, "django.contrib.admin")
 
 MIDDLEWARE = [
+    "patchmanager.core.middleware.RequestIDMiddleware",
+    "patchmanager.core.metrics.MetricsMiddleware",
     "django.middleware.security.SecurityMiddleware",
     "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.middleware.csp.ContentSecurityPolicyMiddleware",
+    "django.contrib.sessions.middleware.SessionMiddleware",
+    "django.middleware.locale.LocaleMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
+    "django.contrib.auth.middleware.AuthenticationMiddleware",
+    "django.contrib.messages.middleware.MessageMiddleware",
+    "patchmanager.accounts.middleware.SessionPolicyMiddleware",
+    "patchmanager.accounts.middleware.SetupRequiredMiddleware",
+    "patchmanager.accounts.middleware.MFAEnforcementMiddleware",
+    "patchmanager.tenancy.middleware.TenantContextMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
+
+# Identity
+AUTH_USER_MODEL = "accounts.User"
+AUTHENTICATION_BACKENDS = ["patchmanager.accounts.backends.EmailBackend"]
+LOGIN_URL = "accounts:login"
+LOGIN_REDIRECT_URL = "core:home"
+PASSWORD_HASHERS = [
+    "django.contrib.auth.hashers.Argon2PasswordHasher",  # Argon2id
+    "django.contrib.auth.hashers.PBKDF2PasswordHasher",  # verify legacy hashes only
+]
+PASSWORD_MIN_LENGTH = int(env("PATCHMANAGER_PASSWORD_MIN_LENGTH", "12"))
+AUTH_PASSWORD_VALIDATORS = [
+    {"NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"},
+    {
+        "NAME": "django.contrib.auth.password_validation.MinimumLengthValidator",
+        "OPTIONS": {"min_length": PASSWORD_MIN_LENGTH},
+    },
+    {"NAME": "django.contrib.auth.password_validation.CommonPasswordValidator"},
+    {"NAME": "django.contrib.auth.password_validation.NumericPasswordValidator"},
+]
+SESSION_ENGINE = "patchmanager.accounts.sessions"
+SESSION_COOKIE_NAME = "__Host-pm_session" if not DEBUG else "pm_session"
+CSRF_COOKIE_NAME = "__Host-pm_csrf" if not DEBUG else "pm_csrf"
+SESSION_MAX_AGE = int(env("PATCHMANAGER_SESSION_MAX_AGE", str(12 * 3600)))
+SESSION_IDLE_TIMEOUT = int(env("PATCHMANAGER_SESSION_IDLE_TIMEOUT", str(30 * 60)))
+SESSION_COOKIE_AGE = SESSION_MAX_AGE
+MFA_REQUIRED_FOR_ALL = env_bool("PATCHMANAGER_MFA_REQUIRED")
+LOGIN_MAX_FAILURES = int(env("PATCHMANAGER_LOGIN_MAX_FAILURES", "10"))
+LOGIN_LOCKOUT_SECONDS = int(env("PATCHMANAGER_LOGIN_LOCKOUT_SECONDS", "900"))
+LOGIN_RATE_PER_IP = int(env("PATCHMANAGER_LOGIN_RATE_PER_IP", "30"))  # per 10 minutes
+INVITATION_TTL_HOURS = int(env("PATCHMANAGER_INVITATION_TTL_HOURS", "72"))
+PATCHMANAGER_ENCRYPTION_KEYS = env_list("PATCHMANAGER_ENCRYPTION_KEYS")
+if not PATCHMANAGER_ENCRYPTION_KEYS:
+    raise ImproperlyConfigured("PATCHMANAGER_ENCRYPTION_KEYS must contain at least one Fernet key.")
+WEBAUTHN_RP_ID = env("PATCHMANAGER_WEBAUTHN_RP_ID", urlsplit(BASE_URL).hostname or "localhost")
+WEBAUTHN_ORIGIN = BASE_URL
+
+# Cache, rate limits and task broker
+REDIS_URL = env("REDIS_URL", "")
+if REDIS_URL:
+    CACHES = {
+        "default": {"BACKEND": "django.core.cache.backends.redis.RedisCache", "LOCATION": REDIS_URL}
+    }
+elif DEBUG or TESTING:
+    CACHES = {"default": {"BACKEND": "django.core.cache.backends.locmem.LocMemCache"}}
+else:
+    raise ImproperlyConfigured("REDIS_URL is required in production (rate limits, cache, jobs).")
+CELERY_BROKER_URL = REDIS_URL or "memory://"
+CELERY_TASK_ALWAYS_EAGER = not REDIS_URL
+CELERY_TASK_ACKS_LATE = True
+CELERY_WORKER_HIJACK_ROOT_LOGGER = False
+CELERY_BEAT_SCHEDULE = {
+    "clear-expired-sessions": {
+        "task": "patchmanager.accounts.tasks.clear_expired_sessions",
+        "schedule": 86400,
+    },
+}
+
+# Mail
+_MAIL_BACKEND = env(
+    "PATCHMANAGER_EMAIL_BACKEND",
+    "django.core.mail.backends.console.EmailBackend"
+    if DEBUG
+    else "django.core.mail.backends.smtp.EmailBackend",
+)
+MAILERS = {
+    "default": {
+        "BACKEND": _MAIL_BACKEND,
+        "OPTIONS": {
+            "host": env("PATCHMANAGER_EMAIL_HOST", "localhost"),
+            "port": int(env("PATCHMANAGER_EMAIL_PORT", "587")),
+            "username": env("PATCHMANAGER_EMAIL_USER", ""),
+            "password": env("PATCHMANAGER_EMAIL_PASSWORD", ""),
+            "use_tls": env_bool("PATCHMANAGER_EMAIL_USE_TLS", True),
+            "timeout": 20,
+        }
+        if _MAIL_BACKEND.endswith("smtp.EmailBackend")
+        else {},
+    }
+}
+DEFAULT_FROM_EMAIL = env("PATCHMANAGER_EMAIL_FROM", "patchmanager@localhost")
 
 ROOT_URLCONF = "patchmanager.urls"
 WSGI_APPLICATION = "patchmanager.wsgi.application"
@@ -93,16 +199,23 @@ TEMPLATES = [
             "context_processors": [
                 "django.template.context_processors.request",
                 "django.template.context_processors.csp",
+                "django.template.context_processors.i18n",
+                "django.contrib.auth.context_processors.auth",
+                "django.contrib.messages.context_processors.messages",
+                "patchmanager.core.context_processors.ui",
             ],
         },
     },
 ]
 
 DATABASES = {"default": database_from_url(env("DATABASE_URL"))}
+# Each request runs in one transaction: changes and their audit events commit together.
+DATABASES["default"]["ATOMIC_REQUESTS"] = True
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 LANGUAGE_CODE = "en"
 LANGUAGES = [("en", "English"), ("de", "Deutsch")]
+LOCALE_PATHS = [BASE_DIR / "locale"]
 TIME_ZONE = "UTC"
 USE_I18N = True
 USE_TZ = True
@@ -117,12 +230,14 @@ STORAGES = {
 # X-Forwarded-Proto; only trust it behind that proxy.
 SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 SECURE_SSL_REDIRECT = not DEBUG
-SECURE_REDIRECT_EXEMPT = [r"^health/"]
+SECURE_REDIRECT_EXEMPT = [r"^health/", r"^metrics$"]
 SECURE_HSTS_SECONDS = 0 if DEBUG else 63072000
 SECURE_HSTS_INCLUDE_SUBDOMAINS = not DEBUG
 SECURE_HSTS_PRELOAD = env_bool("PATCHMANAGER_HSTS_PRELOAD")
 # Preload affects every subdomain of the operator's domain, so it is opt-in.
 SILENCED_SYSTEM_CHECKS = [] if SECURE_HSTS_PRELOAD else ["security.W021"]
+# Emails are stored lowercased and unique through a functional constraint on lower(email).
+SILENCED_SYSTEM_CHECKS.append("auth.W004")
 SECURE_CONTENT_TYPE_NOSNIFF = True
 SECURE_REFERRER_POLICY = "same-origin"
 SECURE_CROSS_ORIGIN_OPENER_POLICY = "same-origin"
@@ -131,6 +246,7 @@ SESSION_COOKIE_HTTPONLY = True
 SESSION_COOKIE_SAMESITE = "Lax"
 CSRF_COOKIE_SECURE = not DEBUG
 CSRF_COOKIE_HTTPONLY = True
+CSRF_FAILURE_VIEW = "patchmanager.core.views.csrf_failure"
 X_FRAME_OPTIONS = "DENY"
 SECURE_CSP = {
     "default-src": [CSP.SELF],
@@ -141,6 +257,7 @@ SECURE_CSP = {
     "base-uri": [CSP.NONE],
     "frame-ancestors": [CSP.NONE],
     "form-action": [CSP.SELF],
+    "connect-src": [CSP.SELF],
 }
 
 LOGGING = {

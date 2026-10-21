@@ -4,6 +4,33 @@ All notable changes to this project are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the project uses
 [Semantic Versioning](https://semver.org/).
 
+## [0.2.0] - 2026-10-21
+
+### Added
+
+* Tenants with archive, restore and confirmed delete; tenant switcher; per tenant MFA requirement.
+* PostgreSQL Row Level Security on tenant data (`FORCE`, non-superuser application role,
+  per request tenant context) with isolation tests.
+* Email login with Argon2id, password policy, account lockout and per IP rate limits.
+* MFA: TOTP, WebAuthn security keys and passkeys (including passwordless sign in),
+  single use recovery codes; enforcement per role, tenant or instance.
+* Server side sessions with idle and absolute timeouts, session list and revocation.
+* RBAC: code defined permissions, six immutable system roles, custom roles with
+  clone and JSON/YAML import/export, nested groups with cycle protection, global or
+  tenant scoped assignments, deny rules, attribute conditions, central cached policy
+  engine with explainer and permission matrix.
+* Append only, SHA-256 hash chained audit log with viewer, CSV export and verifier.
+* First run setup with a one time token; invitations by email.
+* Admin area: users, groups, roles, assignments, tenants, audit log, system info;
+  impersonation with banner, time limit and audit.
+* UI shell: Tailwind CSS 4, HTMX 4, Alpine.js (CSP build), dark mode, English and German.
+* Celery worker and scheduler, Prometheus metrics endpoint, Playwright end to end tests.
+
+### Changed
+
+* Production compose: separate database superuser, worker, scheduler, new secrets
+  (`postgres_superuser_password`, `encryption_keys`, `email_password`).
+
 ## [0.1.0] - 2026-10-21
 
 ### Added
@@ -19,4 +46,5 @@ All notable changes to this project are documented here. The format follows
 * pre-commit hooks, Renovate configuration.
 * Documentation site, ADRs 0001 to 0010, STRIDE threat model draft, security policy.
 
+[0.2.0]: https://github.com/MalteKiefer/PatchManager/releases/tag/v0.2.0
 [0.1.0]: https://github.com/MalteKiefer/PatchManager/releases/tag/v0.1.0
