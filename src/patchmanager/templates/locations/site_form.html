@@ -1,0 +1,13 @@
+{% extends "base.html" %}{% load i18n static %}
+{% block title %}{% translate "New site" %}{% endblock %}
+{% block head %}<link rel="stylesheet" href="{% static 'vendor/leaflet-1.9.4.css' %}"><script defer src="{% static 'vendor/leaflet-1.9.4.js' %}"></script><script type="module" src="{% static 'core/map.js' %}"></script>{% endblock %}
+{% block content %}
+<h1 class="mb-4">{% translate "New site" %}</h1>
+<div class="grid gap-6 lg:grid-cols-2">
+  <form method="post" class="card" novalidate>{% csrf_token %}
+    {% include "core/_form.html" %}
+    <button class="btn-primary">{% translate "Create" %}</button>
+  </form>
+  <div>{% include "locations/_map.html" with pick=True %}<p class="help mt-2 text-xs text-slate-500">{% translate "Click the map to set latitude and longitude." %}</p></div>
+</div>
+{% endblock %}

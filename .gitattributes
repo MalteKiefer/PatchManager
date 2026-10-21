@@ -1,0 +1,2 @@
+# Vendored assets keep their exact upstream bytes (checksums in docs/STACK.md).
+src/patchmanager/core/static/vendor/** -text

@@ -1,5 +1,7 @@
 # Run via pixi: `pixi run -e dev pre-commit` (all files) or
 # `pixi run -e dev pre-commit install` once to run on every commit.
+# Vendored assets keep their upstream bytes (checksums in docs/STACK.md).
+exclude: ^src/patchmanager/core/static/vendor/
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: 3e8a8703264a2f4a69428a0aa4dcb512790b2c8c # v6.0.0

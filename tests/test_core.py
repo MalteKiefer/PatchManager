@@ -73,3 +73,15 @@ def test_error_pages(client: Client, db) -> None:
     assert client.get("/does-not-exist/", secure=True).status_code == 404
     csrf_client = Client(enforce_csrf_checks=True)
     assert csrf_client.post("/auth/login/", {}, secure=True).status_code == 403
+
+
+def test_collectstatic_with_manifest_storage(tmp_path, settings) -> None:
+    """The image build runs this; files missing for vendored assets fail here first."""
+    from django.core.management import call_command
+
+    settings.STATIC_ROOT = tmp_path
+    settings.STORAGES = {
+        "staticfiles": {"BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage"}
+    }
+    call_command("collectstatic", interactive=False, verbosity=0)
+    assert (tmp_path / "staticfiles.json").exists()

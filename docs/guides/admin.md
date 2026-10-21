@@ -31,8 +31,9 @@ typing its identifier.
   group apply to every member of it and of its nested groups.
 * **Roles** bundle permissions. The six system roles cannot be changed; clone
   one to adapt it. Custom roles can be exported and imported as JSON or YAML.
-* **Assignments** connect a user or group to a role, globally or within a
-  tenant. A **deny** assignment removes the role's permissions even if another
+* **Assignments** connect a user or group to a role, globally, within a
+  tenant, or below a site, building, floor, room or rack (the scope covers
+  everything inside it). A **deny** assignment removes the role's permissions even if another
   assignment grants them. Optional conditions restrict an assignment to
   objects whose attributes match.
 

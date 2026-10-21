@@ -70,6 +70,13 @@ docker compose -f compose.prod.yaml pull
 docker compose -f compose.prod.yaml up -d
 ```
 
+## Maps
+
+Site maps load tiles from OpenStreetMap in the user's browser. Set
+`PATCHMANAGER_MAP_TILE_URL` to your own tile server (and
+`PATCHMANAGER_MAP_ATTRIBUTION`), or to an empty value to disable maps. The tile
+origin is added to the Content Security Policy automatically.
+
 ## Health
 
 `/health/live` and `/health/ready` are used by container healthchecks; `/metrics`

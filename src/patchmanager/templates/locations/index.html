@@ -1,0 +1,28 @@
+{% extends "base.html" %}{% load i18n static %}
+{% block title %}{% translate "Locations" %}{% endblock %}
+{% block head %}<link rel="stylesheet" href="{% static 'vendor/leaflet-1.9.4.css' %}"><script defer src="{% static 'vendor/leaflet-1.9.4.js' %}"></script><script type="module" src="{% static 'core/map.js' %}"></script>{% endblock %}
+{% block content %}
+<div class="mb-4 flex flex-wrap items-center gap-3">
+  <h1 class="mr-auto">{% translate "Locations" %}{% if current_tenant %} · {{ current_tenant.name }}{% endif %}</h1>
+  {% if can_add %}<a class="btn-primary" href="{% url 'locations:site-create' %}">{% translate "New site" %}</a>{% endif %}
+</div>
+{% if not current_tenant %}
+<p class="card">{% translate "You do not have access to any tenant yet." %}</p>
+{% else %}
+<div class="grid gap-6 lg:grid-cols-3">
+  <div class="lg:col-span-2">{% include "locations/_map.html" %}</div>
+  <section class="card p-0" aria-labelledby="sites-h">
+    <h2 id="sites-h" class="px-5 pt-4">{% translate "Sites" %}</h2>
+    <ul class="divide-y divide-slate-100 dark:divide-slate-800">
+      {% for site in sites %}
+      <li><a class="block px-5 py-3 no-underline hover:bg-slate-50 dark:hover:bg-slate-800" href="{% url 'locations:node' 'site' site.pk %}">
+        <span class="font-medium">{{ site.name }}</span>{% if site.code %} <span class="badge-muted">{{ site.code }}</span>{% endif %}
+        {% if site.address %}<span class="block text-xs text-slate-500">{{ site.address|linebreaksbr }}</span>{% endif %}</a></li>
+      {% empty %}
+      <li class="px-5 py-3 text-sm text-slate-500">{% translate "No sites yet." %}</li>
+      {% endfor %}
+    </ul>
+  </section>
+</div>
+{% endif %}
+{% endblock %}

@@ -13,8 +13,8 @@ erDiagram
     FLOOR ||--o| FLOOR_PLAN : "drawn on"
     ROOM ||--o{ RACK : contains
     ROOM ||--o{ DEVICE : "floor device"
-    RACK ||--o{ RACK_OCCUPANCY : "U ranges"
-    DEVICE ||--o{ RACK_OCCUPANCY : occupies
+    RACK ||--o{ RACK_SPACE : "U ranges"
+    DEVICE ||--o{ RACK_SPACE : occupies
     VENDOR ||--o{ DEVICE_TYPE : makes
     DEVICE_TYPE ||--o{ PORT_TEMPLATE : defines
     DEVICE_TYPE ||--o{ DEVICE : instantiates
@@ -216,8 +216,9 @@ erDiagram
 
 | Rule | Mechanism |
 |---|---|
-| No two devices share a U on the same rack face | `EXCLUDE USING gist (rack_id WITH =, face WITH =, units WITH &&)` on `rack_occupancy`; full depth devices write one row per face |
-| Device fits in the rack | `CHECK (units <@ int4range(1, u_height + 1))` via trigger (needs rack height) |
+| No two things share a U on the same rack face | `EXCLUDE USING gist (rack_id WITH =, faces WITH &&, units WITH &&)` on `dcim_rackspace`; `faces` is `[0,1)` front, `[1,2)` rear, `[0,2)` both |
+| Space fits in the rack | trigger `pm_check_rackspace`; trigger `pm_check_rack_height` stops shrinking below used units |
+| Child in parent's tenant, path consistent | trigger `pm_check_hierarchy` on every tree table |
 | A port has at most one cable | unique `cable_end.port_id` |
 | A cable has exactly ends A and B | unique `(cable_id, end)`, deferred check for count = 2 |
 | VLAN id range and uniqueness | `CHECK (vid BETWEEN 1 AND 4094)`, unique `(tenant_id, coalesce(site_id), vid)` |

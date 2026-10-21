@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-21 13:35+0000\n"
+"POT-Creation-Date: 2026-10-21 14:22+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -57,7 +57,7 @@ msgstr "Die Passwörter stimmen nicht überein."
 msgid "Current password"
 msgstr "Aktuelles Passwort"
 
-#: accounts/forms.py:103 accounts/views/account.py:97
+#: accounts/forms.py:103 accounts/views/account.py:100
 #: templates/accounts/security.html:21 templates/accounts/security.html:31
 msgid "Authenticator app"
 msgstr "Authenticator-App"
@@ -103,48 +103,56 @@ msgstr ""
 msgid "Conditions apply to"
 msgstr "Bedingungen gelten für"
 
-#: accounts/forms.py:163
+#: accounts/forms.py:143
+msgid "Location"
+msgstr "Ort"
+
+#: accounts/forms.py:145
+msgid "Narrows the scope to a site, building, floor, room or rack."
+msgstr "Beschränkt den Geltungsbereich auf einen Standort, ein Gebäude, eine Etage, einen Raum oder ein Rack."
+
+#: accounts/forms.py:171
 msgid "Name of the copy"
 msgstr "Name der Kopie"
 
-#: accounts/forms.py:169
+#: accounts/forms.py:177
 msgid "JSON or YAML file"
 msgstr "JSON- oder YAML-Datei"
 
-#: accounts/forms.py:175
+#: accounts/forms.py:183
 msgid "The file is too large."
 msgstr "Die Datei ist zu groß."
 
-#: accounts/forms.py:179
+#: accounts/forms.py:187
 msgid "The file must be UTF-8 text."
 msgstr "Die Datei muss UTF-8-Text enthalten."
 
-#: accounts/forms.py:194 templates/manage/group_detail.html:12
+#: accounts/forms.py:202 templates/manage/group_detail.html:12
 #: templates/manage/groups.html:6
 msgid "Members"
 msgstr "Mitglieder"
 
-#: accounts/forms.py:204
+#: accounts/forms.py:212
 msgid "Add to group"
 msgstr "Zur Gruppe hinzufügen"
 
-#: accounts/forms.py:211
+#: accounts/forms.py:219
 msgid "Reason"
 msgstr "Grund"
 
-#: accounts/forms.py:218
+#: accounts/forms.py:226
 msgid "User"
 msgstr "Benutzer"
 
-#: accounts/forms.py:219 templates/manage/permissions.html:6
+#: accounts/forms.py:227 templates/manage/permissions.html:6
 msgid "Permission"
 msgstr "Berechtigung"
 
-#: accounts/forms.py:221
+#: accounts/forms.py:229
 msgid "On tenant"
 msgstr "Für Mandant"
 
-#: accounts/forms.py:224
+#: accounts/forms.py:232
 msgid "Global (no object)"
 msgstr "Global (kein Objekt)"
 
@@ -168,7 +176,7 @@ msgstr "Anzeigename"
 msgid "language"
 msgstr "Sprache"
 
-#: accounts/models.py:42 templates/manage/tenants.html:8
+#: accounts/models.py:42 dcim/models.py:30 templates/manage/tenants.html:8
 #: templates/manage/user_detail.html:6 templates/manage/users.html:13
 msgid "active"
 msgstr "aktiv"
@@ -177,11 +185,14 @@ msgstr "aktiv"
 msgid "locked until"
 msgstr "gesperrt bis"
 
-#: accounts/models.py:137 accounts/models.py:158 tenancy/models.py:20
+#: accounts/models.py:137 accounts/models.py:158 dcim/models.py:34
+#: locations/models.py:16 locations/models.py:58 locations/models.py:78
+#: locations/models.py:108 tenancy/models.py:21
 msgid "name"
 msgstr "Name"
 
-#: accounts/models.py:138 accounts/models.py:159
+#: accounts/models.py:138 accounts/models.py:159 locations/models.py:35
+#: locations/models.py:59 locations/models.py:110
 msgid "description"
 msgstr "Beschreibung"
 
@@ -211,7 +222,8 @@ msgstr "Mandanteneigentümer"
 
 #: accounts/roles.py:66
 msgid "Everything inside a tenant, including its members and roles."
-msgstr "Alles innerhalb eines Mandanten, einschließlich Mitgliedern und Rollen."
+msgstr ""
+"Alles innerhalb eines Mandanten, einschließlich Mitgliedern und Rollen."
 
 #: accounts/roles.py:70
 msgid "Admin"
@@ -219,7 +231,9 @@ msgstr "Admin"
 
 #: accounts/roles.py:79
 msgid "Manage all documentation objects; no identity or system settings."
-msgstr "Alle Dokumentationsobjekte verwalten; keine Identitäts- oder Systemeinstellungen."
+msgstr ""
+"Alle Dokumentationsobjekte verwalten; keine Identitäts- oder "
+"Systemeinstellungen."
 
 #: accounts/roles.py:83
 msgid "Editor"
@@ -263,7 +277,8 @@ msgstr ""
 "Die Sicherheitsschlüssel-Anfrage ist abgelaufen. Versuchen Sie es erneut."
 
 #: accounts/services/mfa.py:181 accounts/services/mfa.py:234
-#: accounts/services/mfa.py:254
+#: accounts/services/mfa.py:254 accounts/views/account.py:138
+#: accounts/views/auth.py:104
 msgid "The security key could not be verified."
 msgstr "Der Sicherheitsschlüssel konnte nicht überprüft werden."
 
@@ -288,48 +303,52 @@ msgstr "Unbekannte Berechtigungen: %(codes)s"
 msgid "System roles cannot be changed."
 msgstr "Systemrollen können nicht geändert werden."
 
-#: accounts/services/rbac.py:120
+#: accounts/services/rbac.py:124
 msgid "Remove the role's assignments first."
 msgstr "Entfernen Sie zuerst die Zuweisungen der Rolle."
 
-#: accounts/services/rbac.py:152
+#: accounts/services/rbac.py:156
 msgid "The file is not valid JSON or YAML."
 msgstr "Die Datei ist kein gültiges JSON oder YAML."
 
-#: accounts/services/rbac.py:158
+#: accounts/services/rbac.py:162
 msgid "Unsupported role file format."
 msgstr "Nicht unterstütztes Format der Rollendatei."
 
-#: accounts/services/rbac.py:163
+#: accounts/services/rbac.py:167
 msgid "Every role needs a name."
 msgstr "Jede Rolle benötigt einen Namen."
 
-#: accounts/services/rbac.py:166
+#: accounts/services/rbac.py:170
 msgid "Permissions must be a list."
 msgstr "Berechtigungen müssen eine Liste sein."
 
-#: accounts/services/rbac.py:191 accounts/services/rbac.py:206
+#: accounts/services/rbac.py:195 accounts/services/rbac.py:210
 msgid "A group with this name already exists."
 msgstr "Eine Gruppe mit diesem Namen existiert bereits."
 
-#: accounts/services/rbac.py:254
+#: accounts/services/rbac.py:270
 msgid "This would create a cycle of nested groups."
 msgstr "Dadurch würde ein Zyklus verschachtelter Gruppen entstehen."
 
-#: accounts/services/rbac.py:278
+#: accounts/services/rbac.py:295
+msgid "You cannot add permissions you do not hold yourself."
+msgstr "Sie können keine Berechtigungen hinzufügen, die Sie selbst nicht besitzen."
+
+#: accounts/services/rbac.py:303
 msgid "Only super admins can grant the Super Admin role."
 msgstr "Nur Super-Admins können die Rolle Super-Admin vergeben."
 
-#: accounts/services/rbac.py:283
+#: accounts/services/rbac.py:308
 msgid "You cannot grant permissions you do not hold yourself."
 msgstr ""
 "Sie können keine Berechtigungen vergeben, die Sie selbst nicht besitzen."
 
-#: accounts/services/rbac.py:300
+#: accounts/services/rbac.py:329
 msgid "Choose either a user or a group."
 msgstr "Wählen Sie entweder einen Benutzer oder eine Gruppe."
 
-#: accounts/services/rbac.py:345
+#: accounts/services/rbac.py:379
 msgid "The last super admin cannot be removed."
 msgstr "Der letzte Super-Admin kann nicht entfernt werden."
 
@@ -377,33 +396,37 @@ msgstr "Als dieser Benutzer kann nicht gehandelt werden."
 msgid "Inactive or locked users cannot be impersonated."
 msgstr "Als inaktiver oder gesperrter Benutzer kann nicht gehandelt werden."
 
-#: accounts/views/account.py:43
+#: accounts/services/users.py:260
+msgid "You cannot act as a user with rights you do not hold."
+msgstr "Sie können nicht als Benutzer mit Rechten handeln, die Sie selbst nicht besitzen."
+
+#: accounts/views/account.py:46
 msgid "Profile saved."
 msgstr "Profil gespeichert."
 
-#: accounts/views/account.py:62
+#: accounts/views/account.py:65
 msgid "Password changed. Other sessions were signed out."
 msgstr "Passwort geändert. Andere Sitzungen wurden abgemeldet."
 
-#: accounts/views/account.py:112
+#: accounts/views/account.py:115
 msgid "Authenticator app added."
 msgstr "Authenticator-App hinzugefügt."
 
-#: accounts/views/account.py:114
+#: accounts/views/account.py:117
 msgid "That code did not match. Scan the code again and retry."
 msgstr ""
 "Der Code stimmte nicht überein. Scannen Sie den Code erneut und versuchen "
 "Sie es noch einmal."
 
-#: accounts/views/account.py:136
+#: accounts/views/account.py:140
 msgid "Security key added."
 msgstr "Sicherheitsschlüssel hinzugefügt."
 
-#: accounts/views/account.py:146
+#: accounts/views/account.py:150
 msgid "Add a second factor first."
 msgstr "Fügen Sie zuerst einen zweiten Faktor hinzu."
 
-#: accounts/views/account.py:161
+#: accounts/views/account.py:165
 msgid ""
 "MFA is required for your account. Add another factor before removing this "
 "one."
@@ -411,138 +434,138 @@ msgstr ""
 "Für Ihr Konto ist MFA erforderlich. Fügen Sie einen weiteren Faktor hinzu, "
 "bevor Sie diesen entfernen."
 
-#: accounts/views/account.py:169
+#: accounts/views/account.py:173
 msgid "Factor removed."
 msgstr "Faktor entfernt."
 
-#: accounts/views/account.py:189
+#: accounts/views/account.py:193
 #, python-format
 msgid "%(count)s other sessions were signed out."
 msgstr "%(count)s andere Sitzungen wurden abgemeldet."
 
-#: accounts/views/auth.py:53
+#: accounts/views/auth.py:56
 msgid "Please sign in again."
 msgstr "Bitte melden Sie sich erneut an."
 
-#: accounts/views/auth.py:60
+#: accounts/views/auth.py:63
 msgid "Too many attempts. Please sign in again."
 msgstr "Zu viele Versuche. Bitte melden Sie sich erneut an."
 
-#: accounts/views/auth.py:74
+#: accounts/views/auth.py:77
 msgid "You used a recovery code. Generate new ones soon."
 msgstr ""
 "Sie haben einen Wiederherstellungscode verwendet. Erzeugen Sie bald neue."
 
-#: accounts/views/auth.py:77
+#: accounts/views/auth.py:80
 msgid "This code is not valid."
 msgstr "Dieser Code ist ungültig."
 
-#: accounts/views/auth.py:102
+#: accounts/views/auth.py:106
 msgid "This account cannot sign in."
 msgstr "Dieses Konto kann sich nicht anmelden."
 
-#: accounts/views/auth.py:111
+#: accounts/views/auth.py:115
 msgid "You have been signed out."
 msgstr "Sie wurden abgemeldet."
 
-#: accounts/views/auth.py:135
+#: accounts/views/auth.py:139
 msgid "Setup complete. Now protect your account with a second factor."
 msgstr ""
 "Einrichtung abgeschlossen. Schützen Sie Ihr Konto jetzt mit einem zweiten "
 "Faktor."
 
-#: accounts/views/auth.py:149
+#: accounts/views/auth.py:153
 msgid "Invitation invalid or expired"
 msgstr "Einladung ungültig oder abgelaufen"
 
-#: accounts/views/auth.py:161
+#: accounts/views/auth.py:165
 msgid "Your password is set. Please sign in."
 msgstr "Ihr Passwort wurde festgelegt. Bitte melden Sie sich an."
 
-#: accounts/views/manage.py:118
+#: accounts/views/manage.py:149
 #, python-format
 msgid "Invitation sent to %(email)s."
 msgstr "Einladung an %(email)s gesendet."
 
-#: accounts/views/manage.py:153
+#: accounts/views/manage.py:186
 msgid "Account locked."
 msgstr "Konto gesperrt."
 
-#: accounts/views/manage.py:157
+#: accounts/views/manage.py:190
 msgid "Account unlocked."
 msgstr "Konto entsperrt."
 
-#: accounts/views/manage.py:161
+#: accounts/views/manage.py:194
 msgid "Account deactivated."
 msgstr "Konto deaktiviert."
 
-#: accounts/views/manage.py:165
+#: accounts/views/manage.py:198
 msgid "Account reactivated."
 msgstr "Konto reaktiviert."
 
-#: accounts/views/manage.py:169
+#: accounts/views/manage.py:202
 msgid "Second factors removed."
 msgstr "Zweite Faktoren entfernt."
 
-#: accounts/views/manage.py:173
+#: accounts/views/manage.py:206
 msgid "Sessions signed out."
 msgstr "Sitzungen abgemeldet."
 
-#: accounts/views/manage.py:182
+#: accounts/views/manage.py:215
 #, python-format
 msgid "You are now acting as %(user)s."
 msgstr "Sie handeln jetzt als %(user)s."
 
-#: accounts/views/manage.py:210
+#: accounts/views/manage.py:243
 #, python-format
 msgid "Check the assignment: %(errors)s"
 msgstr "Prüfen Sie die Zuweisung: %(errors)s"
 
-#: accounts/views/manage.py:227
+#: accounts/views/manage.py:261
 msgid "Assignment added."
 msgstr "Zuweisung hinzugefügt."
 
-#: accounts/views/manage.py:245
+#: accounts/views/manage.py:279
 msgid "Assignment removed."
 msgstr "Zuweisung entfernt."
 
-#: accounts/views/manage.py:303
+#: accounts/views/manage.py:337
 msgid "Group saved."
 msgstr "Gruppe gespeichert."
 
-#: accounts/views/manage.py:311
+#: accounts/views/manage.py:345
 msgid "Members saved."
 msgstr "Mitglieder gespeichert."
 
-#: accounts/views/manage.py:317
+#: accounts/views/manage.py:351
 msgid "Group nested."
 msgstr "Gruppe verschachtelt."
 
-#: accounts/views/manage.py:327
+#: accounts/views/manage.py:361
 msgid "Nesting removed."
 msgstr "Verschachtelung entfernt."
 
-#: accounts/views/manage.py:330
+#: accounts/views/manage.py:364
 msgid "Group deleted."
 msgstr "Gruppe gelöscht."
 
-#: accounts/views/manage.py:399
+#: accounts/views/manage.py:435
 msgid "Role created."
 msgstr "Rolle erstellt."
 
-#: accounts/views/manage.py:429
+#: accounts/views/manage.py:465
 msgid "Role saved."
 msgstr "Rolle gespeichert."
 
-#: accounts/views/manage.py:457
+#: accounts/views/manage.py:493
 msgid "Role copied."
 msgstr "Rolle kopiert."
 
-#: accounts/views/manage.py:466
+#: accounts/views/manage.py:502
 msgid "Role deleted."
 msgstr "Rolle gelöscht."
 
-#: accounts/views/manage.py:499
+#: accounts/views/manage.py:535
 #, python-format
 msgid "%(count)s roles imported."
 msgstr "%(count)s Rollen importiert."
@@ -556,6 +579,219 @@ msgstr "Kette intakt: %(count)s Ereignisse überprüft."
 #, python-format
 msgid "Chain broken at event %(seq)s: %(reason)s"
 msgstr "Kette unterbrochen bei Ereignis %(seq)s: %(reason)s"
+
+#: dcim/models.py:29
+msgid "planned"
+msgstr "geplant"
+
+#: dcim/models.py:31
+msgid "retired"
+msgstr "außer Betrieb"
+
+#: dcim/models.py:36
+msgid "height (U)"
+msgstr "Höhe (HE)"
+
+#: dcim/models.py:40
+msgid "width"
+msgstr "Breite"
+
+#: dcim/models.py:41
+msgid "depth (mm)"
+msgstr "Tiefe (mm)"
+
+#: dcim/models.py:42
+msgid "number units from the top"
+msgstr "Höheneinheiten von oben nummerieren"
+
+#: dcim/models.py:44
+msgid "status"
+msgstr "Status"
+
+#: dcim/models.py:46
+msgid "serial number"
+msgstr "Seriennummer"
+
+#: dcim/models.py:47
+msgid "asset tag"
+msgstr "Inventarnummer"
+
+#: dcim/models.py:48
+msgid "notes"
+msgstr "Notizen"
+
+#: dcim/models.py:100
+msgid "front"
+msgstr "Vorderseite"
+
+#: dcim/models.py:101
+msgid "rear"
+msgstr "Rückseite"
+
+#: dcim/models.py:102
+msgid "front and rear"
+msgstr "Vorder- und Rückseite"
+
+#: dcim/models.py:107
+msgid "face"
+msgstr "Seite"
+
+#: dcim/models.py:110
+msgid "label"
+msgstr "Bezeichnung"
+
+#: dcim/models.py:111
+msgid "note"
+msgstr "Notiz"
+
+#: dcim/services.py:18
+#, python-format
+msgid "The units must lie between 1 and %(height)s."
+msgstr "Die Höheneinheiten müssen zwischen 1 und %(height)s liegen."
+
+#: dcim/services.py:24
+msgid "These units are already taken."
+msgstr "Diese Höheneinheiten sind bereits belegt."
+
+#: dcim/views.py:31 templates/dcim/rack.html:56
+msgid "Label"
+msgstr "Bezeichnung"
+
+#: dcim/views.py:32
+msgid "Lowest unit"
+msgstr "Unterste Höheneinheit"
+
+#: dcim/views.py:33
+msgid "Height (U)"
+msgstr "Höhe (HE)"
+
+#: dcim/views.py:35 templates/dcim/rack.html:56
+msgid "Face"
+msgstr "Seite"
+
+#: dcim/views.py:92 locations/views.py:169
+msgid "Saved."
+msgstr "Gespeichert."
+
+#: dcim/views.py:96
+msgid "Units reserved."
+msgstr "Höheneinheiten reserviert."
+
+#: dcim/views.py:101 locations/views.py:181
+msgid "Deleted."
+msgstr "Gelöscht."
+
+#: dcim/views.py:137
+msgid "Invalid request."
+msgstr "Ungültige Anfrage."
+
+#: dcim/views.py:141
+msgid "These units are taken or outside the rack."
+msgstr "Diese Höheneinheiten sind belegt oder liegen außerhalb des Racks."
+
+#: locations/forms.py:73
+msgid "Target tenant"
+msgstr "Zielmandant"
+
+#: locations/forms.py:74 templates/accounts/totp_setup.html:14
+msgid "Confirm"
+msgstr "Bestätigen"
+
+#: locations/forms.py:74
+msgid "Type the site name to confirm."
+msgstr "Geben Sie zur Bestätigung den Standortnamen ein."
+
+#: locations/models.py:17
+msgid "short code"
+msgstr "Kürzel"
+
+#: locations/models.py:18 tenancy/models.py:22
+msgid "address"
+msgstr "Adresse"
+
+#: locations/models.py:20
+msgid "latitude"
+msgstr "Breitengrad"
+
+#: locations/models.py:28
+msgid "longitude"
+msgstr "Längengrad"
+
+#: locations/models.py:80
+msgid "level"
+msgstr "Ebene"
+
+#: locations/models.py:80
+msgid "0 = ground floor, negative = basement"
+msgstr "0 = Erdgeschoss, negativ = Untergeschoss"
+
+#: locations/models.py:102
+msgid "Server room"
+msgstr "Serverraum"
+
+#: locations/models.py:103
+msgid "Distribution room"
+msgstr "Verteilerraum"
+
+#: locations/models.py:104
+msgid "Office"
+msgstr "Büro"
+
+#: locations/models.py:105
+msgid "Other"
+msgstr "Sonstiges"
+
+#: locations/models.py:109
+msgid "kind"
+msgstr "Art"
+
+#: locations/services.py:27 locations/services.py:33
+msgid "An object with this name already exists here."
+msgstr "Hier existiert bereits ein Objekt mit diesem Namen."
+
+#: locations/services.py:35
+msgid "This change conflicts with existing data."
+msgstr "Diese Änderung steht im Konflikt mit vorhandenen Daten."
+
+#: locations/services.py:80
+msgid "Remove everything inside it first."
+msgstr "Entfernen Sie zuerst alles darin."
+
+#: locations/services.py:107
+msgid "The site already belongs to this tenant."
+msgstr "Der Standort gehört bereits zu diesem Mandanten."
+
+#: locations/views.py:49
+msgid "Buildings"
+msgstr "Gebäude"
+
+#: locations/views.py:50
+msgid "Floors"
+msgstr "Etagen"
+
+#: locations/views.py:51
+msgid "Rooms"
+msgstr "Räume"
+
+#: locations/views.py:52
+msgid "Racks"
+msgstr "Racks"
+
+#: locations/views.py:119
+msgid "Site created."
+msgstr "Standort erstellt."
+
+#: locations/views.py:176
+msgid "Created."
+msgstr "Erstellt."
+
+#: locations/views.py:238
+msgid "The name does not match."
+msgstr "Der Name stimmt nicht überein."
+
+#: locations/views.py:246
+msgid "Site moved."
+msgstr "Standort verschoben."
 
 #: templates/accounts/email/invitation.txt:1
 #, python-format
@@ -635,21 +871,22 @@ msgstr "Geben Sie einen Wiederherstellungscode ein."
 msgid "Verify"
 msgstr "Überprüfen"
 
-#: templates/accounts/mfa.html:18
+#: templates/accounts/mfa.html:18 templates/locations/site_move.html:9
 msgid "Cancel"
 msgstr "Abbrechen"
 
 #: templates/accounts/profile.html:2 templates/accounts/profile.html:4
-#: templates/base.html:50
+#: templates/base.html:51
 msgid "Profile"
 msgstr "Profil"
 
-#: templates/accounts/profile.html:7 templates/manage/audit.html:18
-#: templates/manage/group_detail.html:7
+#: templates/accounts/profile.html:7 templates/locations/node.html:42
+#: templates/manage/audit.html:18 templates/manage/group_detail.html:7
 msgid "Details"
 msgstr "Details"
 
-#: templates/accounts/profile.html:9 templates/manage/group_detail.html:9
+#: templates/accounts/profile.html:9 templates/dcim/rack.html:72
+#: templates/locations/node.html:44 templates/manage/group_detail.html:9
 #: templates/manage/role_detail.html:15 templates/manage/tenant_detail.html:7
 msgid "Save"
 msgstr "Speichern"
@@ -659,7 +896,7 @@ msgid "Change password"
 msgstr "Passwort ändern"
 
 #: templates/accounts/security.html:2 templates/accounts/security.html:5
-#: templates/base.html:51
+#: templates/base.html:52
 msgid "Security"
 msgstr "Sicherheit"
 
@@ -754,7 +991,7 @@ msgstr "Zuletzt aktiv"
 msgid "This session"
 msgstr "Diese Sitzung"
 
-#: templates/accounts/security.html:55 templates/base.html:53
+#: templates/accounts/security.html:55 templates/base.html:54
 msgid "Sign out"
 msgstr "Abmelden"
 
@@ -797,10 +1034,6 @@ msgstr "QR-Code"
 msgid "Can't scan?"
 msgstr "Scannen nicht möglich?"
 
-#: templates/accounts/totp_setup.html:14
-msgid "Confirm"
-msgstr "Bestätigen"
-
 #: templates/base.html:16
 msgid "Skip to content"
 msgstr "Zum Inhalt springen"
@@ -823,14 +1056,23 @@ msgstr "Wechseln"
 msgid "Main"
 msgstr "Hauptmenü"
 
-#: templates/base.html:40 templates/manage/_base.html:4
+#: templates/base.html:40 templates/core/_breadcrumbs.html:4
+#: templates/locations/index.html:2 templates/locations/index.html:6
+msgid "Locations"
+msgstr "Orte"
+
+#: templates/base.html:41 templates/manage/_base.html:4
 #: templates/manage/dashboard.html:2 templates/manage/dashboard.html:4
 msgid "Administration"
 msgstr "Administration"
 
-#: templates/base.html:67
+#: templates/base.html:68
 msgid "Language"
 msgstr "Sprache"
+
+#: templates/core/_breadcrumbs.html:2
+msgid "Breadcrumb"
+msgstr "Brotkrumen-Navigation"
 
 #: templates/core/error.html:7
 msgid "Back to start"
@@ -850,7 +1092,7 @@ msgstr "Willkommen, %(name)s"
 msgid "Current tenant: %(tenant)s"
 msgstr "Aktueller Mandant: %(tenant)s"
 
-#: templates/core/home.html:8
+#: templates/core/home.html:8 templates/locations/index.html:10
 msgid "You do not have access to any tenant yet."
 msgstr "Sie haben noch keinen Zugriff auf einen Mandanten."
 
@@ -865,6 +1107,183 @@ msgid ""
 msgstr ""
 "Standorte, Racks und Geräte folgen im nächsten Release. Richten Sie bis "
 "dahin Mandanten, Benutzer und Rollen im Administrationsbereich ein."
+
+#: templates/dcim/rack.html:8
+msgid "Rack face"
+msgstr "Rack-Seite"
+
+#: templates/dcim/rack.html:9 templates/dcim/rack.html:47
+msgid "Front"
+msgstr "Vorderseite"
+
+#: templates/dcim/rack.html:10 templates/dcim/rack.html:48
+msgid "Rear"
+msgstr "Rückseite"
+
+#: templates/dcim/rack.html:15
+msgid "Front view"
+msgstr "Vorderansicht"
+
+#: templates/dcim/rack.html:15
+msgid "Rear view"
+msgstr "Rückansicht"
+
+#: templates/dcim/rack.html:18
+#, python-format
+msgid "Elevation of rack %(name)s"
+msgstr "Ansicht von Rack %(name)s"
+
+#: templates/dcim/rack.html:28
+#, python-format
+msgid "units %(start)s to %(end)s"
+msgstr "Höheneinheiten %(start)s bis %(end)s"
+
+#: templates/dcim/rack.html:37
+msgid "Drag a block, or focus it and use the arrow keys, to move it."
+msgstr "Ziehen Sie einen Block oder fokussieren Sie ihn und verwenden Sie die Pfeiltasten, um ihn zu verschieben."
+
+#: templates/dcim/rack.html:43
+msgid "Utilisation"
+msgstr "Auslastung"
+
+#: templates/dcim/rack.html:45 templates/dcim/rack.html:50
+#: templates/locations/node.html:19 templates/locations/node.html:22
+msgid "Used"
+msgstr "Belegt"
+
+#: templates/dcim/rack.html:46 templates/dcim/rack.html:58
+msgid "Free"
+msgstr "Frei"
+
+#: templates/dcim/rack.html:54
+msgid "Reserved units"
+msgstr "Reservierte Höheneinheiten"
+
+#: templates/dcim/rack.html:56
+msgid "Units"
+msgstr "Höheneinheiten"
+
+#: templates/dcim/rack.html:58
+msgid "Free these units?"
+msgstr "Diese Höheneinheiten freigeben?"
+
+#: templates/dcim/rack.html:59
+msgid "No units reserved."
+msgstr "Keine Höheneinheiten reserviert."
+
+#: templates/dcim/rack.html:62
+msgid "Reserve units"
+msgstr "Höheneinheiten reservieren"
+
+#: templates/dcim/rack.html:64
+msgid "Reserve"
+msgstr "Reservieren"
+
+#: templates/dcim/rack.html:70
+msgid "Rack details"
+msgstr "Rack-Details"
+
+#: templates/dcim/rack.html:75
+msgid "Delete this rack and its reservations?"
+msgstr "Dieses Rack und seine Reservierungen löschen?"
+
+#: templates/dcim/rack.html:75
+msgid "Delete rack"
+msgstr "Rack löschen"
+
+#: templates/locations/_map.html:3
+msgid "Map"
+msgstr "Karte"
+
+#: templates/locations/_map.html:7
+msgid "The map is disabled on this instance."
+msgstr "Die Karte ist auf dieser Instanz deaktiviert."
+
+#: templates/locations/_tree.html:2 templates/locations/node.html:13
+msgid "Buildings, floors and rooms"
+msgstr "Gebäude, Etagen und Räume"
+
+#: templates/locations/_tree.html:13
+msgid "No floors."
+msgstr "Keine Etagen."
+
+#: templates/locations/_tree.html:16
+msgid "No buildings yet."
+msgstr "Noch keine Gebäude."
+
+#: templates/locations/index.html:7 templates/locations/site_form.html:2
+#: templates/locations/site_form.html:5
+msgid "New site"
+msgstr "Neuer Standort"
+
+#: templates/locations/index.html:15
+msgid "Sites"
+msgstr "Standorte"
+
+#: templates/locations/index.html:22
+msgid "No sites yet."
+msgstr "Noch keine Standorte."
+
+#: templates/locations/node.html:8
+msgid "Move to tenant"
+msgstr "Zu Mandant verschieben"
+
+#: templates/locations/node.html:19
+msgid "Rack"
+msgstr "Rack"
+
+#: templates/locations/node.html:19
+msgid "Height"
+msgstr "Höhe"
+
+#: templates/locations/node.html:19 templates/manage/tenants.html:6
+#: templates/manage/users.html:10
+msgid "Status"
+msgstr "Status"
+
+#: templates/locations/node.html:23
+msgid "No racks yet."
+msgstr "Noch keine Racks."
+
+#: templates/locations/node.html:28
+msgid "Nothing here yet."
+msgstr "Hier ist noch nichts."
+
+#: templates/locations/node.html:32 templates/manage/_assignments.html:15
+msgid "Add"
+msgstr "Hinzufügen"
+
+#: templates/locations/node.html:34 templates/locations/site_form.html:9
+#: templates/manage/groups.html:13
+msgid "Create"
+msgstr "Erstellen"
+
+#: templates/locations/node.html:47
+msgid "Delete this object? It must be empty."
+msgstr "Dieses Objekt löschen? Es muss leer sein."
+
+#: templates/locations/node.html:47
+msgid "Delete"
+msgstr "Löschen"
+
+#: templates/locations/site_form.html:11
+msgid "Click the map to set latitude and longitude."
+msgstr "Klicken Sie auf die Karte, um Breiten- und Längengrad festzulegen."
+
+#: templates/locations/site_move.html:2 templates/locations/site_move.html:8
+msgid "Move site"
+msgstr "Standort verschieben"
+
+#: templates/locations/site_move.html:5
+#, python-format
+msgid "Move %(name)s"
+msgstr "%(name)s verschieben"
+
+#: templates/locations/site_move.html:6
+msgid ""
+"The site and everything in it move to the chosen tenant. Role assignments "
+"scoped to it move along."
+msgstr "Der Standort und alles darin werden zum gewählten Mandanten verschoben. Rollenzuweisungen, die darauf beschränkt sind, werden mitverschoben."
 
 #: templates/manage/_assignments.html:3
 msgid "Conditions"
@@ -881,10 +1300,6 @@ msgstr "Keine Zuweisungen."
 #: templates/manage/_assignments.html:11
 msgid "Add assignment"
 msgstr "Zuweisung hinzufügen"
-
-#: templates/manage/_assignments.html:15
-msgid "Add"
-msgstr "Hinzufügen"
 
 #: templates/manage/_base.html:7
 msgid "Overview"
@@ -1066,10 +1481,6 @@ msgstr "Noch keine Gruppen."
 msgid "New group"
 msgstr "Neue Gruppe"
 
-#: templates/manage/groups.html:13
-msgid "Create"
-msgstr "Erstellen"
-
 #: templates/manage/permissions.html:8
 msgid "granted"
 msgstr "gewährt"
@@ -1205,10 +1616,6 @@ msgstr "Kennung"
 msgid "Contact"
 msgstr "Kontakt"
 
-#: templates/manage/tenants.html:6 templates/manage/users.html:10
-msgid "Status"
-msgstr "Status"
-
 #: templates/manage/tenants.html:8
 msgid "archived"
 msgstr "archiviert"
@@ -1320,31 +1727,27 @@ msgstr "eingeladen"
 msgid "No users found."
 msgstr "Keine Benutzer gefunden."
 
-#: tenancy/models.py:12
+#: tenancy/models.py:13
 msgid "Lowercase letters, digits, dashes."
 msgstr "Kleinbuchstaben, Ziffern, Bindestriche."
 
-#: tenancy/models.py:19
+#: tenancy/models.py:20
 msgid "identifier"
 msgstr "Kennung"
 
-#: tenancy/models.py:21
-msgid "address"
-msgstr "Adresse"
-
-#: tenancy/models.py:22
+#: tenancy/models.py:23
 msgid "contact person"
 msgstr "Ansprechpartner"
 
-#: tenancy/models.py:23
+#: tenancy/models.py:24
 msgid "contact email"
 msgstr "Kontakt-E-Mail"
 
-#: tenancy/models.py:24
+#: tenancy/models.py:25
 msgid "require MFA for members"
 msgstr "MFA für Mitglieder erforderlich"
 
-#: tenancy/models.py:25
+#: tenancy/models.py:26
 msgid "archived at"
 msgstr "archiviert am"
 

@@ -27,6 +27,7 @@ Front end assets (self hosted, no CDN at runtime):
 | HTMX | 4.0.0 | `sha256:e484d9171a9db30a39c8f16e3d709d4137f3211c659f8e6125816635033d593f` (vendored) |
 | Alpine.js CSP build | 3.17.5 | `sha256:48c170c92032e527cbae71b8ce75cf1f96ca06fa869a6120ef0fe438d8e92c36` (vendored) |
 | Tailwind CSS standalone CLI | 4.3.3 | checksums pinned in `scripts/tailwind.py` |
+| Leaflet (JS, CSS, images) | 1.9.4 | JS `sha256:db49d009c841f5ca34a888c96511ae936fd9f5533e90d8b2c4d57596f4e5641a`, CSS `sha256:a7837102824184820dfa198d1ebcd109ff6d0ff9a2672a074b9a1b4d147d04c6`, source map `sha256:600a10dc5cd110de0699510d322afcbe01c7ca90b4c5f48adc20314c70aac753` (vendored) |
 
 `django-otp` was not used: TOTP needs a few lines on top of pyotp, and WebAuthn
 comes from py_webauthn directly.
@@ -37,7 +38,6 @@ comes from py_webauthn directly.
 |---|---|---|
 | Django REST Framework | 3.18.3 | 7 |
 | drf-spectacular (OpenAPI 3.1) | 0.30.0 | 7 |
-| Leaflet | 1.9.4 | 2 |
 | nh3 (HTML sanitising) | 0.3.7 | 3 |
 | WeasyPrint | 69.0 | 6 |
 | openpyxl | 3.1.5 | 6 |

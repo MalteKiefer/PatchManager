@@ -316,14 +316,23 @@ def assign(
     user: User | None = None,
     group: Group | None = None,
     tenant: Tenant | None = None,
+    node: Any = None,
     effect: str = Assignment.Effect.ALLOW,
     condition_list: list[dict[str, Any]] | None = None,
     object_type: str | None = None,
 ) -> Assignment:
-    """Grant or deny ``role`` to a user or group, globally or within a tenant."""
+    """Grant or deny ``role`` to a user or group.
+
+    Scope: global, a tenant, or a location node and everything below it.
+    """
     if (user is None) == (group is None):
         raise ServiceError(_("Choose either a user or a group."))
-    scope = tenant.policy_path if tenant else None
+    if node is not None:
+        tenant = node.tenant
+    scope = node.policy_path if node is not None else tenant.policy_path if tenant else None
+    label = (
+        " / ".join(str(n) for n in [tenant, *node.ancestors(), node]) if node is not None else None
+    )
     require(actor, "accounts.assignment.add", scope_path=scope)
     check_can_grant(actor, role, scope)
     try:
@@ -336,7 +345,7 @@ def assign(
         group=group,
         tenant=tenant,
         scope_path=scope,
-        scope_label=str(tenant) if tenant else "global",
+        scope_label=label or (str(tenant) if tenant else "global"),
         effect=effect,
         conditions=clauses,
         created_by=actor,

@@ -4,6 +4,24 @@ All notable changes to this project are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the project uses
 [Semantic Versioning](https://semver.org/).
 
+## [0.3.0] - 2026-10-21
+
+### Added
+
+* Location tree: sites (address, map position), buildings, floors, rooms, racks,
+  each tenant isolated by Row Level Security and kept consistent by database
+  triggers (parent tenant, scope path).
+* Map view with Leaflet and OpenStreetMap (configurable tile server, can be disabled);
+  pick coordinates on the map.
+* Site page with the full building, floor and room tree; breadcrumbs everywhere.
+* Racks with height, width, depth, unit numbering, status, serial and asset tag;
+  interactive front and rear elevation; reservations by unit range and face with
+  drag and drop and keyboard moves; utilisation per face.
+* Overlap free rack space enforced by a PostgreSQL exclusion constraint; property
+  based test against a Python model.
+* Move a site with everything in it to another tenant.
+* Role assignments scoped to a site, building, floor, room or rack.
+
 ## [0.2.0] - 2026-10-21
 
 ### Added
@@ -46,5 +64,6 @@ All notable changes to this project are documented here. The format follows
 * pre-commit hooks, Renovate configuration.
 * Documentation site, ADRs 0001 to 0010, STRIDE threat model draft, security policy.
 
+[0.3.0]: https://github.com/MalteKiefer/PatchManager/releases/tag/v0.3.0
 [0.2.0]: https://github.com/MalteKiefer/PatchManager/releases/tag/v0.2.0
 [0.1.0]: https://github.com/MalteKiefer/PatchManager/releases/tag/v0.1.0

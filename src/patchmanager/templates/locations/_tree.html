@@ -1,0 +1,17 @@
+{% load i18n %}
+<ul class="space-y-2" role="tree" aria-label="{% translate 'Buildings, floors and rooms' %}">
+  {% for building in tree %}
+  <li role="treeitem" aria-expanded="true">
+    <a class="font-medium" href="{% url 'locations:node' 'building' building.pk %}">{{ building.name }}</a>
+    <ul class="ml-4 mt-1 space-y-1 border-l border-slate-200 pl-3 dark:border-slate-800" role="group">
+      {% for floor in building.visible_floors %}
+      <li role="treeitem" aria-expanded="true"><a href="{% url 'locations:node' 'floor' floor.pk %}">{{ floor.name }}</a>
+        <ul class="ml-4 mt-1 flex flex-wrap gap-2" role="group">
+          {% for room in floor.visible_rooms %}<li role="treeitem"><a class="badge-muted no-underline hover:underline" href="{% url 'locations:node' 'room' room.pk %}">{{ room.name }}</a></li>{% endfor %}
+        </ul>
+      </li>
+      {% empty %}<li class="text-sm text-slate-500">{% translate "No floors." %}</li>{% endfor %}
+    </ul>
+  </li>
+  {% empty %}<li class="text-sm text-slate-500">{% translate "No buildings yet." %}</li>{% endfor %}
+</ul>

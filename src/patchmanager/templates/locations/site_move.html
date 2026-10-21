@@ -1,0 +1,11 @@
+{% extends "base.html" %}{% load i18n %}
+{% block title %}{% translate "Move site" %}{% endblock %}
+{% block content %}
+<form method="post" class="card mx-auto max-w-lg" novalidate>{% csrf_token %}
+  <h1 class="mb-2">{% blocktranslate with name=site.name %}Move {{ name }}{% endblocktranslate %}</h1>
+  <p class="mb-4 text-sm">{% translate "The site and everything in it move to the chosen tenant. Role assignments scoped to it move along." %}</p>
+  {% include "core/_form.html" %}
+  <button class="btn-danger">{% translate "Move site" %}</button>
+  <a class="btn-secondary" href="{% url 'locations:node' 'site' site.pk %}">{% translate "Cancel" %}</a>
+</form>
+{% endblock %}

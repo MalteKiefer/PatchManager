@@ -83,6 +83,8 @@ INSTALLED_APPS = [
     "patchmanager.tenancy",
     "patchmanager.accounts",
     "patchmanager.audit",
+    "patchmanager.locations",
+    "patchmanager.dcim",
 ]
 if DJANGO_ADMIN_ENABLED:
     INSTALLED_APPS.insert(0, "django.contrib.admin")
@@ -226,6 +228,12 @@ STORAGES = {
     "staticfiles": {"BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage"},
 }
 
+# Map view. Tiles load directly from the browser; set an empty URL to disable maps.
+MAP_TILE_URL = env("PATCHMANAGER_MAP_TILE_URL", "https://tile.openstreetmap.org/{z}/{x}/{y}.png")
+MAP_ATTRIBUTION = env("PATCHMANAGER_MAP_ATTRIBUTION", "© OpenStreetMap contributors")
+_tiles = urlsplit(MAP_TILE_URL)
+_MAP_ORIGIN = f"{_tiles.scheme}://{_tiles.netloc.replace('{s}', '*')}" if MAP_TILE_URL else ""
+
 # Security headers. TLS terminates at the reverse proxy, which sets
 # X-Forwarded-Proto; only trust it behind that proxy.
 SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
@@ -252,7 +260,7 @@ SECURE_CSP = {
     "default-src": [CSP.SELF],
     "script-src": [CSP.SELF],
     "style-src": [CSP.SELF],
-    "img-src": [CSP.SELF, "data:"],
+    "img-src": [CSP.SELF, "data:", *([_MAP_ORIGIN] if _MAP_ORIGIN else [])],
     "object-src": [CSP.NONE],
     "base-uri": [CSP.NONE],
     "frame-ancestors": [CSP.NONE],

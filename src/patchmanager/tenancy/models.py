@@ -1,5 +1,6 @@
 """Tenant model and the abstract base for tenant scoped records."""
 
+from django.conf import settings
 from django.core.validators import RegexValidator
 from django.db import models
 from django.db.models.functions import Lower
@@ -43,6 +44,9 @@ class TenantScopedModel(TimestampedModel):
     """Base for every tenant owned record. RLS is enabled by its migration."""
 
     tenant = models.ForeignKey(Tenant, on_delete=models.PROTECT, related_name="+")
+    created_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.SET_NULL, related_name="+"
+    )
 
     class Meta:
         abstract = True
