@@ -126,6 +126,9 @@ def _compile(user: Any) -> list[Grant]:
         "role"
     ):
         system = SYSTEM_ROLES.get(a.role.key) if a.role.is_system else None
+        needs_mfa = a.role.requires_mfa or bool(system and system.requires_mfa)
+        if getattr(user, "is_service", False) and a.effect == "allow" and needs_mfa:
+            continue  # API clients have no second factor: MFA roles never apply, via groups neither
         grants.append(
             Grant(
                 assignment_id=a.id,

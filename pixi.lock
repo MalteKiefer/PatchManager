@@ -1066,6 +1066,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/noarch/django-stubs-6.1.2-pyh5ded981_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/django-stubs-ext-6.1.2-pyh5ded981_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/djangorestframework-3.18.3-pyh5ded981_0.conda
+      - conda: https://conda.anaconda.org/conda-forge/noarch/djangorestframework-stubs-3.18.1-pyh5ded981_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/drf-spectacular-0.30.0-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/et_xmlfile-2.0.0-pyhd8ed1ab_1.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/exceptiongroup-1.3.1-pyhd8ed1ab_0.conda
@@ -1322,6 +1323,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/noarch/django-stubs-6.1.2-pyh5ded981_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/django-stubs-ext-6.1.2-pyh5ded981_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/djangorestframework-3.18.3-pyh5ded981_0.conda
+      - conda: https://conda.anaconda.org/conda-forge/noarch/djangorestframework-stubs-3.18.1-pyh5ded981_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/drf-spectacular-0.30.0-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/et_xmlfile-2.0.0-pyhd8ed1ab_1.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/exceptiongroup-1.3.1-pyhd8ed1ab_0.conda
@@ -1468,6 +1470,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/noarch/django-stubs-6.1.2-pyh5ded981_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/django-stubs-ext-6.1.2-pyh5ded981_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/djangorestframework-3.18.3-pyh5ded981_0.conda
+      - conda: https://conda.anaconda.org/conda-forge/noarch/djangorestframework-stubs-3.18.1-pyh5ded981_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/drf-spectacular-0.30.0-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/et_xmlfile-2.0.0-pyhd8ed1ab_1.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/exceptiongroup-1.3.1-pyhd8ed1ab_0.conda
@@ -2571,6 +2574,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/noarch/django-stubs-6.1.2-pyh5ded981_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/django-stubs-ext-6.1.2-pyh5ded981_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/djangorestframework-3.18.3-pyh5ded981_0.conda
+      - conda: https://conda.anaconda.org/conda-forge/noarch/djangorestframework-stubs-3.18.1-pyh5ded981_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/drf-spectacular-0.30.0-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/et_xmlfile-2.0.0-pyhd8ed1ab_1.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/exceptiongroup-1.3.1-pyhd8ed1ab_0.conda
@@ -2796,6 +2800,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/noarch/django-stubs-6.1.2-pyh5ded981_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/django-stubs-ext-6.1.2-pyh5ded981_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/djangorestframework-3.18.3-pyh5ded981_0.conda
+      - conda: https://conda.anaconda.org/conda-forge/noarch/djangorestframework-stubs-3.18.1-pyh5ded981_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/drf-spectacular-0.30.0-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/et_xmlfile-2.0.0-pyhd8ed1ab_1.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/exceptiongroup-1.3.1-pyhd8ed1ab_0.conda
@@ -2927,6 +2932,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/noarch/django-stubs-6.1.2-pyh5ded981_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/django-stubs-ext-6.1.2-pyh5ded981_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/djangorestframework-3.18.3-pyh5ded981_0.conda
+      - conda: https://conda.anaconda.org/conda-forge/noarch/djangorestframework-stubs-3.18.1-pyh5ded981_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/drf-spectacular-0.30.0-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/et_xmlfile-2.0.0-pyhd8ed1ab_1.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/exceptiongroup-1.3.1-pyhd8ed1ab_0.conda
@@ -7804,6 +7810,20 @@ packages:
   run_exports: {}
   size: 696853
   timestamp: 1791375963581
+- conda: https://conda.anaconda.org/conda-forge/noarch/djangorestframework-stubs-3.18.1-pyh5ded981_0.conda
+  sha256: e09fe547c16dff9e32c94fda97041b37ca4f56f53916798ea0ebd2efc807b0b3
+  md5: 1fe066261ac09266c6030d34f41d2f65
+  depends:
+  - python >=3.11
+  - django-stubs >=6.1.0
+  - typing-extensions >=4.0
+  - types-pyyaml
+  - python
+  license: MIT
+  license_family: MIT
+  run_exports: {}
+  size: 41260
+  timestamp: 1788550457436
 - conda: https://conda.anaconda.org/conda-forge/noarch/drf-spectacular-0.30.0-pyhd8ed1ab_0.conda
   sha256: ef3af52f3eb35aa1b49fddafe05247cb45f2f7bfb35c08333333959487be0834
   md5: 70c3001e7037f81610ed2a76bbf48587

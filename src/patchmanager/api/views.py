@@ -1,0 +1,601 @@
+"""REST API v1. Reads are scoped by the policy engine; writes call the domain services."""
+
+from typing import Any, ClassVar
+
+from django.db.models import QuerySet
+from drf_spectacular.utils import OpenApiParameter, extend_schema
+from rest_framework import status, viewsets
+from rest_framework.decorators import action, api_view
+from rest_framework.request import Request
+from rest_framework.response import Response
+
+from patchmanager.accounts.models import User
+from patchmanager.api import serializers as s
+from patchmanager.api.core import filtered, lookup, tenant_scope, visible
+from patchmanager.cabling import services as cabling
+from patchmanager.cabling.models import Cable
+from patchmanager.dcim import devices
+from patchmanager.dcim.models import Device, Port, Rack
+from patchmanager.history import services as history
+from patchmanager.history.models import Change
+from patchmanager.library.models import DeviceType, Vendor
+from patchmanager.locations import services as tree
+from patchmanager.locations.models import Building, Floor, Room, Site
+from patchmanager.networks import services as networks
+from patchmanager.networks.models import VLAN, WLAN
+from patchmanager.search import services as search_services
+from patchmanager.tenancy.models import Tenant
+
+
+class Base(viewsets.ModelViewSet):  # type: ignore[type-arg]
+    """Scoped reads; subclasses implement create, update and destroy through services."""
+
+    object_type: ClassVar[str]
+    model: ClassVar[Any]
+    path_field: ClassVar[str] = "path"
+    filters: ClassVar[dict[str, str]] = {}
+    related: ClassVar[tuple[str, ...]] = ()
+    http_method_names = ["get", "post", "patch", "delete", "head", "options"]
+
+    def base_queryset(self) -> QuerySet[Any]:
+        """Rows before permission scoping."""
+        rows: QuerySet[Any] = self.model.objects.all()
+        return rows.select_related(*self.related) if self.related else rows
+
+    def get_queryset(self) -> QuerySet[Any]:
+        """Rows the caller may view, filtered by the query parameters."""
+        rows = visible(
+            self.request.user,
+            f"{self.object_type}.view",
+            self.base_queryset(),
+            path_field=self.path_field,
+        )
+        if getattr(self, "swagger_fake_view", False):
+            return rows
+        return filtered(
+            rows, self.request.query_params, {"q": "name__icontains", **self.filters}
+        ).order_by("pk")
+
+    @property
+    def actor(self) -> User:
+        """The authenticated user (every endpoint requires one)."""
+        assert isinstance(self.request.user, User)  # noqa: S101  # nosec B101: TokenScopes requires login
+        return self.request.user
+
+    @property
+    def http(self) -> Any:
+        """The Django request (services take it for audit and history)."""
+        return self.request._request
+
+    def created(self, obj: Any) -> Response:
+        """201 response with the new object."""
+        return Response(self.get_serializer(obj).data, status=status.HTTP_201_CREATED)
+
+    def updated(self, obj: Any) -> Response:
+        """Response with the stored state after a change."""
+        return Response(self.get_serializer(self.model.objects.get(pk=obj.pk)).data)
+
+    def validated(self, partial: bool = False, instance: Any = None) -> Any:
+        """Validated serializer for the request body."""
+        serializer = self.get_serializer(instance, data=self.request.data, partial=partial)
+        serializer.is_valid(raise_exception=True)
+        return serializer
+
+
+# ---------------------------------------------------------------- locations and racks
+
+
+class TreeNodes(Base):
+    """Sites, buildings, floors, rooms and racks share the tree services."""
+
+    parent_model: ClassVar[Any]
+    parent_field: ClassVar[str]
+    parent_permission: ClassVar[str | None]
+    fields: ClassVar[tuple[str, ...]]
+
+    def create(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+        """Create one through the domain service (permissions, validation, audit apply)."""
+        data = self.validated()
+        parent = lookup(
+            request.user,
+            self.parent_model,
+            data.validated_data[f"{self.parent_field}_id"],
+            self.parent_permission,
+            self.parent_field,
+        )
+        node = tree.create(
+            self.http, self.actor, self.model, parent=parent, **s.values(data, *self.fields)
+        )
+        return self.created(node)
+
+    def partial_update(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+        """Change the fields that are sent."""
+        node = self.get_object()
+        data = self.validated(partial=True, instance=node)
+        return self.updated(
+            tree.update(self.http, self.actor, node, **s.values(data, *self.fields))
+        )
+
+    def update(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+        """Same as PATCH: only the fields sent change."""
+        return self.partial_update(request, *args, **kwargs)
+
+    def destroy(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+        """Delete it."""
+        tree.delete(self.http, self.actor, self.get_object())
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class SiteViewSet(TreeNodes):
+    """Sites of the visible tenants."""
+
+    serializer_class = s.SiteSerializer
+    model, object_type = Site, "locations.site"
+    parent_model, parent_field, parent_permission = (
+        Tenant,
+        "tenant",
+        None,
+    )  # adding needs locations.site.add
+    fields = ("name", "code", "address", "latitude", "longitude", "description")
+    filters: ClassVar[dict[str, str]] = {"tenant": "tenant_id", "code": "code__iexact"}
+
+
+class BuildingViewSet(TreeNodes):
+    """Buildings."""
+
+    serializer_class = s.BuildingSerializer
+    model, object_type = Building, "locations.building"
+    parent_model, parent_field, parent_permission = Site, "site", "locations.site.view"
+    fields = ("name", "description")
+    filters: ClassVar[dict[str, str]] = {"site": "site_id"}
+
+
+class FloorViewSet(TreeNodes):
+    """Floors."""
+
+    serializer_class = s.FloorSerializer
+    model, object_type = Floor, "locations.floor"
+    parent_model, parent_field, parent_permission = Building, "building", "locations.building.view"
+    fields = ("name", "level")
+    filters: ClassVar[dict[str, str]] = {"building": "building_id"}
+
+
+class RoomViewSet(TreeNodes):
+    """Rooms."""
+
+    serializer_class = s.RoomSerializer
+    model, object_type = Room, "locations.room"
+    parent_model, parent_field, parent_permission = Floor, "floor", "locations.floor.view"
+    fields = ("name", "kind", "description")
+    filters: ClassVar[dict[str, str]] = {"floor": "floor_id"}
+
+
+class RackViewSet(TreeNodes):
+    """Racks."""
+
+    serializer_class = s.RackSerializer
+    model, object_type = Rack, "dcim.rack"
+    parent_model, parent_field, parent_permission = Room, "room", "locations.room.view"
+    fields = (
+        "name",
+        "u_height",
+        "width",
+        "depth_mm",
+        "descending_units",
+        "status",
+        "serial",
+        "asset_tag",
+        "notes",
+    )
+    filters: ClassVar[dict[str, str]] = {
+        "room": "room_id",
+        "status": "status",
+        "serial": "serial__iexact",
+    }
+
+
+# ---------------------------------------------------------------- library (read only)
+
+
+class VendorViewSet(viewsets.ReadOnlyModelViewSet):  # type: ignore[type-arg]
+    """Vendors are shared by all tenants."""
+
+    serializer_class = s.VendorSerializer
+
+    def get_queryset(self) -> QuerySet[Vendor]:
+        """Rows the caller may view, filtered by the query parameters."""
+        return filtered(
+            Vendor.objects.order_by("name"), self.request.query_params, {"q": "name__icontains"}
+        )
+
+
+class DeviceTypeViewSet(viewsets.ReadOnlyModelViewSet):  # type: ignore[type-arg]
+    """Shared device types and those private to tenants the caller can see."""
+
+    serializer_class = s.DeviceTypeSerializer
+
+    def get_queryset(self) -> QuerySet[DeviceType]:
+        """Rows the caller may view, filtered by the query parameters."""
+        rows = DeviceType.objects.select_related("vendor").order_by(
+            "vendor__name", "model"
+        )  # RLS bounds tenants
+        return filtered(
+            rows,
+            self.request.query_params,
+            {"q": "model__icontains", "vendor": "vendor_id", "form": "form", "tenant": "tenant_id"},
+        )
+
+
+# ---------------------------------------------------------------- devices and ports
+
+
+class DeviceViewSet(Base):
+    """Devices in rooms and racks."""
+
+    serializer_class = s.DeviceSerializer
+    model, object_type = Device, "dcim.device"
+    related = ("space",)
+    filters: ClassVar[dict[str, str]] = {
+        "room": "room_id",
+        "rack": "rack_id",
+        "device_type": "device_type_id",
+        "status": "status",
+        "serial": "serial__iexact",
+        "asset_tag": "asset_tag__iexact",
+    }
+    fields = (
+        "name",
+        "status",
+        "serial",
+        "asset_tag",
+        "purchase_date",
+        "in_service_date",
+        "responsible",
+        "notes",
+    )
+
+    def create(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+        """Create one through the domain service (permissions, validation, audit apply)."""
+        data = self.validated()
+        place = s.PlacementSerializer(data=request.data)
+        place.is_valid(raise_exception=True)
+        device_type = lookup(
+            request.user,
+            DeviceType,
+            data.validated_data["device_type_id"],
+            "library.devicetype.view",
+            "device_type",
+        )
+        room, rack = self._place(place)
+        device = devices.create(
+            self.http,
+            self.actor,
+            device_type=device_type,
+            room=room,
+            rack=rack,
+            position=place.validated_data.get("position"),
+            face=place.validated_data["face"],
+            **s.values(data, *self.fields),
+        )
+        return self.created(device)
+
+    def _place(self, place: s.PlacementSerializer) -> tuple[Room, Rack | None]:
+        room = lookup(
+            self.request.user, Room, place.validated_data["room"], "locations.room.view", "room"
+        )
+        rack_id = place.validated_data.get("rack")
+        rack = (
+            lookup(self.request.user, Rack, rack_id, "dcim.rack.view", "rack") if rack_id else None
+        )
+        return room, rack
+
+    def partial_update(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+        """Change the fields that are sent."""
+        device = self.get_object()
+        data = self.validated(partial=True, instance=device)
+        return self.updated(
+            devices.update(self.http, self.actor, device, **s.values(data, *self.fields))
+        )
+
+    def update(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+        """Same as PATCH: only the fields sent change."""
+        return self.partial_update(request, *args, **kwargs)
+
+    def destroy(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+        """Delete it."""
+        devices.delete(self.http, self.actor, self.get_object())
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+    @extend_schema(request=s.PlacementSerializer, responses=s.DeviceSerializer)
+    @action(detail=True, methods=["post"])
+    def place(self, request: Request, pk: str | None = None) -> Response:
+        """Move a device to a room, or mount it in a rack at a position."""
+        device = self.get_object()
+        place = s.PlacementSerializer(data=request.data)
+        place.is_valid(raise_exception=True)
+        room, rack = self._place(place)
+        devices.place(
+            self.http,
+            self.actor,
+            device,
+            room=room,
+            rack=rack,
+            position=place.validated_data.get("position"),
+            face=place.validated_data["face"],
+        )
+        return self.updated(device)
+
+
+class PortViewSet(Base):
+    """Ports come from device types; they can be documented, not created here."""
+
+    serializer_class = s.PortSerializer
+    model, object_type = Port, "dcim.device"
+    filters: ClassVar[dict[str, str]] = {"device": "device_id", "kind": "kind"}
+    http_method_names = ["get", "patch", "head", "options"]
+    fields = ("connector", "speed_mbps", "enabled", "label", "mac_address", "description")
+
+    def get_queryset(self) -> QuerySet[Port]:
+        """Rows the caller may view, filtered by the query parameters."""
+        allowed = visible(
+            self.request.user, "dcim.device.view", Device.objects.all()
+        )  # judged by the device
+        rows = Port.objects.filter(device__in=allowed)
+        return filtered(
+            rows, self.request.query_params, {"q": "name__icontains", **self.filters}
+        ).order_by("pk")
+
+    def partial_update(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+        """Change the fields that are sent."""
+        port = self.get_object()
+        data = self.validated(partial=True, instance=port)
+        return self.updated(
+            devices.update_port(self.http, self.actor, port, **s.values(data, *self.fields))
+        )
+
+    def update(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+        """Same as PATCH: only the fields sent change."""
+        return self.partial_update(request, *args, **kwargs)
+
+
+# ---------------------------------------------------------------- cables and networks
+
+
+class CableViewSet(Base):
+    """Cables between two ports."""
+
+    serializer_class = s.CableSerializer
+    model, object_type = Cable, "cabling.cable"
+    filters: ClassVar[dict[str, str]] = {
+        "kind": "kind",
+        "media": "media",
+        "status": "status",
+        "label": "label__iexact",
+    }
+    fields = cabling.CABLE_FIELDS
+
+    def base_queryset(self) -> QuerySet[Cable]:
+        """Rows before permission scoping."""
+        return Cable.objects.prefetch_related("ends")
+
+    def get_queryset(self) -> QuerySet[Any]:
+        """Rows the caller may view, filtered by the query parameters."""
+        rows = super().get_queryset()
+        q = self.request.query_params.get("q")
+        return rows.filter(label__icontains=q) if q else rows
+
+    def create(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+        """Create one through the domain service (permissions, validation, audit apply)."""
+        data = self.validated()
+        ends = [
+            lookup(
+                request.user,
+                Port,
+                data.validated_data[side],
+                "dcim.device.view",
+                side,
+                judge=lambda p: p.device,
+            )
+            for side in "ab"
+        ]
+        cable = cabling.connect(
+            self.http, self.actor, ends[0], ends[1], **s.values(data, *self.fields)
+        )
+        return self.created(cable)
+
+    def get_serializer(self, *args: Any, **kwargs: Any) -> Any:
+        """Serializer for the action (cable ends are only required on create)."""
+        serializer: Any = super().get_serializer(*args, **kwargs)
+        if self.action in ("partial_update", "update"):
+            for side in "ab":
+                serializer.fields[side].required = False
+        return serializer
+
+    def partial_update(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+        """Change the fields that are sent."""
+        cable = self.get_object()
+        data = self.validated(partial=True, instance=cable)
+        return self.updated(
+            cabling.update(self.http, self.actor, cable, **s.values(data, *self.fields))
+        )
+
+    def update(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+        """Same as PATCH: only the fields sent change."""
+        return self.partial_update(request, *args, **kwargs)
+
+    def destroy(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+        """Delete it."""
+        cabling.disconnect(self.http, self.actor, self.get_object())
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class VLANViewSet(Base):
+    """VLANs of a tenant or site."""
+
+    serializer_class = s.VLANSerializer
+    model, object_type, path_field = VLAN, "networks.vlan", "scope"
+    filters: ClassVar[dict[str, str]] = {
+        "tenant": "tenant_id",
+        "site": "site_id",
+        "vid": "vid",
+        "status": "status",
+    }
+    fields = ("vid", "name", "status", "description")
+
+    def base_queryset(self) -> QuerySet[VLAN]:
+        """Rows before permission scoping."""
+        return tenant_scope(VLAN.objects.all(), "site")
+
+    def create(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+        """Create one through the domain service (permissions, validation, audit apply)."""
+        data = self.validated()
+        tenant = lookup(request.user, Tenant, data.validated_data["tenant_id"], None, "tenant")
+        site_id = data.validated_data.get("site_id")
+        site = (
+            lookup(request.user, Site, site_id, "locations.site.view", "site") if site_id else None
+        )
+        vlan = networks.create_vlan(
+            self.http, self.actor, tenant, site=site, **s.values(data, *self.fields)
+        )
+        return self.created(vlan)
+
+    def partial_update(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+        """Change the fields that are sent."""
+        vlan = self.get_object()
+        data = self.validated(partial=True, instance=vlan)
+        return self.updated(
+            networks.update_vlan(self.http, self.actor, vlan, **s.values(data, *self.fields))
+        )
+
+    def update(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+        """Same as PATCH: only the fields sent change."""
+        return self.partial_update(request, *args, **kwargs)
+
+    def destroy(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+        """Delete it."""
+        networks.delete_vlan(self.http, self.actor, self.get_object())
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class WLANViewSet(Base):
+    """WLANs and the VLAN they bridge into."""
+
+    serializer_class = s.WLANSerializer
+    model, object_type, path_field = WLAN, "networks.wlan", "scope"
+    filters: ClassVar[dict[str, str]] = {"tenant": "tenant_id", "vlan": "vlan_id"}
+    fields = ("ssid", "security", "hidden", "description")
+
+    def base_queryset(self) -> QuerySet[WLAN]:
+        """Rows before permission scoping."""
+        return tenant_scope(WLAN.objects.all())
+
+    def get_queryset(self) -> QuerySet[Any]:
+        """Rows the caller may view, filtered by the query parameters."""
+        rows = super().get_queryset()
+        q = self.request.query_params.get("q")
+        return rows.filter(ssid__icontains=q) if q else rows
+
+    def _vlan(self, data: Any) -> dict[str, Any]:
+        if "vlan_id" not in data.validated_data:
+            return {}
+        vlan_id = data.validated_data["vlan_id"]
+        return {
+            "vlan": lookup(self.request.user, VLAN, vlan_id, "networks.vlan.view", "vlan")
+            if vlan_id
+            else None
+        }
+
+    def create(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+        """Create one through the domain service (permissions, validation, audit apply)."""
+        data = self.validated()
+        tenant = lookup(request.user, Tenant, data.validated_data["tenant_id"], None, "tenant")
+        wlan = networks.create_wlan(
+            self.http, self.actor, tenant, **s.values(data, *self.fields), **self._vlan(data)
+        )
+        return self.created(wlan)
+
+    def partial_update(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+        """Change the fields that are sent."""
+        wlan = self.get_object()
+        data = self.validated(partial=True, instance=wlan)
+        changed = networks.update_wlan(
+            self.http, self.actor, wlan, **s.values(data, *self.fields), **self._vlan(data)
+        )
+        return self.updated(changed)
+
+    def update(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+        """Same as PATCH: only the fields sent change."""
+        return self.partial_update(request, *args, **kwargs)
+
+    def destroy(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+        """Delete it."""
+        networks.delete_wlan(self.http, self.actor, self.get_object())
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+# ---------------------------------------------------------------- tenants, history, search
+
+
+class TenantViewSet(viewsets.ReadOnlyModelViewSet):  # type: ignore[type-arg]
+    """Tenants the caller can see."""
+
+    serializer_class = s.TenantSerializer
+
+    def get_queryset(self) -> QuerySet[Tenant]:
+        """Rows the caller may view, filtered by the query parameters."""
+        return Tenant.objects.filter(archived_at__isnull=True).order_by(
+            "name"
+        )  # RLS: tenants with any grant
+
+
+class ChangeViewSet(viewsets.ReadOnlyModelViewSet):  # type: ignore[type-arg]
+    """Change history of objects the caller may view."""
+
+    serializer_class = s.ChangeSerializer
+
+    def get_queryset(self) -> QuerySet[Change]:
+        """Rows the caller may view, filtered by the query parameters."""
+        rows = history.visible(self.request.user)
+        return filtered(
+            rows,
+            self.request.query_params,
+            {
+                "object_type": "object_type",
+                "object_id": "object_id",
+                "action": "action",
+                "tenant": "tenant_id",
+                "since": "occurred_at__gte",
+            },
+        ).order_by("-occurred_at", "-id")
+
+
+@extend_schema(
+    parameters=[
+        OpenApiParameter("q", str, required=True),
+        OpenApiParameter("tenant", str, required=True),
+        OpenApiParameter("type", str),
+    ],
+    responses={200: dict},
+)
+@api_view(["GET"])
+def search(request: Request) -> Response:
+    """Search one tenant: hits per type with id and name."""
+    tenant = lookup(request.user, Tenant, request.query_params.get("tenant"), None, "tenant")
+    results, counts = search_services.search(
+        request.user,
+        tenant,
+        request.query_params.get("q", ""),
+        kind=request.query_params.get("type", ""),
+        limit=50,
+    )
+    return Response(
+        {
+            "counts": counts,
+            "results": {
+                kind: [
+                    {"id": str(h.obj.pk), "name": str(h.obj), "context": h.context} for h in hits
+                ]
+                for kind, hits in results.items()
+            },
+        }
+    )

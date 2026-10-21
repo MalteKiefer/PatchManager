@@ -25,6 +25,8 @@ urlpatterns = [
     path("history/", include("patchmanager.history.urls")),
     path("search/", include("patchmanager.search.urls")),
     path("exchange/", include("patchmanager.exchange.urls")),
+    path("api/", include("patchmanager.api.urls")),
+    path("", include("patchmanager.api.ui_urls")),
     path("", include("patchmanager.accounts.urls")),
     path("", include(core_patterns)),
 ]

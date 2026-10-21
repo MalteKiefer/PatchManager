@@ -24,7 +24,7 @@ strict = true
 python_version = "3.14"
 mypy_path = "src"
 files = ["src", "tests"]
-plugins = ["mypy_django_plugin.main"]
+plugins = ["mypy_django_plugin.main", "mypy_drf_plugin.main"]
 
 [tool.django-stubs]
 django_settings_module = "patchmanager.settings"
