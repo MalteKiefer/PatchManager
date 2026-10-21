@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-21 19:27+0000\n"
+"POT-Creation-Date: 2026-10-21 19:40+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -41,10 +41,11 @@ msgstr "Führen Sie den Befehl setup_token aus, um eines zu erhalten."
 
 #: accounts/forms.py:49 accounts/forms.py:103 accounts/forms.py:110
 #: api/ui.py:31 api/ui.py:54 exchange/pdf.py:203 integrations/views.py:26
-#: sso/views.py:187 templates/api/clients.html:9 templates/api/tokens.html:9
-#: templates/integrations/webhooks.html:8 templates/manage/groups.html:6
-#: templates/manage/roles.html:11 templates/manage/tenants.html:6
-#: templates/manage/users.html:10 templates/networks/vlans.html:7
+#: scim/views.py:350 sso/views.py:187 templates/api/clients.html:9
+#: templates/api/tokens.html:9 templates/integrations/webhooks.html:8
+#: templates/manage/groups.html:6 templates/manage/roles.html:11
+#: templates/manage/tenants.html:6 templates/manage/users.html:10
+#: templates/networks/vlans.html:7 templates/scim/tokens.html:12
 #: templates/search/results.html:35 templates/search/results.html:36
 #: templates/sso/providers.html:7
 msgid "Name"
@@ -201,30 +202,30 @@ msgstr "gesperrt bis"
 msgid "break glass"
 msgstr "Notfallkonto"
 
-#: accounts/models.py:141 accounts/models.py:162 api/models.py:16
+#: accounts/models.py:147 accounts/models.py:169 api/models.py:16
 #: api/models.py:56 dcim/models.py:35 dcim/models.py:188 dcim/models.py:227
 #: integrations/models.py:16 library/models.py:25 library/models.py:177
 #: locations/models.py:16 locations/models.py:58 locations/models.py:78
-#: locations/models.py:108 networks/models.py:30 search/models.py:16
-#: sso/models.py:19 tenancy/models.py:21
+#: locations/models.py:108 networks/models.py:30 scim/models.py:14
+#: search/models.py:16 sso/models.py:19 tenancy/models.py:21
 msgid "name"
 msgstr "Name"
 
-#: accounts/models.py:142 accounts/models.py:163 dcim/models.py:237
+#: accounts/models.py:148 accounts/models.py:170 dcim/models.py:237
 #: library/models.py:127 locations/models.py:35 locations/models.py:59
 #: locations/models.py:110 networks/models.py:34 networks/models.py:81
 msgid "description"
 msgstr "Beschreibung"
 
-#: accounts/models.py:166
+#: accounts/models.py:173
 msgid "require MFA"
 msgstr "MFA erforderlich"
 
-#: accounts/models.py:202 templates/manage/_assignments.html:6
+#: accounts/models.py:209 templates/manage/_assignments.html:6
 msgid "allow"
 msgstr "erlauben"
 
-#: accounts/models.py:203 templates/manage/_assignments.html:6
+#: accounts/models.py:210 templates/manage/_assignments.html:6
 msgid "deny"
 msgstr "verweigern"
 
@@ -553,7 +554,9 @@ msgstr "Sitzungen abgemeldet."
 
 #: accounts/views/manage.py:206
 msgid "This account may now sign in with its password where SSO is enforced."
-msgstr "Dieses Konto darf sich jetzt auch dort mit Passwort anmelden, wo SSO erzwungen wird."
+msgstr ""
+"Dieses Konto darf sich jetzt auch dort mit Passwort anmelden, wo SSO "
+"erzwungen wird."
 
 #: accounts/views/manage.py:210
 msgid "This account now follows the SSO rules of its domain."
@@ -701,7 +704,7 @@ msgstr "Läuft ab nach"
 msgid "All my tenants"
 msgstr "Alle meine Mandanten"
 
-#: api/ui.py:111
+#: api/ui.py:111 scim/views.py:405
 msgid "Token revoked."
 msgstr "Token widerrufen."
 
@@ -2150,6 +2153,18 @@ msgstr "Funk-Port"
 msgid "VLAN created."
 msgstr "VLAN erstellt."
 
+#: scim/views.py:352 sso/views.py:192
+msgid "Email domains"
+msgstr "E-Mail-Domains"
+
+#: scim/views.py:354
+msgid "Comma separated. Empty: all domains."
+msgstr "Durch Kommas getrennt. Leer: alle Domains."
+
+#: scim/views.py:363 sso/views.py:257
+msgid "Enter domains like example.com."
+msgstr "Geben Sie Domains wie example.com ein."
+
 #: search/services.py:43 templates/locations/index.html:15
 msgid "Sites"
 msgstr "Standorte"
@@ -2258,7 +2273,9 @@ msgstr "Dieser Identitätsanbieter darf Adressen dieser Domain nicht anmelden."
 
 #: sso/services.py:77
 msgid "There is no account for this email. Ask an administrator for access."
-msgstr "Für diese E-Mail-Adresse gibt es kein Konto. Bitten Sie eine Administratorin oder einen Administrator um Zugang."
+msgstr ""
+"Für diese E-Mail-Adresse gibt es kein Konto. Bitten Sie eine Administratorin "
+"oder einen Administrator um Zugang."
 
 #: sso/services.py:119
 msgid "This sign in method is disabled."
@@ -2278,14 +2295,12 @@ msgstr "Typ"
 msgid "Enabled"
 msgstr "Aktiviert"
 
-#: sso/views.py:192
-msgid "Email domains"
-msgstr "E-Mail-Domains"
-
 #: sso/views.py:195
 msgid ""
 "Comma separated. The provider may link existing accounts of these domains."
-msgstr "Durch Kommas getrennt. Der Anbieter darf vorhandene Konten dieser Domains verknüpfen."
+msgstr ""
+"Durch Kommas getrennt. Der Anbieter darf vorhandene Konten dieser Domains "
+"verknüpfen."
 
 #: sso/views.py:199
 msgid "Enforce for these domains (except break glass accounts)"
@@ -2338,10 +2353,6 @@ msgstr "Gruppenattribut"
 #: sso/views.py:243
 msgid "CA file (path in the container)"
 msgstr "CA-Datei (Pfad im Container)"
-
-#: sso/views.py:257
-msgid "Enter domains like example.com."
-msgstr "Geben Sie Domains wie example.com ein."
 
 #: sso/views.py:270
 #, python-format
@@ -2622,17 +2633,17 @@ msgstr "QR-Code"
 msgid "Can't scan?"
 msgstr "Scannen nicht möglich?"
 
-#: templates/api/_secret.html:3
+#: templates/api/_secret.html:3 templates/scim/tokens.html:8
 msgid "Copy it now"
 msgstr "Jetzt kopieren"
 
-#: templates/api/_secret.html:4
+#: templates/api/_secret.html:4 templates/scim/tokens.html:8
 msgid "It is shown only once. Store it in a secret manager."
 msgstr ""
 "Es wird nur einmal angezeigt. Speichern Sie es in einem Passwortmanager."
 
 #: templates/api/clients.html:2 templates/api/clients.html:4
-#: templates/manage/_base.html:16
+#: templates/manage/_base.html:17
 msgid "API clients"
 msgstr "API-Clients"
 
@@ -2647,14 +2658,17 @@ msgstr ""
 "ihm unter Benutzer Rollen zu wie jeder Person."
 
 #: templates/api/clients.html:9 templates/api/tokens.html:9
+#: templates/scim/tokens.html:12
 msgid "Last used"
 msgstr "Zuletzt verwendet"
 
 #: templates/api/clients.html:12 templates/api/tokens.html:14
+#: templates/scim/tokens.html:15
 msgid "never"
 msgstr "nie"
 
 #: templates/api/clients.html:13 templates/api/tokens.html:13
+#: templates/scim/tokens.html:16
 msgid "revoked"
 msgstr "widerrufen"
 
@@ -2671,6 +2685,7 @@ msgid "Revoke this client for good?"
 msgstr "Diesen Client endgültig widerrufen?"
 
 #: templates/api/clients.html:15 templates/api/tokens.html:15
+#: templates/scim/tokens.html:16
 msgid "Revoke"
 msgstr "Widerrufen"
 
@@ -2708,19 +2723,19 @@ msgstr "Läuft ab"
 msgid "all"
 msgstr "alle"
 
-#: templates/api/tokens.html:15
+#: templates/api/tokens.html:15 templates/scim/tokens.html:16
 msgid "Revoke this token?"
 msgstr "Diesen Token widerrufen?"
 
-#: templates/api/tokens.html:16
+#: templates/api/tokens.html:16 templates/scim/tokens.html:17
 msgid "No tokens yet."
 msgstr "Noch keine Token."
 
-#: templates/api/tokens.html:19
+#: templates/api/tokens.html:19 templates/scim/tokens.html:19
 msgid "New token"
 msgstr "Neuer Token"
 
-#: templates/api/tokens.html:21
+#: templates/api/tokens.html:21 templates/scim/tokens.html:20
 msgid "Create token"
 msgstr "Token erstellen"
 
@@ -3489,7 +3504,7 @@ msgid "Settings"
 msgstr "Einstellungen"
 
 #: templates/integrations/webhooks.html:2
-#: templates/integrations/webhooks.html:4 templates/manage/_base.html:15
+#: templates/integrations/webhooks.html:4 templates/manage/_base.html:16
 msgid "Webhooks"
 msgstr "Webhooks"
 
@@ -3741,12 +3756,17 @@ msgstr "Zugriff erklären"
 msgid "Single sign on"
 msgstr "Single Sign-on"
 
-#: templates/manage/_base.html:17 templates/manage/audit.html:2
+#: templates/manage/_base.html:15 templates/scim/tokens.html:2
+#: templates/scim/tokens.html:4
+msgid "SCIM provisioning"
+msgstr "SCIM-Bereitstellung"
+
+#: templates/manage/_base.html:18 templates/manage/audit.html:2
 #: templates/manage/audit.html:5
 msgid "Audit log"
 msgstr "Audit-Log"
 
-#: templates/manage/_base.html:18 templates/manage/system.html:2
+#: templates/manage/_base.html:19 templates/manage/system.html:2
 #: templates/manage/system.html:4
 msgid "System"
 msgstr "System"
@@ -4188,6 +4208,22 @@ msgstr "Noch keine WLANs."
 msgid "New WLAN"
 msgstr "Neues WLAN"
 
+#: templates/scim/tokens.html:5
+msgid ""
+"Identity providers create, change and deactivate users and groups through "
+"SCIM 2.0 at the base URL below. SCIM never changes super admins, break glass "
+"accounts or API clients, and only manages groups it created; give those "
+"groups roles here."
+msgstr ""
+"Identitätsanbieter legen über SCIM 2.0 unter der folgenden Basis-URL "
+"Benutzer und Gruppen an, ändern und deaktivieren sie. SCIM ändert nie Super "
+"Admins, Notfallkonten oder API-Clients und verwaltet nur Gruppen, die es "
+"selbst angelegt hat. Weisen Sie diesen Gruppen hier Rollen zu."
+
+#: templates/scim/tokens.html:12
+msgid "Created"
+msgstr "Angelegt"
+
 #: templates/search/results.html:6
 msgid "Search term"
 msgstr "Suchbegriff"
@@ -4220,7 +4256,8 @@ msgstr "Neuer Identitätsanbieter"
 
 #: templates/sso/provider.html:5
 msgid "Delete this identity provider? Linked users keep their accounts."
-msgstr "Diesen Identitätsanbieter löschen? Verknüpfte Benutzer behalten ihre Konten."
+msgstr ""
+"Diesen Identitätsanbieter löschen? Verknüpfte Benutzer behalten ihre Konten."
 
 #: templates/sso/provider.html:6
 msgid "Register these at the provider"
@@ -4246,7 +4283,9 @@ msgstr "Noch keine Identitätsanbieter."
 msgid ""
 "Where SSO is enforced, accounts marked as break glass still sign in with "
 "their password. Keep at least one such super admin."
-msgstr "Wo SSO erzwungen wird, melden sich Notfallkonten weiterhin mit ihrem Passwort an. Behalten Sie mindestens einen solchen Super Admin."
+msgstr ""
+"Wo SSO erzwungen wird, melden sich Notfallkonten weiterhin mit ihrem "
+"Passwort an. Behalten Sie mindestens einen solchen Super Admin."
 
 #: tenancy/models.py:13
 msgid "Lowercase letters, digits, dashes."

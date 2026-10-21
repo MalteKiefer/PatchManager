@@ -72,6 +72,14 @@ webhook targets (SSRF risk).
 | E4 | Elevation of privilege | Container escape after RCE | Non-root, read only root fs, no shell, dropped capabilities, no-new-privileges | 0 |
 | E5 | Elevation of privilege | Supply chain (dependency, action, image) | Lockfile, digest pinning, Renovate, pip-audit, Trivy, CodeQL, signed images | 0 |
 
+## Phase 7 controls in place (SCIM)
+
+* S1: SCIM tokens are random, stored as keyed hashes, revocable and rate limited.
+* E1: SCIM never changes super admins, break glass accounts or API clients and
+  only manages groups it created, so it cannot grant roles.
+* T1: filters run on an allow list of attributes, bounded in size; If-Match
+  prevents lost updates.
+
 ## Phase 7 controls in place (single sign on)
 
 * S1: OIDC with PKCE, state, nonce and full ID token validation; SAML with signed

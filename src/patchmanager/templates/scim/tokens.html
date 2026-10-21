@@ -11,7 +11,7 @@
   <div class="card overflow-x-auto p-0"><table class="table">
     <thead><tr><th>{% translate "Name" %}</th><th>{% translate "Created" %}</th><th>{% translate "Last used" %}</th><th></th></tr></thead>
     <tbody>{% for t in tokens %}<tr>
-      <td>{{ t.name }} <span class="font-mono text-xs text-slate-500">pmsc_{{ t.prefix }}_…</span></td>
+      <td>{{ t.name }} <span class="font-mono text-xs text-slate-500">pmsc_{{ t.prefix }}_…</span>{% if t.domains %} <span class="text-xs">{{ t.domains|join:", " }}</span>{% endif %}</td>
       <td class="text-xs">{{ t.created_at|date:"SHORT_DATE_FORMAT" }}</td><td class="text-xs">{{ t.last_used_at|date:"SHORT_DATETIME_FORMAT"|default:_("never") }}</td>
       <td>{% if t.revoked_at %}<span class="badge-muted">{% translate "revoked" %}</span>{% else %}<form method="post" action="{% url 'scim:token-revoke' t.pk %}" data-confirm="{% translate 'Revoke this token?' %}">{% csrf_token %}<button class="btn-secondary py-1">{% translate "Revoke" %}</button></form>{% endif %}</td>
     </tr>{% empty %}<tr><td colspan="4" class="text-slate-500">{% translate "No tokens yet." %}</td></tr>{% endfor %}</tbody>

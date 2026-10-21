@@ -157,20 +157,24 @@ def _one(
 @_authenticated
 def users(request: HttpRequest) -> HttpResponse:
     """GET (list, filter) or POST (create) Users."""
-    token = request.scim_token.name  # type: ignore[attr-defined]
+    token = request.scim_token  # type: ignore[attr-defined]
     if request.method == "POST":
         user = resources.create_user(request, _body(request), token)
-        return _one(request, resources.users().get(pk=user.pk), resources.user_json, 201)
+        return _one(
+            request, resources.users(token.domains).get(pk=user.pk), resources.user_json, 201
+        )
     if request.method != "GET":
         raise ScimError(405, "Method not allowed.")
-    return _list(request, resources.users(), resources.USER_FILTERS, resources.user_json)
+    return _list(
+        request, resources.users(token.domains), resources.USER_FILTERS, resources.user_json
+    )
 
 
 @_authenticated
 def user(request: HttpRequest, pk: str) -> HttpResponse:
     """GET, PUT, PATCH or DELETE one User."""
-    token = request.scim_token.name  # type: ignore[attr-defined]
-    obj = _get(resources.users(), pk)
+    token = request.scim_token  # type: ignore[attr-defined]
+    obj = _get(resources.users(token.domains), pk)
     if request.method == "GET":
         return _one(request, obj, resources.user_json)
     resources.check_version(request, obj)
@@ -183,13 +187,13 @@ def user(request: HttpRequest, pk: str) -> HttpResponse:
         return HttpResponse(status=204)
     else:
         raise ScimError(405, "Method not allowed.")
-    return _one(request, resources.users().get(pk=obj.pk), resources.user_json)
+    return _one(request, resources.users(token.domains).get(pk=obj.pk), resources.user_json)
 
 
 @_authenticated
 def groups(request: HttpRequest) -> HttpResponse:
     """GET (list, filter) or POST (create) Groups."""
-    token = request.scim_token.name  # type: ignore[attr-defined]
+    token = request.scim_token  # type: ignore[attr-defined]
     if request.method == "POST":
         group = resources.create_group(request, _body(request), token)
         return _one(request, resources.groups().get(pk=group.pk), resources.group_json, 201)
@@ -201,7 +205,7 @@ def groups(request: HttpRequest) -> HttpResponse:
 @_authenticated
 def group(request: HttpRequest, pk: str) -> HttpResponse:
     """GET, PUT, PATCH or DELETE one Group."""
-    token = request.scim_token.name  # type: ignore[attr-defined]
+    token = request.scim_token  # type: ignore[attr-defined]
     obj = _get(resources.groups(), pk)
     if request.method == "GET":
         return _one(request, obj, resources.group_json)
@@ -344,6 +348,20 @@ class TokenForm(forms.Form):
     """A token for one provisioning client."""
 
     name = forms.CharField(label=gettext_lazy("Name"), max_length=100)
+    domains = forms.CharField(
+        label=gettext_lazy("Email domains"),
+        required=False,
+        help_text=gettext_lazy("Comma separated. Empty: all domains."),
+    )
+
+    def clean_domains(self) -> list[str]:
+        """Lower case, unique, plausible."""
+        values = sorted(
+            {d.strip().lower() for d in self.cleaned_data["domains"].split(",") if d.strip()}
+        )
+        if any("@" in d or "." not in d for d in values):
+            raise forms.ValidationError(_("Enter domains like example.com."))
+        return values
 
 
 @permission_required("system.scim.manage")
@@ -355,6 +373,7 @@ def token_list(request: HttpRequest) -> HttpResponse:
         plain = f"pmsc_{prefix}_{secrets.token_urlsafe(32)}"
         ScimToken.objects.create(
             name=form.cleaned_data["name"],
+            domains=form.cleaned_data["domains"],
             prefix=prefix,
             token_hash=digest(plain),
             created_by=_actor(request),

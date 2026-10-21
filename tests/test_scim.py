@@ -73,10 +73,9 @@ def test_user_lifecycle(scim, super_admin) -> None:
         == 1
     )
     assert call(scim, "get", 'Users?filter=password eq "x"')[1]["scimType"] == "invalidFilter"
+    call(scim, "post", "Users", {"userName": "grace@example.com"})
     page = call(scim, "get", "Users?startIndex=2&count=1")[1]
-    assert (
-        page["startIndex"] == 2 and page["itemsPerPage"] == 1 and page["totalResults"] == 2
-    )  # with root
+    assert (page["startIndex"], page["itemsPerPage"], page["totalResults"]) == (2, 1, 2)
     # Entra style PATCH with path and string boolean
     status, body, _r = call(
         scim,
@@ -121,22 +120,39 @@ def test_user_lifecycle(scim, super_admin) -> None:
     assert call(scim, "get", "Users/not-a-uuid")[0] == 404
 
 
-def test_protected_accounts(scim, super_admin, make_user) -> None:
-    status, _body, _r = call(
-        scim,
-        "patch",
-        f"Users/{super_admin.pk}",
-        {"schemas": [PATCH], "Operations": [{"op": "replace", "path": "active", "value": False}]},
+def _provision(scim, email: str) -> str:
+    status, body, _r = call(scim, "post", "Users", {"userName": email})
+    assert status == 201, body
+    return str(body["id"])
+
+
+def test_local_and_protected_accounts_are_out_of_reach(scim, super_admin, make_user) -> None:
+    local = make_user("local@example.com")
+    for target in (super_admin, local):
+        assert (
+            call(scim, "get", f"Users/{target.pk}")[0] == 404
+        )  # SCIM only sees what it provisioned
+        assert call(scim, "delete", f"Users/{target.pk}")[0] == 404
+    assert (
+        call(scim, "post", "Users", {"userName": "local@example.com"})[1]["scimType"]
+        == "uniqueness"
     )
-    assert status == 403
-    assert call(scim, "delete", f"Users/{super_admin.pk}")[0] == 403
-    glass = make_user("glass@example.com", break_glass=True)
-    assert call(scim, "put", f"Users/{glass.pk}", {"userName": "x@example.com"})[0] == 403
+    uid = _provision(scim, "glass@example.com")
+    User.objects.filter(pk=uid).update(break_glass=True)
+    assert call(scim, "put", f"Users/{uid}", {"userName": "glass@example.com"})[0] == 403
+    # a locked super admin is still protected (judged by assignments, not by usability)
+    boss = _provision(scim, "boss@example.com")
+    Assignment.objects.create(
+        role=Role.objects.get(key="super_admin"), user_id=boss, scope_label="global"
+    )
+    User.objects.filter(pk=boss).update(is_active=False)
+    patch = {"schemas": [PATCH], "Operations": [{"op": "replace", "path": "active", "value": True}]}
+    assert call(scim, "patch", f"Users/{boss}", patch)[0] == 403
     assert super_admin.is_active
 
 
-def test_deactivation_signs_out(scim, make_user) -> None:
-    user = make_user("bob@example.com")
+def test_deactivation_signs_out(scim) -> None:
+    user = User.objects.get(pk=_provision(scim, "bob@example.com"))
     UserSession.objects.create(
         session_key="k" * 32, user=user, session_data="", expire_date="2999-01-01T00:00:00Z"
     )
@@ -151,7 +167,8 @@ def test_deactivation_signs_out(scim, make_user) -> None:
 
 def test_groups(scim, make_user) -> None:
     local = Group.objects.create(name="Admins")  # not managed by SCIM: invisible and untouchable
-    a, b = make_user("a@example.com"), make_user("b@example.com")
+    a = User.objects.get(pk=_provision(scim, "a@example.com"))
+    b = User.objects.get(pk=_provision(scim, "b@example.com"))
     status, body, _r = call(
         scim,
         "post",
@@ -248,3 +265,70 @@ def test_token_admin(admin_client: Client, make_user) -> None:
     other = Client()
     login(other, make_user())
     assert other.get("/manage/scim/", secure=True).status_code == 403
+
+
+def test_reactivation_rules_and_clean_revival(scim) -> None:
+    from patchmanager.sso.models import ExternalIdentity, IdentityProvider
+
+    uid = _provision(scim, "carol@example.com")
+    user = User.objects.get(pk=uid)
+    user.is_active = False  # an administrator deactivated the account
+    user.deactivated_at = user.created_at
+    user.save()
+    blocked = call(
+        scim,
+        "patch",
+        f"Users/{uid}",
+        {"schemas": [PATCH], "Operations": [{"op": "replace", "path": "active", "value": True}]},
+    )
+    assert blocked[0] == 403 and "administrator" in blocked[1]["detail"]
+    User.objects.filter(pk=uid).update(is_active=True, deactivated_at=None)
+    provider = IdentityProvider.objects.create(
+        name="Corp", slug="corp", kind="oidc", domains=["example.com"]
+    )
+    ExternalIdentity.objects.create(user_id=uid, provider=provider, subject="s-1")
+    call(
+        scim,
+        "patch",
+        f"Users/{uid}",
+        {
+            "schemas": [PATCH],
+            "Operations": [{"op": "replace", "path": "userName", "value": "carol.new@example.com"}],
+        },
+    )
+    assert not ExternalIdentity.objects.filter(
+        user_id=uid
+    ).exists()  # the old SSO link goes with the address
+    Assignment.objects.create(
+        role=Role.objects.get(key="editor"), user_id=uid, scope_label="global"
+    )
+    assert call(scim, "delete", f"Users/{uid}")[0] == 204
+    assert not Assignment.objects.filter(user_id=uid).exists()
+    revived = call(scim, "post", "Users", {"userName": "carol.new@example.com"})
+    assert revived[0] == 201 and revived[1]["id"] == uid and revived[1]["active"] is True
+
+
+def test_token_domains(admin_client: Client) -> None:
+    created = admin_client.post(
+        "/manage/scim/", {"name": "Acme", "domains": "acme.example"}, secure=True, follow=True
+    )
+    acme = Client(HTTP_AUTHORIZATION=f"Bearer {created.context['new_token']}")
+    assert call(acme, "post", "Users", {"userName": "x@other.example"})[0] == 403
+    status, body, _r = call(acme, "post", "Users", {"userName": "x@acme.example"})
+    assert status == 201
+    moved = call(
+        acme,
+        "patch",
+        f"Users/{body['id']}",
+        {
+            "schemas": [PATCH],
+            "Operations": [{"op": "replace", "path": "userName", "value": "x@other.example"}],
+        },
+    )
+    assert moved[0] == 403
+    assert (
+        b"domains"
+        in admin_client.post(
+            "/manage/scim/", {"name": "Bad", "domains": "me@x.example"}, secure=True
+        ).content
+    )

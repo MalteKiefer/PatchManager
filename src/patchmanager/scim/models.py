@@ -1,6 +1,7 @@
 """Bearer tokens of SCIM clients (identity providers that provision users)."""
 
 from django.conf import settings
+from django.contrib.postgres.fields import ArrayField
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
@@ -13,6 +14,7 @@ class ScimToken(TimestampedModel):
     name = models.CharField(_("name"), max_length=100)
     prefix = models.CharField(max_length=16, unique=True)
     token_hash = models.CharField(max_length=64)
+    domains = ArrayField(models.CharField(max_length=253), default=list, blank=True)  # empty: all
     created_by = models.ForeignKey(
         settings.AUTH_USER_MODEL, null=True, on_delete=models.SET_NULL, related_name="+"
     )

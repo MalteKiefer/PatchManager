@@ -1,8 +1,10 @@
 """SCIM Users and Groups (RFC 7643) on top of accounts.User and accounts.Group.
 
-Safeguards: SCIM never changes super admins, break glass accounts or API client
-service users, and only manages groups it created itself (``scim_managed``), so
-a provisioning client cannot hand out roles it was not meant to.
+Safeguards: SCIM only manages accounts and groups it created itself
+(``scim_provisioned``, ``scim_managed``), never super admins, break glass
+accounts or API client service users, only reactivates accounts it deactivated,
+and with a domain list only addresses of those domains. So a provisioning client
+cannot take over local accounts or hand out roles it was not meant to.
 """
 
 from typing import Any
@@ -10,7 +12,7 @@ from typing import Any
 from django.core.exceptions import ValidationError
 from django.core.validators import validate_email
 from django.db import IntegrityError, transaction
-from django.db.models import QuerySet
+from django.db.models import Q, QuerySet
 from django.http import HttpRequest
 from django.utils import timezone
 
@@ -84,16 +86,29 @@ def _meta(request: HttpRequest, obj: Any, kind: str) -> dict[str, Any]:
 # ---------------------------------------------------------------- users
 
 
-def users() -> QuerySet[User]:
-    """Users SCIM sees: everyone except API clients and SCIM deprovisioned accounts."""
-    return User.objects.filter(is_service=False, scim_deleted_at__isnull=True).prefetch_related(
-        "pm_groups"
+def users(domains: list[str] | None = None) -> QuerySet[User]:
+    """Users SCIM manages: those it provisioned, not deprovisioned, of the token's domains."""
+    rows = User.objects.filter(
+        scim_provisioned=True, is_service=False, scim_deleted_at__isnull=True
     )
+    if domains:
+        q = Q()
+        for domain in domains:
+            q |= Q(email__iendswith=f"@{domain}")
+        rows = rows.filter(q)
+    return rows.prefetch_related("pm_groups")
+
+
+def check_domain(email: str, domains: list[str]) -> None:
+    """A token limited to domains may only use addresses of those domains."""
+    if domains and email.rpartition("@")[2].lower() not in domains:
+        raise ScimError(403, "This token may not provision addresses of this domain.")
 
 
 def protected(user: User) -> bool:
-    """Accounts SCIM must not change."""
-    return user.is_service or user.break_glass or policy.is_super_admin(user)
+    """Accounts SCIM must not change, judged by assignments (also when locked or inactive)."""
+    holds_super_admin = any(g.is_super_admin for g in policy._compile(user, unfiltered=True))
+    return user.is_service or user.break_glass or holds_super_admin or not user.scim_provisioned
 
 
 def user_json(request: HttpRequest, user: User) -> dict[str, Any]:
@@ -156,67 +171,88 @@ def _user_fields(data: dict[str, Any]) -> dict[str, Any]:
     return fields
 
 
-def _apply_user(request: HttpRequest, user: User, fields: dict[str, Any], token: str) -> User:
+def _set_active(user: User, active: bool) -> None:
+    if active and not user.is_active and not user.scim_deactivated:
+        raise ScimError(
+            403, "An administrator deactivated this account; only they can reactivate it."
+        )
+    if user.is_locked and active:
+        raise ScimError(403, "This account is locked by an administrator.")
+    if active:
+        user.is_active, user.deactivated_at, user.scim_deactivated = True, None, False
+    elif user.is_active:
+        user.is_active, user.deactivated_at, user.scim_deactivated = False, timezone.now(), True
+
+
+def _unlink(user: User) -> None:
+    """Forget sign in links and sessions (when the address changes or the account goes)."""
+    from patchmanager.sso.models import ExternalIdentity
+
+    ExternalIdentity.objects.filter(user=user).delete()
+    _revoke(user)
+
+
+def _apply_user(request: HttpRequest, user: User, fields: dict[str, Any], token: Any) -> User:
     if protected(user):
         raise ScimError(403, "This account cannot be changed by provisioning.")
+    changed_email = "email" in fields and fields["email"] != user.email
+    if changed_email:
+        check_domain(fields["email"], token.domains)
     active = fields.pop("is_active", None)
     for key, value in fields.items():
         setattr(user, key, value)
     if active is not None:
-        user.is_active = active
-        user.deactivated_at = None if active else (user.deactivated_at or timezone.now())
+        _set_active(user, active)
     try:
         with transaction.atomic():
             user.save()
+            if changed_email or active is False:
+                _unlink(user) if changed_email else _revoke(user)
     except IntegrityError as exc:
         raise ScimError(409, "userName is already in use.", "uniqueness") from exc
-    if active is False:
-        _revoke(user)
-    audit.record(
-        "scim.user.updated",
-        obj=user,
-        data={
-            "token": token,
-            "fields": sorted([*fields, *(["active"] if active is not None else [])]),
-        },
-    )
+    names = sorted([*fields, *(["active"] if active is not None else [])])
+    audit.record("scim.user.updated", obj=user, data={"token": token.name, "fields": names})
     return user
 
 
-def create_user(request: HttpRequest, data: dict[str, Any], token: str) -> User:
-    """POST /Users. A user SCIM deprovisioned earlier comes back instead of a conflict."""
+def create_user(request: HttpRequest, data: dict[str, Any], token: Any) -> User:
+    """POST /Users. An account SCIM deprovisioned earlier comes back (with a clean slate)."""
     fields = _user_fields(data)
     if "email" not in fields:
         raise ScimError(400, "userName is required.", "invalidValue")
+    check_domain(fields["email"], token.domains)
     existing = User.objects.filter(email__iexact=fields["email"]).first()
     if existing is not None:
-        if existing.scim_deleted_at is None or existing.is_service:
+        if not existing.scim_provisioned or existing.scim_deleted_at is None or protected(existing):
             raise ScimError(409, "userName is already in use.", "uniqueness")
         existing.scim_deleted_at = None
         fields.setdefault("is_active", True)
         return _apply_user(request, existing, fields, token)
     active = fields.pop("is_active", True)
     user = User.objects.create_user(
-        password=None, **{"display_name": fields.pop("display_name", fields["email"]), **fields}
+        password=None,
+        scim_provisioned=True,
+        **{"display_name": fields.pop("display_name", fields["email"]), **fields},
     )
     if not active:
-        User.objects.filter(pk=user.pk).update(is_active=False, deactivated_at=timezone.now())
+        User.objects.filter(pk=user.pk).update(
+            is_active=False, deactivated_at=timezone.now(), scim_deactivated=True
+        )
         user.refresh_from_db()
-    audit.record("scim.user.created", obj=user, data={"token": token})
+    audit.record("scim.user.created", obj=user, data={"token": token.name})
     return user
 
 
-def replace_user(request: HttpRequest, user: User, data: dict[str, Any], token: str) -> User:
-    """PUT /Users/<id>."""
+def replace_user(request: HttpRequest, user: User, data: dict[str, Any], token: Any) -> User:
+    """PUT /Users/<id> (``active`` only changes when sent)."""
     fields = _user_fields(data)
     if "email" not in fields:
         raise ScimError(400, "userName is required.", "invalidValue")
-    fields.setdefault("is_active", True)
     return _apply_user(request, user, fields, token)
 
 
 def patch_user(
-    request: HttpRequest, user: User, operations: list[dict[str, Any]], token: str
+    request: HttpRequest, user: User, operations: list[dict[str, Any]], token: Any
 ) -> User:
     """PATCH /Users/<id> with add, replace and remove operations."""
     fields: dict[str, Any] = {}
@@ -242,33 +278,41 @@ def patch_user(
         if key in ("name.formatted", "displayname", "name.givenname", "name.familyname"):
             fields["display_name"] = str(value)[:150]
         elif key in ('emails[type eq "work"].value', "emails"):
-            fields |= _user_fields(
-                {
-                    "emails": value
-                    if isinstance(value, list)
-                    else [{"value": value, "primary": True}]
-                }
-            )
+            emails = value if isinstance(value, list) else [{"value": value, "primary": True}]
+            fields |= _user_fields({"emails": emails})
         else:
             fields |= _user_fields({path: value})
     return _apply_user(request, user, fields, token)
 
 
-def delete_user(request: HttpRequest, user: User, token: str) -> None:
-    """DELETE /Users/<id>: deprovision (deactivate and hide) instead of erasing the history."""
+def delete_user(request: HttpRequest, user: User, token: Any) -> None:
+    """DELETE /Users/<id>: deprovision and keep the history, but leave nothing behind.
+
+    The account is deactivated and hidden; roles, groups, second factors, API
+    tokens, sign in links and sessions go, so a later revival starts clean.
+    """
+    from patchmanager.accounts.models import Assignment
+
     if protected(user):
         raise ScimError(403, "This account cannot be changed by provisioning.")
+    now = timezone.now()
     with transaction.atomic():
         User.objects.filter(pk=user.pk).update(
             is_active=False,
-            deactivated_at=timezone.now(),
-            scim_deleted_at=timezone.now(),
-            updated_at=timezone.now(),
+            deactivated_at=now,
+            scim_deleted_at=now,
+            scim_deactivated=True,
+            updated_at=now,
         )
-        user.pm_groups.remove(*Group.objects.filter(scim_managed=True))
-        _revoke(user)
+        user.pm_groups.clear()
+        Assignment.objects.filter(user=user).delete()
+        user.totp_devices.all().delete()
+        user.webauthn_credentials.all().delete()
+        user.recovery_codes.all().delete()
+        user.api_tokens.all().delete()
+        _unlink(user)
     policy.bump_version()
-    audit.record("scim.user.deleted", obj=user, data={"token": token})
+    audit.record("scim.user.deleted", obj=user, data={"token": token.name})
 
 
 # ---------------------------------------------------------------- groups
@@ -293,7 +337,7 @@ def group_json(request: HttpRequest, group: Group) -> dict[str, Any]:
     }
 
 
-def _members(values: Any) -> list[User]:
+def _members(values: Any, token: Any) -> list[User]:
     if not isinstance(values, list):
         raise ScimError(400, "members must be a list.", "invalidValue")
     ids = []
@@ -304,7 +348,7 @@ def _members(values: Any) -> list[User]:
             raise ScimError(400, "Nested groups are not supported.", "invalidValue")
         ids.append(str(member["value"]))
     try:
-        found = list(users().filter(pk__in=ids))
+        found = list(users(token.domains).filter(pk__in=ids))
     except ValidationError as exc:
         raise ScimError(400, "Unknown member.", "invalidValue") from exc
     if len(found) != len(set(ids)):
@@ -316,7 +360,7 @@ def _members(values: Any) -> list[User]:
 
 def _save_group(
     group: Group,
-    token: str,
+    token: Any,
     action: str,
     members: list[User] | None = None,
     add: list[User] | None = None,
@@ -337,33 +381,33 @@ def _save_group(
     except IntegrityError as exc:
         raise ScimError(409, "displayName is already in use.", "uniqueness") from exc
     policy.bump_version()
-    audit.record(f"scim.group.{action}", data={"token": token, "group": group.name})
+    audit.record(f"scim.group.{action}", data={"token": token.name, "group": group.name})
     return group
 
 
-def create_group(request: HttpRequest, data: dict[str, Any], token: str) -> Group:
+def create_group(request: HttpRequest, data: dict[str, Any], token: Any) -> Group:
     """POST /Groups."""
     name = str(data.get("displayName") or "").strip()
     if not name:
         raise ScimError(400, "displayName is required.", "invalidValue")
-    members = _members(data.get("members", []))
+    members = _members(data.get("members", []), token)
     group = Group(
         name=name[:150], external_id=str(data.get("externalId") or "")[:255], scim_managed=True
     )
     return _save_group(group, token, "created", members=members)
 
 
-def replace_group(request: HttpRequest, group: Group, data: dict[str, Any], token: str) -> Group:
+def replace_group(request: HttpRequest, group: Group, data: dict[str, Any], token: Any) -> Group:
     """PUT /Groups/<id>."""
     name = str(data.get("displayName") or "").strip()
     if not name:
         raise ScimError(400, "displayName is required.", "invalidValue")
     group.name, group.external_id = name[:150], str(data.get("externalId") or "")[:255]
-    return _save_group(group, token, "updated", members=_members(data.get("members", [])))
+    return _save_group(group, token, "updated", members=_members(data.get("members", []), token))
 
 
 def patch_group(
-    request: HttpRequest, group: Group, operations: list[dict[str, Any]], token: str
+    request: HttpRequest, group: Group, operations: list[dict[str, Any]], token: Any
 ) -> Group:
     """PATCH /Groups/<id>: rename, add or remove members (as Entra and Okta send them)."""
     add: list[User] = []
@@ -386,22 +430,22 @@ def patch_group(
         elif lowered == "externalid":
             group.external_id = "" if op == "remove" else str(value or "")[:255]
         elif lowered == "members" and op == "add":
-            add += _members(value)
+            add += _members(value, token)
         elif lowered == "members" and op == "replace":
-            members = _members(value)
+            members = _members(value, token)
         elif lowered == "members" and op == "remove":
-            remove += _members(value) if value else list(group.members.all())
+            remove += _members(value, token) if value else list(group.members.all())
         elif lowered.startswith("members[value eq ") and op == "remove":
             member_id = lowered.removeprefix("members[value eq ").strip('"]')
-            remove += _members([{"value": member_id}])
+            remove += _members([{"value": member_id}], token)
         else:
             raise ScimError(400, f"{path or 'This operation'} is not supported.", "invalidPath")
     return _save_group(group, token, "updated", members=members, add=add, remove=remove)
 
 
-def delete_group(request: HttpRequest, group: Group, token: str) -> None:
+def delete_group(request: HttpRequest, group: Group, token: Any) -> None:
     """DELETE /Groups/<id> (only groups SCIM created)."""
     name = group.name
     group.delete()
     policy.bump_version()
-    audit.record("scim.group.deleted", data={"token": token, "group": name})
+    audit.record("scim.group.deleted", data={"token": token.name, "group": name})

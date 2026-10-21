@@ -16,6 +16,8 @@ All notable changes to this project are documented here. The format follows
 * Single sign on with OpenID Connect (PKCE), SAML 2.0 and LDAP: per domain
   providers, account creation on first sign in, group mapping, enforcement with
   break glass accounts and single logout.
+* SCIM 2.0 provisioning of users and groups (filters, PATCH, ETags) with SCIM tokens;
+  protected accounts and locally managed groups stay out of reach.
 
 ### Fixed
 
