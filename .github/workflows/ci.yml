@@ -49,6 +49,32 @@ jobs:
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with: { name: coverage, path: coverage.xml }
 
+  e2e:
+    needs: typecheck
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with: { persist-credentials: false }
+      - uses: prefix-dev/setup-pixi@ad1da6449d9e506fd127fd67ab2d054a769f6a94 # v0.11.2
+        with: { environments: e2e, locked: true, cache: true }
+      - run: pixi run -e e2e playwright install --with-deps chromium
+      - run: pixi run -e e2e e2e
+
+  compose:
+    needs: lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with: { persist-credentials: false }
+      - name: Validate compose files
+        run: |
+          mkdir -p secrets
+          for s in postgres_password postgres_superuser_password django_secret_key encryption_keys email_password; do
+            echo placeholder > "secrets/$s"
+          done
+          PATCHMANAGER_DOMAIN=ci.example.test docker compose -f compose.prod.yaml config --quiet
+          docker compose -f compose.yaml config --quiet
+
   security:
     needs: lint
     runs-on: ubuntu-latest
@@ -67,7 +93,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   image:
-    needs: [test, security]
+    needs: [test, e2e, security, compose]
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -110,8 +136,12 @@ jobs:
         run: |
           docker run --rm --entrypoint /app/.pixi/envs/prod/bin/python \
             -e DJANGO_SECRET_KEY=smoke-only-insecure-key-0123456789-0123456789-0123456789 \
+            -e PATCHMANAGER_ENCRYPTION_KEYS=AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA= \
+            -e PATCHMANAGER_BASE_URL=https://smoke.example.test \
+            -e PATCHMANAGER_ALLOWED_HOSTS=smoke.example.test \
+            -e REDIS_URL=redis://localhost:6379/0 \
             -e DATABASE_URL=postgresql://smoke@localhost/smoke \
-            patchmanager:scan -m django check
+            patchmanager:scan -m django check --deploy --fail-level WARNING
       - if: github.event_name != 'pull_request'
         uses: docker/login-action@dbcb813823bdd20940b903addbd779551569679f # v4.6.0
         with:

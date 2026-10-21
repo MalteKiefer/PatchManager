@@ -7,12 +7,17 @@ ARG RUNTIME_IMAGE=gcr.io/distroless/base-debian13:nonroot@sha256:7e22204ffcba783
 FROM ${PIXI_IMAGE} AS build
 WORKDIR /app
 COPY pixi.toml pixi.lock ./
-RUN pixi install --locked -e prod
+RUN pixi install --locked -e prod && pixi install --locked -e build
+COPY scripts/tailwind.py ./scripts/tailwind.py
 COPY src ./src
+# Tailwind CSS (pinned, checksum verified binary) and compiled translations.
+RUN pixi run -e build css && pixi run -e build compilemessages
 # Throwaway values: collectstatic imports settings but touches neither DB nor secrets.
 RUN PYTHONPATH=/app/src DJANGO_SETTINGS_MODULE=patchmanager.settings \
     DJANGO_SECRET_KEY=build-only-not-a-secret-0123456789-0123456789-0123456789 \
     DATABASE_URL=postgresql://build@localhost/build \
+    PATCHMANAGER_TESTING=true \
+    PATCHMANAGER_ENCRYPTION_KEYS=AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA= \
     PATCHMANAGER_STATIC_ROOT=/app/staticfiles \
     /app/.pixi/envs/prod/bin/python -m django collectstatic --noinput
 
@@ -46,7 +51,8 @@ ENV PATH=/app/.pixi/envs/prod/bin \
     DJANGO_SETTINGS_MODULE=patchmanager.settings \
     PATCHMANAGER_STATIC_ROOT=/app/staticfiles \
     PYTHONDONTWRITEBYTECODE=1 \
-    PYTHONUNBUFFERED=1
+    PYTHONUNBUFFERED=1 \
+    PROMETHEUS_MULTIPROC_DIR=/tmp/prometheus
 USER 65532:65532
 EXPOSE 8000
 HEALTHCHECK --interval=30s --timeout=5s --start-period=20s --retries=3 \

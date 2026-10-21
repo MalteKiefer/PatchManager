@@ -2,4 +2,5 @@
 !pixi.toml
 !pixi.lock
 !src/
+!scripts/tailwind.py
 **/__pycache__

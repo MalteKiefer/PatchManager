@@ -1,35 +1,50 @@
 # Development stack. Not for production: see compose.prod.yaml.
 #   docker compose up --build
 #   docker compose --profile sso up   # adds Keycloak as test identity provider
+# First run: docker compose exec app python -m django setup_token
 
 name: patchmanager-dev
 
-x-app-env: &app-env
-  PATCHMANAGER_DEBUG: "true"
-  DJANGO_SECRET_KEY: dev-only-insecure-key-never-use-in-production-0123456789
-  DATABASE_URL: postgresql://patchmanager:patchmanager@postgres:5432/patchmanager
+x-app: &app
+  build: { context: ., target: dev }
+  environment:
+    PATCHMANAGER_DEBUG: "true"
+    DJANGO_SECRET_KEY: dev-only-insecure-key-never-use-in-production-0123456789
+    # Publicly known development key. Never reuse it.
+    PATCHMANAGER_ENCRYPTION_KEYS: NLsl_XU372FcoNQgLk7VIumq3upqMH4C6VnX8Arvcas=  # gitleaks:allow
+    DATABASE_URL: postgresql://patchmanager:patchmanager@postgres:5432/patchmanager
+    REDIS_URL: redis://redis:6379/0
+    PATCHMANAGER_EMAIL_BACKEND: django.core.mail.backends.smtp.EmailBackend
+    PATCHMANAGER_EMAIL_HOST: mailpit
+    PATCHMANAGER_EMAIL_PORT: "1025"
+    PATCHMANAGER_EMAIL_USE_TLS: "false"
+  volumes: ["./src:/app/src", "./scripts:/app/scripts:ro"]
+  depends_on:
+    postgres: { condition: service_healthy }
+    redis: { condition: service_healthy }
 
 services:
   app:
-    build: { context: ., target: dev }
-    command: ["sh", "-c", "python -m django migrate && python -m django runserver 0.0.0.0:8000"]
-    environment: *app-env
+    <<: *app
+    command: ["sh", "-c", "python -m django migrate && python scripts/tailwind.py -i src/patchmanager/core/assets/app.css -o src/patchmanager/core/static/core/app.css && python -m django runserver 0.0.0.0:8000"]
     ports: ["127.0.0.1:8000:8000"]
-    volumes: ["./src:/app/src"]
-    depends_on:
-      postgres: { condition: service_healthy }
-      redis: { condition: service_healthy }
+
+  worker:
+    <<: *app
+    command: ["celery", "-A", "patchmanager.worker", "worker", "--beat", "--loglevel", "INFO"]
 
   postgres:
     image: postgres:18.6-trixie@sha256:1267c7e692de235fda2a50dbcdbcbca4672ea6a0298576a6bd9d07cafc319b32
     environment:
-      POSTGRES_USER: patchmanager
-      POSTGRES_PASSWORD: patchmanager
-      POSTGRES_DB: patchmanager
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    secrets: [postgres_password]
     ports: ["127.0.0.1:5432:5432"]
-    volumes: ["pgdata:/var/lib/postgresql"]
+    volumes:
+      - pgdata:/var/lib/postgresql
+      - ./deploy/postgres-init.sh:/docker-entrypoint-initdb.d/10-patchmanager.sh:ro
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U patchmanager -d patchmanager"]
+      test: ["CMD-SHELL", "pg_isready -U postgres -d patchmanager"]
       interval: 5s
       retries: 10
 
@@ -52,6 +67,10 @@ services:
       KC_BOOTSTRAP_ADMIN_USERNAME: admin
       KC_BOOTSTRAP_ADMIN_PASSWORD: admin
     ports: ["127.0.0.1:8080:8080"]
+
+secrets:
+  postgres_password:
+    file: ./deploy/dev/postgres_password  # development only
 
 volumes:
   pgdata:
