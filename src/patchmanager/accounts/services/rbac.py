@@ -61,11 +61,13 @@ def create_role(
 ) -> Role:
     """Create a custom role."""
     require(actor, "accounts.role.add")
+    codes = _validate_permissions(permission_codes)
+    _check_can_add_permissions(actor, set(codes))
     role = Role.objects.create(
         key=_unique_key(name),
         name=name,
         description=description,
-        permissions=_validate_permissions(permission_codes),
+        permissions=codes,
         requires_mfa=requires_mfa,
     )
     policy.bump_version()
@@ -89,8 +91,10 @@ def update_role(
     require(actor, "accounts.role.change", role)
     _guard_custom(role)
     before = {"name": role.name, "permissions": role.permissions, "requires_mfa": role.requires_mfa}
+    new_permissions = _validate_permissions(permission_codes)
+    _check_can_add_permissions(actor, set(new_permissions) - set(role.permissions))
     role.name, role.description, role.requires_mfa = name, description, requires_mfa
-    role.permissions = _validate_permissions(permission_codes)
+    role.permissions = new_permissions
     role.save()
     policy.bump_version()
     after = {"name": role.name, "permissions": role.permissions, "requires_mfa": role.requires_mfa}
@@ -219,6 +223,7 @@ def delete_group(request: HttpRequest, actor: User, group: Group) -> None:
 def set_members(request: HttpRequest, actor: User, group: Group, users: list[User]) -> None:
     """Replace the direct members of a group."""
     require(actor, "accounts.group.change", group)
+    _check_can_confer(actor, group)
     before = sorted(str(u) for u in group.members.all())
     group.members.set(users)
     policy.bump_version()
@@ -244,6 +249,17 @@ def _ancestors(group_id: Any) -> set[Any]:
     return seen
 
 
+def _check_can_confer(actor: User, group: Group) -> None:
+    """Joining ``group`` confers its and its ancestors' assignments.
+
+    The actor must be able to grant every one of them.
+    """
+    for assignment in Assignment.objects.filter(
+        group_id__in=_ancestors(group.pk), effect="allow"
+    ).select_related("role"):
+        check_can_grant(actor, assignment.role, assignment.scope_path)
+
+
 def add_parent(request: HttpRequest, actor: User, child: Group, parent: Group) -> None:
     """Nest ``child`` inside ``parent``; rejects cycles."""
     require(actor, "accounts.group.change", child)
@@ -252,6 +268,7 @@ def add_parent(request: HttpRequest, actor: User, child: Group, parent: Group) -
         list(Group.objects.select_for_update().filter(pk__in=[child.pk, parent.pk]))
         if child.pk in _ancestors(parent.pk):
             raise ServiceError(_("This would create a cycle of nested groups."))
+        _check_can_confer(actor, parent)
         child.parents.add(parent)
     policy.bump_version()
     audit.record("accounts.group.nested", request=request, obj=child, data={"parent": str(parent)})
@@ -268,6 +285,14 @@ def remove_parent(request: HttpRequest, actor: User, child: Group, parent: Group
 
 
 # --- Assignments ----------------------------------------------------------
+
+
+def _check_can_add_permissions(actor: User, added: set[str]) -> None:
+    """A role may be assigned anywhere, so new permissions must be held globally."""
+    if policy.is_super_admin(actor):
+        return
+    if any(not policy.has_perm(actor, perm) for perm in added):
+        raise PermissionDeniedError(_("You cannot add permissions you do not hold yourself."))
 
 
 def check_can_grant(actor: User, role: Role, scope_path: str | None) -> None:

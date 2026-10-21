@@ -172,3 +172,81 @@ def test_unassign_revokes_access(req, super_admin, make_user, make_tenant) -> No
     assert policy.has_perm(user, "tenancy.tenant.view", tenant)
     rbac.unassign(req, super_admin, a)
     assert not policy.has_perm(user, "tenancy.tenant.view", tenant)
+
+
+def test_role_editor_cannot_add_permissions_they_lack(super_admin, make_user, grant) -> None:
+    request = RequestFactory().post("/")
+    request.user = super_admin
+    manager_role = rbac.create_role(
+        request,
+        super_admin,
+        name="Role manager",
+        permission_codes=["accounts.role.change", "accounts.role.view"],
+    )
+    manager = make_user()
+    Assignment.objects.create(role=manager_role, user=manager)
+    with pytest.raises(PermissionDeniedError):
+        rbac.update_role(
+            request,
+            manager,
+            manager_role,
+            name="Role manager",
+            description="",
+            permission_codes=[*manager_role.permissions, "system.settings.change"],
+            requires_mfa=False,
+        )
+    rbac.update_role(
+        request,
+        manager,
+        manager_role,
+        name="Role manager",
+        description="",
+        permission_codes=["accounts.role.change", "accounts.role.view"],
+        requires_mfa=False,
+    )
+
+
+def test_impersonation_cannot_exceed_actor_rights(super_admin, make_user, make_tenant) -> None:
+    from patchmanager.accounts.services import users
+
+    request = RequestFactory().post("/")
+    request.user = super_admin
+    role = rbac.create_role(
+        request,
+        super_admin,
+        name="Impersonator",
+        permission_codes=["accounts.user.impersonate", "accounts.user.view"],
+    )
+    actor = make_user()
+    Assignment.objects.create(role=role, user=actor)
+    tenant = make_tenant()
+    target = make_user()
+    rbac.assign(
+        request, super_admin, role=Role.objects.get(key="admin"), user=target, tenant=tenant
+    )
+    request.user = actor
+    request.session = {}  # type: ignore[assignment]
+    with pytest.raises(PermissionDeniedError):
+        users.start_impersonation(request, actor, target, "support")
+
+
+def test_group_manager_cannot_join_privileged_group(super_admin, make_user) -> None:
+    request = RequestFactory().post("/")
+    request.user = super_admin
+    role = rbac.create_role(
+        request,
+        super_admin,
+        name="Group manager",
+        permission_codes=["accounts.group.change", "accounts.group.view"],
+    )
+    manager = make_user()
+    Assignment.objects.create(role=role, user=manager)
+    admins = rbac.create_group(request, super_admin, name="Admins")
+    rbac.assign(request, super_admin, role=Role.objects.get(key="super_admin"), group=admins)
+    helpers = rbac.create_group(request, super_admin, name="Helpers")
+    with pytest.raises(PermissionDeniedError):
+        rbac.set_members(request, manager, admins, [manager])
+    with pytest.raises(PermissionDeniedError):
+        rbac.add_parent(request, manager, helpers, admins)
+    rbac.set_members(request, manager, helpers, [manager])  # no assignments: allowed
+    assert not policy.is_super_admin(manager)

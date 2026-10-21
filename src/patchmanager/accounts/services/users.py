@@ -246,6 +246,15 @@ def start_impersonation(request: HttpRequest, actor: User, target: User, reason:
         raise ServiceError(_("This user cannot be impersonated."))
     if not target.is_active or target.is_locked:
         raise ServiceError(_("Inactive or locked users cannot be impersonated."))
+    from patchmanager.accounts.services import rbac
+
+    # Acting as someone must never yield more than the actor could grant them.
+    for assignment in Assignment.objects.filter(user=target, effect="allow").select_related("role"):
+        rbac.check_can_grant(actor, assignment.role, assignment.scope_path)
+    for assignment in Assignment.objects.filter(
+        group__members=target, effect="allow"
+    ).select_related("role"):
+        rbac.check_can_grant(actor, assignment.role, assignment.scope_path)
     from django.contrib.auth import login
 
     from patchmanager.accounts.services.auth import BACKEND
