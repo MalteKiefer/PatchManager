@@ -4,6 +4,7 @@
 <nav aria-label="{% translate 'Breadcrumb' %}" class="mb-3 text-sm"><a href="{% url 'cabling:cables' %}">{% translate "Cables" %}</a> / {{ cable }}</nav>
 <div class="mb-6 flex flex-wrap items-center gap-3">
   <h1 class="mr-auto"><span class="mr-2 inline-block size-4 rounded-full align-middle" data-swatch="{{ cable.colour }}" aria-hidden="true"></span>{% translate "Cable" %} {{ cable }}</h1>
+  <a class="btn-secondary" href="{% history_url cable %}">{% translate "History" %}</a>
   <span class="badge-muted">{{ cable.get_kind_display }}</span><span class="badge-muted">{{ reach }}</span>
 </div>
 <div class="grid gap-6 lg:grid-cols-3">

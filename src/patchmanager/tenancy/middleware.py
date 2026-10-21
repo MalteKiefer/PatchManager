@@ -26,6 +26,10 @@ class TenantContextMiddleware:
         all_tenants, tenant_ids = policy.accessible_tenants(request.user)
         rls.set_context(tenant_ids, all_tenants=all_tenants)
         try:
+            if request.user.is_authenticated:
+                impersonator = getattr(request, "impersonator", None)
+                label = str(request.user) + (f" (by {impersonator})" if impersonator else "")
+                rls.set_actor(request.user.pk, label, getattr(request, "request_id", ""))
             request.available_tenants = []  # type: ignore[attr-defined]
             request.tenant = None  # type: ignore[attr-defined]
             if request.user.is_authenticated:

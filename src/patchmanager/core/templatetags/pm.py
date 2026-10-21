@@ -3,6 +3,7 @@
 from typing import Any
 
 from django import template
+from django.urls import reverse
 
 register = template.Library()
 
@@ -23,6 +24,15 @@ def markdown(text: str) -> Any:
     from patchmanager.metadata.services import render_markdown
 
     return mark_safe(render_markdown(text))  # noqa: S308  # nosec B308, B703: nh3 sanitised
+
+
+@register.simple_tag
+def history_url(target: Any) -> str:
+    """Link to the change history of ``target`` (empty if it has none)."""
+    from patchmanager.history.registry import TRACKED
+
+    label = target._meta.label_lower
+    return reverse("history:object", args=[label, target.pk]) if label in TRACKED else ""
 
 
 @register.inclusion_tag("metadata/_panel.html", takes_context=True)

@@ -96,9 +96,21 @@ def set_context(tenant_ids: Iterable[UUID | str], *, all_tenants: bool = False) 
         )
 
 
+def set_actor(actor_id: UUID | str | None, label: str = "", request_id: str = "") -> None:
+    """Tell the history triggers who is changing data in this session."""
+    with connection.cursor() as cursor:
+        cursor.execute(
+            "SELECT set_config('patchmanager.actor_id', %s, false),"
+            " set_config('patchmanager.actor_label', %s, false),"
+            " set_config('patchmanager.request_id', %s, false)",
+            [str(actor_id) if actor_id else "", label[:254], request_id[:64]],
+        )
+
+
 def clear_context() -> None:
-    """Remove all tenant visibility from the session."""
+    """Remove all tenant visibility and the actor from the session."""
     set_context([])
+    set_actor(None)
 
 
 def _current() -> tuple[str, str]:
