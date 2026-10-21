@@ -128,6 +128,10 @@ def location(request: HttpRequest, actor: User, tenant: Tenant, row: Row, *, cre
         if node is None:
             if not create:
                 raise missing
+            if parent is not tenant and not policy.has_perm(
+                actor, f"{parent.policy_object_type}.view", parent
+            ):
+                raise missing  # never create below a location the actor cannot see
             extra: dict[str, Any] = {}
             if model is Site and row.get("site_code"):
                 extra["code"] = row["site_code"]

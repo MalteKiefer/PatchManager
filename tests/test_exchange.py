@@ -478,3 +478,24 @@ def test_export_rate_limit(kit, admin_client: Client, monkeypatch) -> None:
     monkeypatch.setattr(views, "EXPORTS_PER_10_MIN", 1)
     assert admin_client.get("/exchange/racks.csv", secure=True).status_code == 200
     assert admin_client.get("/exchange/racks.csv", secure=True).status_code == 429
+
+
+def test_import_never_creates_below_hidden_location(kit, make_user) -> None:
+    user = make_user()
+    with rls.system_context():
+        Assignment.objects.create(
+            role=Role.objects.get(key="editor"),
+            user=user,
+            tenant=kit["tenant"],
+            scope_path=kit["room"].path,
+        )
+        row = {"site": "HQ", "building": "B1", "floor": "F1", "room": "Sneaky"}
+        results = importer.run(kit["request"], user, kit["tenant"], "locations", [row], apply=False)
+        assert results[0].message == "Location HQ / B1 / F1 / Sneaky not found."
+        rack = {"site": "HQ", "building": "B1", "floor": "F1", "room": "R1", "name": "Own"}
+        assert (
+            importer.run(kit["request"], user, kit["tenant"], "racks", [rack], apply=False)[
+                0
+            ].outcome
+            == "created"
+        )
