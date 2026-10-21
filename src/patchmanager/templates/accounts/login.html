@@ -13,4 +13,7 @@
   {% translate "Sign in with a passkey" %}
 </button>
 <p id="webauthn-status" class="mt-2 text-sm text-red-600" role="alert" aria-live="polite"></p>
+{% for p in providers %}
+<a class="btn-secondary mt-2 w-full justify-center" href="{% url 'sso:login' p.slug %}">{% blocktranslate with name=p.name %}Sign in with {{ name }}{% endblocktranslate %}</a>
+{% endfor %}
 {% endblock %}

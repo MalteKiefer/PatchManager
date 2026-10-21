@@ -1,0 +1,14 @@
+{% extends "manage/_base.html" %}{% load i18n %}
+{% block title %}{% if provider.pk %}{{ provider.name }}{% else %}{% translate "New identity provider" %}{% endif %}{% endblock %}
+{% block manage %}
+<div class="mb-4 flex items-center gap-3"><h1 class="mr-auto">{% if provider.pk %}{{ provider.name }}{% else %}{% translate "New identity provider" %}{% endif %}</h1>
+  {% if provider.pk %}<form method="post" action="{% url 'sso:provider-delete' provider.pk %}" data-confirm="{% translate 'Delete this identity provider? Linked users keep their accounts.' %}">{% csrf_token %}<button class="btn-secondary">{% translate "Delete" %}</button></form>{% endif %}</div>
+{% if urls %}<section class="card mb-6 text-sm" aria-labelledby="urls-h"><h2 id="urls-h" class="mb-2">{% translate "Register these at the provider" %}</h2>
+  <dl class="grid gap-1"><dt class="font-semibold">OIDC redirect URI</dt><dd class="break-all font-mono">{{ urls.oidc }}</dd>
+  <dt class="font-semibold">SAML ACS</dt><dd class="break-all font-mono">{{ urls.acs }}</dd>
+  <dt class="font-semibold">SAML metadata</dt><dd class="break-all font-mono">{{ urls.metadata }}</dd></dl></section>{% endif %}
+<form method="post" class="card max-w-3xl">{% csrf_token %}
+  {% include "core/_form.html" with form=form %}
+  <button class="btn-primary">{% translate "Save" %}</button>
+</form>
+{% endblock %}

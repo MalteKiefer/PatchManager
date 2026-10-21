@@ -37,7 +37,14 @@ testpaths = ["tests"]
 markers = ["e2e: browser tests (Playwright), run with -m e2e"]
 addopts = "-m 'not e2e' --strict-markers --cov=patchmanager --cov-report=term-missing --cov-fail-under=90"
 # collectstatic only runs in the image build, not before tests.
-filterwarnings = ["error", "ignore:No directory at:UserWarning"]
+filterwarnings = [
+    "error",
+    "ignore:No directory at:UserWarning",
+    # pysaml2 7.5 still imports the CFB mode from its old place (third party, harmless until cryptography 49)
+    "ignore:CFB has been moved:cryptography.utils.CryptographyDeprecationWarning",
+    # xmlschema 2.x (pinned by pysaml2) calls PurePath.as_uri, removed only in Python 3.19
+    "ignore:pathlib.PurePath.as_uri:DeprecationWarning",
+]
 
 [tool.coverage.run]
 branch = true
@@ -60,5 +67,5 @@ disable_error_code = ["attr-defined", "arg-type", "union-attr", "misc", "no-unty
 
 # No type information published for these libraries.
 [[tool.mypy.overrides]]
-module = ["celery", "celery.*", "qrcode", "qrcode.*", "defusedxml", "defusedxml.*", "pypdfium2", "pypdfium2.*", "openpyxl", "openpyxl.*", "reportlab", "reportlab.*"]
+module = ["celery", "celery.*", "qrcode", "qrcode.*", "defusedxml", "defusedxml.*", "pypdfium2", "pypdfium2.*", "openpyxl", "openpyxl.*", "reportlab", "reportlab.*", "saml2", "saml2.*", "ldap", "ldap.*"]
 ignore_missing_imports = true

@@ -28,6 +28,7 @@ urlpatterns = [
     path("api/", include("patchmanager.api.urls")),
     path("", include("patchmanager.api.ui_urls")),
     path("integrations/", include("patchmanager.integrations.urls")),
+    path("", include("patchmanager.sso.urls")),
     path("", include("patchmanager.accounts.urls")),
     path("", include(core_patterns)),
 ]

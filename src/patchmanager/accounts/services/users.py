@@ -161,6 +161,16 @@ def set_locked(request: HttpRequest, actor: User, user: User, *, locked: bool) -
     )
 
 
+def set_break_glass(request: HttpRequest, actor: User, user: User, *, on: bool) -> None:
+    """Allow (or stop allowing) a password sign in where SSO is enforced. Super admins only."""
+    if not policy.has_perm(actor, "system.sso.manage"):
+        raise PermissionDeniedError(_("You do not have permission to do that."))
+    if user.is_service:
+        raise ServiceError(_("API clients do not sign in."))
+    User.objects.filter(pk=user.pk).update(break_glass=on)
+    audit.record("accounts.user.break_glass", request=request, obj=user, data={"on": on})
+
+
 def set_active(request: HttpRequest, actor: User, user: User, *, active: bool) -> None:
     """Deactivate (deprovision) or reactivate an account."""
     require(actor, "accounts.user.change", user)

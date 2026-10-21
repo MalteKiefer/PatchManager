@@ -72,6 +72,17 @@ webhook targets (SSRF risk).
 | E4 | Elevation of privilege | Container escape after RCE | Non-root, read only root fs, no shell, dropped capabilities, no-new-privileges | 0 |
 | E5 | Elevation of privilege | Supply chain (dependency, action, image) | Lockfile, digest pinning, Renovate, pip-audit, Trivy, CodeQL, signed images | 0 |
 
+## Phase 7 controls in place (single sign on)
+
+* S1: OIDC with PKCE, state, nonce and full ID token validation; SAML with signed
+  assertions, InResponseTo bound to a signed cookie, replay refused; LDAP with
+  escaped filters, no empty passwords and verified TLS.
+* E1: providers only link existing accounts of their own domains; provider
+  configuration is super admin only; mapped groups follow the provider.
+* S2: enforced SSO keeps break glass accounts for emergencies; MFA still applies
+  unless the provider is trusted to enforce it.
+* I3: pysaml2 loggers are capped so assertions do not reach the logs.
+
 ## Phase 7 controls in place
 
 * S1: API tokens carry 256 bits of entropy, are stored hashed, expire, are scoped

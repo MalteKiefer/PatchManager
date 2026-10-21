@@ -36,6 +36,11 @@ openpyxl = ">=3.1.5,<4"
 reportlab = ">=5.0.1,<6"
 djangorestframework = ">=3.18.3,<4"
 drf-spectacular = ">=0.30.0,<0.31"
+joserfc = ">=1.7.7,<2"
+requests = ">=2.34.2,<3"
+pysaml2 = ">=7.5.5,<8"
+libxmlsec1 = ">=1.3.12,<2"
+python-ldap = ">=3.4.8,<4"
 
 [tasks]
 check = "python -m django check --deploy --fail-level WARNING"

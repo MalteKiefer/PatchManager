@@ -26,6 +26,10 @@
     {% endif %}
     <form method="post" action="{% url 'manage:user-action' subject.pk 'reset-mfa' %}" data-confirm="{% translate 'Remove all second factors of this user?' %}">{% csrf_token %}<button class="btn-secondary">{% translate "Reset MFA" %}</button></form>
     <form method="post" action="{% url 'manage:user-action' subject.pk 'revoke-sessions' %}">{% csrf_token %}<button class="btn-secondary">{% translate "Sign out everywhere" %}</button></form>
+    {% if can_manage_sso and not subject.is_service %}
+    {% if subject.break_glass %}<form method="post" action="{% url 'manage:user-action' subject.pk 'break-glass-off' %}">{% csrf_token %}<button class="btn-secondary">{% translate "Remove break glass" %}</button></form>
+    {% else %}<form method="post" action="{% url 'manage:user-action' subject.pk 'break-glass-on' %}" data-confirm="{% translate 'Allow a password sign in even where SSO is enforced?' %}">{% csrf_token %}<button class="btn-secondary">{% translate "Make break glass account" %}</button></form>{% endif %}
+    {% endif %}
   </div>
   {% if not is_super_admin and subject.pk != user.pk %}
   <form method="post" action="{% url 'manage:user-action' subject.pk 'impersonate' %}" class="mt-4 max-w-lg">{% csrf_token %}

@@ -6,7 +6,8 @@ from django.contrib import messages
 from django.core.exceptions import ValidationError
 from django.http import HttpRequest, HttpResponse, JsonResponse
 from django.shortcuts import redirect, render
-from django.utils.http import url_has_allowed_host_and_scheme
+from django.urls import reverse
+from django.utils.http import url_has_allowed_host_and_scheme, urlencode
 from django.utils.translation import gettext as _
 from django.views.decorators.http import require_http_methods, require_POST
 
@@ -37,15 +38,42 @@ def login_view(request: HttpRequest) -> HttpResponse:
         request.session[NEXT] = request.GET["next"]
     form = LoginForm(request.POST or None)
     if request.method == "POST" and form.is_valid():
+        sso_start = _enforced_sso(form.cleaned_data["email"])
+        if sso_start is not None and not _may_use_password(form.cleaned_data["email"]):
+            return redirect(sso_start)  # domain discovery: this domain signs in at its provider
         result = auth.password_step(
             request, form.cleaned_data["email"], form.cleaned_data["password"]
         )
+        if sso_start is not None and result.outcome not in (auth.Outcome.OK, auth.Outcome.MFA):
+            return redirect(sso_start)  # a wrong break glass password looks like any other account
         if result.outcome == auth.Outcome.OK:
             return redirect(_safe_next(request))
         if result.outcome == auth.Outcome.MFA:
             return redirect("accounts:mfa")
         form.add_error(None, result.message)
-    return render(request, "accounts/login.html", {"form": form})
+    from patchmanager.sso.models import IdentityProvider
+
+    providers = IdentityProvider.objects.filter(enabled=True).exclude(
+        kind=IdentityProvider.Kind.LDAP
+    )
+    return render(request, "accounts/login.html", {"form": form, "providers": providers})
+
+
+def _enforced_sso(email: str) -> str | None:
+    """Start URL of the identity provider enforced for this email's domain."""
+    from patchmanager.sso.services import enforced_for
+
+    provider = enforced_for(email)
+    if provider is None:
+        return None
+    return f"{reverse('sso:login', args=[provider.slug])}?{urlencode({'login_hint': email})}"
+
+
+def _may_use_password(email: str) -> bool:
+    """Break glass accounts keep their password where SSO is enforced."""
+    from patchmanager.accounts.models import User
+
+    return User.objects.filter(email__iexact=email.strip(), break_glass=True).exists()
 
 
 @require_http_methods(["GET", "POST"])
@@ -104,16 +132,25 @@ def webauthn_login_verify(request: HttpRequest) -> JsonResponse:
         return JsonResponse({"error": _("The security key could not be verified.")}, status=400)
     if not user.is_active or user.is_locked or user.deactivated_at:
         return JsonResponse({"error": _("This account cannot sign in.")}, status=403)
+    from patchmanager.sso.services import sso_required
+
+    if pending is None and sso_required(user):  # a passkey must not bypass enforced SSO
+        return JsonResponse(
+            {"error": _("Sign in with your organisation's identity provider.")}, status=403
+        )
     auth.complete_login(request, user, method="webauthn" if pending else "passkey")
     return JsonResponse({"redirect": _safe_next(request)})
 
 
 @require_POST
 def logout_view(request: HttpRequest) -> HttpResponse:
-    """End the session."""
+    """End the session, and the identity provider's session if it supports single logout."""
+    from patchmanager.sso.views import single_logout_url
+
+    upstream = single_logout_url(request)
     auth.logout_user(request)
     messages.info(request, _("You have been signed out."))
-    return redirect("accounts:login")
+    return redirect(upstream) if upstream else redirect("accounts:login")
 
 
 @require_http_methods(["GET", "POST"])
