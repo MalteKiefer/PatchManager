@@ -63,3 +63,23 @@ example `SW-{n:02}` for SW-01, SW-02, ...) and its ports.
 Sites, buildings, floors, rooms, racks, devices, ports and device types carry
 photos, PDFs and Markdown notes. Uploads are checked by content, re-encoded and
 stored encrypted; only people who can see the object can open its files.
+
+## Cabling
+
+Open a port and choose **Connect**: pick the device at the other end and one of
+its free ports, then kind (patch cord or permanent link), media, colour, length
+and label. Patch panels pass the signal from each front port to its rear port,
+so a typical path is switch port → patch cord → panel front → permanent link
+between panel rears → panel front → patch cord → end device.
+
+**Trace path** shows the whole path as a graph and as a list of full locations.
+It is *complete* when it ends at active ports on both sides. A device page lists
+what each cabled port finally connects to. **Cables** lists and filters all
+cables of the tenant.
+
+## VLANs and WLANs
+
+**Networks** holds VLANs (for the whole tenant or one site) and WLANs. On a
+network port set the mode: *access* with one VLAN, or *trunk* with an optional
+native VLAN and tagged VLANs. A WLAN can bridge into a VLAN; add the wireless
+ports of access points that broadcast it.

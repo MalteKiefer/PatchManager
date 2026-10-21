@@ -4,6 +4,27 @@ All notable changes to this project are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the project uses
 [Semantic Versioning](https://semver.org/).
 
+## [0.5.0] - 2026-10-21
+
+### Added
+
+* Cables (permanent links and patch cords) with media, colour, length, label and status,
+  within racks and across rooms, floors, buildings and sites of a tenant; port picker
+  with free ports; cable list with filters.
+* End to end path tracing through patch panels, including MPO style rear ports with
+  positions; graph and hop list; complete, incomplete and loop states; dependency view
+  on device pages. Property based tests on random panel chains.
+* VLANs per tenant or site, access and trunk assignment on ports; WLANs with SSID,
+  security and VLAN, broadcast by access point radios.
+* Database guards: cables, VLAN use and WLAN radios cannot cross tenants; site VLANs
+  only on ports of that site.
+
+### Changed
+
+* Viewer and Auditor roles may trace paths.
+* Moving a site between tenants is refused while cables leave the site or tenant wide
+  VLANs/WLANs are in use; cables and site VLANs inside it move along.
+
 ## [0.4.0] - 2026-10-21
 
 ### Added
@@ -90,6 +111,7 @@ All notable changes to this project are documented here. The format follows
 * pre-commit hooks, Renovate configuration.
 * Documentation site, ADRs 0001 to 0010, STRIDE threat model draft, security policy.
 
+[0.5.0]: https://github.com/MalteKiefer/PatchManager/releases/tag/v0.5.0
 [0.4.0]: https://github.com/MalteKiefer/PatchManager/releases/tag/v0.4.0
 [0.3.1]: https://github.com/MalteKiefer/PatchManager/releases/tag/v0.3.1
 [0.3.0]: https://github.com/MalteKiefer/PatchManager/releases/tag/v0.3.0
