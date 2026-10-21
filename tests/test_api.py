@@ -506,3 +506,61 @@ def test_rotate_needs_the_clients_rights_and_no_tokens_while_impersonating(
         assert not policy.has_perm(
             client.user, "dcim.rack.view", kit["rack"]
         )  # no second factor, no MFA tenant
+
+
+def test_api_clients_never_reach_mfa_tenants(kit, make_tree, super_admin) -> None:
+    from patchmanager.accounts import policy
+    from patchmanager.tenancy import services as tenancy
+
+    other = make_tree(name="Strict")
+    with rls.system_context():
+        client, secret = tokens.create_client(
+            kit["request"], super_admin, name="Bot", scopes=["read"]
+        )
+        Assignment.objects.create(
+            role=Role.objects.get(key="viewer"), user=client.user, scope_label="global"
+        )
+        tenancy.update_tenant(kit["request"], super_admin, other["tenant"], requires_mfa=True)
+        policy.bump_version()
+        all_tenants, ids = policy.accessible_tenants(client.user)
+        assert all_tenants is False and ids == {kit["tenant"].pk}
+    rls.clear_context()  # as in a request before token authentication
+    assert policy.accessible_tenants(client.user) == (False, {kit["tenant"].pk})
+    import base64
+
+    basic = base64.b64encode(f"{client.client_id}:{secret}".encode()).decode()
+    token = (
+        Client()
+        .post(
+            "/api/oauth/token/",
+            {"grant_type": "client_credentials"},
+            HTTP_AUTHORIZATION=f"Basic {basic}",
+            secure=True,
+        )
+        .json()["access_token"]
+    )
+    names = {s["name"] for s in _get(_api(token), "/api/v1/sites/").json()["results"]}
+    assert names == {"HQ"}
+
+
+def test_rotate_checks_unfiltered_grants(kit, super_admin, make_user) -> None:
+    from patchmanager.accounts import policy
+
+    manager = make_user()
+    with rls.system_context():
+        client, _secret = tokens.create_client(
+            kit["request"], super_admin, name="Bot", scopes=["read"]
+        )
+        Assignment.objects.create(
+            role=Role.objects.get(key="super_admin"), user=client.user, scope_label="global"
+        )
+        custom = Role.objects.create(
+            key="keeper", name="Keeper", permissions=["accounts.apiclient.manage"]
+        )
+        Assignment.objects.create(role=custom, user=manager, scope_label="global")
+        policy.bump_version()
+        assert not policy.is_super_admin(
+            client.user
+        )  # filtered, but it would count if the rule changed
+        with pytest.raises(PermissionDeniedError):
+            tokens.rotate_secret(kit["request"], manager, client)

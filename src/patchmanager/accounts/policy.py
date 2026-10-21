@@ -118,25 +118,31 @@ def _group_names(user: Any) -> dict[UUID, str]:
     return names
 
 
-def _compile(user: Any) -> list[Grant]:
+def mfa_tenant_ids() -> set[UUID]:
+    """Tenants that require MFA, read with full visibility (the caller's context may be empty)."""
+    from patchmanager.tenancy import rls
+    from patchmanager.tenancy.models import Tenant
+
+    with rls.system_context():
+        return set(Tenant.objects.filter(requires_mfa=True).values_list("pk", flat=True))
+
+
+def _compile(user: Any, *, unfiltered: bool = False) -> list[Grant]:
+    """Grants of ``user``. API clients lose MFA roles and MFA tenants unless ``unfiltered``."""
     from patchmanager.accounts.models import Assignment
 
     groups = _group_names(user)
     grants = []
-    mfa_tenants: set[str] = set()
-    if getattr(user, "is_service", False):  # API clients have no second factor
-        from patchmanager.tenancy.models import Tenant
-
-        mfa_tenants = {
-            path_label(pk)
-            for pk in Tenant.objects.filter(requires_mfa=True).values_list("pk", flat=True)
-        }
+    service = (
+        getattr(user, "is_service", False) and not unfiltered
+    )  # API clients have no second factor
+    mfa_tenants = {path_label(pk) for pk in mfa_tenant_ids()} if service else set()
     for a in Assignment.objects.filter(Q(user=user) | Q(group_id__in=groups)).select_related(
         "role"
     ):
         system = SYSTEM_ROLES.get(a.role.key) if a.role.is_system else None
         needs_mfa = a.role.requires_mfa or bool(system and system.requires_mfa)
-        if getattr(user, "is_service", False) and a.effect == "allow" and needs_mfa:
+        if service and a.effect == "allow" and needs_mfa:
             continue  # MFA roles never apply to API clients, via groups neither
         if (
             a.effect == "allow"
@@ -316,6 +322,19 @@ def accessible_tenants(user: Any) -> tuple[bool, set[UUID]]:
     if not _usable(user):
         return False, set()
     grants = [g for g in grants_for(user) if g.effect == "allow"]
+    if getattr(user, "is_service", False):
+        # Global grants of API clients must not reach tenants that require MFA either.
+        from patchmanager.tenancy import rls
+        from patchmanager.tenancy.models import Tenant
+
+        with rls.system_context():
+            every = set(Tenant.objects.values_list("pk", flat=True))
+        wanted = (
+            every
+            if any(g.scope_path is None for g in grants)
+            else {UUID(hex=g.scope_path.split(".", 1)[0]) for g in grants if g.scope_path}
+        )
+        return False, wanted - mfa_tenant_ids()
     if any(g.scope_path is None for g in grants):
         return True, set()
     return False, {UUID(hex=g.scope_path.split(".", 1)[0]) for g in grants if g.scope_path}

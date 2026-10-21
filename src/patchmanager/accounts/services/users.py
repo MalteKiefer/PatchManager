@@ -238,13 +238,14 @@ def update_profile(request: HttpRequest, user: User, *, display_name: str, langu
 
 
 def require_rights_of(actor: User, target: User) -> None:
-    """Acting as (or holding the credentials of) ``target`` must never yield more than ``actor`` holds.
+    """Acting as ``target`` (or holding its credentials) must not yield more than ``actor`` holds.
 
-    The target's effective grants include nested groups.
+    The target's grants include nested groups, and filters such as the MFA rule
+    for API clients are ignored: those grants count as soon as the rule changes.
     """
     if policy.is_super_admin(actor):
         return
-    for grant in policy.grants_for(target):
+    for grant in policy._compile(target, unfiltered=True):
         if grant.effect != "allow":
             continue
         if grant.role_key == SUPER_ADMIN or any(
