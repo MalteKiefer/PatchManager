@@ -47,6 +47,12 @@ class User(AbstractBaseUser, TimestampedModel):
     is_service = models.BooleanField(default=False)
     # May sign in with a password even where SSO is enforced (emergency access)
     break_glass = models.BooleanField(_("break glass"), default=False)
+    # SCIM: created by provisioning (only these SCIM may change), the client's id,
+    # deactivated by SCIM (only then may SCIM reactivate), deprovisioned by SCIM
+    scim_provisioned = models.BooleanField(default=False)
+    scim_external_id = models.CharField(max_length=255, blank=True)
+    scim_deactivated = models.BooleanField(default=False)
+    scim_deleted_at = models.DateTimeField(null=True, blank=True)
 
     objects: ClassVar[UserManager] = UserManager()
 
@@ -143,6 +149,16 @@ class Group(TimestampedModel):
     members = models.ManyToManyField(User, related_name="pm_groups", blank=True)
     parents = models.ManyToManyField("self", symmetrical=False, related_name="children", blank=True)
     external_id = models.CharField(max_length=255, blank=True)  # IdP / SCIM mapping
+    scim_managed = models.BooleanField(default=False)  # created by SCIM; only these SCIM may change
+    scim_token = (
+        models.ForeignKey(  # the SCIM token that created the group, which alone may change it
+            "scim.ScimToken",
+            null=True,
+            blank=True,
+            on_delete=models.SET_NULL,
+            related_name="groups",
+        )
+    )
 
     policy_object_type = "accounts.group"
     policy_path = None

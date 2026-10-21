@@ -99,6 +99,7 @@ INSTALLED_APPS = [
     "patchmanager.api",
     "patchmanager.integrations",
     "patchmanager.sso",
+    "patchmanager.scim",
 ]
 if DJANGO_ADMIN_ENABLED:
     INSTALLED_APPS.insert(0, "django.contrib.admin")

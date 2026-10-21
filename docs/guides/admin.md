@@ -79,6 +79,17 @@ form. Mark at least one super admin as *break glass account* (on the user page)
 so you can still sign in when the provider is down. Unless *The provider
 enforces MFA* is set, users still need their second factor here.
 
+## SCIM provisioning
+
+*Administration → SCIM provisioning* (super admins) creates tokens for your
+identity provider. Enter the base URL `https://<host>/scim/v2/` and the token in
+the provider's provisioning settings (Microsoft Entra ID, Okta and others).
+Provisioned users have no password and sign in through single sign on. SCIM only
+manages accounts it created; a token can be limited to email domains.
+Deprovisioned users are deactivated and keep their history. Provisioned groups
+start without rights: assign roles to them under *Groups*. SCIM never touches
+super admins, break glass accounts, API clients or groups created here.
+
 ## Audit log
 
 Security events (logins, failures, lockouts, MFA changes, role and assignment
