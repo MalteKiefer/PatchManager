@@ -1,0 +1,32 @@
+{% extends "base.html" %}{% load i18n %}
+{% block title %}{% translate "Device library" %}{% endblock %}
+{% block content %}
+<div class="mb-4 flex flex-wrap items-center gap-3">
+  <h1 class="mr-auto">{% translate "Device library" %}</h1>
+  <form method="get" class="flex flex-wrap gap-2" role="search">
+    <label for="q" class="sr-only">{% translate "Search" %}</label>
+    <input id="q" name="q" value="{{ q }}" placeholder="{% translate 'Vendor, model, part number' %}" class="rounded-md border border-slate-300 px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-800">
+    <label for="form-filter" class="sr-only">{% translate "Form" %}</label>
+    <select id="form-filter" name="form" data-autosubmit class="rounded-md border border-slate-300 px-2 py-2 text-sm dark:border-slate-700 dark:bg-slate-800">
+      <option value="">{% translate "All" %}</option>{% for value, label in forms %}<option value="{{ value }}" {% if value == form_filter %}selected{% endif %}>{{ label }}</option>{% endfor %}
+    </select>
+  </form>
+  {% if can_add %}<a class="btn-primary" href="{% url 'library:type-create' %}">{% translate "New device type" %}</a>{% endif %}
+</div>
+<div class="card mb-6 overflow-x-auto p-0"><table class="table">
+  <thead><tr><th>{% translate "Vendor" %}</th><th>{% translate "Model" %}</th><th>{% translate "Category" %}</th><th>{% translate "Form" %}</th><th>{% translate "Height" %}</th><th>{% translate "Scope" %}</th><th>{% translate "Devices" %}</th></tr></thead>
+  <tbody>{% for t in types %}<tr>
+    <td>{{ t.vendor.name }}</td><td><a href="{% url 'library:type' t.pk %}">{{ t.model }}</a></td><td>{{ t.get_category_display }}</td>
+    <td>{{ t.get_form_display }}</td><td>{% if t.form == "rack" %}{{ t.u_height }} U{% else %}-{% endif %}</td>
+    <td>{% if t.tenant_id %}<span class="badge-muted">{% translate "this tenant" %}</span>{% else %}{% translate "shared" %}{% endif %}</td><td>{{ t.device_count }}</td>
+  </tr>{% empty %}<tr><td colspan="7" class="text-slate-500">{% translate "No device types yet." %}</td></tr>{% endfor %}</tbody>
+</table></div>
+{% if can_add %}
+<form method="post" action="{% url 'library:type-import' %}" enctype="multipart/form-data" class="card max-w-xl">{% csrf_token %}
+  <h2 class="mb-1">{% translate "Import device type" %}</h2>
+  <p class="mb-3 text-xs text-slate-500">{% translate "YAML or JSON in the community device type library format." %}</p>
+  {% include "core/_form.html" with form=import_form %}
+  <button class="btn-secondary">{% translate "Import" %}</button>
+</form>
+{% endif %}
+{% endblock %}

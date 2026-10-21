@@ -1,0 +1,24 @@
+{% extends "base.html" %}{% load i18n pm %}
+{% block title %}{{ port.name }}{% endblock %}
+{% block content %}
+{% include "core/_breadcrumbs.html" with current=port.name %}
+<h1 class="mb-6">{{ device.name }}: <span class="font-mono">{{ port.name }}</span></h1>
+<div class="grid gap-6 lg:grid-cols-3">
+  <div class="space-y-6 lg:col-span-2">
+    {% if front_ports %}
+    <section class="card"><h2 class="mb-3">{% translate "Front ports on this rear port" %}</h2>
+      <ul class="flex flex-wrap gap-2 text-sm">{% for f in front_ports %}<li><a class="badge-muted no-underline hover:underline" href="{% url 'devices:port' f.pk %}">{{ f.name }} → {{ f.rear_position }}</a></li>{% endfor %}</ul>
+    </section>
+    {% endif %}
+    {% metadata_panel port %}
+  </div>
+  <aside class="space-y-6">
+    <form method="post" class="card" novalidate>{% csrf_token %}<input type="hidden" name="action" value="edit">
+      <h2 class="mb-3">{% translate "Port" %}</h2>
+      <fieldset {% if not can_change %}disabled{% endif %}>{% include "core/_form.html" %}</fieldset>
+      {% if can_change %}<button class="btn-primary">{% translate "Save" %}</button>{% endif %}
+    </form>
+    {% if can_change %}<form method="post" data-confirm="{% translate 'Delete this port?' %}">{% csrf_token %}<button name="action" value="delete" class="btn-danger">{% translate "Delete port" %}</button></form>{% endif %}
+  </aside>
+</div>
+{% endblock %}

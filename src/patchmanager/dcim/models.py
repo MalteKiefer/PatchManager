@@ -11,6 +11,7 @@ from django.db.models.functions import Lower
 from django.utils.translation import gettext_lazy as _
 
 from patchmanager.core.hierarchy import HierarchyNode
+from patchmanager.library.models import Connector, PortKind
 from patchmanager.locations.models import Room
 from patchmanager.tenancy.models import TenantScopedModel
 
@@ -104,6 +105,9 @@ class RackSpace(TenantScopedModel):
     FACE_RANGES = {Face.FRONT: (0, 1), Face.REAR: (1, 2), Face.BOTH: (0, 2)}
 
     rack = models.ForeignKey(Rack, on_delete=models.CASCADE, related_name="spaces")
+    device = models.OneToOneField(
+        "Device", null=True, blank=True, on_delete=models.CASCADE, related_name="space"
+    )
     face = models.CharField(_("face"), max_length=5, choices=Face.choices, default=Face.BOTH)
     faces = IntegerRangeField(editable=False)
     units = IntegerRangeField(editable=False)
@@ -159,3 +163,102 @@ class RackSpace(TenantScopedModel):
     def policy_path(self) -> str:
         """Governed by its rack."""
         return str(self.rack.path)
+
+
+class Device(HierarchyNode):
+    """A device instance: in a rack (with a unit position) or loose in a room (floor device)."""
+
+    class Status(models.TextChoices):
+        PLANNED = "planned", _("planned")
+        ACTIVE = "active", _("active")
+        OFFLINE = "offline", _("offline")
+        DECOMMISSIONED = "decommissioned", _("decommissioned")
+
+    device_type = models.ForeignKey(
+        "library.DeviceType",
+        on_delete=models.PROTECT,
+        related_name="devices",
+        verbose_name=_("device type"),
+    )
+    name = models.CharField(_("name"), max_length=150)
+    status = models.CharField(
+        _("status"), max_length=15, choices=Status.choices, default=Status.ACTIVE
+    )
+    room = models.ForeignKey(Room, on_delete=models.PROTECT, related_name="devices")
+    rack = models.ForeignKey(
+        Rack, null=True, blank=True, on_delete=models.PROTECT, related_name="devices"
+    )
+    serial = models.CharField(_("serial number"), max_length=100, blank=True)
+    asset_tag = models.CharField(_("asset tag"), max_length=100, blank=True)
+    purchase_date = models.DateField(_("purchase date"), null=True, blank=True)
+    in_service_date = models.DateField(_("in service since"), null=True, blank=True)
+    responsible = models.CharField(_("responsible person"), max_length=150, blank=True)
+    notes = models.TextField(_("notes"), blank=True)
+
+    policy_object_type = "dcim.device"
+    condition_attrs = frozenset({"created_by", "name", "status"})
+
+    class Meta(HierarchyNode.Meta):
+        ordering = ["name"]
+        constraints = [
+            models.UniqueConstraint("tenant", Lower("name"), name="device_name_unique_per_tenant")
+        ]
+
+    def __str__(self) -> str:
+        return self.name
+
+    @property
+    def parent(self) -> Any:
+        """The rack if mounted, otherwise the room."""
+        return self.rack if self.rack_id else self.room
+
+
+class Port(TenantScopedModel):
+    """One port of a device. Front ports of passive devices map to a rear port position."""
+
+    device = models.ForeignKey(Device, on_delete=models.CASCADE, related_name="ports")
+    name = models.CharField(_("name"), max_length=100)
+    kind = models.CharField(
+        _("kind"), max_length=10, choices=PortKind.choices, default=PortKind.INTERFACE
+    )
+    connector = models.CharField(
+        _("connector"), max_length=10, choices=Connector.choices, default=Connector.RJ45
+    )
+    speed_mbps = models.PositiveIntegerField(_("speed (Mbit/s)"), null=True, blank=True)
+    enabled = models.BooleanField(_("enabled"), default=True)
+    label = models.CharField(_("label"), max_length=100, blank=True)
+    description = models.TextField(_("description"), blank=True)
+    mac_address = models.CharField(_("MAC address"), max_length=17, blank=True)
+    positions = models.PositiveSmallIntegerField(_("positions"), default=1)
+    rear_port = models.ForeignKey(
+        "self",
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="front_ports",
+        verbose_name=_("rear port"),
+    )
+    rear_position = models.PositiveSmallIntegerField(_("rear position"), null=True, blank=True)
+    order = models.PositiveIntegerField(default=0)
+
+    policy_object_type = "dcim.device"
+
+    class Meta:
+        ordering = ["device", "order", "name"]
+        constraints = [
+            models.UniqueConstraint("device", Lower("name"), name="port_name_unique_per_device"),
+            models.UniqueConstraint("rear_port", "rear_position", name="port_rear_position_unique"),
+        ]
+
+    def __str__(self) -> str:
+        return f"{self.device}: {self.name}"
+
+    @property
+    def policy_path(self) -> str:
+        """Governed by its device."""
+        return str(self.device.path)
+
+    def save(self, *args: Any, **kwargs: Any) -> None:
+        """Belong to the device's tenant."""
+        self.tenant_id = self.device.tenant_id
+        super().save(*args, **kwargs)

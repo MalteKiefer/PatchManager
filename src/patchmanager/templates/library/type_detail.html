@@ -1,0 +1,50 @@
+{% extends "base.html" %}{% load i18n pm %}
+{% block title %}{{ device_type }}{% endblock %}
+{% block content %}
+<nav aria-label="{% translate 'Breadcrumb' %}" class="mb-3 text-sm"><a href="{% url 'library:types' %}">{% translate "Device library" %}</a> / {{ device_type }}</nav>
+<div class="mb-6 flex flex-wrap items-center gap-2">
+  <h1 class="mr-auto">{{ device_type }} {% if device_type.tenant_id %}<span class="badge-muted">{% translate "this tenant" %}</span>{% endif %}</h1>
+  <a class="btn-secondary" href="{% url 'library:type-export' device_type.pk %}">YAML</a>
+  <a class="btn-secondary" href="{% url 'library:type-export' device_type.pk %}?format=json">JSON</a>
+  {% if can_clone %}<form method="post">{% csrf_token %}<button name="action" value="clone" class="btn-secondary">{% translate "Copy as custom type" %}</button></form>{% endif %}
+</div>
+<div class="grid gap-6 lg:grid-cols-3">
+  <div class="space-y-6 lg:col-span-2">
+    <section class="card" aria-labelledby="ports-h">
+      <h2 id="ports-h" class="mb-3">{% translate "Ports" %}</h2>
+      <div class="overflow-x-auto"><table class="table">
+        <thead><tr><th>{% translate "Names" %}</th><th>{% translate "Kind" %}</th><th>{% translate "Connector" %}</th><th>{% translate "Speed" %}</th><th>{% translate "Maps to" %}</th><th></th></tr></thead>
+        <tbody>{% for t in templates %}{% with names=t.names %}<tr>
+          <td class="font-mono text-xs">{{ names|first }}{% if names|length > 1 %} … {{ names|last }} <span class="text-slate-500">({{ names|length }})</span>{% endif %}</td>
+          <td>{{ t.get_kind_display }}</td><td>{{ t.get_connector_display }}</td><td>{% if t.speed_mbps %}{{ t.speed_mbps }} Mbit/s{% endif %}</td>
+          <td>{% if t.rear_port_name %}{{ t.rear_port_name }}:{{ t.rear_position }}{% elif t.rear_template %}{{ t.rear_template.name_pattern }}{% endif %}</td>
+          <td>{% if can_change %}<form method="post">{% csrf_token %}<input type="hidden" name="template" value="{{ t.pk }}"><button name="action" value="remove_ports" class="btn-secondary py-1">{% translate "Remove" %}</button></form>{% endif %}</td>
+        </tr>{% endwith %}{% empty %}<tr><td colspan="6" class="text-slate-500">{% translate "No ports defined." %}</td></tr>{% endfor %}</tbody>
+      </table></div>
+      {% if can_change %}
+      <details class="mt-4" {% if port_form.errors %}open{% endif %}><summary class="cursor-pointer text-sm font-medium">{% translate "Add ports" %}</summary>
+        <form method="post" class="mt-3 grid gap-x-4 sm:grid-cols-2" novalidate>{% csrf_token %}<input type="hidden" name="action" value="ports">
+          {% include "core/_form.html" with form=port_form %}<div class="sm:col-span-2"><button class="btn-primary">{% translate "Add" %}</button></div></form>
+      </details>
+      {% endif %}
+    </section>
+    {% metadata_panel device_type %}
+  </div>
+  <aside class="space-y-6">
+    <form method="post" class="card" novalidate>{% csrf_token %}<input type="hidden" name="action" value="edit">
+      <h2 class="mb-3">{% translate "Details" %}</h2>
+      <fieldset {% if not can_change %}disabled{% endif %}>{% include "core/_form.html" %}</fieldset>
+      {% if can_change %}<button class="btn-primary">{% translate "Save" %}</button>{% endif %}
+    </form>
+    {% if can_change %}
+    <form method="post" class="card" novalidate>{% csrf_token %}<input type="hidden" name="action" value="images">
+      <h2 class="mb-3">{% translate "Images" %}</h2>
+      {% include "core/_form.html" with form=images_form %}
+      <p class="mb-3 text-xs text-slate-500">{% translate "Upload images below, then choose them here." %}</p>
+      <button class="btn-secondary">{% translate "Save images" %}</button>
+    </form>
+    {% endif %}
+    {% if can_delete %}<form method="post" data-confirm="{% translate 'Delete this device type?' %}">{% csrf_token %}<button name="action" value="delete" class="btn-danger">{% translate "Delete" %}</button></form>{% endif %}
+  </aside>
+</div>
+{% endblock %}

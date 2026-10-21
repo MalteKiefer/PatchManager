@@ -153,3 +153,33 @@ def make_tree(make_tenant, super_admin):
         }
 
     return make
+
+
+@pytest.fixture
+def make_type(super_admin):
+    """Create a device type with port templates through the services."""
+    from django.test import RequestFactory
+
+    from patchmanager.library import services as library
+
+    def make(
+        model: str = "Switch 48",
+        *,
+        tenant: Tenant | None = None,
+        ports: list[dict[str, Any]] | None = None,
+        **fields: Any,
+    ) -> Any:
+        request = RequestFactory().post("/")
+        request.user = super_admin
+        with rls.system_context():
+            vendor = library.get_or_create_vendor(
+                request, super_admin, fields.pop("vendor", "Acme")
+            )
+            device_type = library.create_type(
+                request, super_admin, tenant=tenant, vendor=vendor, model=model, **fields
+            )
+            for spec in ports or [{"name_pattern": "Gi1/0/{n}", "count": 4, "speed_mbps": 1000}]:
+                library.add_port_template(request, super_admin, device_type, **spec)
+        return device_type
+
+    return make

@@ -43,6 +43,7 @@ class Block:
     space: RackSpace
     y: int
     height: int
+    image: Any = None
 
 
 def _actor(request: HttpRequest) -> User:
@@ -60,11 +61,17 @@ def elevation(rack: Rack, face: str) -> dict[str, Any]:
 
     rows = [{"unit": u, "y": y_of(u)} for u in range(1, rack.u_height + 1)]
     blocks = []
-    for space in rack.spaces.all():
+    for space in rack.spaces.select_related("device__device_type"):
         if space.face not in (face, RackSpace.Face.BOTH):
             continue
         top_unit = space.start if rack.descending_units else space.end
-        blocks.append(Block(space, y_of(top_unit), space.size * UNIT_PX))
+        device_type = space.device.device_type if space.device is not None else None
+        image = (
+            (device_type.front_image_id if face == "front" else device_type.rear_image_id)
+            if device_type
+            else None
+        )
+        blocks.append(Block(space, y_of(top_unit), space.size * UNIT_PX, image))
     return {"rows": rows, "blocks": blocks, "height": rack.u_height * UNIT_PX, "unit_px": UNIT_PX}
 
 
@@ -111,7 +118,11 @@ def rack_detail(request: HttpRequest, pk: str) -> HttpResponse:
         "face": face,
         "elevation": elevation(rack, face),
         "stats": rack.utilisation(),
-        "spaces": rack.spaces.all(),
+        "reservations": rack.spaces.filter(device__isnull=True),
+        "device_spaces": rack.spaces.filter(device__isnull=False).select_related(
+            "device__device_type__vendor"
+        ),
+        "can_add_device": policy.has_perm(actor, "dcim.device.add", rack),
         "form": form,
         "reserve_form": reserve_form,
         "can_change": can_change,

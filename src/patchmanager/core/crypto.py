@@ -23,3 +23,13 @@ def encrypt(value: str) -> str:
 def decrypt(token: str) -> str:
     """Decrypt a value produced by :func:`encrypt`; raises on tampering."""
     return _fernet().decrypt(token.encode()).decode()
+
+
+def encrypt_bytes(value: bytes) -> bytes:
+    """Encrypt file content (uploads at rest)."""
+    return _fernet().encrypt(value)
+
+
+def decrypt_bytes(token: bytes) -> bytes:
+    """Decrypt file content; raises on tampering."""
+    return _fernet().decrypt(token)

@@ -35,6 +35,17 @@
       </details>
       {% endif %}
     </section>
+    {% if level == "room" %}
+    <section class="card" aria-labelledby="floor-h">
+      <div class="mb-3 flex items-center"><h2 id="floor-h" class="mr-auto">{% translate "Floor devices" %}</h2>
+        {% if can_add_device %}<a class="btn-secondary" href="{% url 'devices:device-create' %}?room={{ node.pk }}">{% translate "Add device" %}</a>{% endif %}</div>
+      <ul class="divide-y divide-slate-100 dark:divide-slate-800">
+        {% for d in floor_devices %}<li class="flex items-center gap-2 py-2"><a href="{% url 'devices:device' d.pk %}">{{ d.name }}</a><span class="text-xs text-slate-500">{{ d.device_type }}</span></li>
+        {% empty %}<li class="py-2 text-sm text-slate-500">{% translate "No floor devices." %}</li>{% endfor %}
+      </ul>
+    </section>
+    {% endif %}
+    {% metadata_panel node %}
   </div>
   <aside class="space-y-6">
     {% if level == "site" and node.latitude %}{% include "locations/_map.html" with markers=site_marker %}{% endif %}

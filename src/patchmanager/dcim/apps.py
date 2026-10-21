@@ -7,6 +7,7 @@ class DcimConfig(AppConfig):
 
     def ready(self) -> None:
         from patchmanager.accounts import permissions
-        from patchmanager.dcim.models import Rack
+        from patchmanager.dcim.models import Device, Rack
 
         permissions.register("dcim.rack", "Rack", condition_attrs=Rack.condition_attrs)
+        permissions.register("dcim.device", "Device", condition_attrs=Device.condition_attrs)
