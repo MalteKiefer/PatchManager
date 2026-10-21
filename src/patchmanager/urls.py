@@ -23,6 +23,7 @@ urlpatterns = [
     path("networks/", include("patchmanager.networks.urls")),
     path("plans/", include("patchmanager.floorplans.urls")),
     path("history/", include("patchmanager.history.urls")),
+    path("search/", include("patchmanager.search.urls")),
     path("", include("patchmanager.accounts.urls")),
     path("", include(core_patterns)),
 ]

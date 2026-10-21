@@ -1,0 +1,42 @@
+{% extends "base.html" %}{% load i18n %}
+{% block title %}{% translate "Search" %}{% endblock %}
+{% block content %}
+<h1 class="mb-4">{% translate "Search" %}{% if current_tenant %} · {{ current_tenant.name }}{% endif %}</h1>
+<form method="get" class="card mb-4 grid gap-3 sm:grid-cols-[1fr_12rem_auto]" role="search">
+  <div class="field mb-0"><label for="s-q">{% translate "Search term" %}</label><input id="s-q" name="q" value="{{ query }}" minlength="2" maxlength="200" required></div>
+  <div class="field mb-0"><label for="s-type">{% translate "Type" %}</label><select id="s-type" name="type"><option value="">{% translate "All" %}</option>{% for k, t in types.items %}<option value="{{ k }}" {% if kind == k %}selected{% endif %}>{{ t }}</option>{% endfor %}</select></div>
+  <div class="self-end"><button class="btn-primary">{% translate "Search" %}</button></div>
+</form>
+<div class="grid gap-6 lg:grid-cols-[1fr_16rem]">
+  <div class="space-y-6">
+    {% if query and not groups %}<p class="text-slate-500">{% translate "Nothing found." %}</p>{% endif %}
+    {% for g in groups %}
+    <section class="card" aria-labelledby="g-{{ g.kind }}">
+      <h2 id="g-{{ g.kind }}" class="mb-3">{{ g.title }}</h2>
+      <ul class="divide-y divide-slate-100 dark:divide-slate-800">{% for item in g.hits %}
+        <li class="py-2"><a href="{{ item.url }}">{{ item.hit.obj }}</a>{% if item.hit.context %} <span class="text-sm text-slate-500">{{ item.hit.context }}</span>{% endif %}</li>
+      {% endfor %}</ul>
+    </section>
+    {% endfor %}
+  </div>
+  <aside class="space-y-6">
+    {% if facets %}<section class="card" aria-labelledby="facets-h"><h2 id="facets-h" class="mb-3">{% translate "Filter by type" %}</h2>
+      <ul class="space-y-1 text-sm">
+        <li><a href="?q={{ query|urlencode }}" {% if not kind %}aria-current="true" class="font-semibold"{% endif %}>{% translate "All" %}</a></li>
+        {% for f in facets %}<li><a href="?q={{ query|urlencode }}&type={{ f.kind }}" {% if kind == f.kind %}aria-current="true" class="font-semibold"{% endif %}>{{ f.title }}</a> <span class="text-slate-500">{{ f.count }}{% if f.count >= cap %}+{% endif %}</span></li>{% endfor %}
+      </ul></section>{% endif %}
+    <section class="card" aria-labelledby="saved-h"><h2 id="saved-h" class="mb-3">{% translate "Saved searches" %}</h2>
+      <ul class="mb-3 space-y-1 text-sm">{% for s in saved %}<li class="flex items-center justify-between gap-2">
+        <a href="?q={{ s.query|urlencode }}&type={{ s.kind }}">{{ s.name }}</a>
+        <form method="post" action="{% url 'search:delete' s.pk %}">{% csrf_token %}<button class="text-xs text-red-600" aria-label="{% blocktranslate with n=s.name %}Delete {{ n }}{% endblocktranslate %}">{% translate "Delete" %}</button></form>
+      </li>{% empty %}<li class="text-slate-500">{% translate "None yet." %}</li>{% endfor %}</ul>
+      {% if query %}<form method="post" action="{% url 'search:save' %}" class="flex gap-2">{% csrf_token %}
+        <input type="hidden" name="q" value="{{ query }}"><input type="hidden" name="type" value="{{ kind }}">
+        <label for="save-name" class="sr-only">{% translate "Name" %}</label>
+        <input id="save-name" name="name" maxlength="100" required placeholder="{% translate 'Name' %}" class="min-w-0 flex-1 rounded border border-slate-300 px-2 py-1 text-sm dark:border-slate-700 dark:bg-slate-800">
+        <button class="btn-secondary py-1">{% translate "Save" %}</button>
+      </form>{% endif %}
+    </section>
+  </aside>
+</div>
+{% endblock %}

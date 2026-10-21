@@ -91,6 +91,7 @@ INSTALLED_APPS = [
     "patchmanager.cabling",
     "patchmanager.floorplans",
     "patchmanager.history",
+    "patchmanager.search",
 ]
 if DJANGO_ADMIN_ENABLED:
     INSTALLED_APPS.insert(0, "django.contrib.admin")

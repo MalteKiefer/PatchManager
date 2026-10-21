@@ -28,6 +28,7 @@ URLS = {
     "cabling.cable": "cabling:cable",
     "networks.vlan": "networks:vlan",
     "networks.wlan": "networks:wlan",
+    "library.devicetype": "library:type",
 }
 
 
