@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-21 19:22+0000\n"
+"POT-Creation-Date: 2026-10-21 19:27+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -41,7 +41,7 @@ msgstr "Führen Sie den Befehl setup_token aus, um eines zu erhalten."
 
 #: accounts/forms.py:49 accounts/forms.py:103 accounts/forms.py:110
 #: api/ui.py:31 api/ui.py:54 exchange/pdf.py:203 integrations/views.py:26
-#: sso/views.py:189 templates/api/clients.html:9 templates/api/tokens.html:9
+#: sso/views.py:187 templates/api/clients.html:9 templates/api/tokens.html:9
 #: templates/integrations/webhooks.html:8 templates/manage/groups.html:6
 #: templates/manage/roles.html:11 templates/manage/tenants.html:6
 #: templates/manage/users.html:10 templates/networks/vlans.html:7
@@ -199,7 +199,7 @@ msgstr "gesperrt bis"
 
 #: accounts/models.py:49
 msgid "break glass"
-msgstr ""
+msgstr "Notfallkonto"
 
 #: accounts/models.py:141 accounts/models.py:162 api/models.py:16
 #: api/models.py:56 dcim/models.py:35 dcim/models.py:188 dcim/models.py:227
@@ -298,7 +298,7 @@ msgstr ""
 
 #: accounts/services/mfa.py:181 accounts/services/mfa.py:234
 #: accounts/services/mfa.py:254 accounts/views/account.py:136
-#: accounts/views/auth.py:127
+#: accounts/views/auth.py:132
 msgid "The security key could not be verified."
 msgstr "Der Sicherheitsschlüssel konnte nicht überprüft werden."
 
@@ -403,10 +403,8 @@ msgid "You cannot lock your own account."
 msgstr "Sie können Ihr eigenes Konto nicht sperren."
 
 #: accounts/services/users.py:169
-#, fuzzy
-#| msgid "This account cannot sign in."
 msgid "API clients do not sign in."
-msgstr "Dieses Konto kann sich nicht anmelden."
+msgstr "API-Clients melden sich nicht an."
 
 #: accounts/services/users.py:178
 msgid "You cannot deactivate your own account."
@@ -481,42 +479,46 @@ msgstr "Faktor entfernt."
 msgid "%(count)s other sessions were signed out."
 msgstr "%(count)s andere Sitzungen wurden abgemeldet."
 
-#: accounts/views/auth.py:79
+#: accounts/views/auth.py:84
 msgid "Please sign in again."
 msgstr "Bitte melden Sie sich erneut an."
 
-#: accounts/views/auth.py:86
+#: accounts/views/auth.py:91
 msgid "Too many attempts. Please sign in again."
 msgstr "Zu viele Versuche. Bitte melden Sie sich erneut an."
 
-#: accounts/views/auth.py:100
+#: accounts/views/auth.py:105
 msgid "You used a recovery code. Generate new ones soon."
 msgstr ""
 "Sie haben einen Wiederherstellungscode verwendet. Erzeugen Sie bald neue."
 
-#: accounts/views/auth.py:103
+#: accounts/views/auth.py:108
 msgid "This code is not valid."
 msgstr "Dieser Code ist ungültig."
 
-#: accounts/views/auth.py:129 sso/services.py:129
+#: accounts/views/auth.py:134 sso/services.py:131
 msgid "This account cannot sign in."
 msgstr "Dieses Konto kann sich nicht anmelden."
 
-#: accounts/views/auth.py:141 sso/views.py:126
+#: accounts/views/auth.py:139
+msgid "Sign in with your organisation's identity provider."
+msgstr "Melden Sie sich beim Identitätsanbieter Ihrer Organisation an."
+
+#: accounts/views/auth.py:152 sso/views.py:124
 msgid "You have been signed out."
 msgstr "Sie wurden abgemeldet."
 
-#: accounts/views/auth.py:165
+#: accounts/views/auth.py:176
 msgid "Setup complete. Now protect your account with a second factor."
 msgstr ""
 "Einrichtung abgeschlossen. Schützen Sie Ihr Konto jetzt mit einem zweiten "
 "Faktor."
 
-#: accounts/views/auth.py:179
+#: accounts/views/auth.py:190
 msgid "Invitation invalid or expired"
 msgstr "Einladung ungültig oder abgelaufen"
 
-#: accounts/views/auth.py:191
+#: accounts/views/auth.py:202
 msgid "Your password is set. Please sign in."
 msgstr "Ihr Passwort wurde festgelegt. Bitte melden Sie sich an."
 
@@ -551,11 +553,11 @@ msgstr "Sitzungen abgemeldet."
 
 #: accounts/views/manage.py:206
 msgid "This account may now sign in with its password where SSO is enforced."
-msgstr ""
+msgstr "Dieses Konto darf sich jetzt auch dort mit Passwort anmelden, wo SSO erzwungen wird."
 
 #: accounts/views/manage.py:210
 msgid "This account now follows the SSO rules of its domain."
-msgstr ""
+msgstr "Dieses Konto folgt jetzt den SSO-Regeln seiner Domain."
 
 #: accounts/views/manage.py:219
 #, python-format
@@ -2179,13 +2181,11 @@ msgstr "Eine gespeicherte Suche mit diesem Namen existiert bereits."
 
 #: sso/ldap.py:62
 msgid "The directory refused the service account."
-msgstr ""
+msgstr "Das Verzeichnis hat das Dienstkonto abgelehnt."
 
 #: sso/ldap.py:70 sso/ldap.py:82
-#, fuzzy
-#| msgid "The virus scanner is not reachable. Try again later."
 msgid "The directory is not reachable."
-msgstr "Der Virenscanner ist nicht erreichbar. Versuchen Sie es später erneut."
+msgstr "Das Verzeichnis ist nicht erreichbar."
 
 #: sso/models.py:20 tenancy/models.py:20
 msgid "identifier"
@@ -2193,200 +2193,185 @@ msgstr "Kennung"
 
 #: sso/models.py:21
 msgid "type"
-msgstr ""
+msgstr "Typ"
 
 #: sso/models.py:24
 msgid "enforce for these domains"
-msgstr ""
+msgstr "für diese Domains erzwingen"
 
 #: sso/models.py:25
-#, fuzzy
-#| msgid "This account cannot sign in."
 msgid "create accounts on first sign in"
-msgstr "Dieses Konto kann sich nicht anmelden."
+msgstr "Konten bei der ersten Anmeldung anlegen"
 
 #: sso/models.py:26
 msgid "the provider enforces MFA"
-msgstr ""
+msgstr "der Anbieter erzwingt MFA"
 
 #: sso/oidc.py:51 sso/oidc.py:186
-#, fuzzy
-#| msgid "The identifier does not match."
 msgid "The identity provider is not reachable."
-msgstr "Die Kennung stimmt nicht überein."
+msgstr "Der Identitätsanbieter ist nicht erreichbar."
 
 #: sso/oidc.py:53
 msgid "The identity provider answered unexpectedly."
-msgstr ""
+msgstr "Der Identitätsanbieter hat unerwartet geantwortet."
 
 #: sso/oidc.py:65
 msgid "The issuer in the metadata does not match the configuration."
-msgstr ""
+msgstr "Der Aussteller in den Metadaten passt nicht zur Konfiguration."
 
-#: sso/oidc.py:121 sso/oidc.py:135 sso/oidc.py:138 sso/saml.py:146
-#: sso/saml.py:148
-#, fuzzy
-#| msgid "The security key could not be verified."
+#: sso/oidc.py:121 sso/oidc.py:135 sso/oidc.py:138 sso/saml.py:157
+#: sso/saml.py:159 sso/saml.py:163
 msgid "The sign in could not be verified."
-msgstr "Der Sicherheitsschlüssel konnte nicht überprüft werden."
+msgstr "Die Anmeldung konnte nicht überprüft werden."
 
 #: sso/oidc.py:146 sso/oidc.py:172 sso/oidc.py:174
 msgid "The identity provider refused the sign in."
-msgstr ""
+msgstr "Der Identitätsanbieter hat die Anmeldung abgelehnt."
 
-#: sso/oidc.py:152 sso/saml.py:139
-#, fuzzy
-#| msgid "Your session expired. Please sign in again."
+#: sso/oidc.py:152 sso/saml.py:150
 msgid "This sign in expired. Please try again."
-msgstr "Ihre Sitzung ist abgelaufen. Bitte melden Sie sich erneut an."
+msgstr "Diese Anmeldung ist abgelaufen. Bitte versuchen Sie es erneut."
 
-#: sso/saml.py:41
+#: sso/saml.py:43
 msgid "SAML is not available: xmlsec1 is missing."
-msgstr ""
+msgstr "SAML ist nicht verfügbar: xmlsec1 fehlt."
 
-#: sso/saml.py:85
+#: sso/saml.py:87
 msgid "The SAML configuration of this provider is invalid."
-msgstr ""
+msgstr "Die SAML-Konfiguration dieses Anbieters ist ungültig."
 
-#: sso/saml.py:91
+#: sso/saml.py:93
 msgid "The IdP metadata must describe exactly one identity provider."
-msgstr ""
+msgstr "Die IdP-Metadaten müssen genau einen Identitätsanbieter beschreiben."
 
-#: sso/services.py:63
+#: sso/services.py:68
 msgid "The identity provider sent no email address."
-msgstr ""
+msgstr "Der Identitätsanbieter hat keine E-Mail-Adresse gesendet."
 
-#: sso/services.py:65
+#: sso/services.py:70
 msgid "The identity provider did not confirm the email address."
-msgstr ""
+msgstr "Der Identitätsanbieter hat die E-Mail-Adresse nicht bestätigt."
 
-#: sso/services.py:71
-msgid "An account with this email exists. Ask an administrator to link it."
-msgstr ""
+#: sso/services.py:73
+msgid "This identity provider may not sign in addresses of this domain."
+msgstr "Dieser Identitätsanbieter darf Adressen dieser Domain nicht anmelden."
 
-#: sso/services.py:80
+#: sso/services.py:77
 msgid "There is no account for this email. Ask an administrator for access."
-msgstr ""
+msgstr "Für diese E-Mail-Adresse gibt es kein Konto. Bitten Sie eine Administratorin oder einen Administrator um Zugang."
 
-#: sso/services.py:117
+#: sso/services.py:119
 msgid "This sign in method is disabled."
-msgstr ""
+msgstr "Diese Anmeldemethode ist deaktiviert."
 
-#: sso/views.py:190 templates/manage/tenants.html:6
+#: sso/views.py:188 templates/manage/tenants.html:6
 msgid "Identifier"
 msgstr "Kennung"
 
-#: sso/views.py:191 templates/history/activity.html:7
+#: sso/views.py:189 templates/history/activity.html:7
 #: templates/manage/roles.html:11 templates/search/results.html:7
 #: templates/sso/providers.html:7
 msgid "Type"
 msgstr "Typ"
 
-#: sso/views.py:192 templates/dcim/device.html:16
+#: sso/views.py:190 templates/dcim/device.html:16
 msgid "Enabled"
 msgstr "Aktiviert"
 
-#: sso/views.py:194
+#: sso/views.py:192
 msgid "Email domains"
-msgstr ""
+msgstr "E-Mail-Domains"
 
-#: sso/views.py:197
+#: sso/views.py:195
 msgid ""
 "Comma separated. The provider may link existing accounts of these domains."
-msgstr ""
+msgstr "Durch Kommas getrennt. Der Anbieter darf vorhandene Konten dieser Domains verknüpfen."
 
-#: sso/views.py:201
+#: sso/views.py:199
 msgid "Enforce for these domains (except break glass accounts)"
-msgstr ""
+msgstr "Für diese Domains erzwingen (außer Notfallkonten)"
 
-#: sso/views.py:205
-#, fuzzy
-#| msgid "This account cannot sign in."
+#: sso/views.py:203
 msgid "Create accounts on first sign in"
-msgstr "Dieses Konto kann sich nicht anmelden."
+msgstr "Konten bei der ersten Anmeldung anlegen"
 
-#: sso/views.py:208
+#: sso/views.py:206
 msgid "The provider enforces MFA"
-msgstr ""
+msgstr "Der Anbieter erzwingt MFA"
 
-#: sso/views.py:211
+#: sso/views.py:209
 msgid "Single logout"
-msgstr ""
+msgstr "Single Logout"
 
-#: sso/views.py:214
+#: sso/views.py:212
 msgid "Client secret or bind password"
-msgstr ""
+msgstr "Client-Secret oder Bind-Passwort"
 
-#: sso/views.py:217
-#, fuzzy
-#| msgid "Leave empty to use the type's naming convention."
+#: sso/views.py:215
 msgid "Leave empty to keep the stored one."
-msgstr "Leer lassen, um die Namenskonvention des Typs zu verwenden."
+msgstr "Leer lassen, um den gespeicherten Wert zu behalten."
 
-#: sso/views.py:220
+#: sso/views.py:218
 msgid "Group mapping"
-msgstr ""
+msgstr "Gruppenzuordnung"
 
-#: sso/views.py:223
+#: sso/views.py:221
 msgid "One per line: external group = group name"
-msgstr ""
+msgstr "Eine pro Zeile: externe Gruppe = Gruppenname"
 
-#: sso/views.py:232
+#: sso/views.py:230
 msgid "Trust unverified email addresses"
-msgstr ""
+msgstr "Unbestätigten E-Mail-Adressen vertrauen"
+
+#: sso/views.py:236
+msgid "Email attribute"
+msgstr "E-Mail-Attribut"
+
+#: sso/views.py:237
+msgid "Name attribute"
+msgstr "Namensattribut"
 
 #: sso/views.py:238
-msgid "Email attribute"
-msgstr ""
-
-#: sso/views.py:239
-msgid "Name attribute"
-msgstr ""
-
-#: sso/views.py:240
 msgid "Groups attribute"
-msgstr ""
+msgstr "Gruppenattribut"
 
-#: sso/views.py:245
+#: sso/views.py:243
 msgid "CA file (path in the container)"
-msgstr ""
+msgstr "CA-Datei (Pfad im Container)"
 
-#: sso/views.py:259
+#: sso/views.py:257
 msgid "Enter domains like example.com."
-msgstr ""
+msgstr "Geben Sie Domains wie example.com ein."
 
-#: sso/views.py:272
-#, fuzzy, python-format
-#| msgid "Unknown columns: %(cols)s."
+#: sso/views.py:270
+#, python-format
 msgid "Unknown group in: %(line)s"
-msgstr "Unbekannte Spalten: %(cols)s."
+msgstr "Unbekannte Gruppe in: %(line)s"
 
-#: sso/views.py:284
+#: sso/views.py:282
 msgid "Use ldaps:// or ldap:// with StartTLS."
-msgstr ""
+msgstr "Verwenden Sie ldaps:// oder ldap:// mit StartTLS."
 
-#: sso/views.py:290
+#: sso/views.py:288
 msgid "Plain LDAP needs StartTLS."
-msgstr ""
+msgstr "Unverschlüsseltes LDAP braucht StartTLS."
 
-#: sso/views.py:296
+#: sso/views.py:294
 #, python-brace-format
 msgid "The filter must contain {email}."
-msgstr ""
+msgstr "Der Filter muss {email} enthalten."
 
-#: sso/views.py:370
-#, fuzzy
-#| msgid "The identifier does not match."
+#: sso/views.py:368
 msgid "This identifier is taken."
-msgstr "Die Kennung stimmt nicht überein."
+msgstr "Diese Kennung ist vergeben."
 
-#: sso/views.py:377
+#: sso/views.py:375
 msgid "Identity provider saved."
-msgstr ""
+msgstr "Identitätsanbieter gespeichert."
 
-#: sso/views.py:396
+#: sso/views.py:394
 msgid "Identity provider deleted."
-msgstr ""
+msgstr "Identitätsanbieter gelöscht."
 
 #: templates/accounts/email/invitation.txt:1
 #, python-format
@@ -2441,10 +2426,9 @@ msgid "Sign in with a passkey"
 msgstr "Mit Passkey anmelden"
 
 #: templates/accounts/login.html:17
-#, fuzzy, python-format
-#| msgid "Sign in with a passkey"
+#, python-format
 msgid "Sign in with %(name)s"
-msgstr "Mit Passkey anmelden"
+msgstr "Mit %(name)s anmelden"
 
 #: templates/accounts/mfa.html:2
 msgid "Second factor"
@@ -3755,7 +3739,7 @@ msgstr "Zugriff erklären"
 #: templates/manage/_base.html:14 templates/sso/providers.html:2
 #: templates/sso/providers.html:4
 msgid "Single sign on"
-msgstr ""
+msgstr "Single Sign-on"
 
 #: templates/manage/_base.html:17 templates/manage/audit.html:2
 #: templates/manage/audit.html:5
@@ -4076,18 +4060,16 @@ msgid "Sign out everywhere"
 msgstr "Überall abmelden"
 
 #: templates/manage/user_detail.html:30
-#, fuzzy
-#| msgid "Remove cable"
 msgid "Remove break glass"
-msgstr "Kabel entfernen"
+msgstr "Notfallkonto aufheben"
 
 #: templates/manage/user_detail.html:31
 msgid "Allow a password sign in even where SSO is enforced?"
-msgstr ""
+msgstr "Anmeldung mit Passwort auch dort erlauben, wo SSO erzwungen wird?"
 
 #: templates/manage/user_detail.html:31
 msgid "Make break glass account"
-msgstr ""
+msgstr "Zum Notfallkonto machen"
 
 #: templates/manage/user_detail.html:37
 msgid "Impersonate"
@@ -4233,44 +4215,38 @@ msgstr "Noch keine."
 
 #: templates/sso/provider.html:2 templates/sso/provider.html:4
 #: templates/sso/providers.html:5
-#, fuzzy
-#| msgid "New device type"
 msgid "New identity provider"
-msgstr "Neuer Gerätetyp"
+msgstr "Neuer Identitätsanbieter"
 
 #: templates/sso/provider.html:5
 msgid "Delete this identity provider? Linked users keep their accounts."
-msgstr ""
+msgstr "Diesen Identitätsanbieter löschen? Verknüpfte Benutzer behalten ihre Konten."
 
 #: templates/sso/provider.html:6
 msgid "Register these at the provider"
-msgstr ""
+msgstr "Diese Angaben beim Anbieter eintragen"
 
 #: templates/sso/providers.html:7
 msgid "Domains"
-msgstr ""
+msgstr "Domains"
 
 #: templates/sso/providers.html:10
-#, fuzzy
-#| msgid "enabled"
 msgid "disabled"
-msgstr "aktiviert"
+msgstr "deaktiviert"
 
 #: templates/sso/providers.html:10
 msgid "enforced"
-msgstr ""
+msgstr "erzwungen"
 
 #: templates/sso/providers.html:11
-#, fuzzy
-#| msgid "No device types yet."
 msgid "No identity providers yet."
-msgstr "Noch keine Gerätetypen."
+msgstr "Noch keine Identitätsanbieter."
 
 #: templates/sso/providers.html:13
 msgid ""
 "Where SSO is enforced, accounts marked as break glass still sign in with "
 "their password. Keep at least one such super admin."
-msgstr ""
+msgstr "Wo SSO erzwungen wird, melden sich Notfallkonten weiterhin mit ihrem Passwort an. Behalten Sie mindestens einen solchen Super Admin."
 
 #: tenancy/models.py:13
 msgid "Lowercase letters, digits, dashes."
