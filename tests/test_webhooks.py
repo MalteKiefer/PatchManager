@@ -135,7 +135,17 @@ def test_rolled_back_changes_send_nothing(make_tree, super_admin, sent) -> None:
 
 
 def test_url_guard(monkeypatch, settings) -> None:
-    for address in ("127.0.0.1", "10.1.2.3", "169.254.169.254", "::1", "fd00::1"):
+    for address in (
+        "127.0.0.1",
+        "10.1.2.3",
+        "169.254.169.254",
+        "::1",
+        "fd00::1",
+        "::ffff:127.0.0.1",
+        "2002:7f00:1::1",
+        "64:ff9b::a9fe:a9fe",
+        "2001:0:4136:e378:8000:63bf:f5ff:fffe",
+    ):
         _resolve(monkeypatch, address)
         with pytest.raises(ServiceError, match="not allowed"):
             http.check("https://internal.example.com/hook")
@@ -307,3 +317,56 @@ def test_prune(make_tree, super_admin, sent) -> None:
         Delivery.objects.filter(pk=old.pk).update(created_at=timezone.now() - timedelta(days=31))
         services.ping(t["request"], super_admin, hook)
         assert services.prune() == 1
+
+
+def test_tenant_wide_sight_required_and_checked_on_delivery(
+    make_tree, make_user, super_admin, sent
+) -> None:
+    calls, _fake = sent
+    t = make_tree()
+    owner = make_user()
+    with rls.system_context():
+        Assignment.objects.create(
+            role=Role.objects.get(key="admin"),
+            user=owner,
+            tenant=t["tenant"],
+            scope_path=t["tenant"].policy_path,
+        )
+        hook, _s = services.create(
+            t["request"],
+            owner,
+            t["tenant"],
+            name="x",
+            url="https://h.example.com/a?key=s3cret",
+            events=["*"],
+        )
+        from patchmanager.audit.models import AuditEvent
+
+        assert (
+            AuditEvent.objects.filter(action="integrations.webhook.created")
+            .latest("seq")
+            .data["url"]
+            == "https://h.example.com"
+        )
+        deny = Assignment.objects.create(
+            role=Role.objects.get(key="viewer"),
+            user=owner,
+            tenant=t["tenant"],
+            scope_path=t["room"].path,
+            effect="deny",
+        )
+        with pytest.raises(PermissionDeniedError):
+            services.create(
+                t["request"],
+                owner,
+                t["tenant"],
+                name="y",
+                url="https://h.example.com/",
+                events=["*"],
+            )
+        tree.update(t["request"], super_admin, t["rack"], name="A02")
+        services.deliver_due()
+        delivery = Delivery.objects.get(webhook=hook)
+        assert delivery.status == "failed" and "lost access" in delivery.last_error
+        assert calls == []
+        deny.delete()

@@ -4,6 +4,21 @@ All notable changes to this project are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the project uses
 [Semantic Versioning](https://semver.org/).
 
+## [Unreleased]
+
+### Added
+
+* REST API under `/api/v1/` with an OpenAPI 3.1 schema: locations, racks, devices,
+  ports, cables, VLANs, WLANs, the device library, the change history and search.
+* Personal API tokens (scoped, expiring, optionally per tenant) and OAuth 2.0 client
+  credentials with service users.
+* Signed webhooks for change events with retries and an SSRF guard.
+
+### Fixed
+
+* Exports and PDF reports now require the export permission, imports the import
+  permission; viewers could export before.
+
 ## [0.7.0] - 2026-10-21
 
 ### Added

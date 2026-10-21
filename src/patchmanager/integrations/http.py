@@ -16,7 +16,8 @@ from django.utils.translation import gettext as _
 
 from patchmanager.accounts.services import ServiceError
 
-TIMEOUT = urllib3.Timeout(connect=5, read=10)
+TIMEOUT = urllib3.Timeout(total=10, connect=5)  # total: a slow sender cannot hold a worker
+NAT64 = ipaddress.ip_network("64:ff9b::/96")
 
 
 @dataclass(frozen=True)
@@ -30,13 +31,24 @@ class Target:
     address: str
 
 
+def _embedded(ip: ipaddress.IPv4Address | ipaddress.IPv6Address) -> list[ipaddress.IPv4Address]:
+    """IPv4 addresses an IPv6 address leads to (mapped, 6to4, Teredo, NAT64)."""
+    if not isinstance(ip, ipaddress.IPv6Address):
+        return []
+    inner = [ip.ipv4_mapped, ip.sixtofour, *(ip.teredo or ())]
+    if ip in NAT64:
+        inner.append(ipaddress.IPv4Address(int(ip) & 0xFFFFFFFF))
+    return [a for a in inner if a is not None]
+
+
 def _allowed(address: str) -> bool:
     ip = ipaddress.ip_address(address)
-    if any(
-        ip in ipaddress.ip_network(net, strict=False) for net in settings.WEBHOOK_ALLOWED_NETWORKS
-    ):
-        return True
-    return ip.is_global
+    allowed = [ipaddress.ip_network(net, strict=False) for net in settings.WEBHOOK_ALLOWED_NETWORKS]
+    return all(
+        any(candidate in net for net in allowed if net.version == candidate.version)
+        or candidate.is_global
+        for candidate in [ip, *_embedded(ip)]
+    )
 
 
 def check(url: str) -> Target:

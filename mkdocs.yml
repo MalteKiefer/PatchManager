@@ -55,3 +55,4 @@ nav:
       - adr/0016-cabling-trace-and-networks.md
       - adr/0017-floor-plans.md
       - adr/0018-history-search-import-export.md
+      - adr/0019-api-tokens-and-webhooks.md

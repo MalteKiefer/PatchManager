@@ -8,6 +8,7 @@ import secrets
 import time
 from datetime import timedelta
 from typing import Any
+from urllib.parse import urlsplit
 
 from django.db import transaction
 from django.http import HttpRequest
@@ -28,14 +29,45 @@ from patchmanager.tenancy.models import Tenant
 
 PATTERN = re.compile(r"^(\*|[a-z]+(\.[a-z]+){0,2}(\.\*)?)$")
 BACKOFF = (60, 300, 1800, 7200, 21600, 86400)  # seconds after attempt 1, 2, ...
-LEASE = timedelta(minutes=2)
+LEASE = timedelta(minutes=5)  # longer than a batch can take (BATCH x total timeout)
+BATCH = 10
 KEEP_DAYS = 30
 
 
+def sees_everything(user: Any, tenant: Tenant) -> bool:
+    """True if ``user`` may view every tracked object type in the whole tenant, without exceptions.
+
+    Webhooks send every change with before and after values, so whoever sets one
+    up must be able to see all of it: a tenant wide view grant per type and no
+    deny rule anywhere inside the tenant.
+    """
+    from patchmanager.history.registry import TRACKED
+
+    if user is None or not user.is_active:
+        return False
+    path = tenant.policy_path
+    views = {f"{t.policy_type}.view" for t in TRACKED.values()}
+    if not all(policy.has_perm(user, perm, scope_path=path) for perm in views):
+        return False
+    return not any(
+        g.effect == "deny"
+        and any(g.grants(p) for p in views)
+        and (g.scope_path is None or g.covers(path) or g.scope_path.startswith(path + "."))
+        for g in policy.grants_for(user)
+    )
+
+
 def require_manage(actor: User, tenant: Tenant) -> None:
-    """Webhooks send every change of the tenant, so managing them needs a tenant wide grant."""
-    if not policy.has_perm(actor, "integrations.webhook.manage", tenant):
+    """Managing webhooks needs the manage grant for the tenant and sight of all its data."""
+    allowed = policy.has_perm(actor, "integrations.webhook.manage", tenant)
+    if not allowed or not sees_everything(actor, tenant):
         raise PermissionDeniedError(_("You do not have permission to do that."))
+
+
+def _redacted(url: str) -> str:
+    """Scheme and host only: paths and queries of webhook URLs often hold secrets."""
+    parts = urlsplit(url)
+    return f"{parts.scheme}://{parts.hostname}"
 
 
 def _events(value: Any) -> list[str]:
@@ -72,7 +104,7 @@ def create(
         "integrations.webhook.created",
         request=request,
         obj=hook,
-        data={"url": url, "events": hook.events},
+        data={"url": _redacted(url), "events": hook.events},
     )
     return hook, secret
 
@@ -101,7 +133,7 @@ def update(
         "integrations.webhook.changed",
         request=request,
         obj=hook,
-        data={"url": url, "events": hook.events, "active": active},
+        data={"url": _redacted(url), "events": hook.events, "active": active},
     )
     return hook
 
@@ -118,7 +150,9 @@ def rotate(request: HttpRequest, actor: User, hook: Webhook) -> str:
 def delete(request: HttpRequest, actor: User, hook: Webhook) -> None:
     """Remove a webhook and its deliveries."""
     require_manage(actor, hook.tenant)
-    audit.record("integrations.webhook.deleted", request=request, obj=hook, data={"url": hook.url})
+    audit.record(
+        "integrations.webhook.deleted", request=request, obj=hook, data={"url": _redacted(hook.url)}
+    )
     hook.delete()
 
 
@@ -204,7 +238,7 @@ def _send(delivery: Delivery) -> None:
     )
 
 
-def deliver_due(limit: int = 100) -> int:
+def deliver_due(limit: int = BATCH) -> int:
     """Send pending deliveries that are due. Safe to run in parallel workers."""
     with rls.system_context():
         now = timezone.now()
@@ -217,10 +251,19 @@ def deliver_due(limit: int = 100) -> int:
             Delivery.objects.filter(pk__in=[d.pk for d in batch]).update(
                 next_attempt_at=now + LEASE
             )
-        for delivery in Delivery.objects.filter(pk__in=[d.pk for d in batch]).select_related(
-            "webhook"
-        ):
-            _send(delivery)
+        allowed: dict[Any, bool] = {}
+        claimed = Delivery.objects.filter(pk__in=[d.pk for d in batch])
+        for delivery in claimed.select_related("webhook__created_by", "webhook__tenant"):
+            hook = delivery.webhook
+            if hook.pk not in allowed:  # the creator must still see everything the webhook sends
+                allowed[hook.pk] = sees_everything(hook.created_by, hook.tenant)
+            if allowed[hook.pk]:
+                _send(delivery)
+            else:
+                Delivery.objects.filter(pk=delivery.pk).update(
+                    status=Delivery.Status.FAILED,
+                    last_error="The creator of this webhook lost access.",
+                )
         return len(batch)
 
 

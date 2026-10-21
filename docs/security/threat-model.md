@@ -72,6 +72,19 @@ webhook targets (SSRF risk).
 | E4 | Elevation of privilege | Container escape after RCE | Non-root, read only root fs, no shell, dropped capabilities, no-new-privileges | 0 |
 | E5 | Elevation of privilege | Supply chain (dependency, action, image) | Lockfile, digest pinning, Renovate, pip-audit, Trivy, CodeQL, signed images | 0 |
 
+## Phase 7 controls in place
+
+* S1: API tokens carry 256 bits of entropy, are stored hashed, expire, are scoped
+  (read, write, tenant) and revocable; OAuth access tokens last one hour.
+* E1: API writes run through the domain services; service users never hold MFA
+  roles nor reach MFA tenants; rotating a client secret needs the client's rights;
+  no tokens while impersonating.
+* E3: webhooks reach only public addresses unless allowed, connect to the checked
+  address, follow no redirects and use short timeouts.
+* T1: webhook payloads are signed (HMAC-SHA256 with timestamp); deliveries are
+  queued in the same transaction as the change.
+* D1: API throttling per user, OAuth token endpoint rate limited per address.
+
 ## Phase 6 controls in place
 
 * R1: history rows are written by database triggers, so no code path changes
