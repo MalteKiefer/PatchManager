@@ -169,16 +169,21 @@ def _reencode(data: bytes) -> CleanFile:
         raise ServiceError(_("The image could not be read.")) from exc
 
 
+def is_raster(data: bytes) -> bool:
+    """JPEG, PNG, GIF or WebP by magic bytes."""
+    head = data[:16]
+    return head.startswith((b"\xff\xd8\xff", b"\x89PNG\r\n\x1a\n", b"GIF87a", b"GIF89a")) or (
+        head[:4] == b"RIFF" and head[8:12] == b"WEBP"
+    )
+
+
 def clean(data: bytes) -> CleanFile:
     """Validate by content and return safe bytes, or raise :class:`ServiceError`."""
     if len(data) > settings.UPLOAD_MAX_BYTES:
         raise ServiceError(_("The file is too large."))
-    head = data[:16]
-    if head.startswith((b"\xff\xd8\xff", b"\x89PNG\r\n\x1a\n", b"GIF87a", b"GIF89a")) or (
-        head[:4] == b"RIFF" and head[8:12] == b"WEBP"
-    ):
+    if is_raster(data):
         result = _reencode(data)
-    elif head.startswith(b"%PDF-"):
+    elif data.startswith(b"%PDF-"):
         result = CleanFile(data, "application/pdf", "document", "pdf")
     elif data.lstrip()[:5] in (b"<?xml", b"<svg ", b"<svg>") or b"<svg" in data[:1024]:
         result = CleanFile(sanitise_svg(data), "image/svg+xml", "image", "svg")

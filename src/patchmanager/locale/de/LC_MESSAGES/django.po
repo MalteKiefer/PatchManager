@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-21 17:13+0000\n"
+"POT-Creation-Date: 2026-10-21 17:18+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -123,7 +123,7 @@ msgstr "Name der Kopie"
 msgid "JSON or YAML file"
 msgstr "JSON- oder YAML-Datei"
 
-#: accounts/forms.py:183 floorplans/views.py:169 metadata/uploads.py:175
+#: accounts/forms.py:183 floorplans/views.py:169 metadata/uploads.py:183
 #: metadata/views.py:65
 msgid "The file is too large."
 msgstr "Die Datei ist zu groß."
@@ -363,8 +363,8 @@ msgid "The last super admin cannot be removed."
 msgstr "Der letzte Super-Admin kann nicht entfernt werden."
 
 #: accounts/services/users.py:29 cabling/services.py:50
-#: floorplans/services.py:166 floorplans/views.py:192 metadata/services.py:96
-#: metadata/services.py:164 networks/services.py:109 networks/services.py:139
+#: floorplans/services.py:187 floorplans/views.py:192 metadata/services.py:98
+#: metadata/services.py:166 networks/services.py:109 networks/services.py:139
 #: networks/services.py:148
 msgid "You do not have permission to do that."
 msgstr "Sie haben keine Berechtigung dafür."
@@ -827,11 +827,11 @@ msgstr "Rackgeräte benötigen einen Typ für den Rackeinbau und eine Position."
 msgid "The rack is not in this room."
 msgstr "Das Rack befindet sich nicht in diesem Raum."
 
-#: dcim/devices.py:221
+#: dcim/devices.py:223
 msgid "The rear port must belong to the same device."
 msgstr "Der Rückport muss zum selben Gerät gehören."
 
-#: dcim/devices.py:243 dcim/devices.py:249
+#: dcim/devices.py:245 dcim/devices.py:251
 msgid "This port name or rear position is already used."
 msgstr "Dieser Portname oder diese Rückposition wird bereits verwendet."
 
@@ -964,60 +964,60 @@ msgstr "Pixel pro Meter"
 msgid "Plan"
 msgstr "Grundriss"
 
-#: floorplans/services.py:32
+#: floorplans/services.py:38
 msgid "The PDF could not be read."
 msgstr "Die PDF Datei konnte nicht gelesen werden."
 
-#: floorplans/services.py:35
+#: floorplans/services.py:41
 msgid "The PDF has no pages."
 msgstr "Die PDF Datei hat keine Seiten."
 
-#: floorplans/services.py:54 templates/floorplans/editor.html:2
+#: floorplans/services.py:61 floorplans/services.py:67
+msgid "Floor plans must be JPEG, PNG, WebP, GIF or PDF."
+msgstr "Grundrisse müssen JPEG, PNG, WebP, GIF oder PDF sein."
+
+#: floorplans/services.py:64 templates/floorplans/editor.html:2
 #: templates/floorplans/editor.html:6 templates/floorplans/editor.html:8
 #: templates/locations/node.html:9
 msgid "Floor plan"
 msgstr "Grundriss"
 
-#: floorplans/services.py:57
-msgid "Floor plans must be JPEG, PNG, WebP, GIF or PDF."
-msgstr "Grundrisse müssen JPEG, PNG, WebP, GIF oder PDF sein."
-
-#: floorplans/services.py:84
+#: floorplans/services.py:94
 msgid "Invalid coordinates."
 msgstr "Ungültige Koordinaten."
 
-#: floorplans/services.py:86
+#: floorplans/services.py:96
 msgid "The point lies outside the plan."
 msgstr "Der Punkt liegt außerhalb des Grundrisses."
 
-#: floorplans/services.py:98
+#: floorplans/services.py:108
 msgid "Choose two distinct points and a positive distance."
 msgstr "Wählen Sie zwei verschiedene Punkte und eine positive Entfernung."
 
-#: floorplans/services.py:116
+#: floorplans/services.py:126
 msgid "The room is not on this floor."
 msgstr "Der Raum befindet sich nicht auf dieser Etage."
 
-#: floorplans/services.py:118
+#: floorplans/services.py:128
 #, python-format
 msgid "An outline needs 3 to %(max)s points."
 msgstr "Ein Umriss braucht 3 bis %(max)s Punkte."
 
-#: floorplans/services.py:121
+#: floorplans/services.py:131
 msgid "The outline is too small."
 msgstr "Der Raumumriss ist zu klein."
 
-#: floorplans/services.py:151
+#: floorplans/services.py:142
+msgid "hidden room"
+msgstr "verborgener Raum"
+
+#: floorplans/services.py:166
 msgid "This rack is on another floor."
 msgstr "Dieses Rack befindet sich auf einer anderen Etage."
 
-#: floorplans/services.py:159
+#: floorplans/services.py:180
 msgid "Only floor devices of this floor can be placed."
 msgstr "Nur Raumgeräte dieser Etage können auf dem Grundriss platziert werden."
-
-#: floorplans/services.py:188
-msgid "hidden room"
-msgstr "verborgener Raum"
 
 #: floorplans/views.py:33
 msgid "Plan (JPEG, PNG, WebP, GIF or PDF)"
@@ -1424,15 +1424,19 @@ msgstr "Dateiname"
 msgid "caption"
 msgstr "Bildunterschrift"
 
-#: metadata/services.py:76
+#: metadata/services.py:78
 msgid "Files cannot be attached here."
 msgstr "Hier können keine Dateien angehängt werden."
 
-#: metadata/services.py:81
+#: metadata/services.py:83
 msgid "Object not found."
 msgstr "Objekt nicht gefunden."
 
-#: metadata/services.py:191 metadata/views.py:91
+#: metadata/services.py:183
+msgid "This file is in use, for example as a floor plan."
+msgstr "Diese Datei wird verwendet, zum Beispiel als Grundriss."
+
+#: metadata/services.py:199 metadata/views.py:91
 msgid "The note is empty."
 msgstr "Die Notiz ist leer."
 
@@ -1444,16 +1448,16 @@ msgstr "Die SVG-Datei ist ungültig."
 msgid "The image could not be read."
 msgstr "Das Bild konnte nicht gelesen werden."
 
-#: metadata/uploads.py:186
+#: metadata/uploads.py:191
 msgid "Only JPEG, PNG, GIF, WebP, SVG and PDF files are accepted."
 msgstr ""
 "Es werden nur JPEG-, PNG-, GIF-, WebP-, SVG- und PDF-Dateien akzeptiert."
 
-#: metadata/uploads.py:205
+#: metadata/uploads.py:210
 msgid "The virus scanner is not reachable. Try again later."
 msgstr "Der Virenscanner ist nicht erreichbar. Versuchen Sie es später erneut."
 
-#: metadata/uploads.py:207
+#: metadata/uploads.py:212
 msgid "The file was rejected by the virus scanner."
 msgstr "Die Datei wurde vom Virenscanner abgelehnt."
 

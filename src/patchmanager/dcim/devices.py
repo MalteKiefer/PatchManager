@@ -165,6 +165,8 @@ def place(
         raise ServiceError(_("The rack is not in this room."))
     with transaction.atomic():
         RackSpace.objects.filter(device=device).delete()
+        if rack is not None or room.floor_id != device.room.floor_id:
+            device.plan_x = device.plan_y = None  # position was on the old floor plan
         device.room, device.rack = room, rack
         _save(device)
         if rack is not None and position is not None:

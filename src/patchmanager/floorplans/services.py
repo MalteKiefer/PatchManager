@@ -1,6 +1,8 @@
 """Plans: upload (PDFs are rasterised), scale, room outlines, placing racks and floor devices."""
 
 import io
+import math
+import threading
 from typing import Any
 
 import pypdfium2
@@ -19,29 +21,35 @@ from patchmanager.floorplans import geometry
 from patchmanager.floorplans.models import FloorPlan
 from patchmanager.locations.models import Floor, Room
 from patchmanager.metadata import services as metadata
+from patchmanager.metadata import uploads
 
 MAX_SIDE = 6000
+MAX_PIXELS = 25_000_000
+_PDFIUM = threading.Lock()  # PDFium is not thread safe
 MAX_POINTS = 64
 
 
 def rasterise_pdf(data: bytes) -> bytes:
     """Render the first page of a PDF to PNG, longest side at most ``MAX_SIDE`` pixels."""
-    try:
-        document = pypdfium2.PdfDocument(data)
-    except pypdfium2.PdfiumError as exc:
-        raise ServiceError(_("The PDF could not be read.")) from exc
-    try:
-        if len(document) < 1:
-            raise ServiceError(_("The PDF has no pages."))
-        page = document[0]
-        width, height = page.get_size()
-        scale = min(150 / 72, MAX_SIDE / max(width, height, 1))
-        image = page.render(scale=scale).to_pil()
-        out = io.BytesIO()
-        image.convert("RGB").save(out, "PNG", optimize=True)
-        return out.getvalue()
-    finally:
-        document.close()
+    with _PDFIUM:
+        try:
+            document = pypdfium2.PdfDocument(data)
+        except pypdfium2.PdfiumError as exc:
+            raise ServiceError(_("The PDF could not be read.")) from exc
+        try:
+            if len(document) < 1:
+                raise ServiceError(_("The PDF has no pages."))
+            page = document[0]
+            width, height = (max(v, 1.0) for v in page.get_size())
+            scale = min(
+                150 / 72, MAX_SIDE / max(width, height), math.sqrt(MAX_PIXELS / (width * height))
+            )
+            image = page.render(scale=scale).to_pil()
+        finally:
+            document.close()
+    out = io.BytesIO()
+    image.convert("RGB").save(out, "PNG", optimize=True)
+    return out.getvalue()
 
 
 def upload(request: HttpRequest, actor: User, floor: Floor, *, name: str, data: bytes) -> FloorPlan:
@@ -49,6 +57,8 @@ def upload(request: HttpRequest, actor: User, floor: Floor, *, name: str, data: 
     require(actor, "locations.floor.change", floor)
     if data[:5] == b"%PDF-":
         data, name = rasterise_pdf(data), name.rsplit(".", 1)[0] + ".png"
+    if not uploads.is_raster(data):  # checked before anything is stored
+        raise ServiceError(_("Floor plans must be JPEG, PNG, WebP, GIF or PDF."))
     with transaction.atomic():
         attachment = metadata.attach(
             request, actor, floor, name=name, data=data, caption=_("Floor plan")
@@ -94,7 +104,7 @@ def set_scale(
     require(actor, "locations.floor.change", plan.floor)
     p, q = _point(plan, a), _point(plan, b)
     pixels = geometry.distance(p, q)
-    if metres <= 0 or pixels < 5:
+    if not (math.isfinite(metres) and 0 < metres <= 100_000) or pixels < 5:
         raise ServiceError(_("Choose two distinct points and a positive distance."))
     plan.px_per_metre = pixels / metres
     plan.save(update_fields=["px_per_metre", "updated_at"])
@@ -127,6 +137,11 @@ def set_outline(
     return room
 
 
+def room_label(actor: Any, room: Room) -> str:
+    """Room name, or a placeholder if the actor may not see the room."""
+    return str(room) if policy.has_perm(actor, "locations.room.view", room) else _("hidden room")
+
+
 def rooms_at(plan: FloorPlan, x: float, y: float) -> list[Room]:
     """Rooms of the floor whose outline contains the point."""
     return [
@@ -153,7 +168,13 @@ def place(
         audit.record("floorplans.rack.placed", request=request, obj=item, data={"x": x, "y": y})
         rooms = rooms_at(plan, x, y)
         outside = bool(item.room.outline) and item.room not in rooms
-        return {"x": x, "y": y, "room": str(item.room), "outside_room": outside, "candidates": []}
+        return {
+            "x": x,
+            "y": y,
+            "room": room_label(actor, item.room),
+            "outside_room": outside,
+            "candidates": [],
+        }
     require(actor, "dcim.device.change", item)
     if item.rack_id or item.room.floor_id != plan.floor_id:
         raise ServiceError(_("Only floor devices of this floor can be placed."))
@@ -182,14 +203,9 @@ def place(
     return {
         "x": x,
         "y": y,
-        "room": str(item.room),
+        "room": room_label(actor, item.room),
         "moved": moved,
-        "candidates": [
-            str(r) if policy.has_perm(actor, "locations.room.view", r) else _("hidden room")
-            for r in rooms
-        ]
-        if len(rooms) > 1
-        else [],
+        "candidates": [room_label(actor, r) for r in rooms] if len(rooms) > 1 else [],
     }
 
 

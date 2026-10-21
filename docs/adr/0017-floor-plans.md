@@ -18,7 +18,9 @@ handled and how placement relates to the room a device belongs to.
   Accepted: JPEG, PNG, WebP, GIF and PDF. Replacing the plan deletes the old
   image and resets the scale.
 * **PDFs** are rasterised on upload with pypdfium2 (PDFium, Apache-2.0): first
-  page only, 150 dpi, longest side at most 6000 pixels, then stored as PNG. The
+  page only, 150 dpi, longest side at most 6000 pixels and at most 25 million
+  pixels, one render at a time per process (PDFium is not thread safe), then
+  stored as PNG. The
   original PDF is not kept. PDFium is a large C parser; it runs inside the
   upload request, only on files below the upload limit. The malware scan of the
   attachment pipeline sees the resulting PNG, not the PDF. Moving rasterising to
@@ -31,6 +33,7 @@ handled and how placement relates to the room a device belongs to.
   and device symbols are sized from the scale (rack 0.6 m by its depth).
 * **Room outlines** are polygons (3 to 64 points, rectangles included) stored on
   the room. Point in polygon uses ray casting; edges count as inside.
+* A device moved to another floor or into a rack loses its plan position.
 * **Placement**: racks keep their room; a rack dropped outside its room's
   outline is placed with a warning. A floor device dropped inside exactly one
   other room's outline moves to that room (needs `dcim.device.add` there), and

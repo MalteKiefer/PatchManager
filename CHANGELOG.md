@@ -17,6 +17,8 @@ All notable changes to this project are documented here. The format follows
 ### Fixed
 
 * Cable scopes are recomputed when a device moves to another room or rack.
+* Deleting an attachment removes the stored file only after the database change is
+  committed; files in use (floor plans) cannot be deleted.
 
 ## [0.5.0] - 2026-10-21
 

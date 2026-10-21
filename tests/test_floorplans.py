@@ -170,6 +170,7 @@ def test_place_needs_permissions(kit, super_admin, make_user) -> None:
         )
         out = services.place(kit["request"], user, plan, ap, [400, 10])  # on the shared edge
         assert sorted(out["candidates"]) == ["R1", "hidden room"]
+        assert services.room_label(user, r2) == "hidden room"
         services.place(kit["request"], user, plan, ap, [10, 10])
         with pytest.raises(PermissionDeniedError):
             services.place(kit["request"], user, plan, ap, [600, 10])  # would move into R2
@@ -236,3 +237,62 @@ def test_other_tenant_and_viewer(kit, make_tree, make_user, client: Client) -> N
         f"/plans/{kit['floor'].pk}/upload/", {"file": io.BytesIO(_png())}, secure=True
     )
     assert response.status_code == 403
+
+
+@pytest.mark.django_db
+def test_review_guards(kit, super_admin) -> None:
+    from patchmanager.metadata import services as metadata
+
+    plan = _upload(kit, super_admin)
+    with rls.system_context():
+        with pytest.raises(ServiceError, match="in use"):
+            metadata.remove(kit["request"], super_admin, plan.image)
+        assert FloorPlan.objects.get(pk=plan.pk).image_id == plan.image_id
+        for metres in (float("nan"), float("inf"), -1, 1e9):
+            with pytest.raises(ServiceError):
+                services.set_scale(kit["request"], super_admin, plan, [0, 0], [100, 0], metres)
+
+        ap = devices.create(
+            kit["request"], super_admin, device_type=kit["ap"], room=kit["room"], name="ap1"
+        )
+        services.place(kit["request"], super_admin, plan, ap, [50, 50])
+        room2 = tree.create(kit["request"], super_admin, Room, parent=kit["floor"], name="R2")
+        devices.place(
+            kit["request"],
+            super_admin,
+            Device.objects.get(pk=ap.pk),
+            room=room2,
+            rack=None,
+            position=None,
+        )
+        assert Device.objects.get(pk=ap.pk).plan_x == 50  # same floor keeps its spot
+        floor2 = tree.create(
+            kit["request"],
+            super_admin,
+            type(kit["floor"]),
+            parent=kit["building"],
+            name="F2",
+            level=2,
+        )
+        room3 = tree.create(kit["request"], super_admin, Room, parent=floor2, name="R3")
+        devices.place(
+            kit["request"],
+            super_admin,
+            Device.objects.get(pk=ap.pk),
+            room=room3,
+            rack=None,
+            position=None,
+        )
+        assert Device.objects.get(pk=ap.pk).plan_x is None
+
+
+def test_huge_pdf_page_is_capped() -> None:
+    import pypdfium2
+
+    document = pypdfium2.PdfDocument.new()
+    document.new_page(14400, 14400)  # 5 m square page
+    out = io.BytesIO()
+    document.save(out)
+    document.close()
+    with Image.open(io.BytesIO(services.rasterise_pdf(out.getvalue()))) as image:
+        assert image.width * image.height <= services.MAX_PIXELS

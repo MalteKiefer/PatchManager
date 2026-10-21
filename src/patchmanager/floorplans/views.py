@@ -119,7 +119,7 @@ def _scene(request: HttpRequest, floor: Floor, plan: FloorPlan | None) -> dict[s
                 "name": d.name,
                 "x": d.plan_x,
                 "y": d.plan_y,
-                "room": d.room.name,
+                "room": services.room_label(user, d.room),
                 "glyph": GLYPHS.get(d.device_type.category, "D"),
                 "url": node_url(d),
                 "r": max(8.0, 0.3 * scale) if scale else 8.0,
