@@ -1,0 +1,1 @@
+{% load i18n %}<option value="">{% translate "Choose a port" %}</option>{% for p in ports %}<option value="{{ p.pk }}">{{ p.name }} ({{ p.get_kind_display }})</option>{% endfor %}

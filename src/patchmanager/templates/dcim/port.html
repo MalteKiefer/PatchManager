@@ -10,6 +10,24 @@
       <ul class="flex flex-wrap gap-2 text-sm">{% for f in front_ports %}<li><a class="badge-muted no-underline hover:underline" href="{% url 'devices:port' f.pk %}">{{ f.name }} → {{ f.rear_position }}</a></li>{% endfor %}</ul>
     </section>
     {% endif %}
+    <section class="card" aria-labelledby="cable-h">
+      <h2 id="cable-h" class="mb-3">{% translate "Cable" %}</h2>
+      {% if peer %}
+      <p class="mb-3 text-sm">{% translate "Connected to" %} {% if peer == "hidden" %}{% translate "(not visible to you)" %}{% else %}<a href="{% url 'devices:device' peer.device_id %}">{{ peer.device }}</a> · <a class="font-mono" href="{% url 'devices:port' peer.pk %}">{{ peer.name }}</a>{% endif %}
+        (<a href="{% url 'cabling:cable' port.cable_end.cable_id %}">{{ port.cable_end.cable.get_kind_display }}</a>)</p>
+      <div class="flex flex-wrap gap-2">
+        {% if can_trace %}<a class="btn-secondary" href="{% url 'cabling:trace' port.pk %}">{% translate "Trace path" %}</a>{% endif %}
+        {% if can_cable %}<form method="post" action="{% url 'cabling:disconnect' port.pk %}" data-confirm="{% translate 'Remove this cable?' %}">{% csrf_token %}<button class="btn-secondary">{% translate "Disconnect" %}</button></form>{% endif %}
+      </div>
+      {% else %}
+      <p class="mb-3 text-sm text-slate-500">{% translate "No cable." %}</p>
+      <div class="flex flex-wrap gap-2">
+        {% if can_cable %}<a class="btn-primary" href="{% url 'cabling:connect' port.pk %}">{% translate "Connect" %}</a>{% endif %}
+        {% if can_trace and port.kind == "front" or can_trace and port.kind == "rear" %}<a class="btn-secondary" href="{% url 'cabling:trace' port.pk %}">{% translate "Trace path" %}</a>{% endif %}
+      </div>
+      {% endif %}
+    </section>
+    {% if wlans %}<section class="card"><h2 class="mb-3">WLANs</h2><ul class="text-sm">{% for w in wlans %}<li><a href="{% url 'networks:wlan' w.pk %}">{{ w.ssid }}</a></li>{% endfor %}</ul></section>{% endif %}
     {% metadata_panel port %}
   </div>
   <aside class="space-y-6">
@@ -18,6 +36,13 @@
       <fieldset {% if not can_change %}disabled{% endif %}>{% include "core/_form.html" %}</fieldset>
       {% if can_change %}<button class="btn-primary">{% translate "Save" %}</button>{% endif %}
     </form>
+    {% if port.kind == "interface" %}
+    <form method="post" class="card" novalidate>{% csrf_token %}<input type="hidden" name="action" value="vlans">
+      <h2 class="mb-3">VLANs</h2>
+      <fieldset {% if not can_change %}disabled{% endif %}>{% include "core/_form.html" with form=vlan_form %}</fieldset>
+      {% if can_change %}<button class="btn-secondary">{% translate "Save VLANs" %}</button>{% endif %}
+    </form>
+    {% endif %}
     {% if can_change %}<form method="post" data-confirm="{% translate 'Delete this port?' %}">{% csrf_token %}<button name="action" value="delete" class="btn-danger">{% translate "Delete port" %}</button></form>{% endif %}
   </aside>
 </div>

@@ -1,0 +1,21 @@
+{% extends "base.html" %}{% load i18n %}
+{% block title %}{% translate "Connect" %}{% endblock %}
+{% block content %}
+<form method="post" class="card mx-auto max-w-2xl" novalidate>{% csrf_token %}
+  <h1 class="mb-1">{% translate "Connect" %} <span class="font-mono">{{ source.device }}: {{ source.name }}</span></h1>
+  <p class="mb-4 text-sm text-slate-500">{% translate "Choose the device and port at the other end. Ports with a cable are not offered." %}</p>
+  {% if form.non_field_errors %}<div class="mb-4 rounded-md border border-red-200 bg-red-50 px-4 py-2 text-sm text-red-800 dark:border-red-900 dark:bg-red-950 dark:text-red-200" role="alert">{{ form.non_field_errors }}</div>{% endif %}
+  <div class="grid gap-x-4 sm:grid-cols-2">
+    <div class="field">{{ form.device.label_tag }}
+      <select name="device" id="id_device" required hx-get="{% url 'cabling:port-options' %}?exclude={{ source.pk }}" hx-trigger="change" hx-target="#id_port" hx-swap="innerHTML">
+        <option value="">-</option>{% for d in form.fields.device.queryset %}<option value="{{ d.pk }}" {% if form.device.value == d.pk|stringformat:"s" %}selected{% endif %}>{{ d.name }}</option>{% endfor %}
+      </select>{{ form.device.errors }}</div>
+    <div class="field">{{ form.port.label_tag }}{{ form.port }}{{ form.port.errors }}
+      <noscript><p class="help">{% translate "Without JavaScript: choose the device, submit, then choose the port." %}</p></noscript></div>
+    {% for field in form.visible_fields %}{% if field.name != "device" and field.name != "port" %}
+    <div class="field">{{ field.label_tag }}{{ field }}{{ field.errors }}</div>{% endif %}{% endfor %}
+  </div>
+  <button class="btn-primary">{% translate "Connect" %}</button>
+  <a class="btn-secondary" href="{% url 'devices:port' source.pk %}">{% translate "Cancel" %}</a>
+</form>
+{% endblock %}

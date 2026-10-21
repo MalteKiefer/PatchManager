@@ -72,6 +72,14 @@ webhook targets (SSRF risk).
 | E4 | Elevation of privilege | Container escape after RCE | Non-root, read only root fs, no shell, dropped capabilities, no-new-privileges | 0 |
 | E5 | Elevation of privilege | Supply chain (dependency, action, image) | Lockfile, digest pinning, Renovate, pip-audit, Trivy, CodeQL, signed images | 0 |
 
+## Phase 4 controls in place
+
+* T1: cable ends, VLAN use (untagged and tagged) and WLAN radios are checked by
+  triggers to stay inside one tenant; site VLANs only on ports of that site.
+* E1: creating a cable needs permission on both end devices.
+* I1: traces anonymise hops on devices the viewer may not see.
+* D1: traces are bounded (256 hops) and stop on loops.
+
 ## Phase 3 controls in place
 
 * T3: uploads accepted by content only; images re-encoded (EXIF, polyglot payloads

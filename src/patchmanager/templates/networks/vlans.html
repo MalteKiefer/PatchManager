@@ -1,0 +1,14 @@
+{% extends "base.html" %}{% load i18n %}
+{% block title %}VLANs{% endblock %}
+{% block content %}
+<div class="mb-4 flex items-center gap-3"><h1 class="mr-auto">VLANs{% if current_tenant %} · {{ current_tenant.name }}{% endif %}</h1><a class="btn-secondary" href="{% url 'networks:wlans' %}">WLANs</a></div>
+<div class="grid gap-6 lg:grid-cols-3">
+  <div class="card overflow-x-auto p-0 lg:col-span-2"><table class="table">
+    <thead><tr><th>ID</th><th>{% translate "Name" %}</th><th>{% translate "Site" %}</th><th>{% translate "Status" %}</th><th>{% translate "Access ports" %}</th><th>{% translate "Trunks" %}</th></tr></thead>
+    <tbody>{% for v in vlans %}<tr><td class="font-mono">{{ v.vid }}</td><td><a href="{% url 'networks:vlan' v.pk %}">{{ v.name }}</a></td>
+      <td>{{ v.site.name|default:_("all") }}</td><td>{{ v.get_status_display }}</td><td>{{ v.access }}</td><td>{{ v.trunks }}</td></tr>
+    {% empty %}<tr><td colspan="6" class="text-slate-500">{% translate "No VLANs yet." %}</td></tr>{% endfor %}</tbody>
+  </table></div>
+  {% if can_add %}<form method="post" class="card" novalidate>{% csrf_token %}<h2 class="mb-3">{% translate "New VLAN" %}</h2>{% include "core/_form.html" %}<button class="btn-primary">{% translate "Create" %}</button></form>{% endif %}
+</div>
+{% endblock %}

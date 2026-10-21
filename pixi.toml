@@ -1,6 +1,6 @@
 [workspace]
 name = "patchmanager"
-version = "0.4.0"
+version = "0.5.0"
 description = "Self-hosted network and rack documentation platform"
 authors = ["Malte Kiefer"]
 license = "AGPL-3.0-only"

@@ -1,6 +1,6 @@
 """PatchManager: self-hosted network and rack documentation."""
 
-__version__ = "0.4.0"
+__version__ = "0.5.0"
 
 from patchmanager.worker import app as celery_app
 

@@ -94,14 +94,14 @@ SYSTEM_ROLES: dict[str, SystemRole] = {
         SystemRole(
             "viewer",
             _("Viewer"),
-            ("*.view",),
+            ("*.view", "*.trace"),
             (*_INSTANCE, *_IDENTITY),
             description=_("Read only access to documentation objects."),
         ),
         SystemRole(
             "auditor",
             _("Auditor"),
-            ("*.view", "audit.event.export", "audit.event.verify"),
+            ("*.view", "*.trace", "audit.event.export", "audit.event.verify"),
             ("system.*",),
             description=_("Read only access including the audit log."),
         ),

@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-21 15:27+0000\n"
+"POT-Creation-Date: 2026-10-21 16:23+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -42,6 +42,7 @@ msgstr "Führen Sie den Befehl setup_token aus, um eines zu erhalten."
 #: accounts/forms.py:49 accounts/forms.py:103 accounts/forms.py:110
 #: templates/manage/groups.html:6 templates/manage/roles.html:11
 #: templates/manage/tenants.html:6 templates/manage/users.html:10
+#: templates/networks/vlans.html:7
 msgid "Name"
 msgstr "Name"
 
@@ -180,8 +181,8 @@ msgid "language"
 msgstr "Sprache"
 
 #: accounts/models.py:42 dcim/models.py:31 dcim/models.py:173
-#: templates/manage/tenants.html:8 templates/manage/user_detail.html:6
-#: templates/manage/users.html:13
+#: networks/models.py:15 templates/manage/tenants.html:8
+#: templates/manage/user_detail.html:6 templates/manage/users.html:13
 msgid "active"
 msgstr "aktiv"
 
@@ -192,13 +193,14 @@ msgstr "gesperrt bis"
 #: accounts/models.py:137 accounts/models.py:158 dcim/models.py:35
 #: dcim/models.py:183 dcim/models.py:220 library/models.py:25
 #: library/models.py:177 locations/models.py:16 locations/models.py:58
-#: locations/models.py:78 locations/models.py:108 tenancy/models.py:21
+#: locations/models.py:78 locations/models.py:108 networks/models.py:30
+#: tenancy/models.py:21
 msgid "name"
 msgstr "Name"
 
 #: accounts/models.py:138 accounts/models.py:159 dcim/models.py:230
 #: library/models.py:127 locations/models.py:35 locations/models.py:59
-#: locations/models.py:110
+#: locations/models.py:110 networks/models.py:34 networks/models.py:81
 msgid "description"
 msgstr "Beschreibung"
 
@@ -359,8 +361,8 @@ msgstr "Wählen Sie entweder einen Benutzer oder eine Gruppe."
 msgid "The last super admin cannot be removed."
 msgstr "Der letzte Super-Admin kann nicht entfernt werden."
 
-#: accounts/services/users.py:29 metadata/services.py:96
-#: metadata/services.py:164
+#: accounts/services/users.py:29 cabling/services.py:50 metadata/services.py:96
+#: metadata/services.py:164 networks/services.py:109 networks/services.py:139
 msgid "You do not have permission to do that."
 msgstr "Sie haben keine Berechtigung dafür."
 
@@ -590,6 +592,139 @@ msgstr "Kette intakt: %(count)s Ereignisse überprüft."
 msgid "Chain broken at event %(seq)s: %(reason)s"
 msgstr "Kette unterbrochen bei Ereignis %(seq)s: %(reason)s"
 
+#: cabling/models.py:15
+msgid "permanent link"
+msgstr "Festverkabelung"
+
+#: cabling/models.py:16
+msgid "patch cord"
+msgstr "Patchkabel"
+
+#: cabling/models.py:29
+msgid "coax"
+msgstr "Koax"
+
+#: cabling/models.py:30 library/models.py:73
+msgid "power"
+msgstr "Strom"
+
+#: cabling/models.py:31 library/models.py:63 library/models.py:98
+msgid "other"
+msgstr "Sonstiges"
+
+#: cabling/models.py:34 dcim/models.py:30 dcim/models.py:172
+msgid "planned"
+msgstr "geplant"
+
+#: cabling/models.py:35
+msgid "installed"
+msgstr "installiert"
+
+#: cabling/models.py:36 dcim/models.py:175
+msgid "decommissioned"
+msgstr "außer Betrieb genommen"
+
+#: cabling/models.py:38 dcim/models.py:222 library/models.py:180
+#: locations/models.py:109
+msgid "kind"
+msgstr "Art"
+
+#: cabling/models.py:39
+msgid "media"
+msgstr "Medium"
+
+#: cabling/models.py:41
+msgid "colour"
+msgstr "Farbe"
+
+#: cabling/models.py:45
+msgid "Use a hex colour like #2563eb."
+msgstr "Verwenden Sie eine Hex-Farbe wie #2563eb."
+
+#: cabling/models.py:48
+msgid "length (m)"
+msgstr "Länge (m)"
+
+#: cabling/models.py:55 dcim/models.py:114 dcim/models.py:229
+msgid "label"
+msgstr "Bezeichnung"
+
+#: cabling/models.py:57 dcim/models.py:45 dcim/models.py:185
+#: networks/models.py:32
+msgid "status"
+msgstr "Status"
+
+#: cabling/models.py:59 dcim/models.py:49 dcim/models.py:196
+msgid "notes"
+msgstr "Notizen"
+
+#: cabling/services.py:35
+msgid "within the device"
+msgstr "im selben Gerät"
+
+#: cabling/services.py:37
+msgid "within the rack"
+msgstr "im selben Rack"
+
+#: cabling/services.py:38
+msgid "within the room"
+msgstr "im selben Raum"
+
+#: cabling/services.py:39
+msgid "within the floor"
+msgstr "in derselben Etage"
+
+#: cabling/services.py:40
+msgid "within the building"
+msgstr "im selben Gebäude"
+
+#: cabling/services.py:41
+msgid "within the site"
+msgstr "im selben Standort"
+
+#: cabling/services.py:45
+msgid "between sites"
+msgstr "zwischen Standorten"
+
+#: cabling/services.py:56
+msgid "A cable needs two different ports."
+msgstr "Ein Kabel benötigt zwei verschiedene Ports."
+
+#: cabling/services.py:58
+msgid "Ports of different tenants cannot be connected."
+msgstr "Ports verschiedener Mandanten können nicht verbunden werden."
+
+#: cabling/services.py:77
+msgid "One of the ports already has a cable."
+msgstr "Einer der Ports hat bereits ein Kabel."
+
+#: cabling/services.py:79
+msgid "These ports cannot be connected."
+msgstr "Diese Ports können nicht verbunden werden."
+
+#: cabling/views.py:43 templates/accounts/security.html:50
+msgid "Device"
+msgstr "Gerät"
+
+#: cabling/views.py:44 templates/dcim/device.html:15
+#: templates/dcim/port.html:35
+msgid "Port"
+msgstr "Port"
+
+#: cabling/views.py:122
+msgid "Connected."
+msgstr "Verbunden."
+
+#: cabling/views.py:146 cabling/views.py:277
+msgid "Cable removed."
+msgstr "Kabel entfernt."
+
+#: cabling/views.py:152 dcim/device_views.py:289 dcim/device_views.py:357
+#: dcim/views.py:99 library/views.py:213 locations/views.py:171
+#: networks/views.py:137
+msgid "Saved."
+msgstr "Gespeichert."
+
 #: dcim/device_views.py:56
 msgid "Device type"
 msgstr "Gerätetyp"
@@ -623,24 +758,43 @@ msgstr "Raum"
 msgid "Rack"
 msgstr "Rack"
 
-#: dcim/device_views.py:176
+#: dcim/device_views.py:127 dcim/models.py:243
+msgid "VLAN mode"
+msgstr "VLAN-Modus"
+
+#: dcim/device_views.py:129 dcim/models.py:246
+msgid "access"
+msgstr "Access"
+
+#: dcim/device_views.py:129 dcim/models.py:246 templates/dcim/device.html:20
+msgid "trunk"
+msgstr "Trunk"
+
+#: dcim/device_views.py:132
+msgid "Untagged / native VLAN"
+msgstr "Untagged / natives VLAN"
+
+#: dcim/device_views.py:135
+msgid "Tagged VLANs"
+msgstr "Getaggte VLANs"
+
+#: dcim/device_views.py:242
 #, python-format
 msgid "Device created with %(n)s ports."
 msgstr "Gerät mit %(n)s Ports angelegt."
 
-#: dcim/device_views.py:223 dcim/device_views.py:281 dcim/views.py:99
-#: library/views.py:213 locations/views.py:171
-msgid "Saved."
-msgstr "Gespeichert."
-
-#: dcim/device_views.py:236
+#: dcim/device_views.py:302
 msgid "Device moved."
 msgstr "Gerät verschoben."
 
-#: dcim/device_views.py:244 dcim/views.py:108 library/views.py:241
-#: locations/views.py:183
+#: dcim/device_views.py:310 dcim/views.py:108 library/views.py:241
+#: locations/views.py:183 networks/views.py:133
 msgid "Deleted."
 msgstr "Gelöscht."
+
+#: dcim/device_views.py:371
+msgid "VLANs saved."
+msgstr "VLANs gespeichert."
 
 #: dcim/devices.py:71 dcim/devices.py:77
 msgid "A device with this name already exists in this tenant."
@@ -678,10 +832,6 @@ msgstr "Der Rückport muss zum selben Gerät gehören."
 msgid "This port name or rear position is already used."
 msgstr "Dieser Portname oder diese Rückposition wird bereits verwendet."
 
-#: dcim/models.py:30 dcim/models.py:172
-msgid "planned"
-msgstr "geplant"
-
 #: dcim/models.py:32
 msgid "retired"
 msgstr "außer Betrieb"
@@ -702,10 +852,6 @@ msgstr "Tiefe (mm)"
 msgid "number units from the top"
 msgstr "Höheneinheiten von oben nummerieren"
 
-#: dcim/models.py:45 dcim/models.py:185
-msgid "status"
-msgstr "Status"
-
 #: dcim/models.py:47 dcim/models.py:191
 msgid "serial number"
 msgstr "Seriennummer"
@@ -713,10 +859,6 @@ msgstr "Seriennummer"
 #: dcim/models.py:48 dcim/models.py:192
 msgid "asset tag"
 msgstr "Inventarnummer"
-
-#: dcim/models.py:49 dcim/models.py:196
-msgid "notes"
-msgstr "Notizen"
 
 #: dcim/models.py:103
 msgid "front and rear"
@@ -726,10 +868,6 @@ msgstr "Vorder- und Rückseite"
 msgid "face"
 msgstr "Seite"
 
-#: dcim/models.py:114 dcim/models.py:229
-msgid "label"
-msgstr "Bezeichnung"
-
 #: dcim/models.py:115 metadata/models.py:60
 msgid "note"
 msgstr "Notiz"
@@ -737,10 +875,6 @@ msgstr "Notiz"
 #: dcim/models.py:174
 msgid "offline"
 msgstr "offline"
-
-#: dcim/models.py:175
-msgid "decommissioned"
-msgstr "außer Betrieb genommen"
 
 #: dcim/models.py:181
 msgid "device type"
@@ -757,10 +891,6 @@ msgstr "in Betrieb seit"
 #: dcim/models.py:195
 msgid "responsible person"
 msgstr "Verantwortliche Person"
-
-#: dcim/models.py:222 library/models.py:180 locations/models.py:109
-msgid "kind"
-msgstr "Art"
 
 #: dcim/models.py:225 library/models.py:183
 msgid "connector"
@@ -789,6 +919,10 @@ msgstr "Rückport"
 #: dcim/models.py:241
 msgid "rear position"
 msgstr "Rückposition"
+
+#: dcim/models.py:254
+msgid "untagged / native VLAN"
+msgstr "untagged / natives VLAN"
 
 #: dcim/services.py:18
 #, python-format
@@ -844,10 +978,6 @@ msgstr "Website"
 msgid "wireless"
 msgstr "Funk"
 
-#: library/models.py:63 library/models.py:98
-msgid "other"
-msgstr "Sonstiges"
-
 #: library/models.py:69
 msgid "network interface"
 msgstr "Netzwerkschnittstelle"
@@ -863,10 +993,6 @@ msgstr "Rückport (passiv)"
 #: library/models.py:72
 msgid "console"
 msgstr "Konsole"
-
-#: library/models.py:73
-msgid "power"
-msgstr "Strom"
 
 #: library/models.py:81
 msgid "rack mounted"
@@ -996,7 +1122,8 @@ msgstr "Dieser Hersteller hat noch Gerätetypen."
 
 #: library/services.py:96
 msgid "Form, height and depth of a type in use cannot change."
-msgstr "Bauform, Höhe und Tiefe eines verwendeten Typs können nicht geändert werden."
+msgstr ""
+"Bauform, Höhe und Tiefe eines verwendeten Typs können nicht geändert werden."
 
 #: library/services.py:111
 msgid "Devices of this type exist."
@@ -1114,13 +1241,30 @@ msgstr "Diese Änderung steht im Konflikt mit vorhandenen Daten."
 msgid "Remove everything inside it first."
 msgstr "Entfernen Sie zuerst alles darin."
 
-#: locations/services.py:118
+#: locations/services.py:117
+msgid ""
+"Cables connect this site to other sites of the tenant. Remove them first."
+msgstr ""
+"Kabel verbinden diesen Standort mit anderen Standorten des Mandanten. "
+"Entfernen Sie diese zuerst."
+
+#: locations/services.py:125
+msgid ""
+"Ports in this site use tenant wide VLANs or WLANs. Remove those assignments "
+"first."
+msgstr ""
+"Ports in diesem Standort verwenden mandantenweite VLANs oder WLANs. "
+"Entfernen Sie diese Zuweisungen zuerst."
+
+#: locations/services.py:139
 msgid "The site already belongs to this tenant."
 msgstr "Der Standort gehört bereits zu diesem Mandanten."
 
-#: locations/services.py:125
+#: locations/services.py:146
 msgid "Devices in this site use device types private to the current tenant."
-msgstr "Geräte an diesem Standort verwenden Gerätetypen, die nur für den aktuellen Mandanten verfügbar sind."
+msgstr ""
+"Geräte an diesem Standort verwenden Gerätetypen, die nur für den aktuellen "
+"Mandanten verfügbar sind."
 
 #: locations/views.py:49
 msgid "Buildings"
@@ -1192,7 +1336,8 @@ msgstr "Das Bild konnte nicht gelesen werden."
 
 #: metadata/uploads.py:186
 msgid "Only JPEG, PNG, GIF, WebP, SVG and PDF files are accepted."
-msgstr "Es werden nur JPEG-, PNG-, GIF-, WebP-, SVG- und PDF-Dateien akzeptiert."
+msgstr ""
+"Es werden nur JPEG-, PNG-, GIF-, WebP-, SVG- und PDF-Dateien akzeptiert."
 
 #: metadata/uploads.py:205
 msgid "The virus scanner is not reachable. Try again later."
@@ -1225,6 +1370,95 @@ msgstr "Wählen Sie eine Datei zum Hochladen."
 #: metadata/views.py:79
 msgid "File attached."
 msgstr "Datei angehängt."
+
+#: networks/models.py:16
+msgid "reserved"
+msgstr "reserviert"
+
+#: networks/models.py:17
+msgid "deprecated"
+msgstr "veraltet"
+
+#: networks/models.py:25
+msgid "site"
+msgstr "Standort"
+
+#: networks/models.py:28
+msgid "VLAN ID"
+msgstr "VLAN-ID"
+
+#: networks/models.py:62
+msgid "open"
+msgstr "offen"
+
+#: networks/models.py:68
+msgid "SSID"
+msgstr "SSID"
+
+#: networks/models.py:75
+msgid "VLAN"
+msgstr "VLAN"
+
+#: networks/models.py:78
+msgid "security"
+msgstr "Sicherheit"
+
+#: networks/models.py:80
+msgid "hidden SSID"
+msgstr "Versteckte SSID"
+
+#: networks/services.py:35 networks/services.py:117
+msgid "This does not fit the tenant or site."
+msgstr "Das passt nicht zum Mandanten oder Standort."
+
+#: networks/services.py:46 networks/services.py:62
+msgid "This VLAN ID is already used here."
+msgstr "Diese VLAN-ID wird hier bereits verwendet."
+
+#: networks/services.py:61
+msgid "The site of a VLAN in use cannot change."
+msgstr "Der Standort eines verwendeten VLANs kann nicht geändert werden."
+
+#: networks/services.py:75
+msgid "A WLAN still uses this VLAN."
+msgstr "Ein WLAN verwendet dieses VLAN noch."
+
+#: networks/services.py:82 networks/services.py:93
+msgid "This SSID already exists."
+msgstr "Diese SSID existiert bereits."
+
+#: networks/services.py:112
+msgid "Only wireless ports broadcast WLANs."
+msgstr "Nur Funk-Ports strahlen WLANs aus."
+
+#: networks/services.py:141
+msgid "Unknown VLAN mode."
+msgstr "Unbekannter VLAN-Modus."
+
+#: networks/services.py:143
+msgid "Access ports carry no tagged VLANs."
+msgstr "Access-Ports führen keine getaggten VLANs."
+
+#: networks/services.py:145
+msgid "Choose access or trunk to assign VLANs."
+msgstr "Wählen Sie Access oder Trunk, um VLANs zuzuweisen."
+
+#: networks/services.py:155
+msgid "The VLANs must belong to this tenant and to the device's site."
+msgstr ""
+"Die VLANs müssen zu diesem Mandanten und zum Standort des Geräts gehören."
+
+#: networks/views.py:41
+msgid "All sites of the tenant"
+msgstr "Alle Standorte des Mandanten"
+
+#: networks/views.py:61
+msgid "Wireless port"
+msgstr "Funk-Port"
+
+#: networks/views.py:99
+msgid "VLAN created."
+msgstr "VLAN erstellt."
 
 #: templates/accounts/email/invitation.txt:1
 #, python-format
@@ -1304,26 +1538,30 @@ msgstr "Geben Sie einen Wiederherstellungscode ein."
 msgid "Verify"
 msgstr "Überprüfen"
 
-#: templates/accounts/mfa.html:18 templates/locations/site_move.html:9
+#: templates/accounts/mfa.html:18 templates/cabling/connect.html:19
+#: templates/locations/site_move.html:9
 msgid "Cancel"
 msgstr "Abbrechen"
 
 #: templates/accounts/profile.html:2 templates/accounts/profile.html:4
-#: templates/base.html:52
+#: templates/base.html:54
 msgid "Profile"
 msgstr "Profil"
 
-#: templates/accounts/profile.html:7 templates/dcim/device.html:34
-#: templates/library/type_detail.html:35 templates/locations/node.html:53
-#: templates/manage/audit.html:18 templates/manage/group_detail.html:7
+#: templates/accounts/profile.html:7 templates/cabling/cable.html:19
+#: templates/dcim/device.html:44 templates/library/type_detail.html:35
+#: templates/locations/node.html:53 templates/manage/audit.html:18
+#: templates/manage/group_detail.html:7 templates/networks/vlan.html:15
+#: templates/networks/wlan.html:16
 msgid "Details"
 msgstr "Details"
 
-#: templates/accounts/profile.html:9 templates/dcim/device.html:36
-#: templates/dcim/port.html:19 templates/dcim/rack.html:84
-#: templates/library/type_detail.html:37 templates/locations/node.html:55
-#: templates/manage/group_detail.html:9 templates/manage/role_detail.html:15
-#: templates/manage/tenant_detail.html:7
+#: templates/accounts/profile.html:9 templates/cabling/cable.html:21
+#: templates/dcim/device.html:46 templates/dcim/port.html:37
+#: templates/dcim/rack.html:84 templates/library/type_detail.html:37
+#: templates/locations/node.html:55 templates/manage/group_detail.html:9
+#: templates/manage/role_detail.html:15 templates/manage/tenant_detail.html:7
+#: templates/networks/vlan.html:16 templates/networks/wlan.html:17
 msgid "Save"
 msgstr "Speichern"
 
@@ -1332,7 +1570,7 @@ msgid "Change password"
 msgstr "Passwort ändern"
 
 #: templates/accounts/security.html:2 templates/accounts/security.html:5
-#: templates/base.html:53
+#: templates/base.html:55 templates/networks/wlans.html:7
 msgid "Security"
 msgstr "Sicherheit"
 
@@ -1364,7 +1602,7 @@ msgstr "Diesen Faktor entfernen?"
 
 #: templates/accounts/security.html:22 templates/accounts/security.html:26
 #: templates/library/type_detail.html:21 templates/manage/_assignments.html:8
-#: templates/manage/group_detail.html:19
+#: templates/manage/group_detail.html:19 templates/networks/wlan.html:10
 msgid "Remove"
 msgstr "Entfernen"
 
@@ -1412,10 +1650,6 @@ msgstr "Neue Wiederherstellungscodes"
 msgid "Active sessions"
 msgstr "Aktive Sitzungen"
 
-#: templates/accounts/security.html:50
-msgid "Device"
-msgstr "Gerät"
-
 #: templates/accounts/security.html:50 templates/manage/audit.html:18
 msgid "Address"
 msgstr "Adresse"
@@ -1428,7 +1662,7 @@ msgstr "Zuletzt aktiv"
 msgid "This session"
 msgstr "Diese Sitzung"
 
-#: templates/accounts/security.html:55 templates/base.html:55
+#: templates/accounts/security.html:55 templates/base.html:57
 msgid "Sign out"
 msgstr "Abmelden"
 
@@ -1502,18 +1736,157 @@ msgstr "Orte"
 msgid "Library"
 msgstr "Bibliothek"
 
-#: templates/base.html:42 templates/manage/_base.html:4
+#: templates/base.html:42 templates/cabling/cable.html:4
+#: templates/cabling/cables.html:2 templates/cabling/cables.html:4
+msgid "Cables"
+msgstr "Kabel"
+
+#: templates/base.html:43
+msgid "Networks"
+msgstr "Netze"
+
+#: templates/base.html:44 templates/manage/_base.html:4
 #: templates/manage/dashboard.html:2 templates/manage/dashboard.html:4
 msgid "Administration"
 msgstr "Administration"
 
-#: templates/base.html:69
+#: templates/base.html:71
 msgid "Language"
 msgstr "Sprache"
 
+#: templates/cabling/_port_options.html:1
+msgid "Choose a port"
+msgstr "Port wählen"
+
+#: templates/cabling/cable.html:2 templates/cabling/cable.html:6
+#: templates/cabling/cables.html:12 templates/dcim/device.html:15
+#: templates/dcim/port.html:14
+msgid "Cable"
+msgstr "Kabel"
+
+#: templates/cabling/cable.html:4 templates/cabling/trace.html:4
 #: templates/core/_breadcrumbs.html:2 templates/library/type_detail.html:4
+#: templates/networks/vlan.html:4 templates/networks/wlan.html:4
 msgid "Breadcrumb"
 msgstr "Brotkrumen-Navigation"
+
+#: templates/cabling/cable.html:11
+msgid "Ends"
+msgstr "Enden"
+
+#: templates/cabling/cable.html:14 templates/cabling/trace.html:2
+#: templates/cabling/trace.html:4
+msgid "Trace"
+msgstr "Verfolgen"
+
+#: templates/cabling/cable.html:23 templates/dcim/port.html:20
+msgid "Remove this cable?"
+msgstr "Dieses Kabel entfernen?"
+
+#: templates/cabling/cable.html:23
+msgid "Remove cable"
+msgstr "Kabel entfernen"
+
+#: templates/cabling/cables.html:6
+msgid "Label or device"
+msgstr "Bezeichnung oder Gerät"
+
+#: templates/cabling/cables.html:7 templates/cabling/cables.html:12
+#: templates/dcim/device.html:15 templates/library/type_detail.html:16
+msgid "Kind"
+msgstr "Art"
+
+#: templates/cabling/cables.html:8 templates/cabling/cables.html:12
+msgid "Media"
+msgstr "Medium"
+
+#: templates/cabling/cables.html:9 templates/manage/audit.html:15
+msgid "Filter"
+msgstr "Filtern"
+
+#: templates/cabling/cables.html:12
+msgid "Length"
+msgstr "Länge"
+
+#: templates/cabling/cables.html:12
+msgid "A"
+msgstr "A"
+
+#: templates/cabling/cables.html:12
+msgid "B"
+msgstr "B"
+
+#: templates/cabling/cables.html:16
+msgid "No cables."
+msgstr "Keine Kabel."
+
+#: templates/cabling/connect.html:2 templates/cabling/connect.html:5
+#: templates/cabling/connect.html:18 templates/dcim/port.html:25
+msgid "Connect"
+msgstr "Verbinden"
+
+#: templates/cabling/connect.html:6
+msgid ""
+"Choose the device and port at the other end. Ports with a cable are not "
+"offered."
+msgstr ""
+"Wählen Sie das Gerät und den Port am anderen Ende. Ports mit einem Kabel "
+"werden nicht angeboten."
+
+#: templates/cabling/connect.html:14
+msgid "Without JavaScript: choose the device, submit, then choose the port."
+msgstr "Ohne JavaScript: Gerät wählen, absenden, dann den Port wählen."
+
+#: templates/cabling/trace.html:6
+msgid "Path"
+msgstr "Pfad"
+
+#: templates/cabling/trace.html:7
+msgid "loop"
+msgstr "Schleife"
+
+#: templates/cabling/trace.html:7
+msgid "complete"
+msgstr "vollständig"
+
+#: templates/cabling/trace.html:7
+msgid "incomplete"
+msgstr "unvollständig"
+
+#: templates/cabling/trace.html:8
+#, python-format
+msgid "%(n)s cable"
+msgid_plural "%(n)s cables"
+msgstr[0] "%(n)s Kabel"
+msgstr[1] "%(n)s Kabel"
+
+#: templates/cabling/trace.html:11
+msgid "Graph"
+msgstr "Graph"
+
+#: templates/cabling/trace.html:13
+msgid "Path graph"
+msgstr "Pfadgraph"
+
+#: templates/cabling/trace.html:18
+msgid "not visible"
+msgstr "nicht sichtbar"
+
+#: templates/cabling/trace.html:28
+msgid ""
+"Solid: patch cord. Dashed: permanent link. Dotted: inside a patch panel."
+msgstr ""
+"Durchgezogen: Patchkabel. Gestrichelt: Festverkabelung. Gepunktet: innerhalb "
+"eines Patchfelds."
+
+#: templates/cabling/trace.html:31
+msgid "Hops"
+msgstr "Stationen"
+
+#: templates/cabling/trace.html:32 templates/dcim/device.html:36
+#: templates/dcim/port.html:16
+msgid "(not visible to you)"
+msgstr "(für Sie nicht sichtbar)"
 
 #: templates/core/error.html:7
 msgid "Back to start"
@@ -1553,14 +1926,6 @@ msgstr ""
 msgid "Ports"
 msgstr "Ports"
 
-#: templates/dcim/device.html:15 templates/dcim/port.html:17
-msgid "Port"
-msgstr "Port"
-
-#: templates/dcim/device.html:15 templates/library/type_detail.html:16
-msgid "Kind"
-msgstr "Art"
-
 #: templates/dcim/device.html:15 templates/library/type_detail.html:16
 msgid "Connector"
 msgstr "Steckverbinder"
@@ -1578,44 +1943,56 @@ msgstr "Rückseite"
 msgid "Enabled"
 msgstr "Aktiviert"
 
-#: templates/dcim/device.html:20
+#: templates/dcim/device.html:22
 msgid "yes"
 msgstr "ja"
 
-#: templates/dcim/device.html:20
+#: templates/dcim/device.html:22
 msgid "no"
 msgstr "nein"
 
-#: templates/dcim/device.html:21
+#: templates/dcim/device.html:23
 msgid "No ports."
 msgstr "Keine Ports."
 
-#: templates/dcim/device.html:24
+#: templates/dcim/device.html:26
 msgid "Add port"
 msgstr "Port hinzufügen"
 
-#: templates/dcim/device.html:26 templates/library/type_detail.html:27
+#: templates/dcim/device.html:28 templates/library/type_detail.html:27
 #: templates/locations/node.html:32 templates/manage/_assignments.html:15
 msgid "Add"
 msgstr "Hinzufügen"
 
-#: templates/dcim/device.html:40
+#: templates/dcim/device.html:34 templates/dcim/port.html:16
+msgid "Connected to"
+msgstr "Verbunden mit"
+
+#: templates/dcim/device.html:36
+msgid "open end"
+msgstr "offenes Ende"
+
+#: templates/dcim/device.html:37
+msgid "trace"
+msgstr "verfolgen"
+
+#: templates/dcim/device.html:50
 msgid "Placement"
 msgstr "Platzierung"
 
-#: templates/dcim/device.html:42
+#: templates/dcim/device.html:52
 msgid "Leave the rack empty for a floor device."
 msgstr "Rack leer lassen für ein Raumgerät."
 
-#: templates/dcim/device.html:43
+#: templates/dcim/device.html:53
 msgid "Move"
 msgstr "Verschieben"
 
-#: templates/dcim/device.html:46
+#: templates/dcim/device.html:56
 msgid "Delete this device with all its ports?"
 msgstr "Dieses Gerät mit allen Ports löschen?"
 
-#: templates/dcim/device.html:46
+#: templates/dcim/device.html:56
 msgid "Delete device"
 msgstr "Gerät löschen"
 
@@ -1632,7 +2009,9 @@ msgstr "Neues Gerät in %(parent)s"
 msgid ""
 "Ports are created from the device type. Missing a type? Create it in the "
 "device library."
-msgstr "Die Ports werden aus dem Gerätetyp erzeugt. Fehlt ein Typ? Legen Sie ihn in der Gerätebibliothek an."
+msgstr ""
+"Die Ports werden aus dem Gerätetyp erzeugt. Fehlt ein Typ? Legen Sie ihn in "
+"der Gerätebibliothek an."
 
 #: templates/dcim/device_form.html:8 templates/library/type_form.html:2
 #: templates/library/type_form.html:5 templates/library/types.html:14
@@ -1641,7 +2020,8 @@ msgstr "Neuer Gerätetyp"
 
 #: templates/dcim/device_form.html:9 templates/library/type_form.html:8
 #: templates/locations/node.html:34 templates/locations/site_form.html:9
-#: templates/manage/groups.html:13
+#: templates/manage/groups.html:13 templates/networks/vlans.html:12
+#: templates/networks/wlans.html:12
 msgid "Create"
 msgstr "Erstellen"
 
@@ -1649,11 +2029,27 @@ msgstr "Erstellen"
 msgid "Front ports on this rear port"
 msgstr "Frontports an diesem Rückport"
 
-#: templates/dcim/port.html:21
+#: templates/dcim/port.html:19 templates/dcim/port.html:26
+msgid "Trace path"
+msgstr "Pfad verfolgen"
+
+#: templates/dcim/port.html:20
+msgid "Disconnect"
+msgstr "Trennen"
+
+#: templates/dcim/port.html:23
+msgid "No cable."
+msgstr "Kein Kabel."
+
+#: templates/dcim/port.html:43
+msgid "Save VLANs"
+msgstr "VLANs speichern"
+
+#: templates/dcim/port.html:46
 msgid "Delete this port?"
 msgstr "Diesen Port löschen?"
 
-#: templates/dcim/port.html:21
+#: templates/dcim/port.html:46
 msgid "Delete port"
 msgstr "Port löschen"
 
@@ -1797,6 +2193,7 @@ msgstr "Diesen Gerätetyp löschen?"
 
 #: templates/library/type_detail.html:47 templates/locations/node.html:58
 #: templates/metadata/_panel.html:11 templates/metadata/_panel.html:20
+#: templates/networks/vlan.html:17 templates/networks/wlan.html:18
 msgid "Delete"
 msgstr "Löschen"
 
@@ -1804,7 +2201,9 @@ msgstr "Löschen"
 msgid ""
 "Shared types need a global library permission; otherwise the type is private "
 "to the current tenant."
-msgstr "Für freigegebene Typen ist eine globale Bibliotheksberechtigung nötig, andernfalls ist der Typ nur für den aktuellen Mandanten verfügbar."
+msgstr ""
+"Für freigegebene Typen ist eine globale Bibliotheksberechtigung nötig, "
+"andernfalls ist der Typ nur für den aktuellen Mandanten verfügbar."
 
 #: templates/library/types.html:7 templates/manage/users.html:6
 msgid "Search"
@@ -1892,7 +2291,7 @@ msgid "Move to tenant"
 msgstr "Zu Mandant verschieben"
 
 #: templates/locations/node.html:19 templates/manage/tenants.html:6
-#: templates/manage/users.html:10
+#: templates/manage/users.html:10 templates/networks/vlans.html:7
 msgid "Status"
 msgstr "Status"
 
@@ -2046,10 +2445,6 @@ msgstr "Von"
 #: templates/manage/audit.html:14
 msgid "Until"
 msgstr "Bis"
-
-#: templates/manage/audit.html:15
-msgid "Filter"
-msgstr "Filtern"
 
 #: templates/manage/audit.html:18
 msgid "Time"
@@ -2398,6 +2793,78 @@ msgstr "Notiz hinzufügen"
 #: templates/metadata/_panel.html:35
 msgid "Nothing attached."
 msgstr "Nichts angehängt."
+
+#: templates/networks/vlan.html:8
+msgid "Access and native ports"
+msgstr "Access- und native Ports"
+
+#: templates/networks/vlan.html:9 templates/networks/vlan.html:11
+msgid "None."
+msgstr "Keine."
+
+#: templates/networks/vlan.html:10
+msgid "Tagged on"
+msgstr "Getaggt auf"
+
+#: templates/networks/vlan.html:17
+msgid "Delete this VLAN? Ports lose it."
+msgstr "Dieses VLAN löschen? Ports verlieren es."
+
+#: templates/networks/vlans.html:7
+msgid "Site"
+msgstr "Standort"
+
+#: templates/networks/vlans.html:7
+msgid "Access ports"
+msgstr "Access-Ports"
+
+#: templates/networks/vlans.html:7
+msgid "Trunks"
+msgstr "Trunks"
+
+#: templates/networks/vlans.html:9
+msgid "all"
+msgstr "alle"
+
+#: templates/networks/vlans.html:10
+msgid "No VLANs yet."
+msgstr "Noch keine VLANs."
+
+#: templates/networks/vlans.html:12
+msgid "New VLAN"
+msgstr "Neues VLAN"
+
+#: templates/networks/wlan.html:7
+msgid "Broadcast by"
+msgstr "Ausgestrahlt von"
+
+#: templates/networks/wlan.html:11
+msgid "No access point broadcasts this WLAN."
+msgstr "Kein Access Point strahlt dieses WLAN aus."
+
+#: templates/networks/wlan.html:13
+msgid "Add radio"
+msgstr "Funkmodul hinzufügen"
+
+#: templates/networks/wlan.html:18
+msgid "Delete this WLAN?"
+msgstr "Dieses WLAN löschen?"
+
+#: templates/networks/wlans.html:7
+msgid "Radios"
+msgstr "Funkmodule"
+
+#: templates/networks/wlans.html:8
+msgid "hidden"
+msgstr "versteckt"
+
+#: templates/networks/wlans.html:10
+msgid "No WLANs yet."
+msgstr "Noch keine WLANs."
+
+#: templates/networks/wlans.html:12
+msgid "New WLAN"
+msgstr "Neues WLAN"
 
 #: tenancy/models.py:13
 msgid "Lowercase letters, digits, dashes."

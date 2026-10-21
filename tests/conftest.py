@@ -21,6 +21,9 @@ collect_ignore = [] if importlib.util.find_spec("playwright") else ["e2e"]
 
 @pytest.fixture(autouse=True)
 def _isolation() -> Iterator[None]:
+    from django.utils import translation
+
+    translation.activate("en")
     cache.clear()
     SetupRequiredMiddleware._done = False
     yield

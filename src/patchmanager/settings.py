@@ -87,6 +87,8 @@ INSTALLED_APPS = [
     "patchmanager.metadata",
     "patchmanager.library",
     "patchmanager.dcim",
+    "patchmanager.networks",
+    "patchmanager.cabling",
 ]
 if DJANGO_ADMIN_ENABLED:
     INSTALLED_APPS.insert(0, "django.contrib.admin")

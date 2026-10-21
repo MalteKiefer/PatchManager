@@ -239,6 +239,20 @@ class Port(TenantScopedModel):
         verbose_name=_("rear port"),
     )
     rear_position = models.PositiveSmallIntegerField(_("rear position"), null=True, blank=True)
+    vlan_mode = models.CharField(
+        _("VLAN mode"),
+        max_length=6,
+        blank=True,
+        choices=[("access", _("access")), ("trunk", _("trunk"))],
+    )
+    untagged_vlan = models.ForeignKey(
+        "networks.VLAN",
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="untagged_on",
+        verbose_name=_("untagged / native VLAN"),
+    )
     order = models.PositiveIntegerField(default=0)
 
     policy_object_type = "dcim.device"

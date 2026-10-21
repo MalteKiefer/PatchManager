@@ -1,0 +1,26 @@
+{% extends "base.html" %}{% load i18n pm %}
+{% block title %}{% translate "Cable" %} {{ cable }}{% endblock %}
+{% block content %}
+<nav aria-label="{% translate 'Breadcrumb' %}" class="mb-3 text-sm"><a href="{% url 'cabling:cables' %}">{% translate "Cables" %}</a> / {{ cable }}</nav>
+<div class="mb-6 flex flex-wrap items-center gap-3">
+  <h1 class="mr-auto"><span class="mr-2 inline-block size-4 rounded-full align-middle" data-swatch="{{ cable.colour }}" aria-hidden="true"></span>{% translate "Cable" %} {{ cable }}</h1>
+  <span class="badge-muted">{{ cable.get_kind_display }}</span><span class="badge-muted">{{ reach }}</span>
+</div>
+<div class="grid gap-6 lg:grid-cols-3">
+  <div class="space-y-6 lg:col-span-2">
+    <section class="card"><h2 class="mb-3">{% translate "Ends" %}</h2>
+      <ul class="space-y-2 text-sm">{% for e in ends %}<li><span class="badge-muted">{{ e.side|upper }}</span>
+        <a href="{% url 'devices:device' e.port.device_id %}">{{ e.port.device }}</a> · <a class="font-mono" href="{% url 'devices:port' e.port_id %}">{{ e.port.name }}</a>
+        · <a href="{% url 'cabling:trace' e.port_id %}">{% translate "Trace" %}</a></li>{% endfor %}</ul>
+    </section>
+  </div>
+  <aside class="space-y-6">
+    <form method="post" class="card" novalidate>{% csrf_token %}
+      <h2 class="mb-3">{% translate "Details" %}</h2>
+      <fieldset {% if not can_change %}disabled{% endif %}>{% include "core/_form.html" %}</fieldset>
+      {% if can_change %}<button class="btn-primary">{% translate "Save" %}</button>{% endif %}
+    </form>
+    {% if can_delete %}<form method="post" data-confirm="{% translate 'Remove this cable?' %}">{% csrf_token %}<button name="action" value="delete" class="btn-danger">{% translate "Remove cable" %}</button></form>{% endif %}
+  </aside>
+</div>
+{% endblock %}
