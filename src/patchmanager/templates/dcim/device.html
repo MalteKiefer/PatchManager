@@ -12,13 +12,15 @@
     <section class="card" aria-labelledby="ports-h">
       <h2 id="ports-h" class="mb-3">{% translate "Ports" %} <span class="text-sm font-normal text-slate-500">({{ ports|length }})</span></h2>
       <div class="overflow-x-auto"><table class="table">
-        <thead><tr><th>{% translate "Port" %}</th><th>{% translate "Kind" %}</th><th>{% translate "Connector" %}</th><th>{% translate "Speed" %}</th><th>{% translate "Label" %}</th><th>{% translate "Rear" %}</th><th>{% translate "Enabled" %}</th></tr></thead>
+        <thead><tr><th>{% translate "Port" %}</th><th>{% translate "Kind" %}</th><th>{% translate "Connector" %}</th><th>{% translate "Speed" %}</th><th>{% translate "Label" %}</th><th>{% translate "Rear" %}</th><th>VLAN</th><th>{% translate "Cable" %}</th><th>{% translate "Enabled" %}</th></tr></thead>
         <tbody>{% for p in ports %}<tr>
           <td><a class="font-mono text-xs" href="{% url 'devices:port' p.pk %}">{{ p.name }}</a></td><td>{{ p.get_kind_display }}</td><td>{{ p.get_connector_display }}</td>
           <td>{% if p.speed_mbps %}{{ p.speed_mbps }}{% endif %}</td><td>{{ p.label }}</td>
           <td class="font-mono text-xs">{% if p.rear_port %}{{ p.rear_port.name }}:{{ p.rear_position }}{% endif %}</td>
+          <td class="text-xs">{% if p.vlan_mode == "trunk" %}{% translate "trunk" %}{% elif p.untagged_vlan %}{{ p.untagged_vlan.vid }}{% endif %}</td>
+          <td class="text-xs">{% if p.cable_end %}<a href="{% url 'cabling:cable' p.cable_end.cable_id %}"><span class="mr-1 inline-block size-2 rounded-full" data-swatch="{{ p.cable_end.cable.colour }}" aria-hidden="true"></span>{{ p.cable_end.cable }}</a>{% endif %}</td>
           <td>{% if p.enabled %}<span class="badge-ok">{% translate "yes" %}</span>{% else %}<span class="badge-muted">{% translate "no" %}</span>{% endif %}</td>
-        </tr>{% empty %}<tr><td colspan="7" class="text-slate-500">{% translate "No ports." %}</td></tr>{% endfor %}</tbody>
+        </tr>{% empty %}<tr><td colspan="9" class="text-slate-500">{% translate "No ports." %}</td></tr>{% endfor %}</tbody>
       </table></div>
       {% if can_change %}
       <details class="mt-4" {% if port_form.errors %}open{% endif %}><summary class="cursor-pointer text-sm font-medium">{% translate "Add port" %}</summary>
@@ -27,6 +29,14 @@
       </details>
       {% endif %}
     </section>
+    {% if neighbours %}
+    <section class="card" aria-labelledby="deps-h">
+      <h2 id="deps-h" class="mb-3">{% translate "Connected to" %}</h2>
+      <ul class="space-y-1 text-sm">{% for port, far in neighbours %}<li><span class="font-mono text-xs">{{ port.name }}</span> →
+        {% if far == "hidden" %}{% translate "(not visible to you)" %}{% elif far %}<a href="{% url 'devices:device' far.device_id %}">{{ far.device }}</a> · <span class="font-mono text-xs">{{ far.name }}</span>{% else %}{% translate "open end" %}{% endif %}
+        · <a href="{% url 'cabling:trace' port.pk %}">{% translate "trace" %}</a></li>{% endfor %}</ul>
+    </section>
+    {% endif %}
     {% metadata_panel device %}
   </div>
   <aside class="space-y-6">

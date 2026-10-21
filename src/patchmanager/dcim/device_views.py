@@ -14,7 +14,7 @@ from django.views.decorators.http import require_http_methods
 
 from patchmanager.accounts import policy
 from patchmanager.accounts.models import User
-from patchmanager.accounts.services import ServiceError
+from patchmanager.accounts.services import PermissionDeniedError, ServiceError
 from patchmanager.core.utils import parse_uuid
 from patchmanager.dcim import devices
 from patchmanager.dcim.models import Device, Port, Rack, RackSpace
@@ -120,6 +120,33 @@ class PortForm(forms.ModelForm):  # type: ignore[type-arg]
         self.fields["rear_port"].queryset = device.ports.filter(kind="rear")  # type: ignore[attr-defined]
 
 
+class PortVLANForm(forms.Form):
+    """802.1Q mode and VLANs of a port."""
+
+    mode = forms.ChoiceField(
+        label=gettext_lazy("VLAN mode"),
+        required=False,
+        choices=[("", "-"), ("access", gettext_lazy("access")), ("trunk", gettext_lazy("trunk"))],
+    )
+    untagged = forms.ModelChoiceField(
+        label=gettext_lazy("Untagged / native VLAN"), queryset=Port.objects.none(), required=False
+    )
+    tagged = forms.ModelMultipleChoiceField(
+        label=gettext_lazy("Tagged VLANs"),
+        queryset=Port.objects.none(),
+        required=False,
+        widget=forms.SelectMultiple(attrs={"size": 6}),
+    )
+
+    def __init__(self, *args: Any, port: Port, **kwargs: Any) -> None:
+        """VLANs usable on this port."""
+        from patchmanager.networks.services import vlans_for_port
+
+        super().__init__(*args, **kwargs)
+        for name in ("untagged", "tagged"):
+            self.fields[name].queryset = vlans_for_port(port)  # type: ignore[attr-defined]
+
+
 class NewPortForm(forms.ModelForm):  # type: ignore[type-arg]
     """An extra port."""
 
@@ -131,6 +158,45 @@ class NewPortForm(forms.ModelForm):  # type: ignore[type-arg]
 def _actor(request: HttpRequest) -> User:
     assert isinstance(request.user, User)  # noqa: S101  # nosec B101: views require login
     return request.user
+
+
+def _peer(port: Port) -> Any:
+    """The port on the other end of this port's cable."""
+    from patchmanager.cabling.models import CableEnd
+
+    end = CableEnd.objects.filter(port=port).select_related("cable").first()
+    if end is None:
+        return None
+    other = (
+        CableEnd.objects.filter(cable=end.cable)
+        .exclude(pk=end.pk)
+        .select_related("port__device")
+        .first()
+    )
+    return other.port if other else None
+
+
+HIDDEN = "hidden"  # far end exists but the viewer may not see its device
+
+
+def _visible_or_hidden(user: Any, port: Port | None) -> Any:
+    if port is None or policy.has_perm(user, "dcim.device.view", port.device):
+        return port
+    return HIDDEN
+
+
+def neighbours(user: Any, device: Device) -> list[tuple[Port, Any]]:
+    """For each cabled port: the far end of its traced path (dependency view)."""
+    from patchmanager.cabling.trace import trace
+
+    if not policy.has_perm(user, "cabling.cable.trace", device):
+        return []
+    result = []
+    for port in device.ports.filter(cable_end__isnull=False):
+        path = trace(port)
+        far = path.ports[-1] if path.ports[0].pk == port.pk else path.ports[0]
+        result.append((port, _visible_or_hidden(user, far if far.pk != port.pk else None)))
+    return result
 
 
 def device_url(device: Device) -> str:
@@ -255,7 +321,8 @@ def device_detail(request: HttpRequest, pk: str) -> HttpResponse:
             "form": form,
             "place_form": place_form,
             "port_form": port_form,
-            "ports": device.ports.select_related("rear_port"),
+            "ports": device.ports.select_related("rear_port", "untagged_vlan", "cable_end__cable"),
+            "neighbours": neighbours(actor, device),
             "can_change": can_change,
             "can_delete": policy.has_perm(actor, "dcim.device.delete", device),
             "breadcrumbs": [(a, node_url(a)) for a in device.ancestors()],
@@ -272,6 +339,15 @@ def port_detail(request: HttpRequest, pk: str) -> HttpResponse:
     actor = _actor(request)
     action = request.POST.get("action")
     form = PortForm(request.POST if action == "edit" else None, instance=port, device=device)
+    vlan_form = PortVLANForm(
+        request.POST if action == "vlans" else None,
+        port=port,
+        initial={
+            "mode": port.vlan_mode,
+            "untagged": port.untagged_vlan_id,
+            "tagged": [t.vlan_id for t in port.tagged.all()],
+        },
+    )
     if request.method == "POST":
         try:
             if action == "edit" and form.is_valid():
@@ -280,9 +356,25 @@ def port_detail(request: HttpRequest, pk: str) -> HttpResponse:
                 )
                 messages.success(request, _("Saved."))
                 return redirect("devices:port", port.pk)
+            if action == "vlans" and vlan_form.is_valid():
+                from patchmanager.networks.services import set_port_vlans
+
+                data = vlan_form.cleaned_data
+                set_port_vlans(
+                    request,
+                    actor,
+                    port,
+                    mode=data["mode"],
+                    untagged=data["untagged"],
+                    tagged=list(data["tagged"]),
+                )
+                messages.success(request, _("VLANs saved."))
+                return redirect("devices:port", port.pk)
             if action == "delete":
                 devices.delete_port(request, actor, port)
                 return redirect(device_url(device))
+        except PermissionDeniedError as exc:
+            raise PermissionDenied from exc
         except ServiceError as exc:
             messages.error(request, str(exc))
             return redirect("devices:port", port.pk)
@@ -293,6 +385,11 @@ def port_detail(request: HttpRequest, pk: str) -> HttpResponse:
             "port": port,
             "device": device,
             "form": form,
+            "vlan_form": vlan_form,
+            "peer": _visible_or_hidden(actor, _peer(port)),
+            "wlans": port.wlans.all(),
+            "can_cable": policy.has_perm(actor, "cabling.cable.add", device),
+            "can_trace": policy.has_perm(actor, "cabling.cable.trace", device),
             "can_change": policy.has_perm(actor, "dcim.device.change", device),
             "front_ports": port.front_ports.all() if port.kind == "rear" else [],
             "breadcrumbs": [(a, node_url(a)) for a in device.ancestors()]

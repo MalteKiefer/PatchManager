@@ -39,3 +39,8 @@ document.addEventListener("submit", (event) => {
 document.addEventListener("change", (event) => {
   if (event.target.matches?.("select[data-autosubmit]")) event.target.form.requestSubmit();
 });
+
+// Colour swatches: <span data-swatch="#rrggbb"> (set via CSSOM, allowed by the CSP).
+for (const swatch of document.querySelectorAll("[data-swatch]")) {
+  if (/^#[0-9a-f]{6}$/i.test(swatch.dataset.swatch)) swatch.style.backgroundColor = swatch.dataset.swatch;
+}

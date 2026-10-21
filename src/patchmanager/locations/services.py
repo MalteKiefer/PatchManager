@@ -105,6 +105,27 @@ _TREE_TABLES = (
 )
 
 
+def _check_site_is_self_contained(site: Any, device_model: Any) -> None:
+    """Cables and tenant wide networks would otherwise end up spanning two tenants."""
+    from patchmanager.cabling.models import CableEnd
+    from patchmanager.networks.models import VLAN, TaggedVLAN, WLANBroadcast
+
+    inside_ports = device_model.objects.filter(path__descendant_of=site.path).values("ports")
+    inside_cables = CableEnd.objects.filter(port__in=inside_ports).values("cable_id")
+    if CableEnd.objects.filter(cable_id__in=inside_cables).exclude(port__in=inside_ports).exists():
+        raise ServiceError(
+            _("Cables connect this site to other sites of the tenant. Remove them first.")
+        )
+    if (
+        WLANBroadcast.objects.filter(port__in=inside_ports).exists()
+        or VLAN.objects.filter(site__isnull=True, untagged_on__in=inside_ports).exists()
+        or TaggedVLAN.objects.filter(port__in=inside_ports, vlan__site__isnull=True).exists()
+    ):
+        raise ServiceError(
+            _("Ports in this site use tenant wide VLANs or WLANs. Remove those assignments first.")
+        )
+
+
 def move_site(request: HttpRequest, actor: User, site: Any, target: Tenant) -> None:
     """Move a site with everything below it to another tenant.
 
@@ -124,6 +145,7 @@ def move_site(request: HttpRequest, actor: User, site: Any, target: Tenant) -> N
         raise ServiceError(
             _("Devices in this site use device types private to the current tenant.")
         )
+    _check_site_is_self_contained(site, Device)
     source_tenant = site.tenant_id
     old = str(site.path)
     new = f"{path_label(target.pk)}.{path_label(site.pk)}"
@@ -145,6 +167,28 @@ def move_site(request: HttpRequest, actor: User, site: Any, target: Tenant) -> N
             cursor.execute(
                 "UPDATE dcim_port SET tenant_id = %s WHERE device_id IN "
                 "(SELECT id FROM dcim_device WHERE path <@ %s::ltree)",
+                [target.pk, new],
+            )
+            # Cables inside the site, its VLANs and tagged assignments follow the site.
+            in_site = (
+                "SELECT p.id FROM dcim_port p JOIN dcim_device d ON d.id = p.device_id"
+                " WHERE d.path <@ %s::ltree"
+            )
+            cursor.execute(
+                "UPDATE cabling_cable SET tenant_id = %s, path = "  # noqa: S608  # nosec B608: constant parts
+                f"{_REBASE.format(column='path')} WHERE id IN"
+                f" (SELECT cable_id FROM cabling_cableend WHERE port_id IN ({in_site}))",
+                [target.pk, old, new, new, old, new],
+            )
+            cursor.execute(
+                f"UPDATE cabling_cableend SET tenant_id = %s WHERE port_id IN ({in_site})",  # noqa: S608  # nosec B608
+                [target.pk, new],
+            )
+            cursor.execute(
+                "UPDATE networks_vlan SET tenant_id = %s WHERE site_id = %s", [target.pk, site.pk]
+            )
+            cursor.execute(
+                f"UPDATE networks_taggedvlan SET tenant_id = %s WHERE port_id IN ({in_site})",  # noqa: S608  # nosec B608
                 [target.pk, new],
             )
             # Photos and notes follow their objects.

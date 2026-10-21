@@ -1,0 +1,18 @@
+{% extends "base.html" %}{% load i18n %}
+{% block title %}{% translate "Cables" %}{% endblock %}
+{% block content %}
+<h1 class="mb-4">{% translate "Cables" %}{% if current_tenant %} · {{ current_tenant.name }}{% endif %}</h1>
+<form method="get" class="card mb-4 grid gap-3 sm:grid-cols-4">
+  <div class="field mb-0"><label for="c-q">{% translate "Label or device" %}</label><input id="c-q" name="q" value="{{ filters.q }}"></div>
+  <div class="field mb-0"><label for="c-kind">{% translate "Kind" %}</label><select id="c-kind" name="kind"><option value="">-</option>{% for v, l in kinds %}<option value="{{ v }}" {% if filters.kind == v %}selected{% endif %}>{{ l }}</option>{% endfor %}</select></div>
+  <div class="field mb-0"><label for="c-media">{% translate "Media" %}</label><select id="c-media" name="media"><option value="">-</option>{% for v, l in medias %}<option value="{{ v }}" {% if filters.media == v %}selected{% endif %}>{{ l }}</option>{% endfor %}</select></div>
+  <div class="self-end"><button class="btn-primary">{% translate "Filter" %}</button></div>
+</form>
+<div class="card overflow-x-auto p-0"><table class="table">
+  <thead><tr><th>{% translate "Cable" %}</th><th>{% translate "Kind" %}</th><th>{% translate "Media" %}</th><th>{% translate "Length" %}</th><th>{% translate "A" %}</th><th>{% translate "B" %}</th></tr></thead>
+  <tbody>{% for c in cables %}<tr>
+    <td><a href="{% url 'cabling:cable' c.pk %}">{{ c }}</a></td><td>{{ c.get_kind_display }}</td><td>{{ c.get_media_display }}</td><td>{% if c.length_m %}{{ c.length_m }} m{% endif %}</td>
+    {% for e in c.ends.all %}<td class="text-xs">{{ e.port.device }} · <span class="font-mono">{{ e.port.name }}</span></td>{% endfor %}
+  </tr>{% empty %}<tr><td colspan="6" class="text-slate-500">{% translate "No cables." %}</td></tr>{% endfor %}</tbody>
+</table></div>
+{% endblock %}

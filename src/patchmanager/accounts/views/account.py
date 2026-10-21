@@ -7,7 +7,6 @@ from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ValidationError
 from django.http import HttpRequest, HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
-from django.utils import translation
 from django.utils.translation import gettext as _
 from django.views.decorators.http import require_http_methods, require_POST
 
@@ -42,7 +41,6 @@ def profile_view(request: HttpRequest) -> HttpResponse:
             display_name=profile.cleaned_data["display_name"],
             language=profile.cleaned_data["language"],
         )
-        translation.activate(user.language)
         messages.success(request, _("Profile saved."))
         response = redirect("accounts:profile")
         response.set_cookie(

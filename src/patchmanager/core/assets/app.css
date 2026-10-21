@@ -41,6 +41,7 @@
     @apply block w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm shadow-sm dark:border-slate-700 dark:bg-slate-800;
   }
   .field input[type=checkbox] { @apply mr-2 size-4 rounded border-slate-300; }
+  .field input[type=color] { @apply h-10 w-20 cursor-pointer p-1; }
   .field .help { @apply mt-1 text-xs text-slate-500 dark:text-slate-400; }
   .field .errorlist, .errorlist { @apply mt-1 text-sm text-red-600 dark:text-red-400; }
   .table { @apply w-full text-left text-sm; }

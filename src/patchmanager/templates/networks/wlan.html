@@ -1,0 +1,21 @@
+{% extends "base.html" %}{% load i18n %}
+{% block title %}WLAN {{ wlan }}{% endblock %}
+{% block content %}
+<nav aria-label="{% translate 'Breadcrumb' %}" class="mb-3 text-sm"><a href="{% url 'networks:wlans' %}">WLANs</a> / {{ wlan }}</nav>
+<h1 class="mb-6">{{ wlan.ssid }}</h1>
+<div class="grid gap-6 lg:grid-cols-3">
+  <section class="card lg:col-span-2"><h2 class="mb-3">{% translate "Broadcast by" %}</h2>
+    <ul class="mb-4 divide-y divide-slate-100 text-sm dark:divide-slate-800">{% for p in radios %}<li class="flex items-center justify-between py-2">
+      <a href="{% url 'devices:port' p.pk %}">{{ p.device }} · {{ p.name }}</a>
+      {% if can_change %}<form method="post">{% csrf_token %}<input type="hidden" name="port" value="{{ p.pk }}"><button name="action" value="remove_radio" class="btn-secondary py-1">{% translate "Remove" %}</button></form>{% endif %}</li>
+    {% empty %}<li class="py-2 text-slate-500">{% translate "No access point broadcasts this WLAN." %}</li>{% endfor %}</ul>
+    {% if can_change %}<form method="post" class="flex flex-wrap items-end gap-2">{% csrf_token %}<input type="hidden" name="action" value="radio">
+      <div class="flex-1">{% include "core/_form.html" with form=radio_form %}</div><button class="btn-secondary mb-4">{% translate "Add radio" %}</button></form>{% endif %}
+  </section>
+  <aside class="space-y-6">
+    <form method="post" class="card" novalidate>{% csrf_token %}<input type="hidden" name="action" value="edit"><h2 class="mb-3">{% translate "Details" %}</h2>
+      <fieldset {% if not can_change %}disabled{% endif %}>{% include "core/_form.html" %}</fieldset>{% if can_change %}<button class="btn-primary">{% translate "Save" %}</button>{% endif %}</form>
+    {% if can_change %}<form method="post" data-confirm="{% translate 'Delete this WLAN?' %}">{% csrf_token %}<button name="action" value="delete" class="btn-danger">{% translate "Delete" %}</button></form>{% endif %}
+  </aside>
+</div>
+{% endblock %}

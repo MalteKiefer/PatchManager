@@ -1,0 +1,14 @@
+{% extends "base.html" %}{% load i18n %}
+{% block title %}WLANs{% endblock %}
+{% block content %}
+<div class="mb-4 flex items-center gap-3"><h1 class="mr-auto">WLANs{% if current_tenant %} · {{ current_tenant.name }}{% endif %}</h1><a class="btn-secondary" href="{% url 'networks:vlans' %}">VLANs</a></div>
+<div class="grid gap-6 lg:grid-cols-3">
+  <div class="card overflow-x-auto p-0 lg:col-span-2"><table class="table">
+    <thead><tr><th>SSID</th><th>VLAN</th><th>{% translate "Security" %}</th><th>{% translate "Radios" %}</th></tr></thead>
+    <tbody>{% for w in wlans %}<tr><td><a href="{% url 'networks:wlan' w.pk %}">{{ w.ssid }}</a>{% if w.hidden %} <span class="badge-muted">{% translate "hidden" %}</span>{% endif %}</td>
+      <td>{{ w.vlan|default:"-" }}</td><td>{{ w.get_security_display }}</td><td>{{ w.radio_count }}</td></tr>
+    {% empty %}<tr><td colspan="4" class="text-slate-500">{% translate "No WLANs yet." %}</td></tr>{% endfor %}</tbody>
+  </table></div>
+  {% if can_add %}<form method="post" class="card" novalidate>{% csrf_token %}<h2 class="mb-3">{% translate "New WLAN" %}</h2>{% include "core/_form.html" %}<button class="btn-primary">{% translate "Create" %}</button></form>{% endif %}
+</div>
+{% endblock %}
