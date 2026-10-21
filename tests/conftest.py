@@ -1,3 +1,4 @@
+import importlib.util
 from collections.abc import Callable, Iterator
 from typing import Any
 
@@ -13,6 +14,9 @@ from patchmanager.tenancy import rls
 from patchmanager.tenancy.models import Tenant
 
 PASSWORD = "correct horse battery staple 42"
+
+# Browser tests need the e2e environment (Playwright).
+collect_ignore = [] if importlib.util.find_spec("playwright") else ["e2e"]
 
 
 @pytest.fixture(autouse=True)
