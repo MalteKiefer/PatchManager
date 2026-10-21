@@ -192,3 +192,38 @@ def test_viewer_cannot_move(client: Client, make_tree, make_user, grant, super_a
         secure=True,
     )
     assert response.status_code == 409
+
+
+def test_conditions_judge_stored_state_not_submitted_values(make_tree, make_user) -> None:
+    """A grant for planned racks must not cover an active rack submitted as planned."""
+    from django.test import RequestFactory
+
+    from patchmanager.accounts.models import Assignment, Role
+    from patchmanager.accounts.services import PermissionDeniedError
+    from patchmanager.locations import services as tree
+    from patchmanager.locations.forms import RackForm
+
+    t = make_tree()
+    user = make_user()
+    Assignment.objects.create(
+        role=Role.objects.get(key="editor"),
+        user=user,
+        tenant=t["tenant"],
+        scope_path=t["tenant"].policy_path,
+        conditions=[{"attr": "status", "op": "eq", "value": "planned"}],
+    )
+    request = RequestFactory().post("/")
+    request.user = user
+    with rls.system_context():
+        rack = Rack.objects.get(pk=t["rack"].pk)
+        form = RackForm(
+            {"name": "Renamed", "u_height": 42, "width": "19", "status": "planned"}, instance=rack
+        )
+        assert form.is_valid()  # mutates ``rack`` in memory
+        with pytest.raises(PermissionDeniedError):
+            tree.update(request, user, rack, **form.cleaned_data)
+        assert Rack.objects.get(pk=rack.pk).name == "A01"
+        Rack.objects.filter(pk=rack.pk).update(status="planned")
+        with pytest.raises(PermissionDeniedError):  # resulting state leaves the grant
+            tree.update(request, user, Rack.objects.get(pk=rack.pk), status="active")
+        tree.update(request, user, Rack.objects.get(pk=rack.pk), name="Planned rack")

@@ -54,12 +54,22 @@ def create[N: HierarchyNode](
 
 
 def update[N: HierarchyNode](request: HttpRequest, actor: User, node: N, **fields: Any) -> N:
-    """Change attributes of a node (not its parent)."""
-    require(actor, f"{node.policy_object_type}.change", node)
-    before = {key: str(getattr(node, key)) for key in fields}
+    """Change attributes of a node (not its parent).
+
+    Authorisation uses the stored row, never ``node`` itself: bound model forms
+    copy submitted values onto their instance during validation, which would
+    let attribute conditions judge the attacker's input. The resulting state
+    must be allowed too, so nobody moves an object out of their own grant.
+    """
+    perm = f"{node.policy_object_type}.change"
+    stored = type(node)._default_manager.get(pk=node.pk)
+    require(actor, perm, stored)
+    before = {key: str(getattr(stored, key)) for key in fields}
     for key, value in fields.items():
-        setattr(node, key, value)
-    _save(node)
+        setattr(stored, key, value)
+    require(actor, perm, stored)
+    _save(stored)
+    node.refresh_from_db()
     changed = {k: [before[k], str(v)] for k, v in fields.items() if before[k] != str(v)}
     audit.record(
         f"{node.policy_object_type}.changed", request=request, obj=node, data={"changed": changed}
