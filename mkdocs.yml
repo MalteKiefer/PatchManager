@@ -1,0 +1,49 @@
+site_name: PatchManager
+repo_url: https://github.com/MalteKiefer/PatchManager
+docs_dir: docs
+strict: true
+theme:
+  name: material
+  features: [navigation.sections, content.code.copy]
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      toggle: { icon: material/weather-night, name: Dark mode }
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      toggle: { icon: material/weather-sunny, name: Light mode }
+markdown_extensions:
+  - admonition
+  - tables
+  - toc: { permalink: true }
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+nav:
+  - Home: index.md
+  - Guides:
+      - Deployment: guides/deployment.md
+      - Administration: guides/admin.md
+      - User guide: guides/user.md
+      - API: guides/api.md
+  - Plan:
+      - Architecture: plan/architecture.md
+      - Data model: plan/data-model.md
+      - Backlog: plan/backlog.md
+      - Feature scope: plan/feature-scope.md
+  - Stack: STACK.md
+  - Security:
+      - Threat model: security/threat-model.md
+  - Decisions:
+      - adr/0001-record-architecture-decisions.md
+      - adr/0002-django-and-drf.md
+      - adr/0003-postgresql-only-and-tenancy.md
+      - adr/0004-local-postgres-via-pixi.md
+      - adr/0005-python-3-14.md
+      - adr/0006-server-rendered-ui.md
+      - adr/0007-container-image.md
+      - adr/0008-license-agpl.md
+      - adr/0009-object-storage.md
+      - adr/0010-metrics.md

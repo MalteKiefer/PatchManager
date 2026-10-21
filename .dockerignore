@@ -1,0 +1,5 @@
+*
+!pixi.toml
+!pixi.lock
+!src/
+**/__pycache__
