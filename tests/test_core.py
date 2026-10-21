@@ -76,10 +76,12 @@ def test_error_pages(client: Client, db) -> None:
 
 
 def test_collectstatic_with_manifest_storage(tmp_path, settings) -> None:
-    """The image build runs this; missing files referenced by vendored assets fail here first."""
+    """The image build runs this; files missing for vendored assets fail here first."""
     from django.core.management import call_command
 
     settings.STATIC_ROOT = tmp_path
-    settings.STORAGES = {"staticfiles": {"BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage"}}
+    settings.STORAGES = {
+        "staticfiles": {"BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage"}
+    }
     call_command("collectstatic", interactive=False, verbosity=0)
     assert (tmp_path / "staticfiles.json").exists()
