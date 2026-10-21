@@ -60,6 +60,37 @@ def visible_users(actor: User) -> Any:
     return User.objects.filter(assignments__tenant_id__in=tenant_ids).distinct()
 
 
+def _location_models() -> dict[str, Any]:
+    from patchmanager.dcim.models import Rack
+    from patchmanager.locations.models import Building, Floor, Room, Site
+
+    return {"site": Site, "building": Building, "floor": Floor, "room": Room, "rack": Rack}
+
+
+def _locations(request: HttpRequest) -> list[tuple[str, str]]:
+    """Location nodes the actor may manage assignments for, as form choices."""
+    choices = []
+    for key, model in _location_models().items():
+        for node in model.objects.select_related("tenant").order_by("path"):
+            if policy.has_perm(request.user, "accounts.assignment.add", node):
+                trail = " / ".join(str(n) for n in [node.tenant, *node.ancestors(), node])
+                choices.append((f"{key}:{node.pk}", trail))
+    return sorted(choices, key=lambda c: c[1].lower())
+
+
+def _location(request: HttpRequest, value: str) -> Any:
+    """Resolve a ``kind:uuid`` choice (RLS limits it to visible tenants)."""
+    if not value:
+        return None
+    kind, _sep, raw = value.partition(":")
+    model = _location_models().get(kind)
+    pk = _uuid(raw)
+    node = model.objects.filter(pk=pk).first() if model is not None and pk else None
+    if node is None:
+        raise Http404
+    return node
+
+
 def _run(request: HttpRequest, action: Any, success: str) -> bool:
     """Call a service; turn ``ServiceError`` into a message."""
     try:
@@ -134,7 +165,9 @@ def user_detail(request: HttpRequest, pk: str) -> HttpResponse:
             "factor_count": subject.totp_devices.filter(confirmed=True).count()
             + subject.webauthn_credentials.count(),
             "session_count": subject.sessions.count(),
-            "assignment_form": AssignmentForm(tenants=_tenants(request)),
+            "assignment_form": AssignmentForm(
+                tenants=_tenants(request), locations=_locations(request)
+            ),
             "reason_form": ReasonForm(),
             "is_super_admin": policy.is_super_admin(subject),
         },
@@ -194,7 +227,7 @@ def user_action(request: HttpRequest, pk: str, action: str) -> HttpResponse:
 @require_POST
 def assignment_create(request: HttpRequest) -> HttpResponse:
     """Grant a role to a user or group."""
-    form = AssignmentForm(request.POST, tenants=_tenants(request))
+    form = AssignmentForm(request.POST, tenants=_tenants(request), locations=_locations(request))
     user_id, group_id = _uuid(request.POST.get("user")), _uuid(request.POST.get("group"))
     user = visible_users(_actor(request)).filter(pk=user_id).first() if user_id else None
     group = Group.objects.filter(pk=group_id).first() if group_id else None
@@ -220,6 +253,7 @@ def assignment_create(request: HttpRequest) -> HttpResponse:
             user=user,
             group=group,
             tenant=data["tenant"],
+            node=_location(request, data["location"]),
             effect=data["effect"],
             condition_list=data["conditions"] or None,
             object_type=data["object_type"] or None,
@@ -340,7 +374,9 @@ def group_detail(request: HttpRequest, pk: str) -> HttpResponse:
             "members": members,
             "parent_form": parent,
             "assignments": group.assignments.select_related("role", "tenant"),
-            "assignment_form": AssignmentForm(tenants=_tenants(request)),
+            "assignment_form": AssignmentForm(
+                tenants=_tenants(request), locations=_locations(request)
+            ),
         },
     )
 

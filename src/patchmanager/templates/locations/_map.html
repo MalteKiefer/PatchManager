@@ -1,0 +1,8 @@
+{% load i18n %}
+{% if map_tiles %}
+<div id="map" class="h-80 w-full rounded-lg border border-slate-200 dark:border-slate-800" role="region" aria-label="{% translate 'Map' %}"
+     data-tiles="{{ map_tiles }}" data-attribution="{{ map_attribution }}" {% if pick %}data-pick="1"{% endif %}></div>
+{{ markers|json_script:"map-markers" }}
+{% else %}
+<p class="text-sm text-slate-500">{% translate "The map is disabled on this instance." %}</p>
+{% endif %}

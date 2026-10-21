@@ -1,0 +1,8 @@
+{% load i18n %}
+<nav aria-label="{% translate 'Breadcrumb' %}" class="mb-3 text-sm">
+  <ol class="flex flex-wrap items-center gap-1 text-slate-500">
+    <li><a href="{% url 'locations:index' %}">{% if current_tenant %}{{ current_tenant.name }}{% else %}{% translate "Locations" %}{% endif %}</a></li>
+    {% for crumb, url in breadcrumbs %}<li aria-hidden="true">/</li><li><a href="{{ url }}">{{ crumb }}</a></li>{% endfor %}
+    <li aria-hidden="true">/</li><li aria-current="page" class="font-medium text-slate-800 dark:text-slate-200">{{ current }}</li>
+  </ol>
+</nav>

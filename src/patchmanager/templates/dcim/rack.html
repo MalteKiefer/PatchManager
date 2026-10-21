@@ -1,0 +1,79 @@
+{% extends "base.html" %}{% load i18n static %}
+{% block title %}{{ rack.name }}{% endblock %}
+{% block head %}<script type="module" src="{% static 'core/rack.js' %}"></script>{% endblock %}
+{% block content %}
+{% include "core/_breadcrumbs.html" with current=rack.name %}
+<div class="mb-6 flex flex-wrap items-center gap-3">
+  <h1 class="mr-auto">{{ rack.name }} <span class="text-base font-normal text-slate-500">{{ rack.u_height }} U · {{ rack.get_width_display }}</span></h1>
+  <nav class="flex gap-1" aria-label="{% translate 'Rack face' %}">
+    <a class="btn-secondary" href="?face=front" {% if face == "front" %}aria-current="page"{% endif %}>{% translate "Front" %}</a>
+    <a class="btn-secondary" href="?face=rear" {% if face == "rear" %}aria-current="page"{% endif %}>{% translate "Rear" %}</a>
+  </nav>
+</div>
+<div class="grid gap-6 lg:grid-cols-3">
+  <section class="card" aria-labelledby="elevation-h">
+    <h2 id="elevation-h" class="mb-3">{% if face == "front" %}{% translate "Front view" %}{% else %}{% translate "Rear view" %}{% endif %}</h2>
+    {% with e=elevation %}
+    <svg id="rack-elevation" class="mx-auto block w-full max-w-xs select-none" viewBox="0 0 280 {{ e.height }}" role="img"
+         aria-label="{% blocktranslate with name=rack.name %}Elevation of rack {{ name }}{% endblocktranslate %}"
+         data-unit-px="{{ e.unit_px }}" data-units="{{ rack.u_height }}" data-descending="{% if rack.descending_units %}1{% endif %}" data-face="{{ face }}">
+      {% for row in e.rows %}
+      <g class="rack-row">
+        <rect x="32" y="{{ row.y }}" width="240" height="{{ e.unit_px }}" class="fill-slate-50 stroke-slate-300 dark:fill-slate-900 dark:stroke-slate-700"/>
+        <text x="26" y="{{ row.y|add:15 }}" text-anchor="end" class="fill-slate-500 text-[10px]">{{ row.unit }}</text>
+      </g>
+      {% endfor %}
+      {% for b in e.blocks %}
+      <g class="rack-block {% if can_change %}cursor-grab{% endif %}" {% if can_change %}tabindex="0" role="button"{% endif %}
+         aria-label="{{ b.space.label }}, {% blocktranslate with start=b.space.start end=b.space.end %}units {{ start }} to {{ end }}{% endblocktranslate %}"
+         data-start="{{ b.space.start }}" data-size="{{ b.space.size }}" data-y="{{ b.y }}"
+         {% if can_change %}data-move-url="{% url 'dcim:space-move' rack.pk b.space.pk %}"{% endif %}>
+        <rect x="34" y="{{ b.y|add:1 }}" width="236" height="{{ b.height|add:-2 }}" rx="3" class="fill-brand-100 stroke-brand-600 dark:fill-slate-700"/>
+        <text x="152" y="{{ b.y|add:15 }}" text-anchor="middle" class="fill-slate-800 text-[11px] dark:fill-slate-100">{{ b.space.label|truncatechars:34 }}</text>
+      </g>
+      {% endfor %}
+    </svg>
+    {% endwith %}
+    {% if can_change %}<p class="mt-2 text-xs text-slate-500">{% translate "Drag a block, or focus it and use the arrow keys, to move it." %}</p>{% endif %}
+    <p id="rack-status" class="mt-2 text-sm text-red-600" role="alert" aria-live="polite"></p>
+  </section>
+
+  <div class="space-y-6 lg:col-span-2">
+    <section class="card" aria-labelledby="stats-h">
+      <h2 id="stats-h" class="mb-3">{% translate "Utilisation" %}</h2>
+      <dl class="grid grid-cols-2 gap-3 sm:grid-cols-4">
+        <div><dt class="text-xs text-slate-500">{% translate "Used" %}</dt><dd class="text-xl font-semibold">{{ stats.used }} U</dd></div>
+        <div><dt class="text-xs text-slate-500">{% translate "Free" %}</dt><dd class="text-xl font-semibold">{{ stats.free }} U</dd></div>
+        <div><dt class="text-xs text-slate-500">{% translate "Front" %}</dt><dd class="text-xl font-semibold">{{ stats.front }} U</dd></div>
+        <div><dt class="text-xs text-slate-500">{% translate "Rear" %}</dt><dd class="text-xl font-semibold">{{ stats.rear }} U</dd></div>
+      </dl>
+      <meter class="mt-3 w-full" min="0" max="100" value="{{ stats.percent }}" aria-label="{% translate 'Used' %}">{{ stats.percent }} %</meter>
+    </section>
+
+    <section class="card" aria-labelledby="spaces-h">
+      <h2 id="spaces-h" class="mb-3">{% translate "Reserved units" %}</h2>
+      <div class="overflow-x-auto"><table class="table">
+        <thead><tr><th>{% translate "Label" %}</th><th>{% translate "Units" %}</th><th>{% translate "Face" %}</th><th></th></tr></thead>
+        <tbody>{% for s in spaces %}<tr><td>{{ s.label }}</td><td>{{ s.start }}{% if s.size > 1 %}–{{ s.end }}{% endif %}</td><td>{{ s.get_face_display }}</td>
+          <td>{% if can_change %}<form method="post" action="{% url 'dcim:space-delete' rack.pk s.pk %}" data-confirm="{% translate 'Free these units?' %}">{% csrf_token %}<button class="btn-secondary py-1">{% translate "Free" %}</button></form>{% endif %}</td></tr>
+        {% empty %}<tr><td colspan="4" class="text-slate-500">{% translate "No units reserved." %}</td></tr>{% endfor %}</tbody>
+      </table></div>
+      {% if can_change %}
+      <details class="mt-4" {% if reserve_form.errors %}open{% endif %}><summary class="cursor-pointer text-sm font-medium">{% translate "Reserve units" %}</summary>
+        <form method="post" class="mt-3 grid gap-x-4 sm:grid-cols-2" novalidate>{% csrf_token %}<input type="hidden" name="action" value="reserve">
+          {% include "core/_form.html" with form=reserve_form %}<div class="sm:col-span-2"><button class="btn-primary">{% translate "Reserve" %}</button></div></form>
+      </details>
+      {% endif %}
+    </section>
+
+    <form method="post" class="card" novalidate>{% csrf_token %}<input type="hidden" name="action" value="edit">
+      <h2 class="mb-3">{% translate "Rack details" %}</h2>
+      <fieldset class="grid gap-x-4 sm:grid-cols-2" {% if not can_change %}disabled{% endif %}>{% include "core/_form.html" %}</fieldset>
+      {% if can_change %}<button class="btn-primary">{% translate "Save" %}</button>{% endif %}
+    </form>
+    {% if can_delete %}
+    <form method="post" data-confirm="{% translate 'Delete this rack and its reservations?' %}">{% csrf_token %}<input type="hidden" name="action" value="delete"><button class="btn-danger">{% translate "Delete rack" %}</button></form>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

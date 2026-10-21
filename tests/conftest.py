@@ -115,3 +115,41 @@ def admin_client(client: Client, super_admin: User) -> Client:
     totp = add_totp(super_admin)
     login(client, super_admin, totp=totp)
     return client
+
+
+@pytest.fixture
+def make_tree(make_tenant, super_admin):
+    """Create tenant/site/building/floor/room/rack through the services."""
+    from django.test import RequestFactory
+
+    from patchmanager.dcim.models import Rack
+    from patchmanager.locations import services
+    from patchmanager.locations.models import Building, Floor, Room, Site
+
+    def make(
+        tenant: Tenant | None = None, *, name: str = "HQ", u_height: int = 42
+    ) -> dict[str, Any]:
+        tenant = tenant or make_tenant()
+        request = RequestFactory().post("/")
+        request.user = super_admin
+        with rls.system_context():
+            site = services.create(request, super_admin, Site, parent=tenant, name=name)
+            building = services.create(request, super_admin, Building, parent=site, name="B1")
+            floor = services.create(
+                request, super_admin, Floor, parent=building, name="F1", level=1
+            )
+            room = services.create(request, super_admin, Room, parent=floor, name="R1")
+            rack = services.create(
+                request, super_admin, Rack, parent=room, name="A01", u_height=u_height
+            )
+        return {
+            "tenant": tenant,
+            "site": site,
+            "building": building,
+            "floor": floor,
+            "room": room,
+            "rack": rack,
+            "request": request,
+        }
+
+    return make

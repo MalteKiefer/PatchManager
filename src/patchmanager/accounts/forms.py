@@ -139,11 +139,19 @@ class AssignmentForm(forms.Form):
         help_text=_('Optional, e.g. [{"attr": "status", "op": "ne", "value": "approved"}]'),
     )
     object_type = forms.ChoiceField(label=_("Conditions apply to"), required=False)
+    location = forms.ChoiceField(
+        label=_("Location"),
+        required=False,
+        help_text=_("Narrows the scope to a site, building, floor, room or rack."),
+    )
 
-    def __init__(self, *args: Any, tenants: Any = None, **kwargs: Any) -> None:
-        """``tenants``: scopes the acting admin can see."""
+    def __init__(
+        self, *args: Any, tenants: Any = None, locations: Any = None, **kwargs: Any
+    ) -> None:
+        """``tenants`` and ``locations``: scopes the acting admin can see."""
         super().__init__(*args, **kwargs)
         self.fields["tenant"].queryset = tenants if tenants is not None else Tenant.objects.all()  # type: ignore[attr-defined]
+        self.fields["location"].choices = [("", "-"), *(locations or [])]  # type: ignore[attr-defined]
         self.fields["object_type"].choices = [("", "-")] + [  # type: ignore[attr-defined]
             (ot.code, ot.label) for ot in permissions.object_types() if ot.condition_attrs
         ]
