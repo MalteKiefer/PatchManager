@@ -31,6 +31,9 @@ PATTERN = re.compile(r"^(\*|[a-z]+(\.[a-z]+){0,2}(\.\*)?)$")
 BACKOFF = (60, 300, 1800, 7200, 21600, 86400)  # seconds after attempt 1, 2, ...
 LEASE = timedelta(minutes=5)  # longer than a batch can take (BATCH x total timeout)
 BATCH = 10
+SEND_WINDOW = (
+    120  # seconds; no new request starts later, and the task is killed before the lease ends
+)
 KEEP_DAYS = 30
 
 
@@ -93,7 +96,7 @@ def create(
     secret = secrets.token_urlsafe(32)
     hook = Webhook.objects.create(
         tenant=tenant,
-        name=name.strip()[:100] or url,
+        name=name.strip()[:100] or _redacted(url),
         url=url,
         active=active,
         encrypted_secret=crypto.encrypt(secret),
@@ -123,7 +126,7 @@ def update(
     require_manage(actor, hook.tenant)
     http.check(url)
     hook.name, hook.url, hook.events, hook.active = (
-        name.strip()[:100] or url,
+        name.strip()[:100] or _redacted(url),
         url,
         _events(events),
         active,
@@ -251,9 +254,15 @@ def deliver_due(limit: int = BATCH) -> int:
             Delivery.objects.filter(pk__in=[d.pk for d in batch]).update(
                 next_attempt_at=now + LEASE
             )
+        started = time.monotonic()
         allowed: dict[Any, bool] = {}
         claimed = Delivery.objects.filter(pk__in=[d.pk for d in batch])
         for delivery in claimed.select_related("webhook__created_by", "webhook__tenant"):
+            if (
+                time.monotonic() - started > SEND_WINDOW
+            ):  # leave the rest to the next run, inside the lease
+                Delivery.objects.filter(pk=delivery.pk).update(next_attempt_at=timezone.now())
+                continue
             hook = delivery.webhook
             if hook.pk not in allowed:  # the creator must still see everything the webhook sends
                 allowed[hook.pk] = sees_everything(hook.created_by, hook.tenant)

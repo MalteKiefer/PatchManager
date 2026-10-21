@@ -370,3 +370,23 @@ def test_tenant_wide_sight_required_and_checked_on_delivery(
         assert delivery.status == "failed" and "lost access" in delivery.last_error
         assert calls == []
         deny.delete()
+
+
+def test_send_window_and_redacted_default_name(make_tree, super_admin, sent, monkeypatch) -> None:
+    calls, _fake = sent
+    t = make_tree()
+    with rls.system_context():
+        hook, _s = services.create(
+            t["request"],
+            super_admin,
+            t["tenant"],
+            name=" ",
+            url="https://h.example.com/a?k=s",
+            events=["*"],
+        )
+        assert hook.name == "https://h.example.com"
+        services.ping(t["request"], super_admin, hook)
+        monkeypatch.setattr(services, "SEND_WINDOW", -1)
+        services.deliver_due()
+        assert calls == [] and Delivery.objects.get().status == "pending"
+    assert services.LEASE.total_seconds() > services.SEND_WINDOW + 60
