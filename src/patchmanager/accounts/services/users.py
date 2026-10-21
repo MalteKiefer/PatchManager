@@ -178,7 +178,8 @@ def set_active(request: HttpRequest, actor: User, user: User, *, active: bool) -
         raise ServiceError(_("You cannot deactivate your own account."))
     user.is_active = active
     user.deactivated_at = None if active else timezone.now()
-    user.save(update_fields=["is_active", "deactivated_at", "updated_at"])
+    user.scim_deactivated = False  # an administrator decided: SCIM may not undo it
+    user.save(update_fields=["is_active", "deactivated_at", "scim_deactivated", "updated_at"])
     if not active:
         _revoke(user)
     audit.record(

@@ -196,17 +196,17 @@ def groups(request: HttpRequest) -> HttpResponse:
     token = request.scim_token  # type: ignore[attr-defined]
     if request.method == "POST":
         group = resources.create_group(request, _body(request), token)
-        return _one(request, resources.groups().get(pk=group.pk), resources.group_json, 201)
+        return _one(request, resources.groups(token).get(pk=group.pk), resources.group_json, 201)
     if request.method != "GET":
         raise ScimError(405, "Method not allowed.")
-    return _list(request, resources.groups(), resources.GROUP_FILTERS, resources.group_json)
+    return _list(request, resources.groups(token), resources.GROUP_FILTERS, resources.group_json)
 
 
 @_authenticated
 def group(request: HttpRequest, pk: str) -> HttpResponse:
     """GET, PUT, PATCH or DELETE one Group."""
     token = request.scim_token  # type: ignore[attr-defined]
-    obj = _get(resources.groups(), pk)
+    obj = _get(resources.groups(token), pk)
     if request.method == "GET":
         return _one(request, obj, resources.group_json)
     resources.check_version(request, obj)
@@ -219,7 +219,7 @@ def group(request: HttpRequest, pk: str) -> HttpResponse:
         return HttpResponse(status=204)
     else:
         raise ScimError(405, "Method not allowed.")
-    return _one(request, resources.groups().get(pk=obj.pk), resources.group_json)
+    return _one(request, resources.groups(token).get(pk=obj.pk), resources.group_json)
 
 
 @_authenticated

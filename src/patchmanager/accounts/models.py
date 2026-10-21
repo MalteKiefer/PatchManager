@@ -150,6 +150,15 @@ class Group(TimestampedModel):
     parents = models.ManyToManyField("self", symmetrical=False, related_name="children", blank=True)
     external_id = models.CharField(max_length=255, blank=True)  # IdP / SCIM mapping
     scim_managed = models.BooleanField(default=False)  # created by SCIM; only these SCIM may change
+    scim_token = (
+        models.ForeignKey(  # the SCIM token that created the group, which alone may change it
+            "scim.ScimToken",
+            null=True,
+            blank=True,
+            on_delete=models.SET_NULL,
+            related_name="groups",
+        )
+    )
 
     policy_object_type = "accounts.group"
     policy_path = None

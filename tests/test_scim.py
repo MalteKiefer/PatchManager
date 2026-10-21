@@ -332,3 +332,38 @@ def test_token_domains(admin_client: Client) -> None:
             "/manage/scim/", {"name": "Bad", "domains": "me@x.example"}, secure=True
         ).content
     )
+
+
+def test_groups_belong_to_their_token_and_admin_decisions_stick(
+    scim, admin_client: Client, super_admin
+) -> None:
+    from django.test import RequestFactory
+
+    from patchmanager.accounts.services import users
+
+    _status, body, _r = call(scim, "post", "Groups", {"displayName": "Team A"})
+    other_token = admin_client.post(
+        "/manage/scim/", {"name": "Okta"}, secure=True, follow=True
+    ).context["new_token"]
+    other = Client(HTTP_AUTHORIZATION=f"Bearer {other_token}")
+    assert call(other, "get", f"Groups/{body['id']}")[0] == 404
+    assert call(other, "get", "Groups")[1]["totalResults"] == 0
+    uid = _provision(scim, "dan@example.com")
+    call(
+        scim,
+        "patch",
+        f"Users/{uid}",
+        {"schemas": [PATCH], "Operations": [{"op": "replace", "path": "active", "value": False}]},
+    )
+    user = User.objects.get(pk=uid)
+    request = RequestFactory().post("/")
+    request.user = super_admin
+    users.set_active(request, super_admin, user, active=True)
+    users.set_active(request, super_admin, user, active=False)  # now the administrator's decision
+    blocked = call(
+        scim,
+        "patch",
+        f"Users/{uid}",
+        {"schemas": [PATCH], "Operations": [{"op": "replace", "path": "active", "value": True}]},
+    )
+    assert blocked[0] == 403

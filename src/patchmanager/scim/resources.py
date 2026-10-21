@@ -318,9 +318,9 @@ def delete_user(request: HttpRequest, user: User, token: Any) -> None:
 # ---------------------------------------------------------------- groups
 
 
-def groups() -> QuerySet[Group]:
+def groups(token: Any) -> QuerySet[Group]:
     """Groups SCIM may see and change: those it created."""
-    return Group.objects.filter(scim_managed=True).prefetch_related("members")
+    return Group.objects.filter(scim_managed=True, scim_token=token).prefetch_related("members")
 
 
 def group_json(request: HttpRequest, group: Group) -> dict[str, Any]:
@@ -370,9 +370,9 @@ def _save_group(
         with transaction.atomic():
             group.save()
             if members is not None:
-                kept = [
-                    u for u in group.members.all() if protected(u)
-                ]  # never drop protected members
+                visible = set(users(token.domains).values_list("pk", flat=True))
+                # keep members this token cannot see or change
+                kept = [u for u in group.members.all() if protected(u) or u.pk not in visible]
                 group.members.set([*members, *kept])
             if add:
                 group.members.add(*add)
@@ -392,7 +392,10 @@ def create_group(request: HttpRequest, data: dict[str, Any], token: Any) -> Grou
         raise ScimError(400, "displayName is required.", "invalidValue")
     members = _members(data.get("members", []), token)
     group = Group(
-        name=name[:150], external_id=str(data.get("externalId") or "")[:255], scim_managed=True
+        name=name[:150],
+        external_id=str(data.get("externalId") or "")[:255],
+        scim_managed=True,
+        scim_token=token,
     )
     return _save_group(group, token, "created", members=members)
 
@@ -434,7 +437,11 @@ def patch_group(
         elif lowered == "members" and op == "replace":
             members = _members(value, token)
         elif lowered == "members" and op == "remove":
-            remove += _members(value, token) if value else list(group.members.all())
+            remove += (
+                _members(value, token)
+                if value
+                else list(users(token.domains).filter(pm_groups=group))
+            )
         elif lowered.startswith("members[value eq ") and op == "remove":
             member_id = lowered.removeprefix("members[value eq ").strip('"]')
             remove += _members([{"value": member_id}], token)
