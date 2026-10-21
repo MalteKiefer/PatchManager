@@ -11,7 +11,7 @@ x-app: &app
     PATCHMANAGER_DEBUG: "true"
     DJANGO_SECRET_KEY: dev-only-insecure-key-never-use-in-production-0123456789
     # Publicly known development key. Never reuse it.
-    PATCHMANAGER_ENCRYPTION_KEYS: NLsl_XU372FcoNQgLk7VIumq3upqMH4C6VnX8Arvcas=  # gitleaks:allow
+    PATCHMANAGER_ENCRYPTION_KEYS: MDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDA=
     DATABASE_URL: postgresql://patchmanager:patchmanager@postgres:5432/patchmanager
     REDIS_URL: redis://redis:6379/0
     PATCHMANAGER_EMAIL_BACKEND: django.core.mail.backends.smtp.EmailBackend
