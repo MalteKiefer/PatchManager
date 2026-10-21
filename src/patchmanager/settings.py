@@ -98,6 +98,7 @@ INSTALLED_APPS = [
     "drf_spectacular",
     "patchmanager.api",
     "patchmanager.integrations",
+    "patchmanager.sso",
 ]
 if DJANGO_ADMIN_ENABLED:
     INSTALLED_APPS.insert(0, "django.contrib.admin")
