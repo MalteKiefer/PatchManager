@@ -11,6 +11,9 @@ let mode = "move";
 let pending = null; // item waiting to be placed
 let draft = []; // clicked points (scale or outline)
 let outlineRoom = null;
+let selected = null; // pin whose details are in the side panel
+const panel = document.getElementById("plan-panel");
+const emptyPanel = panel ? [...panel.childNodes] : [];
 
 const csrf = () => document.querySelector("meta[name=csrf-token]").content;
 const say = (text) => { if (status) status.textContent = text || ""; };
@@ -63,10 +66,19 @@ function itemNode(kind, item) {
                           class: "fill-slate-700 stroke-white", "stroke-width": 1.5 }));
     g.append(el("text", { y: item.h / 2 + 14, "text-anchor": "middle", class: "fill-slate-900 text-[12px] font-semibold dark:fill-white" }, item.name));
   } else {
-    g.append(el("circle", { r: item.r, fill: item.colour || "#f59e0b", class: "stroke-white", "stroke-width": 1.5 }));
-    g.append(el("text", { y: 4, "text-anchor": "middle", class: "fill-white text-[11px] font-bold" }, item.glyph));
-    g.append(el("text", { y: item.r + 13, "text-anchor": "middle", class: "fill-slate-900 text-[11px] dark:fill-white" }, item.name));
+    // A pin whose tip marks the exact spot; the head carries the category sign.
+    const r = Math.max(item.r, 9);
+    const head = -r * 1.9;
+    g.append(el("ellipse", { cy: 0, rx: r * 0.45, ry: r * 0.18, class: "plan-pin-shadow" }));
+    g.append(el("path", {
+      d: `M0 0 C ${-r * 0.35} ${-r * 0.8} ${-r} ${head + r * 0.75} ${-r} ${head} A ${r} ${r} 0 1 1 ${r} ${head} C ${r} ${head + r * 0.75} ${r * 0.35} ${-r * 0.8} 0 0 Z`,
+      fill: item.colour || "#f59e0b", class: "plan-pin stroke-white", "stroke-width": 1.5,
+    }));
+    g.append(el("text", { y: head + 4, "text-anchor": "middle", class: "fill-white text-[11px] font-bold" }, item.glyph));
+    g.append(el("text", { y: 14, "text-anchor": "middle", class: "fill-slate-900 text-[11px] dark:fill-white" }, item.name));
   }
+  if (!item.can_change) { g.setAttribute("tabindex", "0"); g.setAttribute("role", "button"); }
+  if (selected && selected.kind === kind && selected.id === item.id) g.classList.add("is-selected");
   g.addEventListener("dblclick", () => location.assign(item.url));
   return g;
 }
@@ -105,6 +117,31 @@ function roomAt([x, y]) {
     }
     return pts.length >= 3 && inside;
   });
+}
+
+async function select(kind, id) {
+  selected = kind ? { kind, id } : null;
+  for (const node of svg.querySelectorAll(".plan-item")) {
+    node.classList.toggle("is-selected", Boolean(selected) && node.dataset.kind === kind && node.dataset.id === id);
+  }
+  if (!panel) return;
+  if (!selected) { panel.replaceChildren(...emptyPanel); return; }
+  const item = (kind === "rack" ? scene.racks : scene.devices).find((i) => i.id === id);
+  panel.setAttribute("aria-busy", "true");
+  try {
+    const response = await fetch(item.panel, { credentials: "same-origin" });
+    if (!response.ok) throw new Error(String(response.status));
+    panel.innerHTML = await response.text(); // server rendered, escaped template
+    for (const swatch of panel.querySelectorAll("[data-swatch]")) swatch.style.backgroundColor = swatch.dataset.swatch;
+    panel.querySelector("[data-unplace]")?.addEventListener("click", async (event) => {
+      const button = event.currentTarget;
+      try { await post("unplace", { kind: button.dataset.unplace, id: button.dataset.id }); location.reload(); } catch (e) { say(e.message); }
+    });
+  } catch {
+    panel.textContent = text.failed;
+  } finally {
+    panel.removeAttribute("aria-busy");
+  }
 }
 
 function drawItems() {
@@ -161,6 +198,7 @@ if (svg) {
   svg.addEventListener("pointerdown", (event) => {
     const group = event.target.closest?.(".plan-item[tabindex]");
     if (mode !== "move" || !group) return;
+    if (!group.classList.contains("cursor-move")) { select(group.dataset.kind, group.dataset.id); return; } // read only
     drag = { group, start: toPlan(event), kind: group.dataset.kind, id: group.dataset.id };
     svg.setPointerCapture(event.pointerId);
   });
@@ -178,6 +216,7 @@ if (svg) {
     const { kind, id } = drag;
     drag = null;
     if (moved) moveItem(kind, id, point);
+    else select(kind, id);
   });
 
   svg.addEventListener("click", (event) => {
@@ -202,6 +241,13 @@ if (svg) {
 
   svg.addEventListener("keydown", (event) => {
     const group = event.target.closest?.(".plan-item[tabindex]");
+    if (group && (event.key === "Enter" || event.key === " ")) {
+      event.preventDefault();
+      select(group.dataset.kind, group.dataset.id);
+      return;
+    }
+    if (event.key === "Escape") { select(null); return; }
+    if (!group?.classList.contains("cursor-move")) return;
     const steps = { ArrowLeft: [-1, 0], ArrowRight: [1, 0], ArrowUp: [0, -1], ArrowDown: [0, 1] }[event.key];
     if (!group || !steps) return;
     event.preventDefault();

@@ -98,6 +98,11 @@ def cabling(user: Any, room: Room) -> list[tuple[Device, list[Outlet]]]:
         .select_related("device_type__category")
         .order_by("name")
     )
+    return outlets(user, devices)
+
+
+def outlets(user: Any, devices: list[Device]) -> list[tuple[Device, list[Outlet]]]:
+    """Each port of ``devices`` (already checked as visible) with where its path ends."""
     ports = list(
         Port.objects.filter(device__in=devices).select_related("device").order_by("order", "name")
     )

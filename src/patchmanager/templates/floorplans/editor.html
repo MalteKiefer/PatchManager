@@ -55,6 +55,7 @@
 
   <aside class="space-y-6">
     {% if plan %}
+    <section id="plan-panel" class="rack-panel" aria-live="polite" aria-label="{% translate 'Selected item' %}"><p class="text-sm text-slate-500">{% translate "Click a pin to see what is there and where it is patched." %}</p></section>
     <section class="card text-sm" aria-labelledby="legend-h"><h2 id="legend-h" class="mb-2">{% translate "Lines" %}</h2>
       <p class="flex items-center gap-2"><svg width="34" height="6" aria-hidden="true"><line x1="0" y1="3" x2="34" y2="3" stroke="#2563eb" stroke-width="3"/></svg>{% translate "patch cable" %}</p>
       <p class="mt-1 flex items-center gap-2"><svg width="34" height="6" aria-hidden="true"><line x1="0" y1="3" x2="34" y2="3" stroke="#ea580c" stroke-width="3" stroke-dasharray="6 4"/></svg>{% translate "permanent link (installed cabling)" %}</p>
