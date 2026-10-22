@@ -45,6 +45,13 @@ document.addEventListener("submit", (event) => {
   if (message && !window.confirm(message)) event.preventDefault();
 });
 
+// "All" boxes of a checkbox group: <input data-check-group="x"> toggles <input data-group="x">.
+document.addEventListener("change", (event) => {
+  const group = event.target.dataset?.checkGroup;
+  if (!group) return;
+  for (const box of document.querySelectorAll(`input[data-group="${CSS.escape(group)}"]`)) box.checked = event.target.checked;
+});
+
 // Auto submit selects: <select data-autosubmit>
 document.addEventListener("change", (event) => {
   if (event.target.matches?.("select[data-autosubmit]")) event.target.form.requestSubmit();

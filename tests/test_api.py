@@ -395,7 +395,7 @@ def test_ui_pages(kit, admin_client: Client, super_admin, make_user) -> None:
     assert admin_client.get("/account/tokens/new/", secure=True).status_code == 200
     page = admin_client.post(
         "/account/tokens/new/",
-        {"name": "laptop", "scopes": ["read"], "days": 7, "tenant": ""},
+        {"name": "laptop", "access": "read", "days": 7, "tenant": ""},
         secure=True,
         follow=True,
     )
@@ -411,7 +411,7 @@ def test_ui_pages(kit, admin_client: Client, super_admin, make_user) -> None:
     assert admin_client.get("/manage/api-clients/new/", secure=True).status_code == 200
     created = admin_client.post(
         "/manage/api-clients/new/",
-        {"name": "CMDB", "scopes": ["read", "write"]},
+        {"name": "CMDB", "access": "write"},
         secure=True,
         follow=True,
     )
