@@ -52,6 +52,9 @@ All notable changes to this project are documented here. The format follows
 
 ### Fixed
 
+* Pages failed with "current transaction is aborted" when the instance settings
+  could not be read (for example before running the latest migration); the read now
+  falls back to the defaults without breaking the request.
 * Webhook pages now show the administration side menu like the other admin pages.
 * The production stack let the application containers reach nothing outside the
   host (the backend network is internal), so mail, SSO, webhooks, DNS provider
