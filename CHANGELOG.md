@@ -47,6 +47,9 @@ All notable changes to this project are documented here. The format follows
 
 ### Fixed
 
+* The production stack let the application containers reach nothing outside the
+  host (the backend network is internal), so mail, SSO, webhooks, DNS provider
+  imports and platform syncs failed; they now also join an `egress` network.
 * Webhook pages highlighted "Import and export" in the menu instead of
   "Administration".
 

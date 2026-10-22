@@ -2,7 +2,9 @@
 
 PatchManager runs as a Docker Compose stack: Caddy (TLS), app, worker, scheduler,
 PostgreSQL 18, Redis and a backup job. Only Caddy is reachable from outside; everything else sits on an internal
-network.
+network. The application containers also join an `egress` network without published
+ports, so they can reach mail, SSO, webhooks, object storage and platform APIs;
+restrict it with host firewall rules if your policy requires an allow list.
 
 ## Requirements
 

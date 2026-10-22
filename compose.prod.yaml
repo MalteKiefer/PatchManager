@@ -12,7 +12,9 @@ x-app: &app
   cap_drop: ["ALL"]
   security_opt: ["no-new-privileges:true"]
   restart: unless-stopped
-  networks: [backend]
+  # backend is internal (no route out); egress lets the application reach mail,
+  # SSO, webhooks, object storage and platform APIs. No ports are published.
+  networks: [backend, egress]
   volumes: ["media:/app/media", "backups:/backups:ro"]
   secrets: [postgres_password, django_secret_key, encryption_keys, email_password]
   environment:
