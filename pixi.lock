@@ -133,6 +133,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/noarch/cpython-3.14.8-py314hd8ed1ab_102.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/defusedxml-0.7.1-pyhd8ed1ab_0.tar.bz2
       - conda: https://conda.anaconda.org/conda-forge/noarch/django-6.1.2-pyhc364b38_0.conda
+      - conda: https://conda.anaconda.org/conda-forge/noarch/django-storages-1.14.6-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/djangorestframework-3.18.3-pyh5ded981_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/drf-spectacular-0.30.0-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/elementpath-4.8.0-pyhd8ed1ab_0.conda
@@ -310,6 +311,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/noarch/cpython-3.14.8-py314hd8ed1ab_102.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/defusedxml-0.7.1-pyhd8ed1ab_0.tar.bz2
       - conda: https://conda.anaconda.org/conda-forge/noarch/django-6.1.2-pyhc364b38_0.conda
+      - conda: https://conda.anaconda.org/conda-forge/noarch/django-storages-1.14.6-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/djangorestframework-3.18.3-pyh5ded981_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/drf-spectacular-0.30.0-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/elementpath-4.8.0-pyhd8ed1ab_0.conda
@@ -398,6 +400,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/noarch/cpython-3.14.8-py314hd8ed1ab_102.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/defusedxml-0.7.1-pyhd8ed1ab_0.tar.bz2
       - conda: https://conda.anaconda.org/conda-forge/noarch/django-6.1.2-pyhc364b38_0.conda
+      - conda: https://conda.anaconda.org/conda-forge/noarch/django-storages-1.14.6-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/djangorestframework-3.18.3-pyh5ded981_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/drf-spectacular-0.30.0-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/elementpath-4.8.0-pyhd8ed1ab_0.conda
@@ -650,6 +653,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/noarch/cpython-3.14.8-py314hd8ed1ab_102.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/defusedxml-0.7.1-pyhd8ed1ab_0.tar.bz2
       - conda: https://conda.anaconda.org/conda-forge/noarch/django-6.1.2-pyhc364b38_0.conda
+      - conda: https://conda.anaconda.org/conda-forge/noarch/django-storages-1.14.6-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/djangorestframework-3.18.3-pyh5ded981_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/drf-spectacular-0.30.0-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/elementpath-4.8.0-pyhd8ed1ab_0.conda
@@ -821,6 +825,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/noarch/cpython-3.14.8-py314hd8ed1ab_102.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/defusedxml-0.7.1-pyhd8ed1ab_0.tar.bz2
       - conda: https://conda.anaconda.org/conda-forge/noarch/django-6.1.2-pyhc364b38_0.conda
+      - conda: https://conda.anaconda.org/conda-forge/noarch/django-storages-1.14.6-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/djangorestframework-3.18.3-pyh5ded981_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/drf-spectacular-0.30.0-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/elementpath-4.8.0-pyhd8ed1ab_0.conda
@@ -909,6 +914,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/noarch/cpython-3.14.8-py314hd8ed1ab_102.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/defusedxml-0.7.1-pyhd8ed1ab_0.tar.bz2
       - conda: https://conda.anaconda.org/conda-forge/noarch/django-6.1.2-pyhc364b38_0.conda
+      - conda: https://conda.anaconda.org/conda-forge/noarch/django-storages-1.14.6-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/djangorestframework-3.18.3-pyh5ded981_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/drf-spectacular-0.30.0-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/elementpath-4.8.0-pyhd8ed1ab_0.conda
@@ -1195,6 +1201,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/noarch/defusedxml-0.7.1-pyhd8ed1ab_0.tar.bz2
       - conda: https://conda.anaconda.org/conda-forge/noarch/distlib-0.4.4-pyh5ded981_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/django-6.1.2-pyhc364b38_0.conda
+      - conda: https://conda.anaconda.org/conda-forge/noarch/django-storages-1.14.6-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/django-stubs-6.1.2-pyh5ded981_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/django-stubs-ext-6.1.2-pyh5ded981_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/djangorestframework-3.18.3-pyh5ded981_0.conda
@@ -1465,6 +1472,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/noarch/defusedxml-0.7.1-pyhd8ed1ab_0.tar.bz2
       - conda: https://conda.anaconda.org/conda-forge/noarch/distlib-0.4.4-pyh5ded981_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/django-6.1.2-pyhc364b38_0.conda
+      - conda: https://conda.anaconda.org/conda-forge/noarch/django-storages-1.14.6-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/django-stubs-6.1.2-pyh5ded981_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/django-stubs-ext-6.1.2-pyh5ded981_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/djangorestframework-3.18.3-pyh5ded981_0.conda
@@ -1619,6 +1627,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/noarch/defusedxml-0.7.1-pyhd8ed1ab_0.tar.bz2
       - conda: https://conda.anaconda.org/conda-forge/noarch/distlib-0.4.4-pyh5ded981_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/django-6.1.2-pyhc364b38_0.conda
+      - conda: https://conda.anaconda.org/conda-forge/noarch/django-storages-1.14.6-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/django-stubs-6.1.2-pyh5ded981_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/django-stubs-ext-6.1.2-pyh5ded981_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/djangorestframework-3.18.3-pyh5ded981_0.conda
@@ -2164,6 +2173,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/noarch/cpython-3.14.8-py314hd8ed1ab_102.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/defusedxml-0.7.1-pyhd8ed1ab_0.tar.bz2
       - conda: https://conda.anaconda.org/conda-forge/noarch/django-6.1.2-pyhc364b38_0.conda
+      - conda: https://conda.anaconda.org/conda-forge/noarch/django-storages-1.14.6-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/djangorestframework-3.18.3-pyh5ded981_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/drf-spectacular-0.30.0-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/elementpath-4.8.0-pyhd8ed1ab_0.conda
@@ -2375,6 +2385,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/noarch/cpython-3.14.8-py314hd8ed1ab_102.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/defusedxml-0.7.1-pyhd8ed1ab_0.tar.bz2
       - conda: https://conda.anaconda.org/conda-forge/noarch/django-6.1.2-pyhc364b38_0.conda
+      - conda: https://conda.anaconda.org/conda-forge/noarch/django-storages-1.14.6-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/djangorestframework-3.18.3-pyh5ded981_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/drf-spectacular-0.30.0-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/elementpath-4.8.0-pyhd8ed1ab_0.conda
@@ -2479,6 +2490,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/noarch/cpython-3.14.8-py314hd8ed1ab_102.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/defusedxml-0.7.1-pyhd8ed1ab_0.tar.bz2
       - conda: https://conda.anaconda.org/conda-forge/noarch/django-6.1.2-pyhc364b38_0.conda
+      - conda: https://conda.anaconda.org/conda-forge/noarch/django-storages-1.14.6-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/djangorestframework-3.18.3-pyh5ded981_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/drf-spectacular-0.30.0-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/elementpath-4.8.0-pyhd8ed1ab_0.conda
@@ -2790,6 +2802,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/noarch/defusedxml-0.7.1-pyhd8ed1ab_0.tar.bz2
       - conda: https://conda.anaconda.org/conda-forge/noarch/distlib-0.4.4-pyh5ded981_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/django-6.1.2-pyhc364b38_0.conda
+      - conda: https://conda.anaconda.org/conda-forge/noarch/django-storages-1.14.6-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/django-stubs-6.1.2-pyh5ded981_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/django-stubs-ext-6.1.2-pyh5ded981_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/djangorestframework-3.18.3-pyh5ded981_0.conda
@@ -3034,6 +3047,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/noarch/defusedxml-0.7.1-pyhd8ed1ab_0.tar.bz2
       - conda: https://conda.anaconda.org/conda-forge/noarch/distlib-0.4.4-pyh5ded981_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/django-6.1.2-pyhc364b38_0.conda
+      - conda: https://conda.anaconda.org/conda-forge/noarch/django-storages-1.14.6-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/django-stubs-6.1.2-pyh5ded981_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/django-stubs-ext-6.1.2-pyh5ded981_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/djangorestframework-3.18.3-pyh5ded981_0.conda
@@ -3175,6 +3189,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/noarch/defusedxml-0.7.1-pyhd8ed1ab_0.tar.bz2
       - conda: https://conda.anaconda.org/conda-forge/noarch/distlib-0.4.4-pyh5ded981_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/django-6.1.2-pyhc364b38_0.conda
+      - conda: https://conda.anaconda.org/conda-forge/noarch/django-storages-1.14.6-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/django-stubs-6.1.2-pyh5ded981_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/django-stubs-ext-6.1.2-pyh5ded981_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/djangorestframework-3.18.3-pyh5ded981_0.conda
@@ -3487,6 +3502,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/noarch/cpython-3.14.8-py314hd8ed1ab_102.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/defusedxml-0.7.1-pyhd8ed1ab_0.tar.bz2
       - conda: https://conda.anaconda.org/conda-forge/noarch/django-6.1.2-pyhc364b38_0.conda
+      - conda: https://conda.anaconda.org/conda-forge/noarch/django-storages-1.14.6-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/djangorestframework-3.18.3-pyh5ded981_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/drf-spectacular-0.30.0-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/elementpath-4.8.0-pyhd8ed1ab_0.conda
@@ -3658,6 +3674,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/noarch/cpython-3.14.8-py314hd8ed1ab_102.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/defusedxml-0.7.1-pyhd8ed1ab_0.tar.bz2
       - conda: https://conda.anaconda.org/conda-forge/noarch/django-6.1.2-pyhc364b38_0.conda
+      - conda: https://conda.anaconda.org/conda-forge/noarch/django-storages-1.14.6-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/djangorestframework-3.18.3-pyh5ded981_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/drf-spectacular-0.30.0-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/elementpath-4.8.0-pyhd8ed1ab_0.conda
@@ -3746,6 +3763,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/noarch/cpython-3.14.8-py314hd8ed1ab_102.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/defusedxml-0.7.1-pyhd8ed1ab_0.tar.bz2
       - conda: https://conda.anaconda.org/conda-forge/noarch/django-6.1.2-pyhc364b38_0.conda
+      - conda: https://conda.anaconda.org/conda-forge/noarch/django-storages-1.14.6-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/djangorestframework-3.18.3-pyh5ded981_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/drf-spectacular-0.30.0-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/elementpath-4.8.0-pyhd8ed1ab_0.conda
@@ -4004,6 +4022,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/noarch/cpython-3.14.8-py314hd8ed1ab_102.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/defusedxml-0.7.1-pyhd8ed1ab_0.tar.bz2
       - conda: https://conda.anaconda.org/conda-forge/noarch/django-6.1.2-pyhc364b38_0.conda
+      - conda: https://conda.anaconda.org/conda-forge/noarch/django-storages-1.14.6-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/djangorestframework-3.18.3-pyh5ded981_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/drf-spectacular-0.30.0-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/elementpath-4.8.0-pyhd8ed1ab_0.conda
@@ -4198,6 +4217,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/noarch/cpython-3.14.8-py314hd8ed1ab_102.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/defusedxml-0.7.1-pyhd8ed1ab_0.tar.bz2
       - conda: https://conda.anaconda.org/conda-forge/noarch/django-6.1.2-pyhc364b38_0.conda
+      - conda: https://conda.anaconda.org/conda-forge/noarch/django-storages-1.14.6-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/djangorestframework-3.18.3-pyh5ded981_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/drf-spectacular-0.30.0-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/elementpath-4.8.0-pyhd8ed1ab_0.conda
@@ -4296,6 +4316,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/noarch/cpython-3.14.8-py314hd8ed1ab_102.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/defusedxml-0.7.1-pyhd8ed1ab_0.tar.bz2
       - conda: https://conda.anaconda.org/conda-forge/noarch/django-6.1.2-pyhc364b38_0.conda
+      - conda: https://conda.anaconda.org/conda-forge/noarch/django-storages-1.14.6-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/djangorestframework-3.18.3-pyh5ded981_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/drf-spectacular-0.30.0-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/elementpath-4.8.0-pyhd8ed1ab_0.conda
@@ -8329,6 +8350,22 @@ packages:
   run_exports: {}
   size: 3742642
   timestamp: 1791309366483
+- conda: https://conda.anaconda.org/conda-forge/noarch/django-storages-1.14.6-pyhd8ed1ab_0.conda
+  sha256: 6b2c7b5a9b1a54cdf112b23f5cc9ea188a2ca9c9adfa2c01a7c80ce5cf685f2d
+  md5: 1add7ec715925a2bfe7b733dd7359e12
+  depends:
+  - django >=3.2
+  - python >=3.9
+  constrains:
+  - boto3 >=1.4.4
+  - dropbox >=7.2.1
+  - google-cloud-storage >=1.27.0
+  - azure-storage-blob >=12.0.0
+  license: BSD-3-Clause
+  license_family: BSD
+  run_exports: {}
+  size: 31966
+  timestamp: 1743570868514
 - conda: https://conda.anaconda.org/conda-forge/noarch/django-stubs-6.1.2-pyh5ded981_0.conda
   sha256: b85e8129c2dd23a7964890fa280134873ecedc3cf30456c4f8a477cee9c58d68
   md5: 5d9f1f3a008cc482e5ac546e8f80946b

@@ -78,8 +78,7 @@ healthy postgres
 test "$(sql "SELECT to_regclass('dcim_port') IS NULL")" = "t"
 
 echo "== restore $dump"
-$compose exec -T backup sh -c "PGPASSWORD=\$(cat /run/secrets/postgres_superuser_password) \
-    pg_restore --clean --if-exists --dbname=patchmanager '$dump'"
+$compose --profile restore run --rm -T restore "$(basename "$dump")"
 after="$(state)"
 echo "after:  $after"
 test "$before" = "$after"

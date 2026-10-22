@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-22 09:53+0000\n"
+"POT-Creation-Date: 2026-10-22 10:03+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -1615,7 +1615,7 @@ msgstr "Hosts"
 msgid "Add host"
 msgstr "Host hinzufügen"
 
-#: compute/pages.py:124 templates/manage/system.html:32
+#: compute/pages.py:124 templates/manage/system.html:37
 msgid "Server"
 msgstr "Server"
 
@@ -1869,98 +1869,102 @@ msgstr "Diese Kategorie ist für diesen Raumtyp bereits geplant."
 msgid "Planned devices for %(type)s"
 msgstr "Geplante Geräte für %(type)s"
 
-#: core/system.py:57
+#: core/system.py:58
 msgid "reachable"
 msgstr "erreichbar"
 
-#: core/system.py:66
+#: core/system.py:67
 msgid "up to date"
 msgstr "aktuell"
 
-#: core/system.py:73
+#: core/system.py:74
 msgid "working"
 msgstr "funktioniert"
 
-#: core/system.py:80
+#: core/system.py:81
 msgid "writable"
 msgstr "beschreibbar"
 
-#: core/system.py:85
+#: core/system.py:86
 msgid "jobs run in the web process (no broker)"
 msgstr "Aufgaben laufen im Webprozess (kein Broker)"
 
-#: core/system.py:91
+#: core/system.py:92
 #, python-format
 msgid "%(n)s worker(s) answering"
 msgstr "%(n)s Worker antworten"
 
-#: core/system.py:97
+#: core/system.py:98
 msgid "Database"
 msgstr "Datenbank"
 
-#: core/system.py:98
+#: core/system.py:99
 msgid "Migrations"
 msgstr "Migrationen"
 
-#: core/system.py:99
+#: core/system.py:100
 msgid "Cache and rate limits"
 msgstr "Cache und Ratenbegrenzung"
 
-#: core/system.py:100
+#: core/system.py:101
 msgid "File storage"
 msgstr "Dateispeicher"
 
-#: core/system.py:101
+#: core/system.py:102
 msgid "Background workers"
 msgstr "Hintergrund-Worker"
 
-#: core/system.py:180
+#: core/system.py:147
+msgid "The off-site status file cannot be read."
+msgstr "Die Statusdatei der externen Sicherung kann nicht gelesen werden."
+
+#: core/system.py:201
 msgid "MFA required for everyone"
 msgstr "MFA für alle erforderlich"
 
-#: core/system.py:181
+#: core/system.py:202
 msgid "Minimum password length"
 msgstr "Mindestlänge des Passworts"
 
-#: core/system.py:182
+#: core/system.py:203
 msgid "Session lifetime (s)"
 msgstr "Sitzungsdauer (s)"
 
-#: core/system.py:183
+#: core/system.py:204
 msgid "Session idle timeout (s)"
 msgstr "Leerlauf-Timeout der Sitzung (s)"
 
-#: core/system.py:184
+#: core/system.py:205
 msgid "Lockout after failures"
 msgstr "Sperre nach Fehlversuchen"
 
-#: core/system.py:185
+#: core/system.py:206
 msgid "Lockout duration (s)"
 msgstr "Sperrdauer (s)"
 
-#: core/system.py:186
+#: core/system.py:207
 msgid "Login attempts per IP in 10 minutes"
 msgstr "Anmeldeversuche pro IP in 10 Minuten"
 
-#: core/system.py:187
+#: core/system.py:208
 msgid "WebAuthn relying party"
 msgstr "WebAuthn Relying Party"
 
-#: core/system.py:201
+#: core/system.py:222
 #, python-format
 msgid "Test mail from %(name)s"
 msgstr "Testmail von %(name)s"
 
-#: core/system.py:202
+#: core/system.py:223
 msgid "Mail delivery works."
 msgstr "Der Mailversand funktioniert."
 
-#: core/system.py:208
+#: core/system.py:229
 #, python-format
 msgid "The mail could not be sent: %(error)s"
 msgstr "Die E-Mail konnte nicht gesendet werden: %(error)s"
 
-#: core/system.py:211
+#: core/system.py:232
 #, python-format
 msgid "A test mail was sent to %(email)s."
 msgstr "Eine Testmail wurde an %(email)s gesendet."
@@ -5993,13 +5997,17 @@ msgstr "Neues Gerät anlegen"
 msgid ""
 "These devices of the room are not mounted in a rack yet. Choose one to mount "
 "it here, or create a new device."
-msgstr "Diese Geräte des Raums sind noch in keinem Rack eingebaut. Wählen Sie eines, um es hier einzubauen, oder legen Sie ein neues Gerät an."
+msgstr ""
+"Diese Geräte des Raums sind noch in keinem Rack eingebaut. Wählen Sie eines, "
+"um es hier einzubauen, oder legen Sie ein neues Gerät an."
 
 #: templates/dcim/place_here.html:9
 msgid ""
 "These devices of the room are not on the floor plan yet. Choose one to put "
 "it where you clicked, or create a new device."
-msgstr "Diese Geräte des Raums sind noch nicht im Grundriss. Wählen Sie eines, um es an die geklickte Stelle zu setzen, oder legen Sie ein neues Gerät an."
+msgstr ""
+"Diese Geräte des Raums sind noch nicht im Grundriss. Wählen Sie eines, um es "
+"an die geklickte Stelle zu setzen, oder legen Sie ein neues Gerät an."
 
 #: templates/dcim/place_here.html:21
 msgid "Mount here"
@@ -7579,30 +7587,52 @@ msgid "No restore points yet."
 msgstr "Noch keine Wiederherstellungspunkte."
 
 #: templates/manage/system.html:29
-msgid "Restoring is done on the server, see the deployment guide."
-msgstr "Die Wiederherstellung erfolgt auf dem Server, siehe Betriebshandbuch."
+msgid "No off-site copy configured."
+msgstr "Keine externe Sicherung eingerichtet."
 
 #: templates/manage/system.html:30
+msgid "Off-site copy"
+msgstr "Externe Sicherung"
+
+#: templates/manage/system.html:31
+msgid "Off-site copy failed"
+msgstr "Externe Sicherung fehlgeschlagen"
+
+#: templates/manage/system.html:32
+msgid "Restore on the server after stopping app, worker, scheduler and caddy:"
+msgstr "Wiederherstellen auf dem Server, nachdem app, worker, scheduler und caddy gestoppt wurden:"
+
+#: templates/manage/system.html:34
+#, python-format
+msgid ""
+"Uploads are stored in the S3 bucket %(s3_bucket)s; enable versioning there."
+msgstr "Hochgeladene Dateien liegen im S3-Bucket %(s3_bucket)s; aktivieren Sie dort die Versionierung."
+
+#: templates/manage/system.html:34
+msgid "Uploads are stored in the media volume and archived with every backup."
+msgstr "Hochgeladene Dateien liegen im Media-Volume und werden mit jeder Sicherung archiviert."
+
+#: templates/manage/system.html:35
 msgid "Mail"
 msgstr "E-Mail"
 
-#: templates/manage/system.html:31
+#: templates/manage/system.html:36
 msgid "Backend"
 msgstr "Backend"
 
-#: templates/manage/system.html:33
+#: templates/manage/system.html:38
 msgid "Sender"
 msgstr "Absender"
 
-#: templates/manage/system.html:34
+#: templates/manage/system.html:39
 msgid "Send a test mail to me"
 msgstr "Testmail an mich senden"
 
-#: templates/manage/system.html:35
+#: templates/manage/system.html:40
 msgid "Security configuration"
 msgstr "Sicherheitskonfiguration"
 
-#: templates/manage/system.html:36
+#: templates/manage/system.html:41
 msgid "Set through environment variables, see the deployment guide."
 msgstr "Wird über Umgebungsvariablen gesetzt, siehe Bereitstellungshandbuch."
 
@@ -8224,6 +8254,10 @@ msgstr "Mandant gespeichert."
 #: tenancy/views.py:105
 msgid "Tenant deleted."
 msgstr "Mandant gelöscht."
+
+#~ msgid "Restoring is done on the server, see the deployment guide."
+#~ msgstr ""
+#~ "Die Wiederherstellung erfolgt auf dem Server, siehe Betriebshandbuch."
 
 #~ msgid "No floor devices."
 #~ msgstr "Keine Raumgeräte."

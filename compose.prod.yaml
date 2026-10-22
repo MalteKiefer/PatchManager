@@ -147,15 +147,60 @@ services:
     depends_on:
       postgres: { condition: service_healthy }
 
+  # One-off restore of a dump and its uploads; see docs/guides/deployment.md.
+  restore:
+    image: postgres:18.6-trixie@sha256:1267c7e692de235fda2a50dbcdbcbca4672ea6a0298576a6bd9d07cafc319b32
+    profiles: [restore]
+    restart: "no"
+    networks: [backend]
+    secrets: [postgres_superuser_password]
+    environment:
+      PGHOST: postgres
+      PGUSER: postgres
+      PGDATABASE: patchmanager
+    volumes:
+      - ./deploy/restore.sh:/usr/local/bin/restore.sh:ro
+      - backups:/backups:ro
+      - media:/media
+    entrypoint: ["/usr/local/bin/restore.sh"]
+    depends_on:
+      postgres: { condition: service_healthy }
+
+  # Encrypted off-site copy of the backup volume (restic to S3 or Backblaze B2).
+  # Enable with --profile offsite. Credentials are bind mounted rather than compose
+  # secrets so the default stack starts without these files.
+  offsite:
+    image: restic/restic:0.19.1@sha256:136600b6ff6843d61d355f7f71f460a166429f35de6fd11b568fece3c9a4d510
+    profiles: [offsite]
+    restart: unless-stopped
+    networks: [egress]
+    environment:
+      RESTIC_REPOSITORY: ${PATCHMANAGER_OFFSITE_REPOSITORY:-}
+      RESTIC_CACHE_DIR: /cache
+    volumes:
+      - ./deploy/offsite.sh:/usr/local/bin/offsite.sh:ro
+      - ./secrets/offsite_password:/run/secrets/offsite_password:ro
+      - ./secrets/offsite_access_key_id:/run/secrets/offsite_access_key_id:ro
+      - ./secrets/offsite_secret_access_key:/run/secrets/offsite_secret_access_key:ro
+      # Read and write: restic restores into it and the status file lives there.
+      - backups:/backups
+      - offsite_cache:/cache
+    entrypoint: ["/usr/local/bin/offsite.sh"]
+    deploy:
+      resources:
+        limits: { cpus: "1", memory: 512m }
+
 networks:
   frontend:
   backend:
     internal: true
+  egress:
 
 volumes:
   pgdata:
   media:
   backups:
+  offsite_cache:
   caddy_data:
   caddy_config:
 

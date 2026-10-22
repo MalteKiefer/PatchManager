@@ -57,39 +57,57 @@ day and keeps 14 days. Copy that volume off the host, encrypted (for example wit
 or age). Restore:
 
 ```bash
-docker compose -f compose.prod.yaml exec backup sh -c \
-  'pg_restore --clean --if-exists --dbname=patchmanager /backups/<file>.dump'
+docker compose -f compose.prod.yaml stop app worker scheduler caddy
+docker compose -f compose.prod.yaml --profile restore run --rm restore patchmanager-<stamp>.dump
+docker compose -f compose.prod.yaml up -d
 ```
+
+The `restore` service checks the dump, ends open database sessions, restores it in one
+transaction (a failed restore leaves the database as it was) and replaces the uploads
+in the `media` volume with the archive written next to the dump. The system page lists
+the restore points with the command for the newest one.
 
 Every CI run tests this procedure on the production stack (`scripts/drill.sh`): it
 writes data, takes a backup, deletes the database volume, restores the dump and
 checks row counts, Row Level Security, migrations and the audit hash chain. To
 restore after losing the database volume, start `postgres` (the init script creates
 the role and the empty database again), restore the dump as above, then start the
-rest of the stack. Restore uploads with
-`tar -C /app/media -xf /backups/<file>.dump.media.tar` in a container that mounts
-the `media` volume writable.
+rest of the stack.
 
 ### Encrypted off-site copies
 
 Dumps hold the documentation in plain form (uploads and MFA secrets inside are
 already encrypted by the application). Keep them on an encrypted disk and copy them
-off the host with a tool that encrypts on the client. With
-[restic](https://restic.net), run on the host, for example daily from cron after the
-backup service:
+off the host. The `offsite` service does this with [restic](https://restic.net): it
+encrypts on the host and uploads to S3 compatible storage (AWS S3, Backblaze B2,
+Wasabi, ...) after every new dump, keeps 14 daily, 8 weekly and 12 monthly snapshots
+and checks the repository. The system page shows the last run.
 
 ```bash
-export RESTIC_REPOSITORY=s3:https://s3.example.com/backups/patchmanager
-export RESTIC_PASSWORD_FILE=/root/restic-password     # keep a copy outside the host
-restic init                                           # once
-restic backup "$(docker volume inspect -f '{{.Mountpoint}}' patchmanager_backups)"
-restic forget --keep-daily 14 --keep-weekly 8 --keep-monthly 12 --prune
-restic check
+openssl rand -base64 48 > secrets/offsite_password    # keep a copy outside the host
+printf '%s' '<key id>' > secrets/offsite_access_key_id
+printf '%s' '<application key>' > secrets/offsite_secret_access_key
+chmod 600 secrets/offsite_*
+export PATCHMANAGER_OFFSITE_REPOSITORY=s3:https://s3.eu-central-003.backblazeb2.com/<bucket>/patchmanager
+docker compose -f compose.prod.yaml --profile offsite up -d offsite
 ```
 
-To restore, `restic restore latest --target /restore` and copy the dump into the
-`backups` volume, then follow the restore steps above. Keep `secrets/encryption_keys`
-with the off-site copy: uploads and second factors cannot be read without it.
+Use a separate bucket and key from the uploads bucket, so a leaked application key
+cannot delete the backups. For B2 use the S3 endpoint of the bucket's region. Retention
+is set with `OFFSITE_KEEP_DAILY`, `OFFSITE_KEEP_WEEKLY` and `OFFSITE_KEEP_MONTHLY` on
+the service.
+
+To fetch a dump from the off-site copy into the `backups` volume (then restore it as
+above; `restic snapshots` inside the container lists what is there):
+
+```bash
+docker compose -f compose.prod.yaml --profile offsite run --rm offsite \
+  restore patchmanager-<stamp>.dump
+```
+
+Keep `secrets/encryption_keys` and `secrets/offsite_password` outside the host as
+well: without the first, uploads and second factors cannot be read; without the
+second, the off-site copy cannot be opened.
 
 ### Point in time recovery
 
@@ -147,12 +165,27 @@ docker compose -f compose.prod.yaml up -d
 ## Uploads
 
 Photos and files are stored encrypted in the `media` volume (`/app/media`) and are
-included in the daily backup archive. Limits and scanning:
+included in the daily backup archive. Set `PATCHMANAGER_S3_BUCKET` to keep them in
+S3 compatible object storage instead (AWS S3, Backblaze B2, Wasabi, Ceph, Garage).
+The application encrypts every file before it leaves the process, so the provider
+only sees ciphertext. Keep the bucket private and turn on object versioning or a
+retention lock there: the database backup does not contain the files. Limits and
+scanning:
 
 | Variable | Default | Meaning |
 |---|---|---|
 | `PATCHMANAGER_UPLOAD_MAX_MB` | `20` | Maximum upload size (Caddy limits request bodies to 25 MB) |
 | `PATCHMANAGER_CLAMD_HOST` / `PATCHMANAGER_CLAMD_PORT` | unset / `3310` | Scan uploads with clamd; uploads fail while it is unreachable |
+| `PATCHMANAGER_S3_BUCKET` | unset | Store uploads in this bucket instead of the `media` volume |
+| `PATCHMANAGER_S3_ENDPOINT_URL` | AWS | Provider endpoint, https only, for example `https://s3.eu-central-003.backblazeb2.com` |
+| `PATCHMANAGER_S3_REGION` | unset | Region, for example `eu-central-003` for B2 |
+| `PATCHMANAGER_S3_ACCESS_KEY_ID` / `PATCHMANAGER_S3_SECRET_ACCESS_KEY_FILE` | required with a bucket | Application key; give it access to this bucket only (B2: a key restricted to the bucket) |
+| `PATCHMANAGER_S3_PREFIX` | `attachments` | Folder inside the bucket |
+| `PATCHMANAGER_S3_ADDRESSING_STYLE` | provider default | `path` for servers without virtual host buckets |
+
+Switching an existing installation to a bucket: copy the files first, for example
+`rclone copy` of the `media` volume's `attachments` folder into the bucket prefix,
+then set the variables and restart `app` and `worker`.
 
 ## Backups and source
 

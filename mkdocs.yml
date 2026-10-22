@@ -73,3 +73,4 @@ nav:
       - adr/0031-vendor-configuration-readers.md
       - adr/0032-servers-virtualisation-storage.md
       - adr/0033-api-token-limits.md
+      - adr/0034-object-storage-and-offsite-backups.md

@@ -70,5 +70,5 @@ disable_error_code = ["attr-defined", "arg-type", "union-attr", "misc", "no-unty
 
 # No type information published for these libraries.
 [[tool.mypy.overrides]]
-module = ["celery", "celery.*", "qrcode", "qrcode.*", "defusedxml", "defusedxml.*", "pypdfium2", "pypdfium2.*", "openpyxl", "openpyxl.*", "reportlab", "reportlab.*", "saml2", "saml2.*", "ldap", "ldap.*"]
+module = ["celery", "celery.*", "qrcode", "qrcode.*", "defusedxml", "defusedxml.*", "pypdfium2", "pypdfium2.*", "openpyxl", "openpyxl.*", "reportlab", "reportlab.*", "saml2", "saml2.*", "ldap", "ldap.*", "botocore", "botocore.*", "storages", "storages.*"]
 ignore_missing_imports = true

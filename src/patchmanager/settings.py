@@ -281,6 +281,28 @@ STORAGES = {
         },
     },
 }
+# S3 compatible object storage (AWS S3, Backblaze B2, Wasabi, Ceph, Garage) instead of the
+# media volume. Files are already encrypted by the application; the bucket stays private.
+S3_BUCKET = env("PATCHMANAGER_S3_BUCKET", "")
+S3_ENDPOINT_URL = env("PATCHMANAGER_S3_ENDPOINT_URL", "")
+if S3_ENDPOINT_URL and not S3_ENDPOINT_URL.startswith("https://"):
+    raise ImproperlyConfigured("PATCHMANAGER_S3_ENDPOINT_URL must use https.")
+if S3_BUCKET:
+    STORAGES["attachments"] = {
+        "BACKEND": "storages.backends.s3.S3Storage",
+        "OPTIONS": {
+            "bucket_name": S3_BUCKET,
+            "endpoint_url": S3_ENDPOINT_URL or None,
+            "region_name": env("PATCHMANAGER_S3_REGION", "") or None,
+            "access_key": env("PATCHMANAGER_S3_ACCESS_KEY_ID"),
+            "secret_key": env("PATCHMANAGER_S3_SECRET_ACCESS_KEY"),
+            "location": env("PATCHMANAGER_S3_PREFIX", "attachments"),
+            # B2 and most other providers reject ACL headers; access is the bucket policy.
+            "default_acl": None,
+            "file_overwrite": False,
+            "addressing_style": env("PATCHMANAGER_S3_ADDRESSING_STYLE", "") or None,
+        },
+    }
 UPLOAD_MAX_BYTES = int(env("PATCHMANAGER_UPLOAD_MAX_MB", "20")) * 1024 * 1024
 DATA_UPLOAD_MAX_MEMORY_SIZE = UPLOAD_MAX_BYTES + 1024 * 1024
 FILE_UPLOAD_MAX_MEMORY_SIZE = 5 * 1024 * 1024
