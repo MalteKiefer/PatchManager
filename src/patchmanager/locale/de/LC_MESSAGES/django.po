@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-22 08:59+0000\n"
+"POT-Creation-Date: 2026-10-22 09:49+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -40,7 +40,7 @@ msgid "Run the setup_token command to get one."
 msgstr "Führen Sie den Befehl setup_token aus, um eines zu erhalten."
 
 #: accounts/forms.py:49 accounts/forms.py:103 accounts/forms.py:110
-#: api/ui.py:32 api/ui.py:55 compute/pages.py:113 compute/pages.py:137
+#: api/ui.py:73 api/ui.py:96 compute/pages.py:113 compute/pages.py:137
 #: compute/pages.py:156 compute/pages.py:172 compute/pages.py:184
 #: directory/pages.py:86 directory/pages.py:105 directory/pages.py:123
 #: exchange/pdf.py:215 integrations/views.py:27 ipam/pages.py:127
@@ -78,7 +78,7 @@ msgstr "Authenticator-App"
 msgid "Role"
 msgstr "Rolle"
 
-#: accounts/forms.py:113 api/ui.py:42 templates/api/tokens.html:9
+#: accounts/forms.py:113 api/ui.py:83 templates/api/tokens.html:9
 #: templates/base.html:38
 msgid "Tenant"
 msgstr "Mandant"
@@ -185,35 +185,35 @@ msgstr "Melden Sie sich erneut mit Ihrem zweiten Faktor an."
 msgid "Set up a second factor to continue."
 msgstr "Richten Sie einen zweiten Faktor ein, um fortzufahren."
 
-#: accounts/models.py:41 directory/models.py:32 directory/models.py:64
+#: accounts/models.py:44 directory/models.py:32 directory/models.py:64
 msgid "email"
 msgstr "E-Mail"
 
-#: accounts/models.py:42
+#: accounts/models.py:45
 msgid "display name"
 msgstr "Anzeigename"
 
-#: accounts/models.py:44
+#: accounts/models.py:47
 msgid "language"
 msgstr "Sprache"
 
-#: accounts/models.py:46 circuits/models.py:27 dcim/models.py:31
+#: accounts/models.py:49 circuits/models.py:27 dcim/models.py:31
 #: dcim/models.py:178 integrations/models.py:22 ipam/models.py:45
 #: ipam/models.py:116 networks/models.py:17 templates/manage/tenants.html:8
 #: templates/manage/user_detail.html:6 templates/manage/users.html:13
 msgid "active"
 msgstr "aktiv"
 
-#: accounts/models.py:47
+#: accounts/models.py:50
 msgid "locked until"
 msgstr "gesperrt bis"
 
-#: accounts/models.py:53
+#: accounts/models.py:56
 msgid "break glass"
 msgstr "Notfallkonto"
 
-#: accounts/models.py:151 accounts/models.py:182 api/models.py:16
-#: api/models.py:56 compute/models.py:37 compute/models.py:97
+#: accounts/models.py:154 accounts/models.py:185 api/models.py:16
+#: api/models.py:60 compute/models.py:37 compute/models.py:97
 #: compute/models.py:158 compute/models.py:219 compute/models.py:264
 #: compute/models.py:299 dcim/models.py:35 dcim/models.py:188
 #: dcim/models.py:241 directory/models.py:27 directory/models.py:62
@@ -227,7 +227,7 @@ msgstr "Notfallkonto"
 msgid "name"
 msgstr "Name"
 
-#: accounts/models.py:152 accounts/models.py:183 circuits/models.py:68
+#: accounts/models.py:155 accounts/models.py:186 circuits/models.py:68
 #: compute/models.py:50 compute/models.py:133 compute/models.py:190
 #: dcim/models.py:251 directory/models.py:131 ipam/models.py:23
 #: ipam/models.py:77 ipam/models.py:134 ipam/models.py:221 ipam/models.py:291
@@ -238,15 +238,15 @@ msgstr "Name"
 msgid "description"
 msgstr "Beschreibung"
 
-#: accounts/models.py:186
+#: accounts/models.py:189
 msgid "require MFA"
 msgstr "MFA erforderlich"
 
-#: accounts/models.py:222 templates/manage/_assignments.html:6
+#: accounts/models.py:225 templates/manage/_assignments.html:6
 msgid "allow"
 msgstr "erlauben"
 
-#: accounts/models.py:223 templates/manage/_assignments.html:6
+#: accounts/models.py:226 templates/manage/_assignments.html:6
 msgid "deny"
 msgstr "verweigern"
 
@@ -408,7 +408,7 @@ msgid "The last super admin cannot be removed."
 msgstr "Der letzte Super-Admin kann nicht entfernt werden."
 
 #: accounts/services/users.py:29 accounts/services/users.py:167 api/core.py:28
-#: api/tokens.py:99 api/tokens.py:130 cabling/services.py:50
+#: api/tokens.py:74 api/tokens.py:134 api/tokens.py:165 cabling/services.py:50
 #: compute/importing.py:66 directory/links.py:143 directory/links.py:146
 #: directory/links.py:175 exchange/importer.py:54 exchange/importer.py:70
 #: floorplans/services.py:193 floorplans/views.py:283 history/services.py:76
@@ -692,11 +692,11 @@ msgstr "Lesen"
 msgid "Write"
 msgstr "Schreiben"
 
-#: api/models.py:46
+#: api/models.py:50
 msgid "personal token"
 msgstr "persönlicher Token"
 
-#: api/models.py:47
+#: api/models.py:51
 msgid "OAuth access token"
 msgstr "OAuth-Zugriffstoken"
 
@@ -704,66 +704,94 @@ msgstr "OAuth-Zugriffstoken"
 msgid "Choose read, write or both."
 msgstr "Wählen Sie Lesen, Schreiben oder beides."
 
-#: api/tokens.py:68
+#: api/tokens.py:70
+msgid "Choose object types from the list."
+msgstr "Wählen Sie Objekttypen aus der Liste."
+
+#: api/tokens.py:92
 msgid "Service accounts use their client credentials."
 msgstr "Dienstkonten verwenden ihre Client-Zugangsdaten."
 
-#: api/tokens.py:72
+#: api/tokens.py:96
 msgid "Tokens cannot be created while acting as another user."
 msgstr ""
 "Token können nicht erstellt werden, solange Sie als anderer Benutzer handeln."
 
-#: api/tokens.py:74 api/tokens.py:142
+#: api/tokens.py:98 api/tokens.py:184
 msgid "Enter a name."
 msgstr "Geben Sie einen Namen ein."
 
-#: api/tokens.py:76
+#: api/tokens.py:100
 #, python-format
 msgid "Tokens expire after 1 to %(n)s days."
 msgstr "Token laufen nach 1 bis %(n)s Tagen ab."
 
-#: api/ui.py:22
+#: api/tokens.py:103
+msgid "The location belongs to another tenant."
+msgstr "Der Ort gehört zu einem anderen Mandanten."
+
+#: api/ui.py:24
 msgid "7 days"
 msgstr "7 Tage"
 
-#: api/ui.py:23
+#: api/ui.py:25
 msgid "30 days"
 msgstr "30 Tage"
 
-#: api/ui.py:24
+#: api/ui.py:26
 msgid "90 days"
 msgstr "90 Tage"
 
-#: api/ui.py:25
+#: api/ui.py:27
 msgid "1 year"
 msgstr "1 Jahr"
 
-#: api/ui.py:34 api/ui.py:57 templates/api/clients.html:9
+#: api/ui.py:35
+msgid "Only these kinds of objects"
+msgstr "Nur diese Arten von Objekten"
+
+#: api/ui.py:38
+msgid "Leave all empty to allow every kind you may use yourself."
+msgstr "Lassen Sie alle leer, um jede Art zu erlauben, die Sie selbst nutzen dürfen."
+
+#: api/ui.py:41
+msgid "Only this location and what is in it"
+msgstr "Nur dieser Ort und was darin ist"
+
+#: api/ui.py:43
+msgid "A site, building, floor or room; empty means everywhere."
+msgstr "Ein Standort, Gebäude, Stockwerk oder Raum; leer heißt überall."
+
+#: api/ui.py:60
+msgid "everywhere"
+msgstr "überall"
+
+#: api/ui.py:75 api/ui.py:98 templates/api/clients.html:9
 #: templates/api/tokens.html:9
 msgid "Access"
 msgstr "Zugriff"
 
-#: api/ui.py:40
+#: api/ui.py:81
 msgid "Expires after"
 msgstr "Läuft ab nach"
 
-#: api/ui.py:49
+#: api/ui.py:90
 msgid "All my tenants"
 msgstr "Alle meine Mandanten"
 
-#: api/ui.py:114 templates/api/tokens.html:4
+#: api/ui.py:158 templates/api/tokens.html:4
 msgid "New token"
 msgstr "Neuer Token"
 
-#: api/ui.py:124 scim/views.py:415
+#: api/ui.py:168 scim/views.py:415
 msgid "Token revoked."
 msgstr "Token widerrufen."
 
-#: api/ui.py:161 templates/api/clients.html:4
+#: api/ui.py:208 templates/api/clients.html:4
 msgid "New API client"
 msgstr "Neuer API-Client"
 
-#: api/ui.py:175
+#: api/ui.py:222
 msgid "Client revoked."
 msgstr "Client widerrufen."
 
@@ -5152,6 +5180,10 @@ msgstr ""
 #: templates/api/tokens.html:9
 msgid "Expires"
 msgstr "Läuft ab"
+
+#: templates/api/tokens.html:12
+msgid "one location only"
+msgstr "nur ein Ort"
 
 #: templates/api/tokens.html:12 templates/networks/vlans.html:9
 msgid "all"

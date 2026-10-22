@@ -38,6 +38,9 @@ class UserManager(BaseUserManager["User"]):
 class User(AbstractBaseUser, TimestampedModel):
     """A person. Users are global; tenant access comes from role assignments."""
 
+    # Set for the duration of an API request by the token authentication (not stored).
+    api_token_limits: Any = None
+
     email = models.EmailField(_("email"), max_length=254)
     display_name = models.CharField(_("display name"), max_length=150)
     language = models.CharField(

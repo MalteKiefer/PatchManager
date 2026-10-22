@@ -20,6 +20,10 @@ class ApiClient(TimestampedModel):
         settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="api_client"
     )
     scopes = models.JSONField(default=list)
+    # Optional limits on top of the user's own rights: object types (empty: all) and a
+    # location subtree (empty: everywhere the user may act).
+    object_types = models.JSONField(default=list, blank=True)
+    scope_path = models.CharField(max_length=500, blank=True)
     tenant = models.ForeignKey(
         "tenancy.Tenant", null=True, blank=True, on_delete=models.CASCADE, related_name="+"
     )
@@ -57,6 +61,10 @@ class ApiToken(TimestampedModel):
     prefix = models.CharField(max_length=16, unique=True)
     token_hash = models.CharField(max_length=64)
     scopes = models.JSONField(default=list)
+    # Optional limits on top of the user's own rights: object types (empty: all) and a
+    # location subtree (empty: everywhere the user may act).
+    object_types = models.JSONField(default=list, blank=True)
+    scope_path = models.CharField(max_length=500, blank=True)
     tenant = models.ForeignKey(
         "tenancy.Tenant", null=True, blank=True, on_delete=models.CASCADE, related_name="+"
     )

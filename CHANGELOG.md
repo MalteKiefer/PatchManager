@@ -8,6 +8,8 @@ All notable changes to this project are documented here. The format follows
 
 ### Added
 
+* API tokens and OAuth clients can be limited to kinds of objects and to one location;
+  the limits apply to every check of the request, also for super admins (ADR 0033).
 * Servers, virtual machines and storage: clusters with hosts, virtual machines and
   containers with network cards and disks, storage of NAS, SAN and clusters
   (ADR 0032).

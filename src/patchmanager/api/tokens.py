@@ -60,8 +60,32 @@ def _scopes(values: Any) -> list[str]:
     return scopes
 
 
+def _limits(actor: User, object_types: Any, scope: Any) -> tuple[list[str], str]:
+    """Checked limits: known object types, and a location the actor may see."""
+    from patchmanager.accounts import permissions
+
+    known = {ot.code for ot in permissions.object_types()}
+    chosen = sorted(set(object_types or ()))
+    if not set(chosen) <= known:
+        raise ServiceError(_("Choose object types from the list."))
+    path = ""
+    if scope is not None:
+        if not policy.has_perm(actor, f"{scope.policy_object_type}.view", scope):
+            raise PermissionDeniedError(_("You do not have permission to do that."))
+        path = str(scope.path)
+    return chosen, path
+
+
 def create_token(
-    request: HttpRequest, actor: User, *, name: str, scopes: Any, days: int, tenant: Any = None
+    request: HttpRequest,
+    actor: User,
+    *,
+    name: str,
+    scopes: Any,
+    days: int,
+    tenant: Any = None,
+    object_types: Any = None,
+    scope: Any = None,
 ) -> tuple[ApiToken, str]:
     """A personal token for ``actor``. The plain token is returned once."""
     if actor.is_service:
@@ -74,6 +98,9 @@ def create_token(
         raise ServiceError(_("Enter a name."))
     if not 1 <= days <= MAX_DAYS:
         raise ServiceError(_("Tokens expire after 1 to %(n)s days.") % {"n": MAX_DAYS})
+    types, path = _limits(actor, object_types, scope)
+    if scope is not None and tenant is not None and scope.tenant_id != tenant.pk:
+        raise ServiceError(_("The location belongs to another tenant."))
     prefix, plain = _new(PERSONAL_PREFIX)
     token = ApiToken.objects.create(
         user=actor,
@@ -81,14 +108,22 @@ def create_token(
         prefix=prefix,
         token_hash=digest(plain),
         scopes=_scopes(scopes),
-        tenant=tenant,
+        object_types=types,
+        scope_path=path,
+        tenant=tenant if tenant is not None or scope is None else scope.tenant,
         expires_at=timezone.now() + timedelta(days=days),
     )
     audit.record(
         "api.token.created",
         request=request,
         obj=actor,
-        data={"token": token.prefix, "scopes": token.scopes, "days": days},
+        data={
+            "token": token.prefix,
+            "scopes": token.scopes,
+            "days": days,
+            "object_types": token.object_types,
+            "scope": token.scope_path,
+        },
     )
     return token, plain
 
@@ -131,7 +166,14 @@ def _require_manage(actor: User) -> None:
 
 
 def create_client(
-    request: HttpRequest, actor: User, *, name: str, scopes: Any, tenant: Any = None
+    request: HttpRequest,
+    actor: User,
+    *,
+    name: str,
+    scopes: Any,
+    tenant: Any = None,
+    object_types: Any = None,
+    scope: Any = None,
 ) -> tuple[ApiClient, str]:
     """A client with its own service user (give it roles like any user).
 
@@ -140,6 +182,7 @@ def create_client(
     _require_manage(actor)
     if not name.strip():
         raise ServiceError(_("Enter a name."))
+    types, path = _limits(actor, object_types, scope)
     client_id = f"{CLIENT_PREFIX}_{secrets.token_hex(10)}"
     secret = secrets.token_urlsafe(32)
     with transaction.atomic():
@@ -155,14 +198,21 @@ def create_client(
             secret_hash=make_password(secret),  # client secrets: Argon2id like passwords
             user=user,
             scopes=_scopes(scopes),
-            tenant=tenant,
+            object_types=types,
+            scope_path=path,
+            tenant=tenant if tenant is not None or scope is None else scope.tenant,
             created_by=actor,
         )
     audit.record(
         "api.client.created",
         request=request,
         obj=user,
-        data={"client": client_id, "scopes": client.scopes},
+        data={
+            "client": client_id,
+            "scopes": client.scopes,
+            "object_types": client.object_types,
+            "scope": client.scope_path,
+        },
     )
     return client, secret
 
@@ -218,6 +268,8 @@ def issue_access_token(
         prefix=prefix,
         token_hash=digest(plain),
         scopes=sorted(wanted),
+        object_types=list(client.object_types),
+        scope_path=client.scope_path,
         tenant=client.tenant,
         expires_at=timezone.now() + timedelta(seconds=OAUTH_SECONDS),
     )

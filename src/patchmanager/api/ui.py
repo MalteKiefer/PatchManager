@@ -1,5 +1,7 @@
 """Pages for personal API tokens and OAuth clients."""
 
+from typing import Any
+
 from django import forms
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
@@ -13,7 +15,7 @@ from django.views.decorators.http import require_POST
 
 from patchmanager.accounts.decorators import permission_required
 from patchmanager.accounts.models import User
-from patchmanager.accounts.services import ServiceError
+from patchmanager.accounts.services import PermissionDeniedError, ServiceError
 from patchmanager.api import tokens
 from patchmanager.api.models import SCOPES, ApiClient, ApiToken
 
@@ -26,7 +28,46 @@ DAYS = [
 ]
 
 
-class TokenForm(forms.Form):
+class LimitsMixin(forms.Form):
+    """Optional limits: object types and one location (both narrow the token further)."""
+
+    object_types = forms.MultipleChoiceField(
+        label=gettext_lazy("Only these kinds of objects"),
+        required=False,
+        widget=forms.CheckboxSelectMultiple,
+        help_text=gettext_lazy("Leave all empty to allow every kind you may use yourself."),
+    )
+    scope = forms.ChoiceField(
+        label=gettext_lazy("Only this location and what is in it"),
+        required=False,
+        help_text=gettext_lazy("A site, building, floor or room; empty means everywhere."),
+    )
+
+    def limit_choices(self, actor: Any) -> None:
+        """Object types of the registry and the locations the user may see."""
+        from patchmanager.accounts import permissions, policy
+        from patchmanager.locations.models import Building, Floor, Room, Site
+
+        types: Any = self.fields["object_types"]
+        types.choices = [(ot.code, f"{ot.label} ({ot.code})") for ot in permissions.object_types()]
+        self.locations: dict[str, Any] = {}
+        for model in (Site, Building, Floor, Room):
+            for node in policy.scope_queryset(
+                actor, f"{model.policy_object_type}.view", model.objects.all()
+            ).order_by("path")[:2000]:
+                self.locations[f"{model.__name__.lower()}:{node.pk}"] = node
+        scope: Any = self.fields["scope"]
+        scope.choices = [("", _("everywhere"))] + [
+            (key, " / ".join([*(a.name for a in node.ancestors()[1:]), node.name]))
+            for key, node in sorted(self.locations.items(), key=lambda kv: str(kv[1].path))
+        ]
+
+    def chosen_scope(self) -> Any:
+        """The chosen location object (or None)."""
+        return self.locations.get(self.cleaned_data.get("scope") or "")
+
+
+class TokenForm(LimitsMixin):
     """A new personal token."""
 
     name = forms.CharField(label=gettext_lazy("Name"), max_length=100)
@@ -49,7 +90,7 @@ class TokenForm(forms.Form):
         field.choices = [("", _("All my tenants")), *((k, str(t)) for k, t in self.tenants.items())]
 
 
-class ClientForm(forms.Form):
+class ClientForm(LimitsMixin):
     """A new OAuth client."""
 
     name = forms.CharField(label=gettext_lazy("Name"), max_length=100)
@@ -90,6 +131,7 @@ def token_create(request: HttpRequest) -> HttpResponse:
         raise PermissionDenied
     tenants = list(getattr(request, "available_tenants", []))
     form = TokenForm(request.POST or None, tenants=tenants)
+    form.limit_choices(user)
     if request.method == "POST" and form.is_valid():
         tenant = (
             form.tenants.get(form.cleaned_data["tenant"]) if form.cleaned_data["tenant"] else None
@@ -102,8 +144,10 @@ def token_create(request: HttpRequest) -> HttpResponse:
                 scopes=form.cleaned_data["scopes"],
                 days=form.cleaned_data["days"],
                 tenant=tenant,
+                object_types=form.cleaned_data["object_types"],
+                scope=form.chosen_scope(),
             )
-        except ServiceError as exc:
+        except (ServiceError, PermissionDeniedError) as exc:
             messages.error(request, str(exc))
         else:
             request.session[SHOW_ONCE] = {"token": plain}
@@ -142,6 +186,7 @@ def client_list(request: HttpRequest) -> HttpResponse:
 def client_create(request: HttpRequest) -> HttpResponse:
     """Page that creates an OAuth client; the list shows its secret once."""
     form = ClientForm(request.POST or None)
+    form.limit_choices(_user(request))
     if request.method == "POST" and form.is_valid():
         try:
             client, secret = tokens.create_client(
@@ -149,8 +194,10 @@ def client_create(request: HttpRequest) -> HttpResponse:
                 _user(request),
                 name=form.cleaned_data["name"],
                 scopes=form.cleaned_data["scopes"],
+                object_types=form.cleaned_data["object_types"],
+                scope=form.chosen_scope(),
             )
-        except ServiceError as exc:
+        except (ServiceError, PermissionDeniedError) as exc:
             messages.error(request, str(exc))
         else:
             request.session[SHOW_ONCE] = {"client_id": client.client_id, "client_secret": secret}
