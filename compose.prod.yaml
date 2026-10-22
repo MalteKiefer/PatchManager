@@ -21,8 +21,9 @@ x-app: &app
     PATCHMANAGER_BASE_URL: https://${PATCHMANAGER_DOMAIN:?set PATCHMANAGER_DOMAIN}
     PATCHMANAGER_ALLOWED_HOSTS: ${PATCHMANAGER_DOMAIN}
     PATCHMANAGER_CSRF_TRUSTED_ORIGINS: https://${PATCHMANAGER_DOMAIN}
-    # Only Caddy can reach the app, on the internal network.
-    PATCHMANAGER_FORWARDED_ALLOW_IPS: "*"
+    # Only Caddy's fixed backend address may set X-Forwarded-*: the app also sits
+    # on the egress network, where other peers could reach it.
+    PATCHMANAGER_FORWARDED_ALLOW_IPS: ${PATCHMANAGER_PROXY_IP:-172.30.0.2}
     DJANGO_SECRET_KEY_FILE: /run/secrets/django_secret_key
     PATCHMANAGER_ENCRYPTION_KEYS_FILE: /run/secrets/encryption_keys
     DATABASE_URL: postgresql://patchmanager@postgres:5432/patchmanager
@@ -117,7 +118,10 @@ services:
     environment:
       PATCHMANAGER_DOMAIN: ${PATCHMANAGER_DOMAIN}
     ports: ["80:80", "443:443", "443:443/udp"]
-    networks: [frontend, backend]
+    networks:
+      frontend:
+      backend:
+        ipv4_address: ${PATCHMANAGER_PROXY_IP:-172.30.0.2}
     volumes:
       - ./deploy/Caddyfile:/etc/caddy/Caddyfile:ro
       - caddy_data:/data
@@ -175,7 +179,7 @@ services:
     image: restic/restic:0.19.1@sha256:136600b6ff6843d61d355f7f71f460a166429f35de6fd11b568fece3c9a4d510
     profiles: [offsite]
     restart: unless-stopped
-    networks: [egress]
+    networks: [offsite]
     environment:
       RESTIC_REPOSITORY: ${PATCHMANAGER_OFFSITE_REPOSITORY:-}
       RESTIC_CACHE_DIR: /cache
@@ -196,7 +200,11 @@ networks:
   frontend:
   backend:
     internal: true
+    ipam:
+      config:
+        - subnet: ${PATCHMANAGER_BACKEND_SUBNET:-172.30.0.0/24}
   egress:
+  offsite:
 
 volumes:
   pgdata:
