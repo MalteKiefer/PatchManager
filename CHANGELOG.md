@@ -8,6 +8,7 @@ All notable changes to this project are documented here. The format follows
 
 ### Added
 
+* One-off import of volumes and shared folders from QNAP NAS systems (QTS, QuTS hero).
 * Uploads in S3 compatible object storage (AWS S3, Backblaze B2, Wasabi and others)
   with `PATCHMANAGER_S3_BUCKET`; files stay encrypted by the application (ADR 0034).
 * Encrypted off-site backups with restic to S3 or B2 (`offsite` compose profile) and a

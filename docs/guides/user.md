@@ -192,7 +192,8 @@ systems. **Connections → Connect Proxmox VE** reads a Proxmox cluster with an 
 token that has read rights: choose which nodes, machines and storage to take over,
 where new servers go (room and device type) and how often to update. A machine that
 moves to another node keeps its record; only its host changes. **Import once** reads
-a VMware vCenter or a Synology NAS without storing the credentials.
+a VMware vCenter or a Synology or QNAP NAS without storing the credentials. QNAP
+accounts with two step sign in cannot be used; create a separate read only account.
 
 ## Customers, systems and lines
 

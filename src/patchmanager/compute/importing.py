@@ -261,6 +261,7 @@ class ImportForm(forms.Form):
             ("proxmox", "Proxmox VE"),
             ("vmware", "VMware vCenter"),
             ("synology", "Synology DSM"),
+            ("qnap", "QNAP QTS / QuTS hero"),
         ],
     )
     url = forms.URLField(
@@ -276,10 +277,10 @@ class ImportForm(forms.Form):
         help_text=gettext_lazy("user@realm!tokenid=secret, with read rights (PVEAuditor)."),
     )
     username = forms.CharField(
-        label=gettext_lazy("User (vCenter, Synology)"), required=False, max_length=150
+        label=gettext_lazy("User (vCenter, NAS)"), required=False, max_length=150
     )
     password = forms.CharField(
-        label=gettext_lazy("Password (vCenter, Synology)"),
+        label=gettext_lazy("Password (vCenter, NAS)"),
         required=False,
         widget=forms.PasswordInput(attrs={"autocomplete": "off"}),
     )
@@ -292,7 +293,9 @@ class ImportForm(forms.Form):
         ),
     )
     nas = forms.ModelChoiceField(
-        label=gettext_lazy("NAS device (Synology)"), queryset=Device.objects.none(), required=False
+        label=gettext_lazy("NAS device (Synology, QNAP)"),
+        queryset=Device.objects.none(),
+        required=False,
     )
 
     def __init__(self, *args: Any, tenant: Any, actor: Any, **kwargs: Any) -> None:
@@ -309,11 +312,11 @@ class ImportForm(forms.Form):
         platform = data.get("platform")
         if platform == "proxmox" and not data.get("token"):
             raise forms.ValidationError(_("Enter the API token."))
-        if platform in ("vmware", "synology") and not (
+        if platform in ("vmware", "synology", "qnap") and not (
             data.get("username") and data.get("password")
         ):
             raise forms.ValidationError(_("Enter user and password."))
-        if platform == "synology" and data.get("nas") is None:
+        if platform in ("synology", "qnap") and data.get("nas") is None:
             raise forms.ValidationError(_("Choose the NAS device the storage belongs to."))
         return data
 
@@ -342,9 +345,8 @@ def import_view(request: HttpRequest) -> HttpResponse:
                     data["url"], data["username"], data["password"], data["fingerprint"]
                 )
             else:
-                found = sources.synology(
-                    data["url"], data["username"], data["password"], data["fingerprint"]
-                )
+                read = sources.synology if data["platform"] == "synology" else sources.qnap
+                found = read(data["url"], data["username"], data["password"], data["fingerprint"])
             result = save(request, actor, tenant, found, nas=data.get("nas"))
         except PermissionDeniedError as exc:
             raise PermissionDenied from exc
@@ -368,8 +370,8 @@ def import_view(request: HttpRequest) -> HttpResponse:
             "title": _("Import from a platform"),
             "intro": _(
                 "Reads clusters, hosts, virtual machines and storage from Proxmox VE and VMware"
-                " vCenter, or volumes and shares from a Synology NAS. Credentials are used once"
-                " and not stored; give an account with read rights only."
+                " vCenter, or volumes and shares from a Synology or QNAP NAS. Credentials are used"
+                " once and not stored; give an account with read rights only."
             ),
             "form": form,
             "back_url": reverse("objects:index", args=["vms"]),

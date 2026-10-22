@@ -29,8 +29,8 @@ between nodes; a moved machine must stay one documented machine.
   Connections update by hand or every 1, 6 or 24 hours (a scheduled task); a
   connection set up by someone who can no longer sign in stops with an error.
   Machines that disappeared from the platform are reported, not deleted.
-* One-off imports from VMware vCenter (REST API) and Synology DSM (volumes, pools,
-  shares) take credentials that are used once and not stored.
+* One-off imports from VMware vCenter (REST API), Synology DSM (volumes, pools,
+  shares) and QNAP QTS or QuTS hero (volumes, shared folders) take credentials that are used once and not stored.
 * The address is the user's, so every platform request is https only, resolved
   once with loopback, link local (cloud metadata), multicast and unspecified
   addresses refused, sent to the checked address, without redirects, with a deadline
