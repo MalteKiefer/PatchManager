@@ -34,6 +34,7 @@ class Vlan:
     jumbo: bool = False
     ospf_area: str = ""
     ospf_passive: bool = False
+    helpers: list[str] = field(default_factory=list)  # DHCP relay targets
 
 
 @dataclass
@@ -47,6 +48,30 @@ class Interface:
     edge: bool = False
     bpdu_guard: bool = False
     root_guard: bool = False
+    # Per interface VLAN settings (Cisco style); finish() turns them into VLAN port lists.
+    mode: str = ""  # access, trunk or routed
+    access_vlan: int | None = None
+    native_vlan: int | None = None
+    allowed: list[int] | None = None  # None: all VLANs the device has
+    lag: str = ""  # aggregation this port is a member of
+    lag_protocol: str = ""
+    addresses: list[str] = field(default_factory=list)  # routed port addresses
+    helpers: list[str] = field(default_factory=list)
+
+
+@dataclass
+class Pool:
+    """A DHCP pool served by the device."""
+
+    name: str
+    network: str = ""  # 10.0.10.0/24
+    start: str = ""
+    end: str = ""
+    gateway: str = ""
+    dns: list[str] = field(default_factory=list)
+    domain: str = ""
+    lease_seconds: int | None = None
+    reservations: list[tuple[str, str, str]] = field(default_factory=list)  # mac, ip, name
 
 
 @dataclass
@@ -102,6 +127,7 @@ class Config:
     """What a configuration says, in documentation terms."""
 
     hostname: str = ""
+    vendor: str = ""  # parser that read it, for example "cisco"
     platform: str = ""  # from the header, for example "JL258A ... WC.16.10.0009"
     vlans: dict[int, Vlan] = field(default_factory=dict)
     interfaces: dict[str, Interface] = field(default_factory=dict)
@@ -119,6 +145,9 @@ class Config:
     neighbors: dict[str, Neighbor] = field(default_factory=dict)
     profiles: dict[str, Profile] = field(default_factory=dict)
     gateways: list[str] = field(default_factory=list)
+    dns_servers: list[str] = field(default_factory=list)
+    domain: str = ""
+    pools: dict[str, Pool] = field(default_factory=dict)
     stack_kind: str = ""  # vsf or stack
     members: dict[int, Member] = field(default_factory=dict)
     secrets_skipped: int = 0
@@ -246,3 +275,161 @@ def _ip(value: str) -> str:
         return str(ipaddress.ip_address(value))
     except ValueError as exc:
         raise ParseError(f"cannot read the address {value}") from exc
+
+
+# --- Shared steps -----------------------------------------------------------------
+
+# Long and short interface names of the common vendors, to match documented ports.
+_ALIASES = (
+    ("twentyfivegige", ("twe", "twentyfivegigabitethernet")),
+    ("hundredgige", ("hu", "hundredgigabitethernet")),
+    ("fortygigabitethernet", ("fo", "fortygige")),
+    ("tengigabitethernet", ("te", "ten-gigabitethernet", "xge")),
+    ("gigabitethernet", ("gi", "gig", "ge", "g")),
+    ("fastethernet", ("fa", "f")),
+    ("ethernet", ("eth", "et", "e")),
+    ("port-channel", ("po", "bridge-aggregation", "eth-trunk", "trk", "lag", "ae", "bond")),
+)
+_SPLIT = re.compile(r"^([a-z][a-z-]*?)[\s-]?(\d.*)$")
+
+
+def canonical(name: str) -> str:
+    """A comparable form of an interface name: ``Gi1/0/1`` and ``GigabitEthernet1/0/1`` match."""
+    text = name.strip().lower().replace(" ", "")
+    match = _SPLIT.match(text)
+    if match is None:
+        return text
+    prefix, rest = match.groups()
+    for full, short in _ALIASES:
+        if prefix == full or prefix in short:
+            return f"{full}{rest}"
+    return f"{prefix}{rest}"
+
+
+def finish(config: Config) -> Config:
+    """Turn per interface VLAN and aggregation settings into VLAN port lists and trunks."""
+    known = set(config.vlans)
+    for port in config.interfaces.values():
+        if port.lag:
+            trunk = config.trunks.setdefault(
+                port.lag, Trunk(port.lag, [], port.lag_protocol or "static")
+            )
+            if port.name not in trunk.members:
+                trunk.members.append(port.name)
+            if port.lag_protocol:
+                trunk.protocol = port.lag_protocol
+            continue  # members carry the aggregation's VLANs
+        if port.mode == "access" and port.access_vlan:
+            _member(config, port.access_vlan, port.name, tagged=False)
+        elif port.mode == "trunk":
+            if port.native_vlan:
+                _member(config, port.native_vlan, port.name, tagged=False)
+            allowed = known if port.allowed is None else set(port.allowed)
+            for vid in sorted(allowed - {port.native_vlan}):
+                _member(config, vid, port.name, tagged=True)
+    return config
+
+
+def _member(config: Config, vid: int, name: str, *, tagged: bool) -> None:
+    if not 1 <= vid <= 4094:
+        return
+    vlan = config.vlans.setdefault(vid, Vlan(vid))
+    target = vlan.tagged if tagged else vlan.untagged
+    if name not in target:
+        target.append(name)
+
+
+def mask_to_prefix(mask: str) -> int:
+    """``255.255.255.0`` as 24 (also wildcard masks like ``0.0.0.255``)."""
+    try:
+        value = int(ipaddress.IPv4Address(mask))
+    except ValueError as exc:
+        raise ParseError(f"cannot read the mask {mask[:20]}") from exc
+    if value and value & 1 and not value & 0x80000000:
+        value ^= 0xFFFFFFFF  # wildcard mask
+    bits = bin(value).count("1")
+    if value != (0xFFFFFFFF << (32 - bits)) & 0xFFFFFFFF:
+        raise ParseError(f"cannot read the mask {mask[:20]}")
+    return bits
+
+
+def vid_list(spec: str) -> list[int]:
+    """VLAN lists in any common spelling: ``10,20-30``, ``10 20 to 30``, ``all``."""
+    text = spec.lower().replace(" to ", "-").replace(" ", ",")
+    if text in ("all", "1-4094"):
+        return list(range(1, 4095))
+    return vids(",".join(p for p in text.split(",") if p and p not in ("add", "except")))
+
+
+# Lines that carry secrets on any platform; they are counted, never read.
+SECRET = re.compile(
+    r"(password|passwd|secret|community|pre-?shared|psk|private-key|key-string|"
+    r"\bkey\b|passphrase|ENC |hash|credential|authentication-key|md5|sha1|sha256)",
+    re.I,
+)
+
+
+def lines_of(text: str) -> list[str]:
+    """The lines of a configuration, with the size limits every parser shares."""
+    if "\x00" in text:
+        raise ParseError("the file is not a text configuration")
+    if len(text) > MAX_BYTES:
+        raise ParseError("the configuration is larger than 4 MB")
+    lines = [line.removesuffix("\r") for line in text.split("\n")]
+    if len(lines) > MAX_LINES:
+        raise ParseError(f"the configuration has more than {MAX_LINES} lines")
+    for number, line in enumerate(lines, 1):
+        if len(line) > MAX_LINE:
+            raise ParseError(f"line {number} is longer than {MAX_LINE} characters")
+    return lines
+
+
+def blocks(
+    lines: list[str], comments: tuple[str, ...] = ("!",)
+) -> list[tuple[str, list[str], int]]:
+    """Top level commands with their indented sub-commands (``exit`` lines dropped)."""
+    result: list[tuple[str, list[str], int]] = []
+    for number, raw in enumerate(lines, 1):
+        stripped = raw.strip()
+        if not stripped or stripped.startswith(comments):
+            continue
+        if raw[0].isspace() and result:
+            if stripped not in ("exit", "quit", "end"):
+                result[-1][1].append(stripped)
+            continue
+        result.append((stripped, [], number))
+    return result
+
+
+def without_secrets(config: Config, body: list[str]) -> list[str]:
+    """Body lines without secrets (each skipped line is counted)."""
+    kept = []
+    for line in body:
+        if SECRET.search(line):
+            config.secrets_skipped += 1
+        else:
+            kept.append(line)
+    return kept
+
+
+def address_of(words: list[str]) -> str:
+    """``A.B.C.D M.M.M.M``, ``A.B.C.D/len`` or IPv6 ``x::y/len`` as ``address/len``."""
+    if not words:
+        raise ParseError("an address is missing")
+    if "/" in words[0]:
+        return _address(words[0], None)
+    if len(words) > 1 and words[1][:1].isdigit():
+        return _address(words[0], str(mask_to_prefix(words[1])))
+    raise ParseError(f"cannot read the address {words[0][:40]}")
+
+
+def network_of(words: list[str]) -> str:
+    """A network in either spelling, normalised (host bits cleared)."""
+    if "/" in words[0]:
+        return _network(words[0], None)
+    return _network(words[0], str(mask_to_prefix(words[1])) if len(words) > 1 else None)
+
+
+def keywords(text: str) -> frozenset[str]:
+    """A set of command words written as one string."""
+    return frozenset(text.split())

@@ -378,14 +378,14 @@ def _replace(device: Device, config: model.Config, result: Result) -> None:
             lambda r: (r.name, r.detects, r.untagged_vid, r.tagged_vids, r.jumbo),
         ),
     ]
-    for model, rows, label, key in lists:
-        current = list(model.objects.filter(device=device))
+    for table, rows, label, key in lists:
+        current = list(table.objects.filter(device=device))
         if sorted(map(key, current), key=str) == sorted(map(key, rows), key=str):
             continue
-        model.objects.filter(device=device).delete()
+        table.objects.filter(device=device).delete()
         for row in rows:
             row.full_clean(exclude=["tenant", "device"])
-        model.objects.bulk_create(rows)
+        table.objects.bulk_create(rows)
         result.add(_("%(what)s: %(n)s") % {"what": label, "n": len(rows)})
 
 
