@@ -68,9 +68,68 @@ restore after losing the database volume, start `postgres` (the init script crea
 the role and the empty database again), restore the dump as above, then start the
 rest of the stack. Restore uploads with
 `tar -C /app/media -xf /backups/<file>.dump.media.tar` in a container that mounts
-the `media` volume writable. Point in time recovery (WAL archiving) is not built in;
-use your platform's volume snapshots if you need a smaller recovery point than one
-day.
+the `media` volume writable.
+
+### Encrypted off-site copies
+
+Dumps hold the documentation in plain form (uploads and MFA secrets inside are
+already encrypted by the application). Keep them on an encrypted disk and copy them
+off the host with a tool that encrypts on the client. With
+[restic](https://restic.net), run on the host, for example daily from cron after the
+backup service:
+
+```bash
+export RESTIC_REPOSITORY=s3:https://s3.example.com/backups/patchmanager
+export RESTIC_PASSWORD_FILE=/root/restic-password     # keep a copy outside the host
+restic init                                           # once
+restic backup "$(docker volume inspect -f '{{.Mountpoint}}' patchmanager_backups)"
+restic forget --keep-daily 14 --keep-weekly 8 --keep-monthly 12 --prune
+restic check
+```
+
+To restore, `restic restore latest --target /restore` and copy the dump into the
+`backups` volume, then follow the restore steps above. Keep `secrets/encryption_keys`
+with the off-site copy: uploads and second factors cannot be read without it.
+
+### Point in time recovery
+
+The daily dump loses at most one day. For a recovery point of minutes, archive the
+write ahead log. This is not part of the CI drill; rehearse it before relying on it.
+
+1. Add a volume for the archive and enable archiving in a `compose.override.yaml`:
+
+    ```yaml
+    services:
+      postgres:
+        command: ["postgres", "-c", "wal_level=replica", "-c", "archive_mode=on",
+                  "-c", "archive_timeout=300",
+                  "-c", "archive_command=test ! -f /wal/%f && cp %p /wal/%f"]
+        volumes: ["wal:/wal"]
+    volumes:
+      wal:
+    ```
+
+2. Take a base backup after the change and then weekly (old WAL before the oldest
+   base backup can be deleted):
+
+    ```bash
+    docker compose exec postgres pg_basebackup -U postgres \
+      -D /wal/base-$(date -u +%Y%m%d) -Ft -z -X stream
+    ```
+
+3. To recover to a moment: stop the stack, empty the `pgdata` volume, unpack
+   `base.tar.gz` and `pg_wal.tar.gz` of the newest base backup before that moment into
+   `/var/lib/postgresql/18/docker`, create an empty `recovery.signal` there and add to
+   `postgresql.auto.conf`:
+
+    ```
+    restore_command = 'cp /wal/%f %p'
+    recovery_target_time = '2026-10-22 09:30:00+00'
+    recovery_target_action = 'promote'
+    ```
+
+   Start `postgres`, check the data, then start the rest of the stack. Copy the `wal`
+   volume off-site like the dumps.
 
 ## Reverse proxy
 
