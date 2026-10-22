@@ -282,3 +282,11 @@ def test_links_inside_a_site_block_its_move(make_tree, make_tenant, super_admin,
         links.add(request, super_admin, t["room"], role="part", system=doors)
         with pytest.raises(ServiceError, match="refer to this site"):
             tree.move_site(t["request"], super_admin, t["site"], make_tenant())
+
+
+def test_webhooks_highlight_administration(admin_client: Client) -> None:
+    page = admin_client.get("/integrations/webhooks/", secure=True).content.decode()
+    import re
+
+    current = re.findall(r'<a href="([^"]+)" aria-current="page"', page)
+    assert "/manage/" in current and "/exchange/" not in current

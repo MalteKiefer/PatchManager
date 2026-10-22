@@ -21,7 +21,7 @@ SECTIONS = {
     "history": "activity",
     "search": "search",
     "exchange": "exchange",
-    "integrations": "exchange",
+    "integrations": "admin",
     "manage": "admin",
     "scim": "admin",
     "sso": "admin",
