@@ -1,7 +1,8 @@
-# Threat model (STRIDE, draft)
+# Threat model (STRIDE)
 
-Status: draft for Phase 0, revisited at the end of every phase and fully reviewed in
-Phase 9 against OWASP ASVS 5.0 Level 2.
+Status: reviewed for 1.0 against OWASP ASVS 5.0 Level 2; see the
+[self-audit](asvs-l2.md) for gaps and accepted risks. Revisited with every release
+that changes a trust boundary.
 
 ## Assets
 

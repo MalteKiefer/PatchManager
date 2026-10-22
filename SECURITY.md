@@ -2,8 +2,7 @@
 
 ## Supported versions
 
-Until 1.0.0, only the latest release receives security fixes. After 1.0.0 the latest
-minor release of the current major version is supported.
+The latest minor release of the current major version (1.x) receives security fixes.
 
 ## Reporting a vulnerability
 

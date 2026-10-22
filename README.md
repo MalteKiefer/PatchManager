@@ -4,11 +4,11 @@ Self-hosted documentation for network infrastructure: sites, buildings, floors, 
 racks, devices, ports, patch panels, cabling, VLANs and WLANs. Multi-tenant, with fine
 grained permissions, SSO and an API.
 
-> Status: Phase 9 (hardening for 1.0). Tenants, users, MFA, roles, the audit log,
-> locations, racks, devices, ports, cabling with path tracing, VLANs, WLANs, floor
-> plans, change history, search, imports and exports, the REST API, webhooks, single
-> sign on (OIDC, SAML, LDAP), SCIM provisioning and the admin area work.
-> Every feature is free and available on every installation. See the [phase backlog](docs/plan/backlog.md).
+> Status: 1.0. Tenants, users, MFA, roles, the audit log, locations, racks, devices,
+> ports, cabling with path tracing, VLANs, WLANs, floor plans, change history, search,
+> imports and exports, the REST API, webhooks, single sign on (OIDC, SAML, LDAP), SCIM
+> provisioning, personal data export and the admin area. Every feature is free and
+> available on every installation.
 
 ## Quick start (development)
 
@@ -33,7 +33,9 @@ See the [deployment guide](docs/guides/deployment.md). Images are published to
 * [Architecture](docs/plan/architecture.md) and [data model](docs/plan/data-model.md)
 * [Technology stack](docs/STACK.md)
 * [Architecture decisions](docs/adr/)
-* [Threat model](docs/security/threat-model.md)
+* [Threat model](docs/security/threat-model.md), [ASVS L2 self-audit](docs/security/asvs-l2.md)
+  and [pen-test checklist](docs/security/pentest-checklist.md)
+* [Performance](docs/guides/performance.md)
 * [Contributing](CONTRIBUTING.md) and [security policy](SECURITY.md)
 
 Build the docs site with `pixi run -e docs docs`.

@@ -4,12 +4,15 @@ All notable changes to this project are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the project uses
 [Semantic Versioning](https://semver.org/).
 
-## [Unreleased]
+## [1.0.0] - 2026-10-22
 
 ### Added
 
 * Personal data: everyone can download their data as JSON; administrators can
   anonymise accounts for erasure requests (ADR 0024).
+* Backup and restore drill on the production stack in every CI run; guides for
+  encrypted off-site copies and point in time recovery.
+* ASVS 5.0 Level 2 self-audit and a penetration test checklist.
 * Load test in CI with 500 racks, 50 000 ports and 12 000 cables, with time and
   query budgets per page; `seed_scale` command for demo and load data.
 
@@ -25,6 +28,7 @@ All notable changes to this project are documented here. The format follows
 
 * Search loaded the vendor of every device hit separately.
 * Path tracing needed two queries per cable hop instead of one.
+* The status code on error pages was below AA contrast in light mode.
 
 ### Removed
 
@@ -207,6 +211,11 @@ All notable changes to this project are documented here. The format follows
 * pre-commit hooks, Renovate configuration.
 * Documentation site, ADRs 0001 to 0010, STRIDE threat model draft, security policy.
 
+[1.0.0]: https://github.com/MalteKiefer/PatchManager/releases/tag/v1.0.0
+[0.9.0]: https://github.com/MalteKiefer/PatchManager/releases/tag/v0.9.0
+[0.8.0]: https://github.com/MalteKiefer/PatchManager/releases/tag/v0.8.0
+[0.7.0]: https://github.com/MalteKiefer/PatchManager/releases/tag/v0.7.0
+[0.6.0]: https://github.com/MalteKiefer/PatchManager/releases/tag/v0.6.0
 [0.5.0]: https://github.com/MalteKiefer/PatchManager/releases/tag/v0.5.0
 [0.4.0]: https://github.com/MalteKiefer/PatchManager/releases/tag/v0.4.0
 [0.3.1]: https://github.com/MalteKiefer/PatchManager/releases/tag/v0.3.1

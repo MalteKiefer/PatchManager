@@ -32,8 +32,6 @@ page shows the elevation for the **Front** or **Rear** face.
 * Settings: height (1 to 100 U), width, depth, unit numbering (from the bottom
   by default), status, serial number and asset tag.
 
-Devices, ports and cabling follow in the next releases.
-
 ## Device library
 
 **Library** lists device types: shared ones and the custom types of the current

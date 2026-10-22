@@ -37,6 +37,8 @@ nav:
   - Stack: STACK.md
   - Security:
       - Threat model: security/threat-model.md
+      - ASVS L2 self-audit: security/asvs-l2.md
+      - Pen-test checklist: security/pentest-checklist.md
   - Decisions:
       - adr/0001-record-architecture-decisions.md
       - adr/0002-django-and-drf.md
