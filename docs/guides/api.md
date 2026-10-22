@@ -20,6 +20,11 @@ curl -u "$CLIENT_ID:$CLIENT_SECRET" -d grant_type=client_credentials \
 
 The answer contains an `access_token` valid for one hour.
 
+Tokens and clients can be **limited** further: to some kinds of objects (for example
+only devices and IP addresses) and to one location (a site, building, floor or room
+and everything in it). A limited token never does more, even if its user is a super
+admin; read only tokens are limited to reading in every check.
+
 ## Conventions
 
 * JSON in and out; lists are paginated with `?limit=` (default 100, at most 1000)

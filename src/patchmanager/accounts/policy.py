@@ -198,12 +198,49 @@ def is_super_admin(user: Any) -> bool:
     return _usable(user) and any(g.is_super_admin for g in grants_for(user))
 
 
+@dataclass(frozen=True)
+class TokenLimits:
+    """What an API token may do at most, on top of its user's own rights.
+
+    ``object_types`` (empty: all) and ``scope_path`` (empty: everywhere) narrow every
+    check of the request; ``write`` is false for read only tokens. Super admins are
+    narrowed too: a token never does more than it was made for.
+    """
+
+    object_types: frozenset[str]
+    scope_path: str
+    write: bool
+
+    def allows(self, permission: str, path: str | None) -> bool:
+        """Whether ``permission`` at ``path`` stays inside these limits."""
+        object_type, _sep, action = permission.rpartition(".")
+        if self.object_types and object_type not in self.object_types:
+            return False
+        if not self.write and action != "view":
+            return False
+        if self.scope_path:
+            if path is None:  # global objects (the library) are only read
+                return action == "view"
+            return path == self.scope_path or path.startswith(self.scope_path + ".")
+        return True
+
+
+def token_limits(user: Any) -> TokenLimits | None:
+    """The limits of the API token this request uses (None for sessions)."""
+    return getattr(user, "api_token_limits", None)
+
+
 def explain(
     user: Any, permission: str, obj: Any = None, *, scope_path: str | None = None
 ) -> Decision:
     """Decide ``permission`` for ``user`` on ``obj`` (or at ``scope_path``) and say why."""
     if not _usable(user):
         return Decision(False, "actor inactive, locked or anonymous")
+    limits = token_limits(user)
+    if limits is not None:
+        path = obj.policy_path if obj is not None else scope_path
+        if not limits.allows(permission, path):
+            return Decision(False, "outside the limits of the API token")
     grants = grants_for(user)
     if any(g.is_super_admin for g in grants):
         return Decision(True, "super admin", next(g for g in grants if g.is_super_admin), grants)
@@ -239,6 +276,15 @@ def has_perm_within(user: Any, permission: str, path: str) -> bool:
     """
     if not _usable(user):
         return False
+    limits = token_limits(user)
+    if limits is not None and not (
+        limits.allows(permission, path)
+        or (
+            limits.scope_path.startswith(path + ".")
+            and limits.allows(permission, limits.scope_path)
+        )
+    ):
+        return False
     return any(
         g.effect == "allow"
         and g.grants(permission)
@@ -264,6 +310,16 @@ def scope_queryset[M: Model](
     """
     if not _usable(user):
         return queryset.none()
+    limits = token_limits(user)
+    if limits is not None:
+        if not limits.allows(permission, limits.scope_path or None):
+            return queryset.none()
+        if limits.scope_path:
+            if path_field is None:
+                if not permission.endswith(".view"):
+                    return queryset.none()
+            else:
+                queryset = queryset.filter(**{f"{path_field}__descendant_of": limits.scope_path})
     grants = grants_for(user)
     if any(g.is_super_admin for g in grants):
         return queryset

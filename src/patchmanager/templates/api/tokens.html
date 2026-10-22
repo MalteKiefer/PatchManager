@@ -9,7 +9,7 @@
     <thead><tr><th>{% translate "Name" %}</th><th>{% translate "Access" %}</th><th>{% translate "Tenant" %}</th><th>{% translate "Expires" %}</th><th>{% translate "Last used" %}</th><th></th></tr></thead>
     <tbody>{% for t in tokens %}<tr>
       <td>{{ t.name }} <span class="font-mono text-xs text-slate-500">pmat_{{ t.prefix }}_…</span></td>
-      <td>{{ t.scopes|join:", " }}</td><td>{{ t.tenant|default:_("all") }}</td>
+      <td>{{ t.scopes|join:", " }}{% if t.object_types %}<br><span class="text-xs text-slate-500">{{ t.object_types|join:", " }}</span>{% endif %}{% if t.scope_path %}<br><span class="text-xs text-slate-500">{% translate "one location only" %}</span>{% endif %}</td><td>{{ t.tenant|default:_("all") }}</td>
       <td>{% if t.revoked_at %}<span class="badge-muted">{% translate "revoked" %}</span>{% else %}{{ t.expires_at|date:"SHORT_DATE_FORMAT" }}{% endif %}</td>
       <td class="text-xs">{{ t.last_used_at|date:"SHORT_DATETIME_FORMAT"|default:_("never") }}</td>
       <td>{% if not t.revoked_at %}<form method="post" action="{% url 'api-ui:token-revoke' t.pk %}" data-confirm="{% translate 'Revoke this token?' %}">{% csrf_token %}<button class="btn-secondary py-1">{% translate "Revoke" %}</button></form>{% endif %}</td>

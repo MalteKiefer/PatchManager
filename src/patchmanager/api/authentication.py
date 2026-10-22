@@ -30,6 +30,12 @@ class TokenAuthentication(authentication.BaseAuthentication):
             visible = all_tenants or token.tenant_id in tenant_ids
             all_tenants, tenant_ids = False, {token.tenant_id} if visible else set()
         rls.set_context(tenant_ids, all_tenants=all_tenants)
+        # Every permission check of this request stays inside the token's own limits.
+        token.user.api_token_limits = policy.TokenLimits(
+            object_types=frozenset(token.object_types or ()),
+            scope_path=token.scope_path or "",
+            write="write" in token.scopes,
+        )
         rls.set_actor(
             token.user.pk,
             f"{token.user} (API: {token.name})",
