@@ -22,7 +22,6 @@ from patchmanager.dcim.models import Device, Port
 from patchmanager.ipam import services as ipam
 from patchmanager.ipam.models import IPAddress
 from patchmanager.library.models import Connector, PortKind
-from patchmanager.networks import aruba
 from patchmanager.networks.models import (
     VLAN,
     BGPNeighbor,
@@ -32,6 +31,7 @@ from patchmanager.networks.models import (
     SwitchSettings,
     TaggedVLAN,
 )
+from patchmanager.networks.platforms import common as model
 
 
 @dataclass
@@ -54,7 +54,7 @@ def apply(
     request: HttpRequest,
     actor: User,
     device: Device,
-    config: aruba.Config,
+    config: model.Config,
     *,
     commit: bool,
     source: str = "",
@@ -91,7 +91,7 @@ def _apply(
     request: HttpRequest,
     actor: User,
     device: Device,
-    config: aruba.Config,
+    config: model.Config,
     result: Result,
     source: str,
 ) -> None:
@@ -140,7 +140,7 @@ def _apply(
     _replace(device, config, result)
 
 
-def _settings(device: Device, config: aruba.Config, result: Result, source: str) -> None:
+def _settings(device: Device, config: model.Config, result: Result, source: str) -> None:
     settings, _created = SwitchSettings.objects.get_or_create(
         device=device, defaults={"tenant_id": device.tenant_id}
     )
@@ -170,7 +170,7 @@ def _settings(device: Device, config: aruba.Config, result: Result, source: str)
     settings.save()
 
 
-def _port_settings(target: Port, item: aruba.Interface, result: Result) -> None:
+def _port_settings(target: Port, item: model.Interface, result: Result) -> None:
     wanted: dict[str, Any] = {
         "enabled": item.enabled,
         "tunneled": item.tunneled,
@@ -227,7 +227,7 @@ def _vlan(
 
 
 def _memberships(
-    config: aruba.Config, vlans: dict[int, VLAN], port: Any, ports: dict[str, Port], result: Result
+    config: model.Config, vlans: dict[int, VLAN], port: Any, ports: dict[str, Port], result: Result
 ) -> None:
     untagged: dict[str, int] = {}
     tagged: dict[str, set[int]] = {}
@@ -273,7 +273,7 @@ def _vlan_interface(
     request: HttpRequest,
     actor: User,
     device: Device,
-    item: aruba.Vlan,
+    item: model.Vlan,
     ports: dict[str, Port],
     result: Result,
 ) -> None:
@@ -317,7 +317,7 @@ def _vlan_interface(
             )
 
 
-def _replace(device: Device, config: aruba.Config, result: Result) -> None:
+def _replace(device: Device, config: model.Config, result: Result) -> None:
     """Lists the configuration owns completely: MST instances, routes, BGP peers, profiles."""
     tenant = device.tenant_id
     instances = [
@@ -389,11 +389,11 @@ def _replace(device: Device, config: aruba.Config, result: Result) -> None:
         result.add(_("%(what)s: %(n)s") % {"what": label, "n": len(rows)})
 
 
-def document(device: Device, user: Any) -> aruba.Config:
+def document(device: Device, user: Any) -> model.Config:
     """The documentation of a device as a configuration (to show or export)."""
     if not policy.has_perm(user, "dcim.device.view", device):
         raise ServiceError(_("Not found."))
-    config = aruba.Config()
+    config = model.Config()
     settings = SwitchSettings.objects.filter(device=device).first()
     if settings is not None:
         config.hostname = settings.hostname
@@ -415,13 +415,13 @@ def document(device: Device, user: Any) -> aruba.Config:
     for p in ports:
         if p.kind == PortKind.LAG:
             members = [m.name for m in ports if m.lag_id == p.pk]
-            config.trunks[p.name] = aruba.Trunk(p.name, members, p.lag_protocol or "static")
+            config.trunks[p.name] = model.Trunk(p.name, members, p.lag_protocol or "static")
     for p in ports:
         if p.kind == PortKind.VIRTUAL and p.name.startswith("vlan "):
             vid = int(p.name.split()[1]) if p.name.split()[1].isdigit() else None
             if vid is None:
                 continue
-            vlan = config.vlans.setdefault(vid, aruba.Vlan(vid))
+            vlan = config.vlans.setdefault(vid, model.Vlan(vid))
             vlan.addresses = [str(a.address) for a in p.ip_addresses.all()]
             vlan.dhcp = p.description == "DHCP"
             vlan.ospf_area, vlan.ospf_passive = p.ospf_area, p.ospf_passive
@@ -431,14 +431,14 @@ def document(device: Device, user: Any) -> aruba.Config:
         if not p.lag_id:  # members of an aggregation carry its VLANs, not their own
             if p.untagged_vlan is not None:
                 vid = p.untagged_vlan.vid
-                config.vlans.setdefault(vid, aruba.Vlan(vid)).untagged.append(p.name)
+                config.vlans.setdefault(vid, model.Vlan(vid)).untagged.append(p.name)
             for tag in p.tagged.all():
-                config.vlans.setdefault(tag.vlan.vid, aruba.Vlan(tag.vlan.vid)).tagged.append(
+                config.vlans.setdefault(tag.vlan.vid, model.Vlan(tag.vlan.vid)).tagged.append(
                     p.name
                 )
         flags = (p.tunneled, p.stp_edge, p.stp_bpdu_guard, p.stp_root_guard)
         if p.kind == PortKind.INTERFACE and (p.label or not p.enabled or any(flags)):
-            config.interfaces[p.name] = aruba.Interface(p.name, p.label, p.enabled, *flags)
+            config.interfaces[p.name] = model.Interface(p.name, p.label, p.enabled, *flags)
     names = dict(
         VLAN.objects.filter(tenant_id=device.tenant_id, vid__in=list(config.vlans)).values_list(
             "vid", "name"
@@ -451,16 +451,16 @@ def document(device: Device, user: Any) -> aruba.Config:
         config.mst_instances[row.instance] = (list(row.vlans), row.priority)
     for route in StaticRoute.objects.filter(device=device):
         config.routes.append(
-            aruba.Route(
+            model.Route(
                 str(route.prefix), str(route.next_hop) if route.next_hop else None, route.distance
             )
         )
     for n in BGPNeighbor.objects.filter(device=device):
-        config.neighbors[str(n.address)] = aruba.Neighbor(
+        config.neighbors[str(n.address)] = model.Neighbor(
             str(n.address), n.remote_asn, n.description, n.enabled
         )
     for profile in PortProfile.objects.filter(device=device):
-        config.profiles[profile.name] = aruba.Profile(
+        config.profiles[profile.name] = model.Profile(
             profile.name,
             profile.untagged_vid,
             list(profile.tagged_vids),
