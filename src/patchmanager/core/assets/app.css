@@ -93,6 +93,19 @@
 .rack-svg { display: block; width: 100%; height: auto; margin: 0 auto; }
 .rack-panel { @apply rounded-lg border border-[#dde2e8] p-4 xl:sticky xl:top-20 xl:max-h-[78vh] xl:overflow-y-auto dark:border-slate-800; }
 .rack-panel[aria-busy="true"] { @apply opacity-60; }
+.vlan-matrix { @apply grid grid-cols-[repeat(auto-fill,minmax(4.25rem,1fr))] gap-2; }
+.vlan-port { @apply flex flex-col items-center gap-1 rounded-md border border-[#dde2e8] p-1.5 text-center dark:border-slate-700; }
+.vlan-port.is-edge { @apply border-2 border-dashed border-slate-500; }
+.vlan-port.is-off { @apply opacity-50; }
+.vlan-port-name { @apply font-mono text-[11px] text-slate-600 dark:text-slate-300; }
+.vlan-port-face { @apply flex h-7 w-full items-center justify-center rounded bg-slate-200 text-xs font-semibold text-white dark:bg-slate-700; }
+.vlan-port-face:not([data-swatch]) { @apply text-slate-600 dark:text-slate-300; }
+.vlan-port-tags { @apply flex min-h-1.5 flex-wrap justify-center gap-0.5; }
+.vlan-tag { @apply h-1.5 w-2.5 rounded-sm; }
+.vlan-port-flags { @apply min-h-4 text-[10px] text-slate-600 dark:text-slate-400; }
+.stack-members { @apply space-y-2; }
+.stack-member { @apply flex flex-wrap items-center gap-3 rounded-lg border border-[#dde2e8] p-3 dark:border-slate-700; }
+.stack-member-id { @apply flex size-9 shrink-0 items-center justify-center rounded-md bg-slate-800 font-mono text-sm font-bold text-white dark:bg-slate-200 dark:text-slate-900; }
 .plan-pin-shadow { @apply fill-slate-900/25; }
 .plan-item.is-selected .plan-pin { stroke: #0f172a; stroke-width: 3; }
 .plan-item.is-selected rect { stroke: #f59e0b; stroke-width: 3; }

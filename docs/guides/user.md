@@ -165,6 +165,23 @@ tables; without a VRF everything is in the global table).
 * Prefixes and addresses can be imported and exported like VLANs (*Import and
   export*), and the search finds them by address or DNS name.
 
+## Switching and routing
+
+**Switching and routing** on a device page shows its ports coloured by untagged
+VLAN with marks for tagged VLANs, edge ports, guards and tunnelled ports, then its
+VLANs with addresses, static routes, BGP neighbors, OSPF, spanning tree, link
+aggregations, device profiles and the stack it belongs to.
+
+**Read a configuration** takes an ArubaOS-Switch configuration or an Aruba Central
+template (with its variables as JSON): paste it, choose a file or a stored version.
+**Show changes** lists what would change and what is left out; **Apply changes**
+saves it. Passwords, keys and SNMP communities are never read. **As ArubaOS-Switch
+configuration** writes the documentation back as configuration text.
+
+Port settings such as link aggregation, MTU, edge port, guards and OSPF can also be
+edited on each port. Under *Networks → Stacks* you group switches into stacks, VSF,
+VSX or MLAG pairs or a virtual chassis, with member number, role and priority.
+
 ## VLANs and WLANs
 
 **Networks** holds VLANs (for the whole tenant or one site) and WLANs. On a

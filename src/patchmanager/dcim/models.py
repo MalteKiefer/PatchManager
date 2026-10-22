@@ -4,7 +4,7 @@ from typing import Any
 
 from django.contrib.postgres.constraints import ExclusionConstraint
 from django.contrib.postgres.fields import IntegerRangeField, RangeOperators
-from django.core.validators import MaxValueValidator, MinValueValidator
+from django.core.validators import MaxValueValidator, MinValueValidator, RegexValidator
 from django.db import models
 from django.db.backends.postgresql.psycopg_any import NumericRange
 from django.db.models.functions import Lower
@@ -260,6 +260,44 @@ class Port(TenantScopedModel):
         related_name="untagged_on",
         verbose_name=_("untagged / native VLAN"),
     )
+    lag = models.ForeignKey(
+        "self",
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="lag_members",
+        verbose_name=_("link aggregation"),
+        limit_choices_to={"kind": "lag"},
+    )
+    lag_protocol = models.CharField(
+        _("aggregation protocol"),
+        max_length=6,
+        blank=True,
+        choices=[("lacp", "LACP"), ("static", _("static"))],
+    )
+    mtu = models.PositiveIntegerField(
+        _("MTU"),
+        null=True,
+        blank=True,
+        validators=[MinValueValidator(576), MaxValueValidator(65535)],
+    )
+    tunneled = models.BooleanField(
+        _("tunnelled to a gateway"), default=False, help_text=_("Traffic goes to the gateway.")
+    )
+    stp_edge = models.BooleanField(_("edge port"), default=False)
+    stp_bpdu_guard = models.BooleanField(_("BPDU guard"), default=False)
+    stp_root_guard = models.BooleanField(_("root guard"), default=False)
+    ospf_area = models.CharField(
+        _("OSPF area"),
+        max_length=15,
+        blank=True,
+        validators=[
+            RegexValidator(
+                r"^(\d{1,10}|\d{1,3}(\.\d{1,3}){3})$", _("Use a number or a dotted area ID.")
+            )
+        ],
+    )
+    ospf_passive = models.BooleanField(_("OSPF passive"), default=False)
     order = models.PositiveIntegerField(default=0)
 
     policy_object_type = "dcim.device"

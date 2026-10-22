@@ -68,3 +68,4 @@ nav:
       - adr/0026-ipam.md
       - adr/0027-configuration-storage.md
       - adr/0028-rooms-lists-and-surveys.md
+      - adr/0029-switching-and-routing.md

@@ -37,5 +37,11 @@ TRACKED = {
         Tracked("ipam.vrf", "name", "tenant", "ipam.vrf"),
         Tracked("ipam.prefix", "text", "self", "ipam.prefix"),
         Tracked("ipam.ipaddress", "host", "self", "ipam.ipaddress"),
+        Tracked("networks.switchsettings", "hostname", "device", "dcim.device"),
+        Tracked("networks.mstinstance", "instance", "device", "dcim.device"),
+        Tracked("networks.staticroute", "prefix", "device", "dcim.device"),
+        Tracked("networks.bgpneighbor", "address", "device", "dcim.device"),
+        Tracked("networks.portprofile", "name", "device", "dcim.device"),
+        Tracked("networks.stack", "name", "site", "dcim.device"),
     )
 }

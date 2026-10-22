@@ -83,6 +83,8 @@ class PortKind(models.TextChoices):
     USB = "usb", "USB"
     VIDEO = "video", _("video output")
     AUDIO = "audio", _("audio")
+    LAG = "lag", _("link aggregation (trunk, LAG)")
+    VIRTUAL = "virtual", _("virtual interface (VLAN interface, loopback)")
 
 
 class Airflow(models.TextChoices):

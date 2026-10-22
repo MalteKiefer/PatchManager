@@ -8,6 +8,13 @@ All notable changes to this project are documented here. The format follows
 
 ### Added
 
+* Switching and routing per device: link aggregations, spanning tree (with MST
+  instances), VLAN interfaces with addresses, static routes, OSPF, BGP neighbors,
+  tunnelled ports, device profiles, and a port matrix coloured by VLAN (ADR 0029).
+* Stacks and virtual switches (stacking, VSF, VSX, MLAG, virtual chassis).
+* Read ArubaOS-Switch configurations and Aruba Central templates into the
+  documentation with a preview of every change; write the documentation back as an
+  ArubaOS-Switch configuration.
 * Floor plan pins: floor devices are drawn as pins at their exact spot; a click shows
   the device with its room, photos, notes and the patch target of every port.
 

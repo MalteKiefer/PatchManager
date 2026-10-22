@@ -11,4 +11,8 @@ urlpatterns = [
     path("wlans/", views.wlan_list, name="wlans"),
     path("wlans/new/", views.wlan_create, name="wlan-create"),
     path("wlans/<uuid:pk>/", views.wlan_detail, name="wlan"),
+    path("stacks/", views.stack_list, name="stacks"),
+    path("stacks/new/", views.stack_create, name="stack-create"),
+    path("stacks/<uuid:pk>/", views.stack_detail, name="stack"),
+    path("stacks/<uuid:pk>/members/new/", views.member_create, name="member-create"),
 ]
