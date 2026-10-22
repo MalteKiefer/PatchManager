@@ -14,6 +14,12 @@
   {% block head %}{% endblock %}
 </head>
 <body hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}' class="min-h-screen">
+  <div id="js-text" hidden
+       data-theme-system="{% translate 'Theme: system' %}" data-theme-light="{% translate 'Theme: light' %}" data-theme-dark="{% translate 'Theme: dark' %}"
+       data-failed="{% translate 'The request failed.' %}" data-move-failed="{% translate 'The block could not be moved.' %}"
+       data-key-cancelled="{% translate 'The request was cancelled or timed out.' %}"
+       data-key-unsupported="{% translate 'This browser does not support security keys.' %}"
+       data-menu-open="{% translate 'Open menu' %}" data-menu-close="{% translate 'Close menu' %}"></div>
   <a href="#main" class="sr-only focus:not-sr-only focus:absolute focus:left-2 focus:top-2 focus:z-50 btn-primary">{% translate "Skip to content" %}</a>
   {% if impersonator %}
   <div role="alert" class="flex flex-wrap items-center justify-center gap-3 bg-amber-400 px-4 py-2 text-sm font-medium text-amber-950">
@@ -24,9 +30,12 @@
   </div>
   {% endif %}
   {% if user.is_authenticated %}
-  <header class="border-b border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900">
+  <header class="border-b border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900" x-data="menu">
     <div class="mx-auto flex max-w-7xl flex-wrap items-center gap-3 px-4 py-3">
       <a href="{% url 'core:home' %}" class="mr-auto flex items-center gap-2 text-base font-semibold text-slate-900 no-underline dark:text-white">{% if branding.has_logo %}<img src="{% url 'instance:logo' %}?v={{ branding.version }}" alt="" class="h-7 w-auto">{% endif %}{{ instance_name }}</a>
+      <button type="button" class="btn-secondary px-2 lg:hidden" x-cloak x-on:click="toggle" x-bind:aria-expanded="open" aria-controls="main-nav" x-bind:aria-label="label">
+        <svg aria-hidden="true" class="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
+      </button>
       {% if available_tenants %}
       <form method="post" action="{% url 'tenant-switch' %}" class="flex items-center gap-2">{% csrf_token %}
         <label for="tenant-switch" class="sr-only">{% translate "Tenant" %}</label>
@@ -41,7 +50,7 @@
         <label for="global-search" class="sr-only">{% translate "Search" %}</label>
         <input id="global-search" name="q" type="search" minlength="2" maxlength="200" placeholder="{% translate 'Search' %}" class="w-36 rounded-md border border-slate-300 bg-white px-2 py-1.5 text-sm dark:border-slate-700 dark:bg-slate-800">
       </form>
-      <nav class="flex items-center gap-1" aria-label="{% translate 'Main' %}">
+      <nav id="main-nav" class="flex w-full flex-wrap items-center gap-1 lg:w-auto" x-bind:class="open ? '' : 'max-lg:hidden'" aria-label="{% translate 'Main' %}">
         <a class="nav-link" href="{% url 'locations:index' %}">{% translate "Locations" %}</a>
         <a class="nav-link" href="{% url 'library:types' %}">{% translate "Library" %}</a>
         <a class="nav-link" href="{% url 'cabling:cables' %}">{% translate "Cables" %}</a>

@@ -2,7 +2,7 @@
   <thead><tr><th>{% translate "When" %}</th>{% if show_object %}<th>{% translate "Object" %}</th>{% endif %}<th>{% translate "Action" %}</th><th>{% translate "Fields" %}</th><th>{% translate "By" %}</th></tr></thead>
   <tbody>{% for c in page %}<tr>
     <td class="whitespace-nowrap"><a href="{% url 'history:change' c.pk %}">{{ c.occurred_at|date:"SHORT_DATETIME_FORMAT" }}</a></td>
-    {% if show_object %}<td><a href="{% url 'history:object' c.object_type c.object_id %}">{{ c.label|default:c.object_id }}</a> <span class="text-xs text-slate-500">{{ c.object_type }}</span></td>{% endif %}
+    {% if show_object %}<td><a href="{% url 'history:object' c.object_type c.object_id %}">{{ c.label|default:c.object_id }}</a><div class="text-xs text-slate-500">{{ c.object_type }}</div></td>{% endif %}
     <td>{{ c.get_action_display }}</td>
     <td class="text-xs font-mono">{{ c.fields|join:", " }}</td>
     <td class="text-xs">{{ c.actor_label|default:_("system") }}</td>

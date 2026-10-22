@@ -72,6 +72,16 @@ webhook targets (SSRF risk).
 | E4 | Elevation of privilege | Container escape after RCE | Non-root, read only root fs, no shell, dropped capabilities, no-new-privileges | 0 |
 | E5 | Elevation of privilege | Supply chain (dependency, action, image) | Lockfile, digest pinning, Renovate, pip-audit, Trivy, CodeQL, signed images | 0 |
 
+## Phase 8 controls in place
+
+* T3: uploaded logos are size limited, re-encoded as PNG and served with a sandbox
+  CSP; brand colours are numbers, so branding CSS cannot carry markup.
+* E1: edition, branding and system pages need system settings permissions; limits
+  are checked in the services, not only in the views.
+* I3: the job monitor keeps only error classes, not messages; mail secrets stay in
+  the environment.
+* D1: health checks are bounded (one second worker ping) and only on the admin page.
+
 ## Phase 7 controls in place (SCIM)
 
 * S1: SCIM tokens are random, stored as keyed hashes, revocable and rate limited.

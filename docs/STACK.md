@@ -31,6 +31,10 @@ Added in 0.8.0: djangorestframework 3.18.3, drf-spectacular 0.30.0 (OpenAPI 3.1)
 djangorestframework-stubs 3.18.1 (type checking), joserfc 1.7.7 (OIDC ID tokens),
 requests 2.34.2, pysaml2 7.5.5 with libxmlsec1 1.3.12 (SAML), python-ldap 3.4.8.
 
+Test only since 0.9.0: axe-core 4.12.1 (MPL-2.0, `tests/e2e/vendor/axe-4.12.1.min.js`,
+SHA-256 `66a8aaa95a8b044a7fd74a5435873bf04ff65a1ca75567c921b7509742085a14`, matches the
+cdnjs SRI `sha512-7Y+2K9ZP/j7Cahfb4lm6+HC7pkGsAf9i2sI2FzHKQwFBzoUXC0is8UXcm5o05wgsSCSnbwvkn/G0aoXbJDKRwQ==`).
+
 Front end assets (self hosted, no CDN at runtime):
 
 | Asset | Version | Integrity |
