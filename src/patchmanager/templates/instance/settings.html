@@ -10,7 +10,8 @@
   <p class="mb-4 text-sm text-slate-500">{{ intro }}</p>
   {% if secret_stored %}<p class="mb-4 text-sm"><span class="badge-ok">{% translate "A secret is stored" %}</span></p>{% endif %}
   {% include "core/_form.html" %}
-  <button class="btn-primary">{% translate "Save" %}</button>
+  <div class="flex flex-wrap gap-2"><button class="btn-primary">{% translate "Save" %}</button>
+    {% if section == "storage" %}<button name="action" value="test" class="btn-secondary">{% translate "Test connection" %}</button>{% endif %}</div>
 </form>
 {% if section == "backups" %}
 <section class="card mt-4 max-w-2xl" aria-labelledby="run-h"><h2 id="run-h" class="mb-2">{% translate "Last off-site copy" %}</h2>

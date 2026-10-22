@@ -30,11 +30,12 @@ SECURITY = {
     "invitation_ttl_hours": 24,
 }
 MAIL = {"mail_host": "smtp.example.com", "mail_port": 587, "mail_use_tls": "on"}
-STORAGE = {"upload_max_mb": 10, "clamd_port": 3310, "s3_prefix": "attachments"}
+STORAGE = {"s3_prefix": "attachments"}
+UPLOADS = {"upload_max_mb": 10, "clamd_port": 3310}
 
 
 def test_pages_and_permission(admin_client: Client, make_user) -> None:
-    for section in ("security", "mail", "storage", "maps", "integrations"):
+    for section in ("security", "mail", "uploads", "storage", "maps", "integrations", "backups"):
         page = admin_client.get(f"/manage/settings/{section}/", secure=True).content.decode()
         assert 'href="/manage/settings/security/" aria-current="page"' in page
     assert admin_client.get("/manage/settings/nope/", secure=True).status_code == 404
@@ -139,3 +140,25 @@ def test_maps_and_integrations(admin_client: Client) -> None:
     )
     assert config.get().allowed_networks == ["10.0.0.0/8"]
     assert runtime.ConfiguredUserRateThrottle().get_rate() == "100/minute"
+
+
+def test_uploads_save_apart_from_storage_and_bucket_test(admin_client: Client, monkeypatch) -> None:
+    assert "Settings saved" in _post(admin_client, "uploads", {**UPLOADS, "upload_max_mb": 7})
+    assert config.get().upload_max_mb == 7 and config.get().s3_bucket == ""
+    bucket = InMemoryStorage()
+    monkeypatch.setattr(runtime, "s3_storage", lambda cfg: bucket)
+    monkeypatch.setattr(
+        socket, "getaddrinfo", lambda h, p, **kw: [(2, 1, 6, "", ("203.0.113.5", p))]
+    )
+    s3 = {
+        **STORAGE,
+        "s3_bucket": "pm-files",
+        "s3_endpoint_url": "https://s3.eu-central-003.backblazeb2.com",
+        "s3_access_key_id": "key",
+        "s3_secret_access_key": "secret",
+        "action": "test",
+    }
+    page = _post(admin_client, "storage", s3)
+    assert "The bucket can be written and read" in page and 'value="pm-files"' in page
+    assert config.get().s3_bucket == ""  # testing saves nothing
+    assert "Enter a bucket to test" in _post(admin_client, "storage", {**STORAGE, "action": "test"})

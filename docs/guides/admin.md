@@ -112,16 +112,19 @@ installation; there are no editions, limits or licence keys.
 
 ## Settings
 
-*Administration → Settings* holds what used to need the environment, in six parts:
+*Administration → Settings* holds what used to need the environment, in seven parts:
 
 * **Sign in**: minimum password length, a second factor for everyone, session
   lifetime and idle timeout, lockout after failed sign ins, attempts per address and
   how long invitation links stay valid.
 * **Mail**: SMTP server, port, STARTTLS, user, password and sender, with a test mail.
-* **Files**: largest upload (up to 25 MB), the clamd virus scanner and S3 compatible
-  object storage (AWS S3, Backblaze B2, Wasabi). Saving a bucket writes and deletes a
-  test file first, so a wrong name or key is reported right away. Files stored before
-  stay readable from the media volume.
+* **Uploads**: largest upload (up to 25 MB) and the clamd virus scanner.
+* **File storage**: S3 compatible object storage (AWS S3, Backblaze B2, Wasabi) instead
+  of the media volume. *Test connection* writes and deletes a test file without saving;
+  saving checks the bucket again. Files stored before stay readable from the media
+  volume. Changing the endpoint or bucket needs the secret key entered again, so a
+  stored key is never sent to a new destination (the same holds for the off-site
+  repository).
 * **Maps**: tile server and attribution, or none.
 * **Integrations**: private networks webhooks may reach, plain http webhooks and the
   API rate per user.

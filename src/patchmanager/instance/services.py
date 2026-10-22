@@ -149,10 +149,31 @@ def _probe(config: instance_config.Config) -> None:
         ) from exc
 
 
-def save_config(request: HttpRequest, actor: User, values: dict[str, Any]) -> None:
-    """Store operational settings. Empty secrets keep the stored one; ``None`` clears it."""
-    row = _require(actor)
-    stored = dict(row.config)
+# Destination settings and the secrets that belong to them: a stored secret is only sent
+# to the destination it was entered for.
+DESTINATIONS = (
+    (("s3_endpoint_url", "s3_bucket"), ("s3_secret_access_key",)),
+    (("offsite_repository",), ("offsite_secret_access_key", "offsite_password")),
+)
+
+
+def _keeps_secret_for_new_destination(
+    before: instance_config.Config, values: dict[str, Any]
+) -> bool:
+    for targets, secrets_of_target in DESTINATIONS:
+        moved = any(name in values and values[name] != getattr(before, name) for name in targets)
+        kept = any(
+            getattr(before, name) and values.get(name, "") == "" for name in secrets_of_target
+        )
+        if moved and kept:
+            return True
+    return False
+
+
+def _merge(stored: dict[str, Any], values: dict[str, Any]) -> list[str]:
+    """Apply ``values`` to the stored form in place; returns the names that changed."""
+    if _keeps_secret_for_new_destination(instance_config.from_stored(stored), values):
+        raise ServiceError(_("A new destination needs its secret key and password entered again."))
     changed = []
     for name, value in values.items():
         if name not in instance_config.NAMES:
@@ -164,6 +185,26 @@ def save_config(request: HttpRequest, actor: User, values: dict[str, Any]) -> No
         if stored.get(name) != value:
             changed.append(name)
         stored[name] = value
+    return changed
+
+
+def test_bucket(actor: User, values: dict[str, Any]) -> None:
+    """Check bucket settings with a test object without saving them."""
+    stored = dict(_require(actor).config)
+    _merge(stored, values)
+    effective = instance_config.from_stored(stored)
+    if not effective.s3_bucket:
+        raise ServiceError(_("Enter a bucket to test."))
+    if effective.s3_endpoint_url:
+        public_host(effective.s3_endpoint_url)
+    _probe(effective)
+
+
+def save_config(request: HttpRequest, actor: User, values: dict[str, Any]) -> None:
+    """Store operational settings. Empty secrets keep the stored one; ``None`` clears it."""
+    row = _require(actor)
+    stored = dict(row.config)
+    changed = _merge(stored, values)
     effective = instance_config.from_stored(stored)
     if effective.s3_endpoint_url and "s3_endpoint_url" in values:
         # botocore resolves again when it connects; only holders of system.settings.change

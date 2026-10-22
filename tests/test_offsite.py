@@ -111,3 +111,25 @@ def test_repository_must_not_point_into_the_host(admin_client: Client, monkeypat
     page = admin_client.post("/manage/settings/backups/", SETTINGS, secure=True).content.decode()
     assert "This address cannot be used" in page
     assert config.get().offsite_repository == ""
+
+
+def test_new_destination_needs_secrets_again(admin_client: Client, public, restic) -> None:
+    admin_client.post("/manage/settings/backups/", SETTINGS, secure=True)
+    moved = {
+        **SETTINGS,
+        "offsite_repository": "s3:https://evil.example.com/bucket/x",
+        "offsite_secret_access_key": "",
+        "offsite_password": "",
+    }
+    page = admin_client.post("/manage/settings/backups/", moved, secure=True).content.decode()
+    assert "needs its secret key and password entered again" in page
+    assert config.get().offsite_repository == SETTINGS["offsite_repository"]
+    same = {
+        **SETTINGS,
+        "offsite_secret_access_key": "",
+        "offsite_password": "",
+        "offsite_keep_daily": 7,
+    }
+    saved = admin_client.post("/manage/settings/backups/", same, secure=True, follow=True)
+    assert "Settings saved" in saved.content.decode()
+    assert config.get().offsite_password == "repo-pass-123"  # kept for the same destination

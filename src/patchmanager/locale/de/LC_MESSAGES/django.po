@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-22 11:51+0000\n"
+"POT-Creation-Date: 2026-10-22 13:57+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -1920,7 +1920,7 @@ msgstr "Migrationen"
 msgid "Cache and rate limits"
 msgstr "Cache und Ratenbegrenzung"
 
-#: core/system.py:102
+#: core/system.py:102 instance/views.py:347
 msgid "File storage"
 msgstr "Dateispeicher"
 
@@ -3108,9 +3108,17 @@ msgstr ""
 "In den Bucket konnte nicht geschrieben werden (%(error)s). Prüfen Sie Name, "
 "Endpoint und Schlüssel."
 
-#: instance/services.py:159
+#: instance/services.py:176
+msgid "A new destination needs its secret key and password entered again."
+msgstr "Ein neues Ziel braucht den geheimen Schlüssel und das Passwort erneut."
+
+#: instance/services.py:180
 msgid "Unknown setting."
 msgstr "Unbekannte Einstellung."
+
+#: instance/services.py:197
+msgid "Enter a bucket to test."
+msgstr "Geben Sie einen Bucket zum Testen ein."
 
 #: instance/views.py:28
 msgid "Instance name"
@@ -3218,15 +3226,15 @@ msgstr ""
 msgid "clamd port"
 msgstr "clamd-Port"
 
-#: instance/views.py:187
+#: instance/views.py:192
 msgid "S3 bucket"
 msgstr "S3-Bucket"
 
-#: instance/views.py:192
+#: instance/views.py:197
 msgid "Enter a valid bucket name."
 msgstr "Geben Sie einen gültigen Bucket-Namen ein."
 
-#: instance/views.py:196
+#: instance/views.py:201
 msgid ""
 "Empty: files stay in the media volume. Files already stored there stay "
 "readable."
@@ -3234,11 +3242,11 @@ msgstr ""
 "Leer: Dateien bleiben im Media-Volume. Dort bereits gespeicherte Dateien "
 "bleiben lesbar."
 
-#: instance/views.py:200
+#: instance/views.py:205
 msgid "Endpoint"
 msgstr "Endpoint"
 
-#: instance/views.py:204
+#: instance/views.py:209
 msgid ""
 "Empty for AWS. Backblaze B2 for example https://s3.eu-"
 "central-003.backblazeb2.com."
@@ -3246,190 +3254,202 @@ msgstr ""
 "Leer für AWS. Backblaze B2 zum Beispiel https://s3.eu-"
 "central-003.backblazeb2.com."
 
-#: instance/views.py:207
+#: instance/views.py:212
 msgid "Region"
 msgstr "Region"
 
-#: instance/views.py:209 instance/views.py:303
+#: instance/views.py:214 instance/views.py:308
 msgid "Access key ID"
 msgstr "Access-Key-ID"
 
-#: instance/views.py:211 instance/views.py:305
+#: instance/views.py:216 instance/views.py:310
 msgid "Secret access key"
 msgstr "Secret Access Key"
 
-#: instance/views.py:213
+#: instance/views.py:218
 msgid "Folder in the bucket"
 msgstr "Ordner im Bucket"
 
-#: instance/views.py:216
+#: instance/views.py:221
 msgid "Letters, digits, . _ - /"
 msgstr "Buchstaben, Ziffern, . _ - /"
 
-#: instance/views.py:220
+#: instance/views.py:225
 msgid "Addressing"
 msgstr "Adressierung"
 
-#: instance/views.py:223
+#: instance/views.py:228
 msgid "Provider default"
 msgstr "Standard des Anbieters"
 
-#: instance/views.py:224
+#: instance/views.py:229
 msgid "Virtual host (bucket.host)"
 msgstr "Virtueller Host (bucket.host)"
 
-#: instance/views.py:225
+#: instance/views.py:230
 msgid "Path (host/bucket)"
 msgstr "Pfad (host/bucket)"
 
-#: instance/views.py:233
+#: instance/views.py:238
 msgid "The endpoint must use https."
 msgstr "Der Endpoint muss https verwenden."
 
-#: instance/views.py:241
+#: instance/views.py:246
 msgid "Tile server"
 msgstr "Kachelserver"
 
-#: instance/views.py:244
+#: instance/views.py:249
 #, python-brace-format
 msgid "https with {z}, {x} and {y}. Empty: no map."
 msgstr "https mit {z}, {x} und {y}. Leer: keine Karte."
 
-#: instance/views.py:247
+#: instance/views.py:252
 msgid "Attribution"
 msgstr "Quellenangabe"
 
-#: instance/views.py:256
+#: instance/views.py:261
 #, python-brace-format
 msgid "Enter an https address with {z}, {x} and {y}."
 msgstr "Geben Sie eine https-Adresse mit {z}, {x} und {y} ein."
 
-#: instance/views.py:264
+#: instance/views.py:269
 msgid "Private networks webhooks may reach"
 msgstr "Private Netze, die Webhooks erreichen dürfen"
 
-#: instance/views.py:267
+#: instance/views.py:272
 msgid "Comma separated, for example 10.0.0.0/8. Empty: public only."
 msgstr ""
 "Kommagetrennt, zum Beispiel 10.0.0.0/8. Leer: nur öffentliche Adressen."
 
-#: instance/views.py:270
+#: instance/views.py:275
 msgid "Allow plain http webhook URLs"
 msgstr "Unverschlüsselte http-Webhook-URLs erlauben"
 
-#: instance/views.py:273
+#: instance/views.py:278
 msgid "API requests per user"
 msgstr "API-Anfragen pro Benutzer"
 
-#: instance/views.py:275
+#: instance/views.py:280
 msgid "For example 1200/minute."
 msgstr "Zum Beispiel 1200/minute."
 
-#: instance/views.py:284
+#: instance/views.py:289
 msgid "Enter networks such as 10.0.0.0/8."
 msgstr "Geben Sie Netze wie 10.0.0.0/8 ein."
 
-#: instance/views.py:291
+#: instance/views.py:296
 msgid "Copy backups off-site after every new dump"
 msgstr "Sicherungen nach jedem neuen Dump extern kopieren"
 
-#: instance/views.py:294
+#: instance/views.py:299
 msgid "Repository"
 msgstr "Repository"
 
-#: instance/views.py:298
+#: instance/views.py:303
 msgid ""
 "s3:https://host/bucket/folder, for Backblaze B2 for example s3:https://s3.eu-"
 "central-003.backblazeb2.com/my-bucket/patchmanager."
-msgstr "s3:https://host/bucket/ordner, für Backblaze B2 zum Beispiel s3:https://s3.eu-central-003.backblazeb2.com/mein-bucket/patchmanager."
+msgstr ""
+"s3:https://host/bucket/ordner, für Backblaze B2 zum Beispiel s3:https://"
+"s3.eu-central-003.backblazeb2.com/mein-bucket/patchmanager."
 
-#: instance/views.py:306
+#: instance/views.py:311
 msgid "Repository password"
 msgstr "Repository-Passwort"
 
-#: instance/views.py:308
+#: instance/views.py:313
 msgid "Keep daily copies"
 msgstr "Tägliche Kopien behalten"
 
-#: instance/views.py:311
+#: instance/views.py:316
 msgid "Keep weekly copies"
 msgstr "Wöchentliche Kopien behalten"
 
-#: instance/views.py:314
+#: instance/views.py:319
 msgid "Keep monthly copies"
 msgstr "Monatliche Kopien behalten"
 
-#: instance/views.py:321
+#: instance/views.py:326
 msgid "Enter the repository."
 msgstr "Geben Sie das Repository ein."
 
-#: instance/views.py:327 templates/accounts/login.html:2
+#: instance/views.py:332 templates/accounts/login.html:2
 #: templates/accounts/login.html:5 templates/accounts/login.html:8
 msgid "Sign in"
 msgstr "Anmelden"
 
-#: instance/views.py:329
+#: instance/views.py:334
 msgid "Passwords, second factors, sessions and lockouts."
 msgstr "Passwörter, zweite Faktoren, Sitzungen und Sperren."
 
-#: instance/views.py:332 templates/manage/system.html:37
+#: instance/views.py:337 templates/manage/system.html:37
 msgid "Mail"
 msgstr "E-Mail"
 
-#: instance/views.py:334
+#: instance/views.py:339
 msgid "The server for invitations, password resets and notifications."
 msgstr ""
 "Der Server für Einladungen, Passwort-Zurücksetzungen und Benachrichtigungen."
 
-#: instance/views.py:337
-msgid "Files"
-msgstr "Dateien"
+#: instance/views.py:342
+msgid "Uploads"
+msgstr "Uploads"
 
-#: instance/views.py:340
+#: instance/views.py:344
+msgid "How large uploads may be and whether a virus scanner checks them."
+msgstr "Wie groß Uploads sein dürfen und ob ein Virenscanner sie prüft."
+
+#: instance/views.py:350
 msgid ""
 "Uploads are encrypted before they are stored, in the media volume or in S3 "
-"compatible object storage (AWS S3, Backblaze B2, Wasabi). The bucket is "
-"checked with a test file when you save."
-msgstr ""
-"Uploads werden vor dem Speichern verschlüsselt, im Media-Volume oder in S3-"
-"kompatiblem Objektspeicher (AWS S3, Backblaze B2, Wasabi). Beim Speichern "
-"wird der Bucket mit einer Testdatei geprüft."
+"compatible object storage (AWS S3, Backblaze B2, Wasabi). Test the "
+"connection first; saving checks the bucket with a test file as well."
+msgstr "Uploads werden vor dem Speichern verschlüsselt, im Media-Volume oder in S3-kompatiblem Objektspeicher (AWS S3, Backblaze B2, Wasabi). Testen Sie zuerst die Verbindung; auch beim Speichern wird der Bucket mit einer Testdatei geprüft."
 
-#: instance/views.py:345
+#: instance/views.py:355
 msgid "Maps"
 msgstr "Karten"
 
-#: instance/views.py:345
+#: instance/views.py:355
 msgid "Tiles shown behind the site map."
 msgstr "Kacheln, die hinter der Standortkarte angezeigt werden."
 
-#: instance/views.py:347
+#: instance/views.py:357
 msgid "Integrations"
 msgstr "Integrationen"
 
-#: instance/views.py:349
+#: instance/views.py:359
 msgid "Limits for webhooks and the API."
 msgstr "Grenzen für Webhooks und die API."
 
-#: instance/views.py:352 templates/manage/system.html:24
+#: instance/views.py:362 templates/manage/system.html:24
 msgid "Backups"
 msgstr "Sicherungen"
 
-#: instance/views.py:355
+#: instance/views.py:365
 msgid ""
 "The backup service writes a database dump every day. Here the worker copies "
 "them encrypted with restic to S3 compatible storage (AWS S3, Backblaze B2, "
 "Wasabi). Keep the repository password outside this installation too: without "
 "it the copies cannot be opened. Use a key that may only write to this bucket."
-msgstr "Der Sicherungsdienst schreibt jeden Tag einen Datenbank-Dump. Hier kopiert der Worker sie verschlüsselt mit restic in S3-kompatiblen Speicher (AWS S3, Backblaze B2, Wasabi). Bewahren Sie das Repository-Passwort auch außerhalb dieser Installation auf: Ohne es lassen sich die Kopien nicht öffnen. Verwenden Sie einen Schlüssel, der nur in diesen Bucket schreiben darf."
+msgstr ""
+"Der Sicherungsdienst schreibt jeden Tag einen Datenbank-Dump. Hier kopiert "
+"der Worker sie verschlüsselt mit restic in S3-kompatiblen Speicher (AWS S3, "
+"Backblaze B2, Wasabi). Bewahren Sie das Repository-Passwort auch außerhalb "
+"dieser Installation auf: Ohne es lassen sich die Kopien nicht öffnen. "
+"Verwenden Sie einen Schlüssel, der nur in diesen Bucket schreiben darf."
 
-#: instance/views.py:376
+#: instance/views.py:386
 msgid "The off-site copy was started; see the system page."
 msgstr "Die externe Sicherung wurde gestartet; siehe Systemseite."
 
-#: instance/views.py:391
+#: instance/views.py:406
 msgid "Settings saved."
 msgstr "Einstellungen gespeichert."
+
+#: instance/views.py:409
+msgid "The bucket can be written and read. Save to use it."
+msgstr "Der Bucket kann beschrieben und gelesen werden. Speichern Sie, um ihn zu verwenden."
 
 #: integrations/http.py:61
 msgid "Webhook URLs must use https."
@@ -7025,27 +7045,31 @@ msgstr "Bereiche der Einstellungen"
 msgid "A secret is stored"
 msgstr "Ein Geheimnis ist gespeichert"
 
-#: templates/instance/settings.html:16
+#: templates/instance/settings.html:14
+msgid "Test connection"
+msgstr "Verbindung testen"
+
+#: templates/instance/settings.html:17
 msgid "Last off-site copy"
 msgstr "Letzte externe Sicherung"
 
-#: templates/instance/settings.html:17
+#: templates/instance/settings.html:18
 msgid "Not run yet."
 msgstr "Noch nicht gelaufen."
 
-#: templates/instance/settings.html:17
+#: templates/instance/settings.html:18
 msgid "Copied"
 msgstr "Kopiert"
 
-#: templates/instance/settings.html:17
+#: templates/instance/settings.html:18
 msgid "Failed"
 msgstr "Fehlgeschlagen"
 
-#: templates/instance/settings.html:18
+#: templates/instance/settings.html:19
 msgid "Copy now"
 msgstr "Jetzt kopieren"
 
-#: templates/instance/settings.html:23 templates/manage/system.html:41
+#: templates/instance/settings.html:24 templates/manage/system.html:41
 msgid "Send a test mail to me"
 msgstr "Testmail an mich senden"
 
@@ -7934,7 +7958,9 @@ msgstr "Alle (s)"
 msgid ""
 "No backup volume in this installation. In the production stack the backup "
 "service writes a database dump every day."
-msgstr "Diese Installation hat kein Sicherungsvolume. Im Produktions-Stack schreibt der Sicherungsdienst jeden Tag einen Datenbank-Dump."
+msgstr ""
+"Diese Installation hat kein Sicherungsvolume. Im Produktions-Stack schreibt "
+"der Sicherungsdienst jeden Tag einen Datenbank-Dump."
 
 #: templates/manage/system.html:26
 msgid "The backup folder cannot be read."
@@ -8615,38 +8641,5 @@ msgstr "Mandant gespeichert."
 msgid "Tenant deleted."
 msgstr "Mandant gelöscht."
 
-#~ msgid "The off-site status file cannot be read."
-#~ msgstr "Die Statusdatei der externen Sicherung kann nicht gelesen werden."
-
-#~ msgid "Restoring is done on the server, see the deployment guide."
-#~ msgstr ""
-#~ "Die Wiederherstellung erfolgt auf dem Server, siehe Betriebshandbuch."
-
-#~ msgid "No floor devices."
-#~ msgstr "Keine Raumgeräte."
-
-#~ msgid "Whole rack"
-#~ msgstr "Ganzes Rack"
-
-#~ msgid "Whole room"
-#~ msgstr "Ganzer Raum"
-
-#~ msgid "Library"
-#~ msgstr "Bibliothek"
-
-#~ msgid "Import/Export"
-#~ msgstr "Import/Export"
-
-#~ msgid "Start"
-#~ msgstr "Start"
-
-#, python-format
-#~ msgid "Current tenant: %(tenant)s"
-#~ msgstr "Aktueller Mandant: %(tenant)s"
-
-#~ msgid ""
-#~ "Sites, racks and devices arrive in the next release. Until then, set up "
-#~ "tenants, users and roles in the administration area."
-#~ msgstr ""
-#~ "Standorte, Racks und Geräte folgen im nächsten Release. Richten Sie bis "
-#~ "dahin Mandanten, Benutzer und Rollen im Administrationsbereich ein."
+#~ msgid "Files"
+#~ msgstr "Dateien"

@@ -8,6 +8,9 @@ All notable changes to this project are documented here. The format follows
 
 ### Added
 
+* Settings → File storage has its own page with *Test connection*; upload limit
+  and virus scanner moved to Settings → Uploads. A changed bucket endpoint or
+  off-site repository needs its secret entered again.
 * Off-site backups are configured under Administration → Settings → Backups: the
   worker copies the backup volume encrypted with restic to S3 or B2 after every new
   dump, with retention, a check, *Copy now* and the last result on the system page

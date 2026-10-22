@@ -167,8 +167,8 @@ class MailForm(forms.Form):
     mail_from = forms.EmailField(label=gettext_lazy("Sender address"))
 
 
-class StorageForm(forms.Form):
-    """Upload limits, virus scanning and where files are kept."""
+class UploadsForm(forms.Form):
+    """Upload limit and virus scanning."""
 
     upload_max_mb = forms.IntegerField(
         label=gettext_lazy("Largest upload (MB)"),
@@ -183,6 +183,11 @@ class StorageForm(forms.Form):
         help_text=gettext_lazy("Empty: no scan. When set, uploads fail while it is unreachable."),
     )
     clamd_port = forms.IntegerField(label=gettext_lazy("clamd port"), min_value=1, max_value=65535)
+
+
+class StorageForm(forms.Form):
+    """Where uploaded files are kept: the media volume or an S3 compatible bucket."""
+
     s3_bucket = forms.CharField(
         label=gettext_lazy("S3 bucket"),
         required=False,
@@ -333,13 +338,18 @@ SECTIONS: dict[str, tuple[Any, type[forms.Form], Any]] = {
         MailForm,
         gettext_lazy("The server for invitations, password resets and notifications."),
     ),
+    "uploads": (
+        gettext_lazy("Uploads"),
+        UploadsForm,
+        gettext_lazy("How large uploads may be and whether a virus scanner checks them."),
+    ),
     "storage": (
-        gettext_lazy("Files"),
+        gettext_lazy("File storage"),
         StorageForm,
         gettext_lazy(
             "Uploads are encrypted before they are stored, in the media volume or in S3"
-            " compatible object storage (AWS S3, Backblaze B2, Wasabi). The bucket is checked"
-            " with a test file when you save."
+            " compatible object storage (AWS S3, Backblaze B2, Wasabi). Test the connection"
+            " first; saving checks the bucket with a test file as well."
         ),
     ),
     "maps": (gettext_lazy("Maps"), MapsForm, gettext_lazy("Tiles shown behind the site map.")),
@@ -383,13 +393,20 @@ def settings_view(request: HttpRequest, section: str = "security") -> HttpRespon
         values = {k: v for k, v in form.cleaned_data.items() if k in instance_config.NAMES}
         if form.cleaned_data.get("mail_password_clear"):
             values["mail_password"] = None
+        testing = request.POST.get("action") == "test" and section == "storage"
         try:
-            services.save_config(request, _actor(request), values)
+            if testing:
+                services.test_bucket(_actor(request), values)
+            else:
+                services.save_config(request, _actor(request), values)
         except ServiceError as exc:
             form.add_error(None, str(exc))
         else:
-            messages.success(request, _("Settings saved."))
-            return redirect("instance:settings", section)
+            if not testing:
+                messages.success(request, _("Settings saved."))
+                return redirect("instance:settings", section)
+            # Nothing was saved: show the page again with the entries.
+            messages.success(request, _("The bucket can be written and read. Save to use it."))
     secret = {
         "mail": "mail_password",
         "storage": "s3_secret_access_key",

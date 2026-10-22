@@ -170,8 +170,8 @@ keys, domain and proxy, backup volume and log level.
 
 Photos and files are stored encrypted in the `media` volume (`/app/media`) and are
 included in the daily backup archive. A bucket in S3 compatible object storage (AWS
-S3, Backblaze B2, Wasabi, Ceph, Garage) can be used instead, set under *Settings →
-Files*. The application encrypts every file before it leaves the process, so the
+S3, Backblaze B2, Wasabi, Ceph, Garage) can be used instead, set under *Settings → File
+storage*. The application encrypts every file before it leaves the process, so the
 provider only sees ciphertext. Keep the bucket private and turn on object versioning
 or a retention lock there: the database backup does not contain the files. Initial
 values:
