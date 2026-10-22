@@ -78,16 +78,19 @@ def test_providers(admin_client: Client, make_tree, system, monkeypatch, provide
     calls = []
 
     def fake(url, headers):
+        from urllib.parse import urlsplit
+
         calls.append((url, headers))
-        if "desec.io" in url:
+        host = urlsplit(url).hostname
+        if host == "desec.io":
             return [
                 {"subname": "", "type": "MX", "ttl": 3600, "records": ["10 mail.example.org."]},
                 {"subname": "www", "type": "A", "ttl": 300, "records": ["192.0.2.1"]},
                 {"subname": "", "type": "TXT", "ttl": 300, "records": ['"v=spf1 -all"']},
             ]
-        if "cloudflare" in url and "dns_records" not in url:
+        if host == "api.cloudflare.com" and "dns_records" not in url:
             return {"result": [{"id": "abc123"}]}
-        if "cloudflare" in url:
+        if host == "api.cloudflare.com":
             return {
                 "result": [
                     {"name": "www.example.org", "type": "A", "content": "192.0.2.1", "ttl": 1},
@@ -129,11 +132,11 @@ def test_providers(admin_client: Client, make_tree, system, monkeypatch, provide
         )
         assert records[("@", "TXT")].value == "v=spf1 -all"
         assert all("tok-123" not in str(e.data) for e in AuditEvent.objects.all())
+    from urllib.parse import urlsplit
+
+    hosts = {"desec.io", "api.cloudflare.com", "dns.hetzner.com"}
     assert all(
-        url.startswith(
-            ("https://desec.io/", "https://api.cloudflare.com/", "https://dns.hetzner.com/")
-        )
-        for url, _headers in calls
+        urlsplit(url).scheme == "https" and urlsplit(url).hostname in hosts for url, _h in calls
     )
 
 
