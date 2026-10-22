@@ -124,8 +124,10 @@ def test_maps_and_integrations(admin_client: Client) -> None:
         {"map_tile_url": "https://tiles.example.org/{z}/{x}/{y}.png", "map_attribution": "x"},
     )
     page = admin_client.get("/locations/", secure=True)
-    assert "https://tiles.example.org" in page["Content-Security-Policy"]
-    assert "tile.openstreetmap.org" not in page["Content-Security-Policy"]
+    directives = dict(
+        part.strip().split(" ", 1) for part in page["Content-Security-Policy"].split(";")
+    )
+    assert directives["img-src"].split() == ["'self'", "data:", "https://tiles.example.org"]
     bad = _post(admin_client, "maps", {"map_tile_url": "http://tiles.example.org/a.png"})
     assert "{z}, {x} and {y}" in bad
     wrong = {"webhook_allowed_networks": "10.0.0.0/8, nope", "api_rate": "100/minute"}
