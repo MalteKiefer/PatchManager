@@ -50,6 +50,7 @@
         <a href="{% url 'cabling:cables' %}" {% if section == "cables" %}aria-current="page"{% endif %}>{% include "core/_icon.html" with name="cables" %}{% translate "Cables" %}</a>
         <a href="{% url 'networks:vlans' %}" {% if section == "networks" %}aria-current="page"{% endif %}>{% include "core/_icon.html" with name="networks" %}{% translate "Networks" %}</a>
         <a href="{% url 'ipam:prefixes' %}" {% if section == "ipam" %}aria-current="page"{% endif %}>{% include "core/_icon.html" with name="ipam" %}{% translate "IP networks" %}</a>
+        <a href="{% url 'objects:index' 'vms' %}" {% if section == "compute" %}aria-current="page"{% endif %}>{% include "core/_icon.html" with name="compute" %}{% translate "Servers and storage" %}</a>
         <a href="{% url 'objects:index' 'organizations' %}" {% if section == "directory" %}aria-current="page"{% endif %}>{% include "core/_icon.html" with name="directory" %}{% translate "Customers and systems" %}</a>
         <a href="{% url 'library:types' %}" {% if section == "library" %}aria-current="page"{% endif %}>{% include "core/_icon.html" with name="library" %}{% translate "Device library" %}</a>
         <p class="app-nav-label">{% translate "Records" %}</p>

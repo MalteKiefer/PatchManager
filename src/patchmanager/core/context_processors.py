@@ -17,6 +17,7 @@ SECTIONS = {
     "cabling": "cables",
     "networks": "networks",
     "directory": "directory",
+    "compute": "compute",
     "ipam": "ipam",
     "history": "activity",
     "search": "search",
@@ -37,6 +38,8 @@ def _section(request: HttpRequest) -> str:
         from patchmanager.core.crud import REGISTRY
 
         resource = REGISTRY.get(match.kwargs.get("key", "")) if match else None
+        if resource is not None and resource.group == "compute":
+            return "compute"
         return "ipam" if resource is not None and resource.group == "services" else "directory"
     return SECTIONS.get(namespace, "")
 

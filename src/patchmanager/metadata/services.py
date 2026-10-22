@@ -41,6 +41,12 @@ TARGETS = {
     "ipam.dnszone": "ipam.dnszone",
     "ipam.dnsrecord": "ipam.dnszone",
     "circuits.circuit": "circuits.circuit",
+    "compute.cluster": "compute.cluster",
+    "compute.virtualmachine": "compute.vm",
+    "compute.storagevolume": "compute.storage",
+    "compute.clusterhost": "compute.cluster",
+    "compute.vminterface": "compute.vm",
+    "compute.virtualdisk": "compute.vm",
 }
 
 _markdown = MarkdownIt("commonmark", {"html": False, "linkify": False}).enable("table")

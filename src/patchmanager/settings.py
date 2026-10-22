@@ -99,6 +99,7 @@ INSTALLED_APPS = [
     "patchmanager.configs",
     "patchmanager.directory",
     "patchmanager.circuits",
+    "patchmanager.compute",
     "patchmanager.cabling",
     "patchmanager.floorplans",
     "patchmanager.history",
