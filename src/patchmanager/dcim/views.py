@@ -91,16 +91,11 @@ def rack_detail(request: HttpRequest, pk: str) -> HttpResponse:
     can_change = policy.has_perm(actor, "dcim.rack.change", rack)
     action = request.POST.get("action")
     form = RackForm(request.POST if action == "edit" else None, instance=rack)
-    reserve_form = ReserveForm(request.POST if action == "reserve" else None)
     if request.method == "POST":
         try:
             if action == "edit" and form.is_valid():
                 tree.update(request, actor, rack, **form.cleaned_data)
                 messages.success(request, _("Saved."))
-                return redirect(node_url(rack))
-            if action == "reserve" and reserve_form.is_valid():
-                services.reserve(request, actor, rack, **reserve_form.cleaned_data)
-                messages.success(request, _("Units reserved."))
                 return redirect(node_url(rack))
             if action == "delete":
                 room = rack.room
@@ -124,12 +119,41 @@ def rack_detail(request: HttpRequest, pk: str) -> HttpResponse:
         ),
         "can_add_device": policy.has_perm(actor, "dcim.device.add", rack),
         "form": form,
-        "reserve_form": reserve_form,
         "can_change": can_change,
         "can_delete": policy.has_perm(actor, "dcim.rack.delete", rack),
         "breadcrumbs": [(a, node_url(a)) for a in rack.ancestors()],
     }
     return render(request, "dcim/rack.html", context)
+
+
+@login_required
+@require_http_methods(["GET", "POST"])
+def space_create(request: HttpRequest, pk: str) -> HttpResponse:
+    """Page that reserves a block of units."""
+    rack = _rack(request, pk)
+    actor = _actor(request)
+    if not policy.has_perm(actor, "dcim.rack.change", rack):
+        raise Http404
+    form = ReserveForm(request.POST or None, initial={"start": request.GET.get("start")})
+    if request.method == "POST" and form.is_valid():
+        try:
+            services.reserve(request, actor, rack, **form.cleaned_data)
+        except ServiceError as exc:
+            form.add_error(None, str(exc))
+        else:
+            messages.success(request, _("Units reserved."))
+            return redirect(node_url(rack))
+    return render(
+        request,
+        "core/create.html",
+        {
+            "title": _("Reserve units in %(rack)s") % {"rack": rack},
+            "form": form,
+            "submit": _("Reserve"),
+            "back_url": node_url(rack),
+            "breadcrumbs": [(a, node_url(a)) for a in [*rack.ancestors(), rack]],
+        },
+    )
 
 
 @login_required

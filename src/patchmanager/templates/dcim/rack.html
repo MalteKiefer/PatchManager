@@ -70,12 +70,7 @@
           <td>{% if can_change %}<form method="post" action="{% url 'dcim:space-delete' rack.pk s.pk %}" data-confirm="{% translate 'Free these units?' %}">{% csrf_token %}<button class="btn-secondary py-1">{% translate "Free" %}</button></form>{% endif %}</td></tr>
         {% empty %}<tr><td colspan="4" class="text-slate-500">{% translate "No units reserved." %}</td></tr>{% endfor %}</tbody>
       </table></div>
-      {% if can_change %}
-      <details class="mt-4" {% if reserve_form.errors %}open{% endif %}><summary class="cursor-pointer text-sm font-medium">{% translate "Reserve units" %}</summary>
-        <form method="post" class="mt-3 grid gap-x-4 sm:grid-cols-2" novalidate>{% csrf_token %}<input type="hidden" name="action" value="reserve">
-          {% include "core/_form.html" with form=reserve_form %}<div class="sm:col-span-2"><button class="btn-primary">{% translate "Reserve" %}</button></div></form>
-      </details>
-      {% endif %}
+      {% if can_change %}<a class="btn-secondary mt-4" href="{% url 'dcim:space-create' rack.pk %}">{% translate "Reserve units" %}</a>{% endif %}
     </section>
 
     {% metadata_panel rack %}

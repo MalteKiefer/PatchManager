@@ -12,6 +12,7 @@ from django.core.exceptions import ValidationError
 from django.db.models import QuerySet
 from django.http import HttpRequest, HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
+from django.urls import reverse
 from django.utils import timezone
 from django.utils.translation import gettext as _
 from django.utils.translation import gettext_lazy
@@ -366,7 +367,21 @@ class TokenForm(forms.Form):
 
 @permission_required("system.scim.manage")
 def token_list(request: HttpRequest) -> HttpResponse:
-    """SCIM tokens; create one (shown once)."""
+    """SCIM tokens and the base URL."""
+    return render(
+        request,
+        "scim/tokens.html",
+        {
+            "tokens": ScimToken.objects.all(),
+            "new_token": request.session.pop(SHOW_ONCE, None),
+            "base_url": request.build_absolute_uri("/scim/v2/"),
+        },
+    )
+
+
+@permission_required("system.scim.manage")
+def token_create(request: HttpRequest) -> HttpResponse:
+    """Page that creates a SCIM token; the list shows it once."""
     form = TokenForm(request.POST or None)
     if request.method == "POST" and form.is_valid():
         prefix = secrets.token_hex(6)
@@ -385,13 +400,8 @@ def token_list(request: HttpRequest) -> HttpResponse:
         return redirect("scim:tokens")
     return render(
         request,
-        "scim/tokens.html",
-        {
-            "form": form,
-            "tokens": ScimToken.objects.all(),
-            "new_token": request.session.pop(SHOW_ONCE, None),
-            "base_url": request.build_absolute_uri("/scim/v2/"),
-        },
+        "core/create.html",
+        {"title": _("New SCIM token"), "form": form, "back_url": reverse("scim:tokens")},
     )
 
 

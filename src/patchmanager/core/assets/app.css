@@ -60,3 +60,6 @@
 
 /* Secondary text: slate-500 on the dark backgrounds misses WCAG AA contrast (4.5:1). */
 .dark .text-slate-500 { color: var(--color-slate-400); }
+
+/* Map tiles in black and white, so markers and the brand colour stand out. */
+.leaflet-tile-pane { filter: grayscale(1); }

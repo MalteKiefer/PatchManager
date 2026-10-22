@@ -9,6 +9,7 @@ from django.core.exceptions import PermissionDenied
 from django.db.models import Count, Q
 from django.http import Http404, HttpRequest, HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
+from django.urls import reverse
 from django.utils.translation import gettext as _
 from django.utils.translation import gettext_lazy
 from django.views.decorators.http import require_http_methods, require_POST
@@ -174,6 +175,34 @@ def type_create(request: HttpRequest) -> HttpResponse:
 
 @login_required
 @require_http_methods(["GET", "POST"])
+def type_ports_create(request: HttpRequest, pk: str) -> HttpResponse:
+    """Page that adds ports to a device type."""
+    device_type = get_object_or_404(visible_types(request), pk=pk)
+    actor = _actor(request)
+    if not policy.has_perm(actor, "library.devicetype.change", device_type):
+        raise PermissionDenied
+    form = PortTemplateForm(request.POST or None, device_type=device_type)
+    if request.method == "POST" and form.is_valid():
+        try:
+            services.add_port_template(request, actor, device_type, **form.cleaned_data)
+        except ServiceError as exc:
+            form.add_error(None, str(exc))
+        else:
+            return redirect("library:type", pk)
+    return render(
+        request,
+        "core/create.html",
+        {
+            "title": _("Add ports to %(type)s") % {"type": device_type},
+            "form": form,
+            "submit": _("Add"),
+            "back_url": reverse("library:type", args=[pk]),
+        },
+    )
+
+
+@login_required
+@require_http_methods(["GET", "POST"])
 def type_detail(request: HttpRequest, pk: str) -> HttpResponse:
     """Edit a device type, its ports and images."""
     device_type = get_object_or_404(visible_types(request), pk=pk)
@@ -187,9 +216,6 @@ def type_detail(request: HttpRequest, pk: str) -> HttpResponse:
         request.POST if action == "edit" else None,
         instance=device_type,
         initial={"vendor_name": device_type.vendor.name, "shared": device_type.tenant_id is None},
-    )
-    port_form = PortTemplateForm(
-        request.POST if action == "ports" else None, device_type=device_type
     )
     del form.fields["shared"]  # scope is fixed after creation
     images_form = ImagesForm(
@@ -211,9 +237,6 @@ def type_detail(request: HttpRequest, pk: str) -> HttpResponse:
                     **{k: form.cleaned_data[k] for k in TYPE_FIELDS},
                 )
                 messages.success(request, _("Saved."))
-                return redirect("library:type", pk)
-            if action == "ports" and port_form.is_valid():
-                services.add_port_template(request, actor, device_type, **port_form.cleaned_data)
                 return redirect("library:type", pk)
             if action == "remove_ports":
                 template = get_object_or_404(
@@ -249,7 +272,6 @@ def type_detail(request: HttpRequest, pk: str) -> HttpResponse:
         {
             "device_type": device_type,
             "form": form,
-            "port_form": port_form,
             "images_form": images_form,
             "templates": device_type.port_templates.select_related("rear_template"),
             "can_change": can_change,

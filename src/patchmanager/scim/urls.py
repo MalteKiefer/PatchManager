@@ -12,5 +12,6 @@ urlpatterns = [
     re_path(r"^scim/v2/ResourceTypes/?$", views.resource_types, name="resource-types"),
     re_path(r"^scim/v2/Schemas/?$", views.schemas, name="schemas"),
     path("manage/scim/", views.token_list, name="tokens"),
+    path("manage/scim/new/", views.token_create, name="token-create"),
     path("manage/scim/<uuid:pk>/revoke/", views.token_revoke, name="token-revoke"),
 ]

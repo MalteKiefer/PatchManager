@@ -8,6 +8,7 @@ from django.core.paginator import Paginator
 from django.db.models import Count, Q
 from django.http import Http404, HttpRequest, HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
+from django.urls import reverse
 from django.utils.translation import gettext as _
 from django.views.decorators.http import require_http_methods, require_POST
 
@@ -160,9 +161,6 @@ def user_detail(request: HttpRequest, pk: str) -> HttpResponse:
             "factor_count": subject.totp_devices.filter(confirmed=True).count()
             + subject.webauthn_credentials.count(),
             "session_count": subject.sessions.count(),
-            "assignment_form": AssignmentForm(
-                tenants=_tenants(request), locations=_locations(request)
-            ),
             "reason_form": ReasonForm(),
             "is_super_admin": policy.is_super_admin(subject),
             "can_manage_sso": policy.has_perm(request.user, "system.sso.manage"),
@@ -233,43 +231,50 @@ def user_action(request: HttpRequest, pk: str, action: str) -> HttpResponse:
 
 
 @permission_required("accounts.assignment.view", any_scope=True)
-@require_POST
+@require_http_methods(["GET", "POST"])
 def assignment_create(request: HttpRequest) -> HttpResponse:
-    """Grant a role to a user or group."""
-    form = AssignmentForm(request.POST, tenants=_tenants(request), locations=_locations(request))
-    user_id, group_id = _uuid(request.POST.get("user")), _uuid(request.POST.get("group"))
+    """Page that grants a role to a user or group (``?user=`` or ``?group=``)."""
+    params = request.POST if request.method == "POST" else request.GET
+    user_id, group_id = _uuid(params.get("user")), _uuid(params.get("group"))
     user = visible_users(_actor(request)).filter(pk=user_id).first() if user_id else None
     group = Group.objects.filter(pk=group_id).first() if group_id else None
-    back = (
-        redirect("manage:user", user.pk)
-        if user
-        else redirect("manage:group", group.pk)
-        if group
-        else redirect("manage:users")
+    if user is None and group is None:
+        raise Http404
+    principal: Any = user or group
+    back = reverse("manage:user" if user else "manage:group", args=[principal.pk])
+    form = AssignmentForm(
+        request.POST or None, tenants=_tenants(request), locations=_locations(request)
     )
-    if not form.is_valid():
-        messages.error(
-            request, _("Check the assignment: %(errors)s") % {"errors": form.errors.as_text()}
-        )
-        return back
-    data = form.cleaned_data
-    _run(
-        request,
-        lambda: rbac.assign(
+    if request.method == "POST" and form.is_valid():
+        data = form.cleaned_data
+        if _run(
             request,
-            _actor(request),
-            role=data["role"],
-            user=user,
-            group=group,
-            tenant=data["tenant"],
-            node=_location(request, data["location"]),
-            effect=data["effect"],
-            condition_list=data["conditions"] or None,
-            object_type=data["object_type"] or None,
-        ),
-        _("Assignment added."),
+            lambda: rbac.assign(
+                request,
+                _actor(request),
+                role=data["role"],
+                user=user,
+                group=group,
+                tenant=data["tenant"],
+                node=_location(request, data["location"]),
+                effect=data["effect"],
+                condition_list=data["conditions"] or None,
+                object_type=data["object_type"] or None,
+            ),
+            _("Assignment added."),
+        ):
+            return redirect(back)
+    return render(
+        request,
+        "core/create.html",
+        {
+            "title": _("New assignment for %(who)s") % {"who": principal},
+            "form": form,
+            "submit": _("Add"),
+            "back_url": back,
+            "hidden": {"user" if user else "group": principal.pk},
+        },
     )
-    return back
 
 
 @permission_required("accounts.assignment.view", any_scope=True)
@@ -299,24 +304,26 @@ def group_list(request: HttpRequest) -> HttpResponse:
     groups = Group.objects.annotate(member_count=Count("members", distinct=True)).prefetch_related(
         "parents"
     )
-    return render(request, "manage/groups.html", {"groups": groups, "form": GroupForm()})
+    return render(request, "manage/groups.html", {"groups": groups})
 
 
 @permission_required("accounts.group.add")
-@require_POST
+@require_http_methods(["GET", "POST"])
 def group_create(request: HttpRequest) -> HttpResponse:
-    """Create a group."""
-    form = GroupForm(request.POST)
-    if form.is_valid():
+    """Page that creates a group."""
+    form = GroupForm(request.POST or None)
+    if request.method == "POST" and form.is_valid():
         try:
             group = rbac.create_group(request, _actor(request), **form.cleaned_data)
         except ServiceError as exc:
-            messages.error(request, str(exc))
+            form.add_error(None, str(exc))
         else:
             return redirect("manage:group", group.pk)
-    else:
-        messages.error(request, form.errors.as_text())
-    return redirect("manage:groups")
+    return render(
+        request,
+        "core/create.html",
+        {"title": _("New group"), "form": form, "back_url": reverse("manage:groups")},
+    )
 
 
 @permission_required("accounts.group.view")
@@ -383,9 +390,6 @@ def group_detail(request: HttpRequest, pk: str) -> HttpResponse:
             "members": members,
             "parent_form": parent,
             "assignments": group.assignments.select_related("role", "tenant"),
-            "assignment_form": AssignmentForm(
-                tenants=_tenants(request), locations=_locations(request)
-            ),
         },
     )
 

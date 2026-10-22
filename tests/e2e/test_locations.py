@@ -34,22 +34,26 @@ def test_site_to_rack_and_move_block(page: Page, live_server, super_admin, make_
     page.get_by_role("button", name="Create").click()
     expect(page.get_by_role("heading", name="Lab", exact=True)).to_be_visible()
 
-    for name in ("North wing", "Ground floor", "Server room"):
-        page.get_by_text("Add", exact=True).click()
-        page.locator("form:has(input[value=add])").get_by_label("Name").fill(name)
-        page.locator("form:has(input[value=add])").get_by_role("button", name="Create").click()
+    for link, name in (
+        ("New building", "North wing"),
+        ("New floor", "Ground floor"),
+        ("New room", "Server room"),
+    ):
+        page.get_by_role("link", name=link).click()
+        page.locator("main form").get_by_label("Name").fill(name)
+        page.get_by_role("button", name="Create").click()
         expect(page.get_by_role("heading", name=name)).to_be_visible()
 
-    page.get_by_text("Add", exact=True).click()
-    form = page.locator("form:has(input[value=add])")
+    page.get_by_role("link", name="New rack").click()
+    form = page.locator("main form")
     form.get_by_label("Name").fill("A01")
     form.get_by_label("Height (U)").fill("12")
     form.get_by_role("button", name="Create").click()
     expect(page).to_have_url(re.compile(r"/racks/"))
     expect(page.get_by_role("navigation", name="Breadcrumb")).to_contain_text("Lab")
 
-    page.get_by_text("Reserve units").click()
-    reserve = page.locator("form:has(input[value=reserve])")
+    page.get_by_role("link", name="Reserve units").click()
+    reserve = page.locator("main form")
     reserve.get_by_label("Label").fill("Switch")
     reserve.get_by_label("Lowest unit").fill("5")
     reserve.get_by_role("button", name="Reserve").click()

@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-22 02:20+0000\n"
+"POT-Creation-Date: 2026-10-22 02:42+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -40,8 +40,8 @@ msgid "Run the setup_token command to get one."
 msgstr "Führen Sie den Befehl setup_token aus, um eines zu erhalten."
 
 #: accounts/forms.py:49 accounts/forms.py:103 accounts/forms.py:110
-#: api/ui.py:31 api/ui.py:54 exchange/pdf.py:215 integrations/views.py:26
-#: scim/views.py:350 sso/views.py:187 templates/api/clients.html:9
+#: api/ui.py:32 api/ui.py:55 exchange/pdf.py:215 integrations/views.py:27
+#: scim/views.py:351 sso/views.py:187 templates/api/clients.html:9
 #: templates/api/tokens.html:9 templates/integrations/webhooks.html:8
 #: templates/manage/groups.html:6 templates/manage/roles.html:11
 #: templates/manage/tenants.html:6 templates/manage/users.html:10
@@ -73,7 +73,7 @@ msgstr "Authenticator-App"
 msgid "Role"
 msgstr "Rolle"
 
-#: accounts/forms.py:113 api/ui.py:41 templates/api/tokens.html:9
+#: accounts/forms.py:113 api/ui.py:42 templates/api/tokens.html:9
 #: templates/base.html:41
 msgid "Tenant"
 msgstr "Mandant"
@@ -134,7 +134,7 @@ msgstr "JSON- oder YAML-Datei"
 msgid "The file is too large."
 msgstr "Die Datei ist zu groß."
 
-#: accounts/forms.py:187 library/views.py:291
+#: accounts/forms.py:187 library/views.py:313
 msgid "The file must be UTF-8 text."
 msgstr "Die Datei muss UTF-8-Text enthalten."
 
@@ -315,11 +315,11 @@ msgstr "Dieser Sicherheitsschlüssel ist nicht registriert."
 msgid "Factor not found."
 msgstr "Faktor nicht gefunden."
 
-#: accounts/services/privacy.py:124
+#: accounts/services/privacy.py:130
 msgid "You cannot anonymise your own account."
 msgstr "Sie können Ihr eigenes Konto nicht anonymisieren."
 
-#: accounts/services/privacy.py:126
+#: accounts/services/privacy.py:132
 msgid "Delete the API client instead."
 msgstr "Löschen Sie stattdessen den API-Client."
 
@@ -536,104 +536,112 @@ msgstr "Einladung ungültig oder abgelaufen"
 msgid "Your password is set. Please sign in."
 msgstr "Ihr Passwort wurde festgelegt. Bitte melden Sie sich an."
 
-#: accounts/views/manage.py:144
+#: accounts/views/manage.py:145
 #, python-format
 msgid "Invitation sent to %(email)s."
 msgstr "Einladung an %(email)s gesendet."
 
-#: accounts/views/manage.py:183
+#: accounts/views/manage.py:181
 msgid "Account locked."
 msgstr "Konto gesperrt."
 
-#: accounts/views/manage.py:187
+#: accounts/views/manage.py:185
 msgid "Account unlocked."
 msgstr "Konto entsperrt."
 
-#: accounts/views/manage.py:191
+#: accounts/views/manage.py:189
 msgid "Account deactivated."
 msgstr "Konto deaktiviert."
 
-#: accounts/views/manage.py:195
+#: accounts/views/manage.py:193
 msgid "Account reactivated."
 msgstr "Konto reaktiviert."
 
-#: accounts/views/manage.py:199
+#: accounts/views/manage.py:197
 msgid "Second factors removed."
 msgstr "Zweite Faktoren entfernt."
 
-#: accounts/views/manage.py:203
+#: accounts/views/manage.py:201
 msgid "Sessions signed out."
 msgstr "Sitzungen abgemeldet."
 
-#: accounts/views/manage.py:207
+#: accounts/views/manage.py:205
 msgid "This account may now sign in with its password where SSO is enforced."
 msgstr ""
 "Dieses Konto darf sich jetzt auch dort mit Passwort anmelden, wo SSO "
 "erzwungen wird."
 
-#: accounts/views/manage.py:211
+#: accounts/views/manage.py:209
 msgid "The account was anonymised."
 msgstr "Das Konto wurde anonymisiert."
 
-#: accounts/views/manage.py:215
+#: accounts/views/manage.py:213
 msgid "This account now follows the SSO rules of its domain."
 msgstr "Dieses Konto folgt jetzt den SSO-Regeln seiner Domain."
 
-#: accounts/views/manage.py:224
+#: accounts/views/manage.py:222
 #, python-format
 msgid "You are now acting as %(user)s."
 msgstr "Sie handeln jetzt als %(user)s."
 
-#: accounts/views/manage.py:252
-#, python-format
-msgid "Check the assignment: %(errors)s"
-msgstr "Prüfen Sie die Zuweisung: %(errors)s"
-
-#: accounts/views/manage.py:270
+#: accounts/views/manage.py:264
 msgid "Assignment added."
 msgstr "Zuweisung hinzugefügt."
 
-#: accounts/views/manage.py:288
+#: accounts/views/manage.py:271
+#, python-format
+msgid "New assignment for %(who)s"
+msgstr "Neue Zuweisung für %(who)s"
+
+#: accounts/views/manage.py:273 library/views.py:198
+msgid "Add"
+msgstr "Hinzufügen"
+
+#: accounts/views/manage.py:293
 msgid "Assignment removed."
 msgstr "Zuweisung entfernt."
 
-#: accounts/views/manage.py:346
+#: accounts/views/manage.py:325 templates/manage/groups.html:4
+msgid "New group"
+msgstr "Neue Gruppe"
+
+#: accounts/views/manage.py:353
 msgid "Group saved."
 msgstr "Gruppe gespeichert."
 
-#: accounts/views/manage.py:354
+#: accounts/views/manage.py:361
 msgid "Members saved."
 msgstr "Mitglieder gespeichert."
 
-#: accounts/views/manage.py:360
+#: accounts/views/manage.py:367
 msgid "Group nested."
 msgstr "Gruppe verschachtelt."
 
-#: accounts/views/manage.py:370
+#: accounts/views/manage.py:377
 msgid "Nesting removed."
 msgstr "Verschachtelung entfernt."
 
-#: accounts/views/manage.py:373
+#: accounts/views/manage.py:380
 msgid "Group deleted."
 msgstr "Gruppe gelöscht."
 
-#: accounts/views/manage.py:444
+#: accounts/views/manage.py:448
 msgid "Role created."
 msgstr "Rolle erstellt."
 
-#: accounts/views/manage.py:474
+#: accounts/views/manage.py:478
 msgid "Role saved."
 msgstr "Rolle gespeichert."
 
-#: accounts/views/manage.py:502
+#: accounts/views/manage.py:506
 msgid "Role copied."
 msgstr "Rolle kopiert."
 
-#: accounts/views/manage.py:511
+#: accounts/views/manage.py:515
 msgid "Role deleted."
 msgstr "Rolle gelöscht."
 
-#: accounts/views/manage.py:544
+#: accounts/views/manage.py:548
 #, python-format
 msgid "%(count)s roles imported."
 msgstr "%(count)s Rollen importiert."
@@ -692,40 +700,48 @@ msgstr "Geben Sie einen Namen ein."
 msgid "Tokens expire after 1 to %(n)s days."
 msgstr "Token laufen nach 1 bis %(n)s Tagen ab."
 
-#: api/ui.py:21
+#: api/ui.py:22
 msgid "7 days"
 msgstr "7 Tage"
 
-#: api/ui.py:22
+#: api/ui.py:23
 msgid "30 days"
 msgstr "30 Tage"
 
-#: api/ui.py:23
+#: api/ui.py:24
 msgid "90 days"
 msgstr "90 Tage"
 
-#: api/ui.py:24
+#: api/ui.py:25
 msgid "1 year"
 msgstr "1 Jahr"
 
-#: api/ui.py:33 api/ui.py:56 templates/api/clients.html:9
+#: api/ui.py:34 api/ui.py:57 templates/api/clients.html:9
 #: templates/api/tokens.html:9
 msgid "Access"
 msgstr "Zugriff"
 
-#: api/ui.py:39
+#: api/ui.py:40
 msgid "Expires after"
 msgstr "Läuft ab nach"
 
-#: api/ui.py:48
+#: api/ui.py:49
 msgid "All my tenants"
 msgstr "Alle meine Mandanten"
 
-#: api/ui.py:111 scim/views.py:405
+#: api/ui.py:114 templates/api/tokens.html:4
+msgid "New token"
+msgstr "Neuer Token"
+
+#: api/ui.py:124 scim/views.py:415
 msgid "Token revoked."
 msgstr "Token widerrufen."
 
-#: api/ui.py:153
+#: api/ui.py:161 templates/api/clients.html:4
+msgid "New API client"
+msgstr "Neuer API-Client"
+
+#: api/ui.py:175
 msgid "Client revoked."
 msgstr "Client widerrufen."
 
@@ -866,9 +882,9 @@ msgstr "Verbunden."
 msgid "Cable removed."
 msgstr "Kabel entfernt."
 
-#: cabling/views.py:152 dcim/device_views.py:289 dcim/device_views.py:358
-#: dcim/views.py:99 library/views.py:213 locations/views.py:171
-#: networks/views.py:142
+#: cabling/views.py:152 dcim/device_views.py:316 dcim/device_views.py:381
+#: dcim/views.py:98 library/views.py:239 locations/views.py:216
+#: networks/views.py:131
 msgid "Saved."
 msgstr "Gespeichert."
 
@@ -997,7 +1013,7 @@ msgstr "Leer lassen, um die Namenskonvention des Typs zu verwenden."
 msgid "Room"
 msgstr "Raum"
 
-#: dcim/device_views.py:83 templates/locations/node.html:21
+#: dcim/device_views.py:83 templates/locations/node.html:22
 msgid "Rack"
 msgstr "Rack"
 
@@ -1026,16 +1042,21 @@ msgstr "Getaggte VLANs"
 msgid "Device created with %(n)s ports."
 msgstr "Gerät mit %(n)s Ports angelegt."
 
-#: dcim/device_views.py:302
+#: dcim/device_views.py:282
+#, python-format
+msgid "New port on %(device)s"
+msgstr "Neuer Port an %(device)s"
+
+#: dcim/device_views.py:329
 msgid "Device moved."
 msgstr "Gerät verschoben."
 
-#: dcim/device_views.py:310 dcim/views.py:108 library/views.py:241
-#: locations/views.py:183 networks/views.py:138
+#: dcim/device_views.py:334 dcim/views.py:103 library/views.py:264
+#: locations/views.py:221 networks/views.py:127
 msgid "Deleted."
 msgstr "Gelöscht."
 
-#: dcim/device_views.py:372
+#: dcim/device_views.py:395
 msgid "VLANs saved."
 msgstr "VLANs gespeichert."
 
@@ -1185,15 +1206,24 @@ msgstr "Bezeichnung"
 msgid "Height (U)"
 msgstr "Höhe (HE)"
 
-#: dcim/views.py:103
+#: dcim/views.py:144
 msgid "Units reserved."
 msgstr "Höheneinheiten reserviert."
 
-#: dcim/views.py:148 floorplans/views.py:59 floorplans/views.py:61
+#: dcim/views.py:150
+#, python-format
+msgid "Reserve units in %(rack)s"
+msgstr "Höheneinheiten in %(rack)s reservieren"
+
+#: dcim/views.py:152
+msgid "Reserve"
+msgstr "Reservieren"
+
+#: dcim/views.py:172 floorplans/views.py:59 floorplans/views.py:61
 msgid "Invalid request."
 msgstr "Ungültige Anfrage."
 
-#: dcim/views.py:152
+#: dcim/views.py:176
 msgid "These units are taken or outside the rack."
 msgstr "Diese Höheneinheiten sind belegt oder liegen außerhalb des Racks."
 
@@ -1294,7 +1324,7 @@ msgstr "Etage"
 msgid "Kind"
 msgstr "Art"
 
-#: exchange/pdf.py:199 exchange/tables.py:539 locations/views.py:52
+#: exchange/pdf.py:199 exchange/tables.py:539 locations/views.py:64
 #: search/services.py:58
 msgid "Racks"
 msgstr "Racks"
@@ -1318,7 +1348,7 @@ msgid "VID"
 msgstr "VID"
 
 #: exchange/pdf.py:215 templates/integrations/webhook.html:23
-#: templates/locations/node.html:21 templates/manage/system.html:17
+#: templates/locations/node.html:22 templates/manage/system.html:17
 #: templates/manage/tenants.html:6 templates/manage/users.html:10
 #: templates/networks/vlans.html:7 templates/sso/providers.html:7
 msgid "Status"
@@ -1378,7 +1408,7 @@ msgstr "Mbit/s"
 msgid "VLAN"
 msgstr "VLAN"
 
-#: exchange/pdf.py:286 templates/dcim/device.html:35
+#: exchange/pdf.py:286 templates/dcim/device.html:30
 #: templates/dcim/port.html:16
 msgid "Connected to"
 msgstr "Verbunden mit"
@@ -1416,7 +1446,7 @@ msgstr "B"
 msgid "Patch list: %(name)s"
 msgstr "Patchliste: %(name)s"
 
-#: exchange/pdf.py:344 library/views.py:39 templates/library/types.html:17
+#: exchange/pdf.py:344 library/views.py:40 templates/library/types.html:17
 msgid "Vendor"
 msgstr "Hersteller"
 
@@ -1802,7 +1832,7 @@ msgstr "Der Host kann nicht aufgelöst werden."
 msgid "This address is not allowed for webhooks."
 msgstr "Diese Adresse ist für Webhooks nicht erlaubt."
 
-#: integrations/models.py:17 integrations/views.py:27
+#: integrations/models.py:17 integrations/views.py:28
 #: templates/integrations/webhooks.html:8
 msgid "URL"
 msgstr "URL"
@@ -1819,31 +1849,35 @@ msgstr "gesendet"
 msgid "Events are patterns like dcim.device.*, cabling.cable.insert or *."
 msgstr "Ereignisse sind Muster wie dcim.device.*, cabling.cable.insert oder *."
 
-#: integrations/views.py:29 templates/integrations/webhooks.html:8
+#: integrations/views.py:30 templates/integrations/webhooks.html:8
 msgid "Events"
 msgstr "Ereignisse"
 
-#: integrations/views.py:32
+#: integrations/views.py:33
 msgid "Comma separated, for example dcim.device.*, cabling.cable.insert or *"
 msgstr "Kommagetrennt, zum Beispiel dcim.device.*, cabling.cable.insert oder *"
 
-#: integrations/views.py:35 templates/integrations/webhooks.html:8
+#: integrations/views.py:36 templates/integrations/webhooks.html:8
 msgid "Active"
 msgstr "Aktiv"
 
-#: integrations/views.py:126
+#: integrations/views.py:107 templates/integrations/webhooks.html:4
+msgid "New webhook"
+msgstr "Neuer Webhook"
+
+#: integrations/views.py:143
 msgid "Webhook saved."
 msgstr "Webhook gespeichert."
 
-#: integrations/views.py:149
+#: integrations/views.py:166
 msgid "Test event queued."
 msgstr "Testereignis eingereiht."
 
-#: integrations/views.py:154
+#: integrations/views.py:171
 msgid "Webhook deleted."
 msgstr "Webhook gelöscht."
 
-#: integrations/views.py:172
+#: integrations/views.py:189
 msgid "Delivery queued again."
 msgstr "Zustellung erneut eingereiht."
 
@@ -2031,39 +2065,44 @@ msgstr "Frontports können nur Rückports desselben Typs zugeordnet werden."
 msgid "The number of front ports must be a multiple of the rear ports."
 msgstr "Die Anzahl der Frontports muss ein Vielfaches der Rückports sein."
 
-#: library/views.py:40 library/views.py:91
+#: library/views.py:41 library/views.py:92
 msgid "Shared with all tenants"
 msgstr "Für alle Mandanten freigegeben"
 
-#: library/views.py:74
+#: library/views.py:75
 msgid "Front image"
 msgstr "Bild der Vorderseite"
 
-#: library/views.py:77
+#: library/views.py:78
 msgid "Rear image"
 msgstr "Bild der Rückseite"
 
-#: library/views.py:90
+#: library/views.py:91
 msgid "YAML or JSON file"
 msgstr "YAML- oder JSON-Datei"
 
-#: library/views.py:170
+#: library/views.py:171
 msgid "Device type created. Now add its ports."
 msgstr "Gerätetyp angelegt. Fügen Sie jetzt die Ports hinzu."
 
-#: library/views.py:235
+#: library/views.py:196
+#, python-format
+msgid "Add ports to %(type)s"
+msgstr "Ports zu %(type)s hinzufügen"
+
+#: library/views.py:258
 msgid "copy"
 msgstr "Kopie"
 
-#: library/views.py:237
+#: library/views.py:260
 msgid "Copied into a private type of this tenant."
 msgstr "In einen privaten Typ dieses Mandanten kopiert."
 
-#: library/views.py:283
+#: library/views.py:305
 msgid "Choose a file of at most 1 MB."
 msgstr "Wählen Sie eine Datei mit höchstens 1 MB."
 
-#: library/views.py:295
+#: library/views.py:317
 msgid "Device type imported."
 msgstr "Gerätetyp importiert."
 
@@ -2156,31 +2195,47 @@ msgstr ""
 "Geräte an diesem Standort verwenden Gerätetypen, die nur für den aktuellen "
 "Mandanten verfügbar sind."
 
-#: locations/views.py:49 search/services.py:46
+#: locations/views.py:55 search/services.py:46
 msgid "Buildings"
 msgstr "Gebäude"
 
-#: locations/views.py:50 search/services.py:53
+#: locations/views.py:56
+msgid "New building"
+msgstr "Neues Gebäude"
+
+#: locations/views.py:59 search/services.py:53
 msgid "Floors"
 msgstr "Etagen"
 
-#: locations/views.py:51 search/services.py:55
+#: locations/views.py:59
+msgid "New floor"
+msgstr "Neue Etage"
+
+#: locations/views.py:62 search/services.py:55
 msgid "Rooms"
 msgstr "Räume"
 
-#: locations/views.py:121
+#: locations/views.py:62
+msgid "New room"
+msgstr "Neuer Raum"
+
+#: locations/views.py:64
+msgid "New rack"
+msgstr "Neues Rack"
+
+#: locations/views.py:133
 msgid "Site created."
 msgstr "Standort erstellt."
 
-#: locations/views.py:178
+#: locations/views.py:180
 msgid "Created."
 msgstr "Erstellt."
 
-#: locations/views.py:246
+#: locations/views.py:284
 msgid "The name does not match."
 msgstr "Der Name stimmt nicht überein."
 
-#: locations/views.py:254
+#: locations/views.py:292
 msgid "Site moved."
 msgstr "Standort verschoben."
 
@@ -2326,29 +2381,41 @@ msgid "The VLANs must belong to this tenant and to the device's site."
 msgstr ""
 "Die VLANs müssen zu diesem Mandanten und zum Standort des Geräts gehören."
 
-#: networks/views.py:41
+#: networks/views.py:42
 msgid "All sites of the tenant"
 msgstr "Alle Standorte des Mandanten"
 
-#: networks/views.py:66
+#: networks/views.py:67
 msgid "Wireless port"
 msgstr "Funk-Port"
 
-#: networks/views.py:104
+#: networks/views.py:245
 msgid "VLAN created."
 msgstr "VLAN erstellt."
 
-#: scim/views.py:352 sso/views.py:192
+#: networks/views.py:250 templates/networks/vlans.html:4
+msgid "New VLAN"
+msgstr "Neues VLAN"
+
+#: networks/views.py:274 templates/networks/wlans.html:4
+msgid "New WLAN"
+msgstr "Neues WLAN"
+
+#: scim/views.py:353 sso/views.py:192
 msgid "Email domains"
 msgstr "E-Mail-Domains"
 
-#: scim/views.py:354
+#: scim/views.py:355
 msgid "Comma separated. Empty: all domains."
 msgstr "Durch Kommas getrennt. Leer: alle Domains."
 
-#: scim/views.py:363 sso/views.py:257
+#: scim/views.py:364 sso/views.py:257
 msgid "Enter domains like example.com."
 msgstr "Geben Sie Domains wie example.com ein."
+
+#: scim/views.py:404 templates/scim/tokens.html:4
+msgid "New SCIM token"
+msgstr "Neues SCIM-Token"
 
 #: search/services.py:43 templates/locations/index.html:15
 msgid "Sites"
@@ -2653,8 +2720,8 @@ msgid "Verify"
 msgstr "Überprüfen"
 
 #: templates/accounts/mfa.html:18 templates/cabling/connect.html:19
-#: templates/exchange/preview.html:12 templates/floorplans/editor.html:34
-#: templates/locations/site_move.html:9
+#: templates/core/create.html:9 templates/exchange/preview.html:12
+#: templates/floorplans/editor.html:34 templates/locations/site_move.html:9
 msgid "Cancel"
 msgstr "Abbrechen"
 
@@ -2664,18 +2731,18 @@ msgid "Profile"
 msgstr "Profil"
 
 #: templates/accounts/profile.html:7 templates/cabling/cable.html:20
-#: templates/dcim/device.html:45 templates/library/type_detail.html:35
-#: templates/locations/node.html:55 templates/manage/audit.html:18
+#: templates/dcim/device.html:40 templates/library/type_detail.html:30
+#: templates/locations/node.html:50 templates/manage/audit.html:18
 #: templates/manage/group_detail.html:7 templates/networks/vlan.html:15
 #: templates/networks/wlan.html:16
 msgid "Details"
 msgstr "Details"
 
 #: templates/accounts/profile.html:9 templates/cabling/cable.html:22
-#: templates/dcim/device.html:47 templates/dcim/port.html:37
-#: templates/dcim/rack.html:85 templates/instance/branding.html:9
-#: templates/integrations/webhook.html:34 templates/library/type_detail.html:37
-#: templates/locations/node.html:57 templates/manage/group_detail.html:9
+#: templates/dcim/device.html:42 templates/dcim/port.html:37
+#: templates/dcim/rack.html:80 templates/instance/branding.html:9
+#: templates/integrations/webhook.html:34 templates/library/type_detail.html:32
+#: templates/locations/node.html:52 templates/manage/group_detail.html:9
 #: templates/manage/role_detail.html:15 templates/manage/tenant_detail.html:7
 #: templates/networks/vlan.html:16 templates/networks/wlan.html:17
 #: templates/search/results.html:37 templates/sso/provider.html:12
@@ -2893,14 +2960,6 @@ msgstr "Widerrufen"
 msgid "No clients yet."
 msgstr "Noch keine Clients."
 
-#: templates/api/clients.html:19
-msgid "New client"
-msgstr "Neuer Client"
-
-#: templates/api/clients.html:21
-msgid "Create client"
-msgstr "Client erstellen"
-
 #: templates/api/tokens.html:2 templates/api/tokens.html:4
 #: templates/base.html:72
 msgid "API tokens"
@@ -2930,14 +2989,6 @@ msgstr "Diesen Token widerrufen?"
 #: templates/api/tokens.html:16 templates/scim/tokens.html:17
 msgid "No tokens yet."
 msgstr "Noch keine Token."
-
-#: templates/api/tokens.html:19 templates/scim/tokens.html:19
-msgid "New token"
-msgstr "Neuer Token"
-
-#: templates/api/tokens.html:21 templates/scim/tokens.html:20
-msgid "Create token"
-msgstr "Token erstellen"
 
 #: templates/base.html:18
 msgid "Theme: system"
@@ -3147,10 +3198,15 @@ msgstr ""
 msgid "Hops"
 msgstr "Stationen"
 
-#: templates/cabling/trace.html:32 templates/dcim/device.html:37
+#: templates/cabling/trace.html:32 templates/dcim/device.html:32
 #: templates/dcim/port.html:16
 msgid "(not visible to you)"
 msgstr "(für Sie nicht sichtbar)"
+
+#: templates/core/create.html:9 templates/dcim/device_form.html:9
+#: templates/library/type_form.html:8 templates/locations/site_form.html:9
+msgid "Create"
+msgstr "Erstellen"
 
 #: templates/core/error.html:7
 msgid "Back to start"
@@ -3243,40 +3299,35 @@ msgstr "nein"
 msgid "No ports."
 msgstr "Keine Ports."
 
-#: templates/dcim/device.html:27
+#: templates/dcim/device.html:26
 msgid "Add port"
 msgstr "Port hinzufügen"
 
-#: templates/dcim/device.html:29 templates/library/type_detail.html:27
-#: templates/locations/node.html:34 templates/manage/_assignments.html:15
-msgid "Add"
-msgstr "Hinzufügen"
-
-#: templates/dcim/device.html:37
+#: templates/dcim/device.html:32
 msgid "open end"
 msgstr "offenes Ende"
 
-#: templates/dcim/device.html:38
+#: templates/dcim/device.html:33
 msgid "trace"
 msgstr "verfolgen"
 
-#: templates/dcim/device.html:51
+#: templates/dcim/device.html:46
 msgid "Placement"
 msgstr "Platzierung"
 
-#: templates/dcim/device.html:53
+#: templates/dcim/device.html:48
 msgid "Leave the rack empty for a floor device."
 msgstr "Rack leer lassen für ein Raumgerät."
 
-#: templates/dcim/device.html:54 templates/floorplans/editor.html:21
+#: templates/dcim/device.html:49 templates/floorplans/editor.html:21
 msgid "Move"
 msgstr "Verschieben"
 
-#: templates/dcim/device.html:57
+#: templates/dcim/device.html:52
 msgid "Delete this device with all its ports?"
 msgstr "Dieses Gerät mit allen Ports löschen?"
 
-#: templates/dcim/device.html:57
+#: templates/dcim/device.html:52
 msgid "Delete device"
 msgstr "Gerät löschen"
 
@@ -3301,13 +3352,6 @@ msgstr ""
 #: templates/library/type_form.html:5 templates/library/types.html:14
 msgid "New device type"
 msgstr "Neuer Gerätetyp"
-
-#: templates/dcim/device_form.html:9 templates/library/type_form.html:8
-#: templates/locations/node.html:36 templates/locations/site_form.html:9
-#: templates/manage/groups.html:13 templates/networks/vlans.html:12
-#: templates/networks/wlans.html:12
-msgid "Create"
-msgstr "Erstellen"
 
 #: templates/dcim/port.html:9
 msgid "Front ports on this rear port"
@@ -3374,7 +3418,7 @@ msgid "Utilisation"
 msgstr "Auslastung"
 
 #: templates/dcim/rack.html:48 templates/dcim/rack.html:53
-#: templates/locations/node.html:21 templates/locations/node.html:24
+#: templates/locations/node.html:22 templates/locations/node.html:25
 msgid "Used"
 msgstr "Belegt"
 
@@ -3406,23 +3450,19 @@ msgstr "Diese Höheneinheiten freigeben?"
 msgid "No units reserved."
 msgstr "Keine Höheneinheiten reserviert."
 
-#: templates/dcim/rack.html:74
+#: templates/dcim/rack.html:73
 msgid "Reserve units"
 msgstr "Höheneinheiten reservieren"
 
-#: templates/dcim/rack.html:76
-msgid "Reserve"
-msgstr "Reservieren"
-
-#: templates/dcim/rack.html:83
+#: templates/dcim/rack.html:78
 msgid "Rack details"
 msgstr "Rack-Details"
 
-#: templates/dcim/rack.html:88
+#: templates/dcim/rack.html:83
 msgid "Delete this rack and its reservations?"
 msgstr "Dieses Rack und seine Reservierungen löschen?"
 
-#: templates/dcim/rack.html:88
+#: templates/dcim/rack.html:83
 msgid "Delete rack"
 msgstr "Rack löschen"
 
@@ -3769,8 +3809,8 @@ msgstr "Neues Geheimnis ausstellen? Empfänger müssen es aktualisieren."
 msgid "Delete this webhook?"
 msgstr "Diesen Webhook löschen?"
 
-#: templates/integrations/webhook.html:10 templates/library/type_detail.html:47
-#: templates/locations/node.html:60 templates/metadata/_panel.html:12
+#: templates/integrations/webhook.html:10 templates/library/type_detail.html:42
+#: templates/locations/node.html:55 templates/metadata/_panel.html:12
 #: templates/metadata/_panel.html:21 templates/networks/vlan.html:17
 #: templates/networks/wlan.html:18 templates/search/results.html:31
 #: templates/sso/provider.html:5
@@ -3831,14 +3871,6 @@ msgstr ""
 msgid "No webhooks yet."
 msgstr "Noch keine Webhooks."
 
-#: templates/integrations/webhooks.html:15
-msgid "New webhook"
-msgstr "Neuer Webhook"
-
-#: templates/integrations/webhooks.html:17
-msgid "Create webhook"
-msgstr "Webhook erstellen"
-
 #: templates/library/type_detail.html:4 templates/library/types.html:2
 #: templates/library/types.html:5
 msgid "Device library"
@@ -3864,23 +3896,23 @@ msgstr "Zugeordnet zu"
 msgid "No ports defined."
 msgstr "Keine Ports definiert."
 
-#: templates/library/type_detail.html:25
+#: templates/library/type_detail.html:24
 msgid "Add ports"
 msgstr "Ports hinzufügen"
 
-#: templates/library/type_detail.html:41
+#: templates/library/type_detail.html:36
 msgid "Images"
 msgstr "Bilder"
 
-#: templates/library/type_detail.html:43
+#: templates/library/type_detail.html:38
 msgid "Upload images below, then choose them here."
 msgstr "Laden Sie unten Bilder hoch und wählen Sie sie dann hier aus."
 
-#: templates/library/type_detail.html:44
+#: templates/library/type_detail.html:39
 msgid "Save images"
 msgstr "Bilder speichern"
 
-#: templates/library/type_detail.html:47
+#: templates/library/type_detail.html:42
 msgid "Delete this device type?"
 msgstr "Diesen Gerätetyp löschen?"
 
@@ -3909,7 +3941,7 @@ msgstr "Alle"
 msgid "Category"
 msgstr "Kategorie"
 
-#: templates/library/types.html:17 templates/locations/node.html:21
+#: templates/library/types.html:17 templates/locations/node.html:22
 msgid "Height"
 msgstr "Höhe"
 
@@ -3966,27 +3998,27 @@ msgstr "Zu Mandant verschieben"
 msgid "Site report (PDF)"
 msgstr "Standortbericht (PDF)"
 
-#: templates/locations/node.html:25
+#: templates/locations/node.html:26
 msgid "No racks yet."
 msgstr "Noch keine Racks."
 
-#: templates/locations/node.html:30
+#: templates/locations/node.html:31
 msgid "Nothing here yet."
 msgstr "Hier ist noch nichts."
 
-#: templates/locations/node.html:42
+#: templates/locations/node.html:37
 msgid "Floor devices"
 msgstr "Raumgeräte"
 
-#: templates/locations/node.html:43
+#: templates/locations/node.html:38
 msgid "Add device"
 msgstr "Gerät hinzufügen"
 
-#: templates/locations/node.html:46
+#: templates/locations/node.html:41
 msgid "No floor devices."
 msgstr "Keine Raumgeräte."
 
-#: templates/locations/node.html:60
+#: templates/locations/node.html:55
 msgid "Delete this object? It must be empty."
 msgstr "Dieses Objekt löschen? Es muss leer sein."
 
@@ -4192,10 +4224,6 @@ msgstr "Mitglied von"
 #: templates/manage/groups.html:8
 msgid "No groups yet."
 msgstr "Noch keine Gruppen."
-
-#: templates/manage/groups.html:11
-msgid "New group"
-msgstr "Neue Gruppe"
 
 #: templates/manage/permissions.html:8
 msgid "granted"
@@ -4593,10 +4621,6 @@ msgstr "Trunks"
 msgid "No VLANs yet."
 msgstr "Noch keine VLANs."
 
-#: templates/networks/vlans.html:12
-msgid "New VLAN"
-msgstr "Neues VLAN"
-
 #: templates/networks/wlan.html:7
 msgid "Broadcast by"
 msgstr "Ausgestrahlt von"
@@ -4624,10 +4648,6 @@ msgstr "versteckt"
 #: templates/networks/wlans.html:10
 msgid "No WLANs yet."
 msgstr "Noch keine WLANs."
-
-#: templates/networks/wlans.html:12
-msgid "New WLAN"
-msgstr "Neues WLAN"
 
 #: templates/scim/tokens.html:5
 msgid ""

@@ -124,9 +124,10 @@ def test_elevation_coordinates(make_tree, super_admin) -> None:
 def test_rack_page_and_json_move(admin_client: Client, make_tree, system) -> None:
     t = make_tree()
     url = f"/racks/{t['rack'].pk}/"
+    assert admin_client.get(url + "spaces/new/", secure=True).status_code == 200
     admin_client.post(
-        url,
-        {"action": "reserve", "label": "Core switch", "start": 40, "size": 2, "face": "both"},
+        url + "spaces/new/",
+        {"label": "Core switch", "start": 40, "size": 2, "face": "both"},
         secure=True,
     )
     page = admin_client.get(url + "?face=rear", secure=True).content.decode()

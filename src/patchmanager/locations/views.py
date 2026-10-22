@@ -43,13 +43,25 @@ class Level:
     child_model: type[HierarchyNode] | None
     child_form: type[ModelForm] | None  # type: ignore[type-arg]
     child_label: Any
+    new_child: Any = None  # title of the page that creates a child
 
 
 LEVELS: dict[str, Level] = {
-    "site": Level(Site, SiteForm, Building, BuildingForm, gettext_lazy("Buildings")),
-    "building": Level(Building, BuildingForm, Floor, FloorForm, gettext_lazy("Floors")),
-    "floor": Level(Floor, FloorForm, Room, RoomForm, gettext_lazy("Rooms")),
-    "room": Level(Room, RoomForm, Rack, RackForm, gettext_lazy("Racks")),
+    "site": Level(
+        Site,
+        SiteForm,
+        Building,
+        BuildingForm,
+        gettext_lazy("Buildings"),
+        gettext_lazy("New building"),
+    ),
+    "building": Level(
+        Building, BuildingForm, Floor, FloorForm, gettext_lazy("Floors"), gettext_lazy("New floor")
+    ),
+    "floor": Level(
+        Floor, FloorForm, Room, RoomForm, gettext_lazy("Rooms"), gettext_lazy("New room")
+    ),
+    "room": Level(Room, RoomForm, Rack, RackForm, gettext_lazy("Racks"), gettext_lazy("New rack")),
 }
 
 
@@ -145,6 +157,42 @@ def _tree(request: HttpRequest, site: Site) -> list[Building]:
 
 @login_required
 @require_http_methods(["GET", "POST"])
+def node_create(request: HttpRequest, level: str, pk: str) -> HttpResponse:
+    """Page that creates a child of a node (building, floor, room or rack)."""
+    config = LEVELS.get(level)
+    if config is None or config.child_model is None or config.child_form is None:
+        raise Http404
+    node: Any = get_object_or_404(config.model, pk=pk)
+    actor = _actor(request)
+    if not policy.has_perm(actor, f"{node.policy_object_type}.view", node):
+        raise Http404
+    if not policy.has_perm(actor, f"{config.child_model.policy_object_type}.add", node):
+        raise PermissionDenied
+    form = config.child_form(request.POST or None)
+    if request.method == "POST" and form.is_valid():
+        try:
+            child = services.create(
+                request, actor, config.child_model, parent=node, **form.cleaned_data
+            )
+        except ServiceError as exc:
+            form.add_error(None, str(exc))
+        else:
+            messages.success(request, _("Created."))
+            return redirect(node_url(child))
+    return render(
+        request,
+        "core/create.html",
+        {
+            "title": config.new_child,
+            "form": form,
+            "back_url": node_url(node),
+            "breadcrumbs": [(a, node_url(a)) for a in [*node.ancestors(), node]],
+        },
+    )
+
+
+@login_required
+@require_http_methods(["GET", "POST"])
 def node_detail(request: HttpRequest, level: str, pk: str) -> HttpResponse:
     """Show a node with its children; edit it, add children, delete it."""
     if level not in LEVELS:
@@ -160,9 +208,6 @@ def node_detail(request: HttpRequest, level: str, pk: str) -> HttpResponse:
     can_add = bool(child_type) and policy.has_perm(actor, f"{child_type}.add", node)
     action = request.POST.get("action")
     form = config.form(request.POST if action == "edit" else None, instance=node)
-    child_form = (
-        config.child_form(request.POST if action == "add" else None) if config.child_form else None
-    )
 
     if request.method == "POST":
         try:
@@ -170,13 +215,6 @@ def node_detail(request: HttpRequest, level: str, pk: str) -> HttpResponse:
                 services.update(request, actor, node, **form.cleaned_data)
                 messages.success(request, _("Saved."))
                 return redirect(node_url(node))
-            if action == "add" and child_form is not None and child_form.is_valid():
-                assert config.child_model is not None  # noqa: S101  # nosec B101
-                child = services.create(
-                    request, actor, config.child_model, parent=node, **child_form.cleaned_data
-                )
-                messages.success(request, _("Created."))
-                return redirect(node_url(child))
             if action == "delete":
                 parent = node.parent
                 services.delete(request, actor, node)
@@ -184,9 +222,9 @@ def node_detail(request: HttpRequest, level: str, pk: str) -> HttpResponse:
                 return redirect(node_url(parent) if parent else reverse("locations:index"))
         except ServiceError as exc:
             messages.error(request, str(exc))
-            if action not in ("edit", "add"):
+            if action != "edit":
                 return redirect(node_url(node))
-            (form if action == "edit" else child_form).add_error(None, str(exc))  # type: ignore[union-attr]
+            form.add_error(None, str(exc))
 
     children: Any = []
     if config.child_model is not None:
@@ -197,7 +235,7 @@ def node_detail(request: HttpRequest, level: str, pk: str) -> HttpResponse:
         "level": level,
         "node": node,
         "form": form,
-        "child_form": child_form,
+        "new_child": config.new_child,
         "children": children,
         "child_label": config.child_label,
         "can_change": can_change,

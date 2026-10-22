@@ -6,6 +6,7 @@ from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
 from django.http import HttpRequest, HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
+from django.urls import reverse
 from django.utils.translation import gettext as _
 from django.utils.translation import gettext_lazy
 from django.views.decorators.http import require_POST
@@ -67,7 +68,23 @@ def _user(request: HttpRequest) -> User:
 
 @login_required
 def token_list(request: HttpRequest) -> HttpResponse:
-    """The user's personal tokens; create one."""
+    """The user's personal tokens."""
+    user = _user(request)
+    if user.is_service:
+        raise PermissionDenied
+    return render(
+        request,
+        "api/tokens.html",
+        {
+            "new_secret": request.session.pop(SHOW_ONCE, None),
+            "tokens": user.api_tokens.filter(kind=ApiToken.Kind.PERSONAL).select_related("tenant"),
+        },
+    )
+
+
+@login_required
+def token_create(request: HttpRequest) -> HttpResponse:
+    """Page that creates a personal token; the list shows it once."""
     user = _user(request)
     if user.is_service:
         raise PermissionDenied
@@ -93,12 +110,8 @@ def token_list(request: HttpRequest) -> HttpResponse:
             return redirect("api-ui:tokens")
     return render(
         request,
-        "api/tokens.html",
-        {
-            "form": form,
-            "new_secret": request.session.pop(SHOW_ONCE, None),
-            "tokens": user.api_tokens.filter(kind=ApiToken.Kind.PERSONAL).select_related("tenant"),
-        },
+        "core/create.html",
+        {"title": _("New token"), "form": form, "back_url": reverse("api-ui:tokens")},
     )
 
 
@@ -114,7 +127,20 @@ def token_revoke(request: HttpRequest, pk: str) -> HttpResponse:
 
 @permission_required("accounts.apiclient.manage")
 def client_list(request: HttpRequest) -> HttpResponse:
-    """OAuth clients; create one."""
+    """OAuth clients."""
+    return render(
+        request,
+        "api/clients.html",
+        {
+            "new_secret": request.session.pop(SHOW_ONCE, None),
+            "clients": ApiClient.objects.select_related("user"),
+        },
+    )
+
+
+@permission_required("accounts.apiclient.manage")
+def client_create(request: HttpRequest) -> HttpResponse:
+    """Page that creates an OAuth client; the list shows its secret once."""
     form = ClientForm(request.POST or None)
     if request.method == "POST" and form.is_valid():
         try:
@@ -131,12 +157,8 @@ def client_list(request: HttpRequest) -> HttpResponse:
             return redirect("api-ui:clients")
     return render(
         request,
-        "api/clients.html",
-        {
-            "form": form,
-            "new_secret": request.session.pop(SHOW_ONCE, None),
-            "clients": ApiClient.objects.select_related("user"),
-        },
+        "core/create.html",
+        {"title": _("New API client"), "form": form, "back_url": reverse("api-ui:clients")},
     )
 
 

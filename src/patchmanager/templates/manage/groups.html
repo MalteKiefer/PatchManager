@@ -1,15 +1,10 @@
 {% extends "manage/_base.html" %}{% load i18n %}
 {% block title %}{% translate "Groups" %}{% endblock %}
 {% block manage %}
-<h1 class="mb-4">{% translate "Groups" %}</h1>
+<div class="mb-4 flex flex-wrap items-center gap-3"><h1 class="mr-auto">{% translate "Groups" %}</h1><a class="btn-primary" href="{% url 'manage:group-create' %}">{% translate "New group" %}</a></div>
 <div class="card mb-6 overflow-x-auto p-0"><table class="table">
   <thead><tr><th>{% translate "Name" %}</th><th>{% translate "Members" %}</th><th>{% translate "Member of" %}</th></tr></thead>
   <tbody>{% for g in groups %}<tr><td><a href="{% url 'manage:group' g.pk %}">{{ g.name }}</a></td><td>{{ g.member_count }}</td><td>{{ g.parents.all|join:", "|default:"-" }}</td></tr>
   {% empty %}<tr><td colspan="3">{% translate "No groups yet." %}</td></tr>{% endfor %}</tbody>
 </table></div>
-<form method="post" action="{% url 'manage:group-create' %}" class="card max-w-xl">{% csrf_token %}
-  <h2 class="mb-3">{% translate "New group" %}</h2>
-  {% include "core/_form.html" %}
-  <button class="btn-primary">{% translate "Create" %}</button>
-</form>
 {% endblock %}

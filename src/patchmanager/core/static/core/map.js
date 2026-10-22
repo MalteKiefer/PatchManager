@@ -7,7 +7,12 @@ function init() {
   const L = window.L;
   const markers = JSON.parse(document.getElementById("map-markers")?.textContent || "[]");
   const map = L.map(element, { scrollWheelZoom: false });
-  L.tileLayer(element.dataset.tiles, { maxZoom: 19, attribution: element.dataset.attribution }).addTo(map);
+  L.tileLayer(element.dataset.tiles, {
+    maxZoom: 19,
+    attribution: element.dataset.attribution,
+    // The page sends no Referer cross origin; OpenStreetMap refuses tiles without one.
+    referrerPolicy: "strict-origin-when-cross-origin",
+  }).addTo(map);
 
   const points = [];
   for (const m of markers) {

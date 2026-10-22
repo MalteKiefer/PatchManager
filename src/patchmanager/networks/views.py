@@ -9,6 +9,7 @@ from django.core.exceptions import PermissionDenied
 from django.db.models import Count
 from django.http import Http404, HttpRequest, HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
+from django.urls import reverse
 from django.utils.translation import gettext as _
 from django.utils.translation import gettext_lazy
 from django.views.decorators.http import require_http_methods
@@ -88,21 +89,10 @@ def _tenant(request: HttpRequest) -> Any:
 
 
 @login_required
-@require_http_methods(["GET", "POST"])
+@require_http_methods(["GET"])
 def vlan_list(request: HttpRequest) -> HttpResponse:
-    """VLANs of the current tenant; create new ones."""
+    """VLANs of the current tenant."""
     tenant = _tenant(request)
-    form = VLANForm(request.POST or None, tenant=tenant)
-    if request.method == "POST" and form.is_valid():
-        try:
-            vlan = services.create_vlan(request, _actor(request), tenant, **form.cleaned_data)
-        except PermissionDeniedError as exc:
-            raise PermissionDenied from exc
-        except ServiceError as exc:
-            form.add_error(None, str(exc))
-        else:
-            messages.success(request, _("VLAN created."))
-            return redirect("networks:vlan", vlan.pk)
     candidates = (
         VLAN.objects.filter(tenant=tenant)
         .select_related("site")
@@ -116,7 +106,6 @@ def vlan_list(request: HttpRequest) -> HttpResponse:
         "networks/vlans.html",
         {
             "vlans": vlans,
-            "form": form,
             "can_add": policy.has_perm(request.user, "networks.vlan.add", tenant),
         },
     )
@@ -169,20 +158,10 @@ def vlan_detail(request: HttpRequest, pk: str) -> HttpResponse:
 
 
 @login_required
-@require_http_methods(["GET", "POST"])
+@require_http_methods(["GET"])
 def wlan_list(request: HttpRequest) -> HttpResponse:
     """WLANs of the current tenant."""
     tenant = _tenant(request)
-    form = WLANForm(request.POST or None, tenant=tenant)
-    if request.method == "POST" and form.is_valid():
-        try:
-            wlan = services.create_wlan(request, _actor(request), tenant, **form.cleaned_data)
-        except PermissionDeniedError as exc:
-            raise PermissionDenied from exc
-        except ServiceError as exc:
-            form.add_error(None, str(exc))
-        else:
-            return redirect("networks:wlan", wlan.pk)
     if not policy.has_perm(request.user, "networks.wlan.view", tenant):
         raise PermissionDenied
     wlans = (
@@ -195,7 +174,6 @@ def wlan_list(request: HttpRequest) -> HttpResponse:
         "networks/wlans.html",
         {
             "wlans": wlans,
-            "form": form,
             "can_add": policy.has_perm(request.user, "networks.wlan.add", tenant),
         },
     )
@@ -245,4 +223,53 @@ def wlan_detail(request: HttpRequest, pk: str) -> HttpResponse:
             ),
             "can_change": policy.has_perm(actor, "networks.wlan.change", wlan),
         },
+    )
+
+
+@login_required
+@require_http_methods(["GET", "POST"])
+def vlan_create(request: HttpRequest) -> HttpResponse:
+    """Page that creates a VLAN in the current tenant."""
+    tenant = _tenant(request)
+    if not policy.has_perm(request.user, "networks.vlan.add", tenant):
+        raise PermissionDenied
+    form = VLANForm(request.POST or None, tenant=tenant)
+    if request.method == "POST" and form.is_valid():
+        try:
+            vlan = services.create_vlan(request, _actor(request), tenant, **form.cleaned_data)
+        except PermissionDeniedError as exc:
+            raise PermissionDenied from exc
+        except ServiceError as exc:
+            form.add_error(None, str(exc))
+        else:
+            messages.success(request, _("VLAN created."))
+            return redirect("networks:vlan", vlan.pk)
+    return render(
+        request,
+        "core/create.html",
+        {"title": _("New VLAN"), "form": form, "back_url": reverse("networks:vlans")},
+    )
+
+
+@login_required
+@require_http_methods(["GET", "POST"])
+def wlan_create(request: HttpRequest) -> HttpResponse:
+    """Page that creates a WLAN in the current tenant."""
+    tenant = _tenant(request)
+    if not policy.has_perm(request.user, "networks.wlan.add", tenant):
+        raise PermissionDenied
+    form = WLANForm(request.POST or None, tenant=tenant)
+    if request.method == "POST" and form.is_valid():
+        try:
+            wlan = services.create_wlan(request, _actor(request), tenant, **form.cleaned_data)
+        except PermissionDeniedError as exc:
+            raise PermissionDenied from exc
+        except ServiceError as exc:
+            form.add_error(None, str(exc))
+        else:
+            return redirect("networks:wlan", wlan.pk)
+    return render(
+        request,
+        "core/create.html",
+        {"title": _("New WLAN"), "form": form, "back_url": reverse("networks:wlans")},
     )

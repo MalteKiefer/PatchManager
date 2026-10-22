@@ -244,10 +244,10 @@ def test_library_views(admin_client: Client, make_tenant, system) -> None:
     assert ap.tenant_id == tenant.pk
     url = f"/library/{ap.pk}/"
     assert admin_client.get(url, secure=True).status_code == 200
+    assert admin_client.get(url + "ports/new/", secure=True).status_code == 200
     admin_client.post(
-        url,
+        url + "ports/new/",
         {
-            "action": "ports",
             "name_pattern": "eth{n}",
             "kind": "interface",
             "connector": "rj45",

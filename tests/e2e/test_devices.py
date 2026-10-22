@@ -26,8 +26,8 @@ def test_type_to_mounted_device_with_photo(
     page.get_by_role("button", name="Create").click()
     expect(page.get_by_role("heading", name="Acme Edge 8")).to_be_visible()
 
-    page.get_by_text("Add ports").click()
-    form = page.locator("form:has(input[value=ports])")
+    page.get_by_role("link", name="Add ports").click()
+    form = page.locator("main form")
     form.get_by_label("Name").fill("port{n}")
     form.get_by_label("Count").fill("8")
     form.get_by_role("button", name="Add").click()

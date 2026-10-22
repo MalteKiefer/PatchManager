@@ -144,8 +144,9 @@ def test_site_move_refuses_cables_leaving_the_site(
 def test_network_views(admin_client: Client, net, system) -> None:
     admin_client.post("/tenants/switch/", {"tenant": net["tenant"].pk}, secure=True)
     assert admin_client.get("/networks/vlans/", secure=True).status_code == 200
+    assert admin_client.get("/networks/vlans/new/", secure=True).status_code == 200
     admin_client.post(
-        "/networks/vlans/", {"vid": 100, "name": "Servers", "status": "active"}, secure=True
+        "/networks/vlans/new/", {"vid": 100, "name": "Servers", "status": "active"}, secure=True
     )
     with system():
         vlan = VLAN.objects.get(vid=100)
@@ -167,7 +168,7 @@ def test_network_views(admin_client: Client, net, system) -> None:
         assert Port.objects.get(pk=port.pk).untagged_vlan_id == vlan.pk
     assert "ge3" in admin_client.get(f"/networks/vlans/{vlan.pk}/", secure=True).content.decode()
     admin_client.post(
-        "/networks/wlans/",
+        "/networks/wlans/new/",
         {"ssid": "Corp", "security": "wpa3-enterprise", "vlan": vlan.pk},
         secure=True,
     )

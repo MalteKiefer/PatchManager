@@ -9,7 +9,7 @@ from patchmanager.accounts.services import PermissionDeniedError, ServiceError, 
 from patchmanager.core.fields import path_label
 from patchmanager.dcim.models import Rack
 from patchmanager.locations import services
-from patchmanager.locations.models import Building, Room, Site
+from patchmanager.locations.models import Building, Floor, Room, Site
 from patchmanager.tenancy import rls
 from tests.conftest import login
 
@@ -165,23 +165,25 @@ def test_tree_navigation_and_crud(admin_client: Client, make_tree, system) -> No
     site_url = f"/locations/site/{t['site'].pk}/"
     page = admin_client.get(site_url, secure=True).content.decode()
     assert "R1" in page  # map -> site -> room in three clicks: room link on the site page
-    admin_client.post(site_url, {"action": "add", "name": "B2"}, secure=True)
+    assert 'href="/locations/site/' in page and "New building" in page
+    assert admin_client.get(site_url + "new/", secure=True).status_code == 200
+    admin_client.post(site_url + "new/", {"name": "B2"}, secure=True)
     with system():
         b2 = Building.objects.get(name="B2")
     admin_client.post(
         f"/locations/building/{b2.pk}/", {"action": "edit", "name": "B2 North"}, secure=True
     )
-    admin_client.post(
-        f"/locations/building/{b2.pk}/", {"action": "add", "name": "EG", "level": 0}, secure=True
-    )
+    admin_client.post(f"/locations/building/{b2.pk}/new/", {"name": "EG", "level": 0}, secure=True)
     room_url = f"/locations/room/{t['room'].pk}/"
     response = admin_client.get(room_url, secure=True)
     assert response.status_code == 200 and "A01" in response.content.decode()
     admin_client.post(
-        room_url,
-        {"action": "add", "name": "A02", "u_height": 24, "width": "19", "status": "active"},
+        room_url + "new/",
+        {"name": "A02", "u_height": 24, "width": "19", "status": "active"},
         secure=True,
     )
+    with system():
+        assert Floor.objects.filter(name="EG").exists()
     with system():
         assert Rack.objects.filter(name="A02", u_height=24).exists()
     response = admin_client.post(room_url, {"action": "delete"}, secure=True, follow=True)
@@ -235,6 +237,8 @@ def test_assignment_view_with_location(admin_client: Client, make_tree, make_use
     t = make_tree()
     user = make_user()
     page = admin_client.get(f"/manage/users/{user.pk}/", secure=True).content.decode()
+    assert f"/manage/assignments/?user={user.pk}" in page
+    page = admin_client.get(f"/manage/assignments/?user={user.pk}", secure=True).content.decode()
     assert f"rack:{t['rack'].pk}" in page
     admin_client.post(
         "/manage/assignments/",
@@ -259,5 +263,5 @@ def test_assignment_view_with_location(admin_client: Client, make_tree, make_use
         },
         secure=True,
     )
-    assert response.status_code == 302  # not a valid choice: shown as form error
+    assert response.status_code == 200  # not a valid choice: the form shows the error
     assert user.assignments.count() == 1

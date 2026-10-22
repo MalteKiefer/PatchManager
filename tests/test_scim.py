@@ -13,7 +13,7 @@ PATCH = "urn:ietf:params:scim:api:messages:2.0:PatchOp"
 
 @pytest.fixture
 def scim(admin_client: Client):
-    created = admin_client.post("/manage/scim/", {"name": "Entra"}, secure=True, follow=True)
+    created = admin_client.post("/manage/scim/new/", {"name": "Entra"}, secure=True, follow=True)
     plain = created.context["new_token"]
     assert plain.startswith("pmsc_")
     return Client(HTTP_AUTHORIZATION=f"Bearer {plain}")
@@ -251,7 +251,7 @@ def test_bad_requests_and_rate_limit(scim, monkeypatch) -> None:
 
 
 def test_token_admin(admin_client: Client, make_user) -> None:
-    admin_client.post("/manage/scim/", {"name": "Okta"}, secure=True)
+    admin_client.post("/manage/scim/new/", {"name": "Okta"}, secure=True)
     token = ScimToken.objects.get(name="Okta")
     assert b"Copy it now" in admin_client.get("/manage/scim/", secure=True).content
     assert (
@@ -310,7 +310,7 @@ def test_reactivation_rules_and_clean_revival(scim) -> None:
 
 def test_token_domains(admin_client: Client) -> None:
     created = admin_client.post(
-        "/manage/scim/", {"name": "Acme", "domains": "acme.example"}, secure=True, follow=True
+        "/manage/scim/new/", {"name": "Acme", "domains": "acme.example"}, secure=True, follow=True
     )
     acme = Client(HTTP_AUTHORIZATION=f"Bearer {created.context['new_token']}")
     assert call(acme, "post", "Users", {"userName": "x@other.example"})[0] == 403
@@ -329,7 +329,7 @@ def test_token_domains(admin_client: Client) -> None:
     assert (
         b"domains"
         in admin_client.post(
-            "/manage/scim/", {"name": "Bad", "domains": "me@x.example"}, secure=True
+            "/manage/scim/new/", {"name": "Bad", "domains": "me@x.example"}, secure=True
         ).content
     )
 
@@ -343,7 +343,7 @@ def test_groups_belong_to_their_token_and_admin_decisions_stick(
 
     _status, body, _r = call(scim, "post", "Groups", {"displayName": "Team A"})
     other_token = admin_client.post(
-        "/manage/scim/", {"name": "Okta"}, secure=True, follow=True
+        "/manage/scim/new/", {"name": "Okta"}, secure=True, follow=True
     ).context["new_token"]
     other = Client(HTTP_AUTHORIZATION=f"Bearer {other_token}")
     assert call(other, "get", f"Groups/{body['id']}")[0] == 404

@@ -261,6 +261,34 @@ def _device(request: HttpRequest, pk: Any) -> Device:
 
 @login_required
 @require_http_methods(["GET", "POST"])
+def port_create(request: HttpRequest, pk: str) -> HttpResponse:
+    """Page that adds a port the device type does not define."""
+    device = _device(request, pk)
+    actor = _actor(request)
+    if not policy.has_perm(actor, "dcim.device.change", device):
+        raise PermissionDenied
+    form = NewPortForm(request.POST or None)
+    if request.method == "POST" and form.is_valid():
+        try:
+            devices.add_port(request, actor, device, **form.cleaned_data)
+        except ServiceError as exc:
+            form.add_error(None, str(exc))
+        else:
+            return redirect(device_url(device))
+    return render(
+        request,
+        "core/create.html",
+        {
+            "title": _("New port on %(device)s") % {"device": device},
+            "form": form,
+            "back_url": device_url(device),
+            "breadcrumbs": [(a, node_url(a)) for a in [*device.ancestors(), device]],
+        },
+    )
+
+
+@login_required
+@require_http_methods(["GET", "POST"])
 def device_detail(request: HttpRequest, pk: str) -> HttpResponse:
     """Device attributes, placement, ports, photos and notes."""
     device = _device(request, pk)
@@ -279,7 +307,6 @@ def device_detail(request: HttpRequest, pk: str) -> HttpResponse:
             "face": space.face if space and space.face != "both" else "front",
         },
     )
-    port_form = NewPortForm(request.POST if action == "add_port" else None)
     if request.method == "POST":
         try:
             if action == "edit" and form.is_valid():
@@ -301,9 +328,6 @@ def device_detail(request: HttpRequest, pk: str) -> HttpResponse:
                 )
                 messages.success(request, _("Device moved."))
                 return redirect(device_url(device))
-            if action == "add_port" and port_form.is_valid():
-                devices.add_port(request, actor, device, **port_form.cleaned_data)
-                return redirect(device_url(device))
             if action == "delete":
                 parent = device.parent
                 devices.delete(request, actor, device)
@@ -320,7 +344,6 @@ def device_detail(request: HttpRequest, pk: str) -> HttpResponse:
             "space": space,
             "form": form,
             "place_form": place_form,
-            "port_form": port_form,
             "ports": device.ports.select_related("rear_port", "untagged_vlan", "cable_end__cable"),
             "neighbours": neighbours(actor, device),
             "can_change": can_change,

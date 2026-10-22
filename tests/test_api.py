@@ -392,8 +392,9 @@ def test_service_users_get_no_mfa_roles(kit, super_admin, make_user) -> None:
 
 
 def test_ui_pages(kit, admin_client: Client, super_admin, make_user) -> None:
+    assert admin_client.get("/account/tokens/new/", secure=True).status_code == 200
     page = admin_client.post(
-        "/account/tokens/",
+        "/account/tokens/new/",
         {"name": "laptop", "scopes": ["read"], "days": 7, "tenant": ""},
         secure=True,
         follow=True,
@@ -407,8 +408,9 @@ def test_ui_pages(kit, admin_client: Client, super_admin, make_user) -> None:
     admin_client.post(f"/account/tokens/{token.pk}/revoke/", secure=True)
     with rls.system_context():
         assert ApiToken.objects.get(pk=token.pk).revoked_at is not None
+    assert admin_client.get("/manage/api-clients/new/", secure=True).status_code == 200
     created = admin_client.post(
-        "/manage/api-clients/",
+        "/manage/api-clients/new/",
         {"name": "CMDB", "scopes": ["read", "write"]},
         secure=True,
         follow=True,
