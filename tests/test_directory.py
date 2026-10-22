@@ -328,7 +328,6 @@ def test_record_pages_edit_and_delete(admin_client: Client, setup, system) -> No
     assert "still use" in blocked.content.decode()
     assert admin_client.get("/items/nothing/", secure=True).status_code == 404
     assert admin_client.get("/items/contacts/", secure=True).status_code == 404  # no own list
-||||||| 08ac51f
 
 
 def test_device_supplier_choices_are_visible_only(
