@@ -67,6 +67,9 @@ All notable changes to this project are documented here. The format follows
 
 ### Changed
 
+* Placing a rack or device on the floor plan is clearer: the chosen entry and the plan
+  are framed, the cursor aims, the hint names the item, its room outline is marked,
+  and Esc cancels. Racks not on the plan show their room.
 * The API token and client forms group the kinds of objects by area with an
   "All" box per group and offer read or read and write as one choice; the client
   form keeps the administration menu. The system page links mail and sign in

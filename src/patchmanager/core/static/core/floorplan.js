@@ -50,7 +50,10 @@ function drawRooms() {
   layer.replaceChildren();
   for (const room of scene.rooms) {
     if (!room.points.length) continue;
-    layer.append(el("polygon", { points: room.points.map((p) => p.join(",")).join(" "), class: "fill-brand-500/10 stroke-brand-600", "stroke-width": 2 }));
+    // While placing, the item's own room stands out as the target.
+    const target = pending && pending.room === room.id;
+    layer.append(el("polygon", { points: room.points.map((p) => p.join(",")).join(" "),
+                                 class: target ? "plan-room is-target" : "plan-room fill-brand-500/10 stroke-brand-600", "stroke-width": 2 }));
     const cx = room.points.reduce((s, p) => s + p[0], 0) / room.points.length;
     const cy = room.points.reduce((s, p) => s + p[1], 0) / room.points.length;
     layer.append(el("text", { x: cx, y: cy, "text-anchor": "middle", class: "fill-brand-700 text-[14px] font-semibold" }, room.name));
@@ -175,10 +178,16 @@ async function moveItem(kind, id, point) {
   }
 }
 
-function setMode(next) {
+function setMode(next, item = null) {
   mode = next;
   draft = [];
-  pending = null;
+  pending = item;
+  svg.dataset.planMode = mode;
+  svg.closest(".plan-frame")?.classList.toggle("is-placing", mode === "place");
+  hint.classList.toggle("is-placing", mode === "place");
+  for (const button of document.querySelectorAll("[data-place]")) {
+    button.setAttribute("aria-pressed", String(Boolean(item) && button.dataset.id === item.id && button.dataset.place === item.kind));
+  }
   for (const button of document.querySelectorAll("[data-mode]")) button.setAttribute("aria-pressed", String(button.dataset.mode === mode));
   document.getElementById("scale-form")?.classList.toggle("hidden", mode !== "scale");
   document.getElementById("scale-form")?.classList.toggle("flex", mode === "scale");
@@ -186,8 +195,9 @@ function setMode(next) {
   document.getElementById("outline-bar")?.classList.toggle("hidden", !outlining);
   document.getElementById("outline-bar")?.classList.toggle("flex", outlining);
   if (mode === "room") document.getElementById("outline-label").textContent = text.newRoomLabel;
-  hint.textContent = text[mode];
+  hint.textContent = item ? text.placing.replace("%(name)s", item.name) : text[mode];
   drawDraft();
+  drawRooms();
 }
 
 if (svg) {
@@ -258,8 +268,14 @@ if (svg) {
   });
 
   for (const button of document.querySelectorAll("[data-mode]")) button.addEventListener("click", () => setMode(button.dataset.mode));
+  // Esc leaves placing, drawing or measuring from anywhere on the page.
+  document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape" && mode !== "move") setMode("move");
+  });
   for (const button of document.querySelectorAll("[data-place]")) {
-    button.addEventListener("click", () => { setMode("place"); pending = { kind: button.dataset.place, id: button.dataset.id }; });
+    button.addEventListener("click", () => {
+      setMode("place", { kind: button.dataset.place, id: button.dataset.id, name: button.dataset.name, room: button.dataset.room });
+    });
   }
   for (const button of document.querySelectorAll("[data-outline]")) {
     button.addEventListener("click", () => {
