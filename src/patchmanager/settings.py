@@ -123,6 +123,7 @@ MIDDLEWARE = [
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
+    "patchmanager.core.middleware.PrivateCacheMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "patchmanager.accounts.middleware.SessionPolicyMiddleware",
     "patchmanager.accounts.middleware.SetupRequiredMiddleware",

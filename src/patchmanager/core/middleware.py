@@ -8,6 +8,7 @@ from collections.abc import Callable
 
 from django.conf import settings
 from django.http import HttpRequest, HttpResponse
+from django.utils.cache import add_never_cache_headers
 
 _VALID = re.compile(r"^[A-Za-z0-9._-]{8,64}$")
 
@@ -61,3 +62,22 @@ class ClientIPMiddleware:
             with contextlib.suppress(ValueError):
                 request.META["REMOTE_ADDR"] = str(ipaddress.ip_address(candidate))
         return self.get_response(request)
+
+
+class PrivateCacheMiddleware:
+    """Keep pages for signed in users out of browser and proxy caches.
+
+    Responses that set their own ``Cache-Control`` (branding assets) keep it.
+    """
+
+    def __init__(self, get_response: Callable[[HttpRequest], HttpResponse]) -> None:
+        """Standard middleware constructor."""
+        self.get_response = get_response
+
+    def __call__(self, request: HttpRequest) -> HttpResponse:
+        """Add ``no-store`` to responses for authenticated users."""
+        response = self.get_response(request)
+        user = getattr(request, "user", None)
+        if user is not None and user.is_authenticated and "Cache-Control" not in response:
+            add_never_cache_headers(response)
+        return response

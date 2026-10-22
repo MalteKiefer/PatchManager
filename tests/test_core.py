@@ -131,3 +131,8 @@ def test_client_ip_comes_from_trusted_proxies_only(settings, allowed, peer, head
     request = RequestFactory().get("/", REMOTE_ADDR=peer, HTTP_X_FORWARDED_FOR=header)
     ClientIPMiddleware(lambda r: HttpResponse())(request)
     assert request.META["REMOTE_ADDR"] == seen
+
+
+def test_pages_for_signed_in_users_are_not_cached(admin_client) -> None:
+    assert "no-store" in admin_client.get("/locations/", secure=True)["Cache-Control"]
+    assert admin_client.get("/branding.css", secure=True)["Cache-Control"].startswith("public")

@@ -59,11 +59,11 @@ def _pages(live_server, tree) -> list[str]:
         "/manage/roles/",
         "/manage/audit/",
         "/manage/system/",
-        "/manage/edition/",
         "/manage/branding/",
         "/manage/sso/",
         f"/plans/{tree['floor'].pk}/",
         "/licenses/",
+        "/no-such-page/",  # error page
     ]
 
 
