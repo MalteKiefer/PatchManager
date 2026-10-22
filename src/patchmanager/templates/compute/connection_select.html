@@ -1,0 +1,20 @@
+{% extends "base.html" %}{% load i18n %}
+{% block title %}{% translate "Choose what to take over" %}{% endblock %}
+{% block content %}
+<nav aria-label="{% translate 'Breadcrumb' %}" class="mb-3 text-sm"><a href="{% url 'compute:connections' %}">{% translate "Connections" %}</a> / <a href="{% url 'compute:connection' connection.pk %}">{{ connection.name }}</a></nav>
+<h1 class="mb-2">{% translate "Choose what to take over" %}</h1>
+<p class="mb-6 max-w-3xl text-sm text-slate-500">{% blocktranslate with c=found.cluster %}Cluster {{ c }} reports these nodes, machines and storage. Nodes that are not documented yet become servers in the room and with the device type below. Machines are recognised by their ID, so moving one to another node only changes its host.{% endblocktranslate %}</p>
+<form method="post" class="grid gap-6 lg:grid-cols-3" novalidate>{% csrf_token %}
+  {% if form.non_field_errors %}<div class="lg:col-span-3 rounded-md border border-red-200 bg-red-50 px-4 py-2 text-sm text-red-800" role="alert">{{ form.non_field_errors }}</div>{% endif %}
+  <div class="space-y-6 lg:col-span-2">
+    <fieldset class="card"><legend class="mb-2 text-base font-semibold">{{ form.nodes.label }}</legend><div class="pick-list">{{ form.nodes }}</div></fieldset>
+    <fieldset class="card"><legend class="mb-2 text-base font-semibold">{{ form.guests.label }}</legend><div class="pick-list">{{ form.guests }}</div></fieldset>
+    <fieldset class="card"><legend class="mb-2 text-base font-semibold">{{ form.storage.label }}</legend><div class="pick-list">{{ form.storage }}</div></fieldset>
+  </div>
+  <aside class="card h-fit space-y-1">
+    <h2 class="mb-2">{% translate "Options" %}</h2>
+    {% for field in form %}{% if field.name != "nodes" and field.name != "guests" and field.name != "storage" %}<div class="field">{% if field.widget_type == "checkbox" %}<label class="flex items-center gap-2">{{ field }} {{ field.label }}</label>{% else %}{{ field.label_tag }}{{ field }}{% endif %}{{ field.errors }}</div>{% endif %}{% endfor %}
+    <button class="btn-primary mt-2">{% translate "Save and update now" %}</button>
+  </aside>
+</form>
+{% endblock %}

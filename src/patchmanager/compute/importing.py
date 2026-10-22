@@ -34,10 +34,22 @@ from patchmanager.networks.models import VLAN
 
 
 @dataclass
+class Pick:
+    """What of an inventory to take over (None: everything) and how to create servers."""
+
+    nodes: set[str] | None = None
+    guests: set[str] | None = None
+    storage: set[str] | None = None
+    room: Any = None  # room and device type for nodes not documented as devices yet
+    device_type: Any = None
+
+
+@dataclass
 class Result:
     """What an import did."""
 
     cluster: Cluster | None = None
+    servers: int = 0
     created: int = 0
     updated: int = 0
     storage: int = 0
@@ -55,31 +67,42 @@ def _need(actor: User, permission: str, tenant: Any, obj: Any = None) -> None:
 
 
 def save(
-    request: HttpRequest,
+    request: HttpRequest | None,
     actor: User,
     tenant: Any,
     data: sources.Inventory,
     *,
     nas: Device | None = None,
+    pick: Pick | None = None,
+    cluster: Cluster | None = None,
 ) -> Result:
-    """Create or update the cluster, its hosts, guests and storage (nothing is deleted)."""
+    """Create or update the cluster, its hosts, guests and storage (nothing is deleted).
+
+    Guests are found by their ID on the platform within the cluster, so a machine that
+    moved to another node is updated (its host changes) and never documented twice.
+    """
+    pick = pick or Pick()
     result = Result(notes=list(data.notes))
     with transaction.atomic():
-        cluster = None
         if data.platform in ("proxmox", "vmware"):
-            cluster = _cluster(actor, tenant, data, result)
-            _hosts(actor, tenant, cluster, data, result)
-            _guests(actor, tenant, cluster, data, result)
-        for item in data.storage:
-            _storage(actor, tenant, cluster, nas, item, result)
+            cluster = cluster or _cluster(actor, tenant, data)
+            _need(actor, "compute.cluster.change", tenant, cluster)
+        for item in data.storage:  # first, so the disks of guests can point at it
+            if pick.storage is None or item.name in pick.storage:
+                _storage(actor, tenant, cluster, nas, item, result)
+        if cluster is not None:
+            _hosts(request, actor, tenant, cluster, data, result, pick)
+            _guests(actor, tenant, cluster, data, result, pick)
         result.cluster = cluster
     audit.record(
         "compute.inventory.imported",
+        actor=actor,
         request=request,
         obj=cluster or nas,
         tenant_id=tenant.pk,
         data={
             "platform": data.platform,
+            "servers": result.servers,
             "created": result.created,
             "updated": result.updated,
             "storage": result.storage,
@@ -88,7 +111,7 @@ def save(
     return result
 
 
-def _cluster(actor: User, tenant: Any, data: sources.Inventory, result: Result) -> Cluster:
+def _cluster(actor: User, tenant: Any, data: sources.Inventory) -> Cluster:
     name = data.cluster or data.platform
     cluster = Cluster.objects.filter(tenant=tenant, name__iexact=name).first()
     if cluster is None:
@@ -96,20 +119,30 @@ def _cluster(actor: User, tenant: Any, data: sources.Inventory, result: Result) 
         cluster = Cluster(tenant=tenant, created_by=actor, name=name[:100], kind=data.platform)
         cluster.full_clean(exclude=["tenant"])
         cluster.save()
-    else:
-        _need(actor, "compute.cluster.change", tenant, cluster)
     return cluster
 
 
 def _hosts(
-    actor: User, tenant: Any, cluster: Cluster, data: sources.Inventory, result: Result
+    request: HttpRequest | None,
+    actor: User,
+    tenant: Any,
+    cluster: Cluster,
+    data: sources.Inventory,
+    result: Result,
+    pick: Pick,
 ) -> None:
-    devices = {d.name.lower(): d for d in Device.objects.filter(tenant=tenant, name__in=data.hosts)}
+    """Nodes become (or are matched to) server devices of the cluster."""
+    from patchmanager.dcim import devices as dcim
+
     for name in data.hosts:
-        device = (
-            devices.get(name.lower())
-            or Device.objects.filter(tenant=tenant, name__iexact=name).first()
-        )
+        if pick.nodes is not None and name not in pick.nodes:
+            continue
+        device = Device.objects.filter(tenant=tenant, name__iexact=name).first()
+        if device is None and pick.room is not None and pick.device_type is not None:
+            device = dcim.create(
+                request, actor, device_type=pick.device_type, room=pick.room, name=name[:150]
+            )
+            result.servers += 1
         if device is None or not policy.has_perm(actor, "dcim.device.view", device):
             result.notes.append(_("Host %(name)s is not documented as a device.") % {"name": name})
             continue
@@ -121,7 +154,7 @@ def _hosts(
 
 
 def _guests(
-    actor: User, tenant: Any, cluster: Cluster, data: sources.Inventory, result: Result
+    actor: User, tenant: Any, cluster: Cluster, data: sources.Inventory, result: Result, pick: Pick
 ) -> None:
     hosts = {
         d.name.lower(): d
@@ -129,13 +162,15 @@ def _guests(
     }
     vlans = {v.vid: v for v in VLAN.objects.filter(tenant=tenant)}
     for guest in data.guests:
+        if pick.guests is not None and guest.external_id not in pick.guests:
+            continue
         vm = VirtualMachine.objects.filter(
             tenant=tenant, cluster=cluster, external_id=guest.external_id
         ).first()
         vm = (
             vm
             or VirtualMachine.objects.filter(
-                tenant=tenant, cluster=cluster, name__iexact=guest.name
+                tenant=tenant, cluster=cluster, external_id="", name__iexact=guest.name
             ).first()
         )
         if vm is None:

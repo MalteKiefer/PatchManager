@@ -8,6 +8,12 @@ All notable changes to this project are documented here. The format follows
 
 ### Added
 
+* Servers, virtual machines and storage: clusters with hosts, virtual machines and
+  containers with network cards and disks, storage of NAS, SAN and clusters
+  (ADR 0032).
+* Proxmox VE connections: choose nodes, machines and storage to take over, create
+  servers for new nodes, update automatically; moved machines stay one record.
+* One-off imports from VMware vCenter and Synology DSM.
 * Switching and routing per device: link aggregations, spanning tree (with MST
   instances), VLAN interfaces with addresses, static routes, OSPF, BGP neighbors,
   tunnelled ports, device profiles, and a port matrix coloured by VLAN (ADR 0029).

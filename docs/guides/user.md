@@ -184,6 +184,16 @@ Port settings such as link aggregation, MTU, edge port, guards and OSPF can also
 edited on each port. Under *Networks → Stacks* you group switches into stacks, VSF,
 VSX or MLAG pairs or a virtual chassis, with member number, role and priority.
 
+## Servers, virtual machines and storage
+
+*Servers and storage* lists virtual machines and containers, clusters with their host
+servers, and storage (pools, volumes, LUNs, shares, datastores) of NAS and SAN
+systems. **Connections → Connect Proxmox VE** reads a Proxmox cluster with an API
+token that has read rights: choose which nodes, machines and storage to take over,
+where new servers go (room and device type) and how often to update. A machine that
+moves to another node keeps its record; only its host changes. **Import once** reads
+a VMware vCenter or a Synology NAS without storing the credentials.
+
 ## Customers, systems and lines
 
 *Customers and systems* lists organisations (customers, suppliers, providers,

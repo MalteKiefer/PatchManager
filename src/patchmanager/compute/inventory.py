@@ -13,6 +13,7 @@ import ipaddress
 import json
 import re
 import socket
+import time
 from dataclasses import dataclass, field
 from typing import Any
 from urllib.parse import quote, urlencode, urlsplit
@@ -24,6 +25,8 @@ from patchmanager.accounts.services import ServiceError
 
 MAX_BYTES = 20 * 1024 * 1024
 MAX_GUESTS = 5000
+MAX_REQUESTS = MAX_GUESTS + 100
+DEADLINE = 120  # seconds for a whole import
 TIMEOUT = urllib3.Timeout(total=30, connect=10)
 _FINGERPRINT = re.compile(r"^([0-9a-f]{2}:){31}[0-9a-f]{2}$|^[0-9a-f]{64}$")
 
@@ -112,6 +115,8 @@ class Client:
             }
         else:
             options["cert_reqs"] = "CERT_REQUIRED"
+        self.deadline = time.monotonic() + DEADLINE
+        self.requests = 0
         self.pool = urllib3.HTTPSConnectionPool(
             self.address, self.port, timeout=TIMEOUT, retries=False, maxsize=2, **options
         )
@@ -125,6 +130,9 @@ class Client:
         body: str | None = None,
     ) -> tuple[int, Any]:
         """Send a request and return the status and the JSON answer."""
+        self.requests += 1
+        if time.monotonic() > self.deadline or self.requests > MAX_REQUESTS:
+            raise ServiceError(_("The platform is too large or too slow to read in one go."))
         host = self.host if self.port == 443 else f"{self.host}:{self.port}"
         try:
             response = self.pool.urlopen(

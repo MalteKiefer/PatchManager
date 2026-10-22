@@ -14,6 +14,10 @@ REFERENCES = {
     ],
     "compute_virtualmachine": [("cluster_id", "compute_cluster"), ("host_id", "dcim_device")],
     "compute_vminterface": [("vm_id", "compute_virtualmachine"), ("vlan_id", "networks_vlan")],
+    "compute_connection": [
+        ("cluster_id", "compute_cluster"),
+        ("node_room_id", "locations_room"),
+    ],
     "compute_virtualdisk": [
         ("vm_id", "compute_virtualmachine"),
         ("storage_id", "compute_storagevolume"),
@@ -68,6 +72,7 @@ class Migration(migrations.Migration):
                 "virtualmachine",
                 "vminterface",
                 "virtualdisk",
+                "connection",
             )
         ),
     ]

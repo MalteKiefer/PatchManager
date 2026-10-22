@@ -1,0 +1,383 @@
+import socket
+from typing import Any
+
+import pytest
+from django.test import Client
+
+from patchmanager.accounts.services import ServiceError
+from patchmanager.compute import connections, inventory
+from patchmanager.compute.models import ClusterHost, Connection, VirtualMachine
+from patchmanager.dcim.models import Device
+
+pytestmark = pytest.mark.django_db
+
+TOKEN = "monitor@pve!patchmanager=12345678-1234-1234-1234-123456789abc"
+
+
+class FakePVE:
+    """The answers of a small Proxmox VE cluster; ``nodes`` says where each guest runs."""
+
+    def __init__(self) -> None:
+        self.nodes = {"100": "pve1", "101": "pve2", "200": "pve1"}
+        self.extra: list[dict[str, Any]] = []
+
+    def answer(self, path: str) -> Any:
+        if path == "/api2/json/cluster/status":
+            return {
+                "data": [
+                    {"type": "cluster", "name": "LAB"},
+                    {"type": "node", "name": "pve1"},
+                    {"type": "node", "name": "pve2"},
+                ]
+            }
+        if path == "/api2/json/cluster/resources":
+            guests = [
+                {
+                    "type": "qemu",
+                    "vmid": 100,
+                    "name": "web",
+                    "node": self.nodes["100"],
+                    "status": "running",
+                    "maxcpu": 2,
+                    "maxmem": 4 * 1024**3,
+                    "maxdisk": 32 * 1024**3,
+                },
+                {
+                    "type": "qemu",
+                    "vmid": 101,
+                    "name": "db",
+                    "node": self.nodes["101"],
+                    "status": "stopped",
+                    "maxcpu": 4,
+                    "maxmem": 8 * 1024**3,
+                },
+                {
+                    "type": "lxc",
+                    "vmid": 200,
+                    "name": "dns",
+                    "node": self.nodes["200"],
+                    "status": "running",
+                },
+                *self.extra,
+            ]
+            return {
+                "data": [
+                    *guests,
+                    {
+                        "type": "storage",
+                        "storage": "local-lvm",
+                        "node": "pve1",
+                        "maxdisk": 500 * 1024**3,
+                        "disk": 100 * 1024**3,
+                        "plugintype": "lvmthin",
+                    },
+                ]
+            }
+        if path.endswith("/qemu/100/config"):
+            return {
+                "data": {
+                    "ostype": "l26",
+                    "net0": "virtio=AA:BB:CC:00:00:01,bridge=vmbr0,tag=10",
+                    "scsi0": "local-lvm:vm-100-disk-0,size=32G",
+                }
+            }
+        if path.endswith("/lxc/200/config"):
+            return {
+                "data": {
+                    "ostype": "debian",
+                    "net0": "name=eth0,bridge=vmbr0,hwaddr=AA:BB:CC:00:00:02,ip=10.0.0.53/24",
+                }
+            }
+        return {"data": {}}
+
+
+@pytest.fixture
+def pve(monkeypatch):
+    fake = FakePVE()
+    monkeypatch.setattr(
+        socket, "getaddrinfo", lambda host, port, **kw: [(2, 1, 6, "", ("10.0.0.10", port))]
+    )
+    monkeypatch.setattr(inventory.Client, "get", lambda self, path, headers=None: fake.answer(path))
+    return fake
+
+
+def test_proxmox_inventory(pve) -> None:
+    found = inventory.proxmox("https://pve1.lab:8006", TOKEN)
+    assert found.cluster == "LAB" and found.hosts == ["pve1", "pve2"]
+    web = next(g for g in found.guests if g.external_id == "100")
+    assert (web.memory_mb, web.disk_gb, web.operating_system) == (4096, 32, "l26")
+    assert web.nics[0] == {
+        "name": "net0",
+        "mac": "aa:bb:cc:00:00:01",
+        "bridge": "vmbr0",
+        "vlan": "10",
+        "addresses": "",
+    }
+    assert web.disks == [("scsi0", 32, "local-lvm")]
+    dns = next(g for g in found.guests if g.external_id == "200")
+    assert dns.kind == "container" and dns.nics[0]["addresses"] == "10.0.0.53/24"
+    assert found.storage[0].size_gb == 500
+
+
+def test_addresses_and_tokens_are_checked(monkeypatch) -> None:
+    with pytest.raises(ServiceError):
+        inventory.proxmox("http://pve.lab:8006", TOKEN)  # https only
+    with pytest.raises(ServiceError):
+        inventory.proxmox("https://pve.lab", "not a token")
+    for address in ("127.0.0.1", "169.254.169.254", "0.0.0.0", "::1"):  # noqa: S104
+        monkeypatch.setattr(
+            socket, "getaddrinfo", lambda h, p, a=address, **kw: [(2, 1, 6, "", (a, p))]
+        )
+        with pytest.raises(ServiceError, match="cannot be used"):
+            inventory.Client("https://pve.lab:8006")
+    monkeypatch.setattr(socket, "getaddrinfo", lambda h, p, **kw: [(2, 1, 6, "", ("10.0.0.10", p))])
+    with pytest.raises(ServiceError, match="fingerprint"):
+        inventory.Client("https://pve.lab:8006", "abc")
+    inventory.Client("https://pve.lab:8006", "ab" * 32)  # a valid pin
+
+
+def test_connect_choose_and_follow_migrations(
+    admin_client: Client, make_tree, make_type, pve, system
+) -> None:
+    tree = make_tree()
+    admin_client.post("/tenants/switch/", {"tenant": tree["tenant"].pk}, secure=True)
+    with system():
+        server_type = make_type("PowerEdge R650", u_height=1)
+        from patchmanager.dcim import devices
+
+        devices.create(
+            tree["request"],
+            tree["request"].user,
+            device_type=server_type,
+            room=tree["room"],
+            name="pve1",
+        )
+    created = admin_client.post(
+        "/compute/connections/new/",
+        {"name": "Lab", "url": "https://pve1.lab:8006", "fingerprint": "", "token": TOKEN},
+        secure=True,
+    )
+    with system():
+        connection = Connection.objects.get()
+        assert TOKEN not in connection.secret  # stored encrypted
+    assert created.url == f"/compute/connections/{connection.pk}/select/"
+    page = admin_client.get(created.url, secure=True).content.decode()
+    assert "pve2 (new server)" in page and "pve1 (documented)" in page and "100 · web" in page
+    admin_client.post(
+        created.url,
+        {
+            "nodes": ["pve1", "pve2"],
+            "guests": ["100", "101"],
+            "storage": ["local-lvm"],
+            "add_new_guests": "on",
+            "node_room": tree["room"].pk,
+            "node_type": server_type.pk,
+            "interval": "6",
+        },
+        secure=True,
+    )
+    with system():
+        assert Device.objects.filter(name="pve2").exists()  # a node became a server
+        assert ClusterHost.objects.filter(cluster__name="LAB").count() == 2
+        web = VirtualMachine.objects.get(external_id="100")
+        assert web.host.name == "pve1" and web.interfaces.get().vlan is None
+        assert not VirtualMachine.objects.filter(external_id="200").exists()  # left out
+        assert web.disks.get().storage.name == "local-lvm"
+    pve.nodes["100"] = "pve2"  # live migration
+    pve.extra = [{"type": "qemu", "vmid": 102, "name": "new", "node": "pve1", "status": "running"}]
+    admin_client.post(f"/compute/connections/{connection.pk}/", {"action": "sync"}, secure=True)
+    with system():
+        assert VirtualMachine.objects.filter(external_id="100").count() == 1
+        assert VirtualMachine.objects.get(external_id="100").host.name == "pve2"
+        assert VirtualMachine.objects.filter(external_id="102").exists()  # new machine taken over
+        assert not VirtualMachine.objects.filter(external_id="200").exists()  # still left out
+        connection.refresh_from_db()
+        assert "102" in connection.guests and connection.last_error == ""
+    detail = admin_client.get(
+        f"/compute/connections/{connection.pk}/", secure=True
+    ).content.decode()
+    assert "LAB" in detail and "updated machines" in detail
+
+
+def test_scheduled_update(make_tree, super_admin, pve, system) -> None:
+    from django.utils import timezone
+
+    from patchmanager.core import crypto
+
+    tree = make_tree()
+    with system():
+        connection = Connection.objects.create(
+            tenant=tree["tenant"],
+            created_by=super_admin,
+            name="Lab",
+            url="https://pve1.lab:8006",
+            secret=crypto.encrypt(TOKEN),
+            nodes=[],
+            guests=["100"],
+            storage=[],
+            seen=["100", "101", "200"],
+            add_new_guests=False,
+            interval=1,
+        )
+        Connection.objects.create(
+            tenant=tree["tenant"],
+            created_by=super_admin,
+            name="Fresh",
+            url="https://pve1.lab:8006",
+            secret=crypto.encrypt(TOKEN),
+            interval=1,
+            last_synced_at=timezone.now(),
+        )
+    assert connections.sync_due() == 1  # the fresh one is not due
+    with system():
+        assert list(VirtualMachine.objects.values_list("external_id", flat=True)) == ["100"]
+        connection.refresh_from_db()
+        assert connection.last_synced_at is not None
+
+
+def test_vmware_and_synology(
+    admin_client: Client, make_tree, make_type, monkeypatch, system
+) -> None:
+    from patchmanager.compute.models import StorageVolume
+    from patchmanager.dcim import devices
+
+    monkeypatch.setattr(socket, "getaddrinfo", lambda h, p, **kw: [(2, 1, 6, "", ("10.0.0.20", p))])
+    calls: list[tuple[str, str]] = []
+
+    def request(self, method, path, *, headers=None, body=None):
+        calls.append((method, path))
+        if path == "/api/session":
+            return (201, "session-1") if method == "POST" else (204, None)
+        if path.startswith("/webapi/entry.cgi") and method == "POST":
+            return 200, {"success": True, "data": {"sid": "s1"}}
+        return 200, None
+
+    answers = {
+        "/api/vcenter/cluster": [{"name": "VC-CL"}],
+        "/api/vcenter/host": [{"host": "host-1", "name": "esx1"}],
+        "/api/vcenter/vm?hosts=host-1": [
+            {
+                "vm": "vm-7",
+                "name": "app",
+                "power_state": "POWERED_ON",
+                "cpu_count": 2,
+                "memory_size_MiB": 2048,
+            }
+        ],
+        "/api/vcenter/vm/vm-7": {
+            "guest_OS": "UBUNTU_64",
+            "nics": {
+                "4000": {
+                    "label": "Network adapter 1",
+                    "mac_address": "00:50:56:00:00:01",
+                    "backing": {"network_name": "VM Network"},
+                }
+            },
+            "disks": {"2000": {"label": "Hard disk 1", "capacity": 40 * 1024**3}},
+        },
+        "/api/vcenter/datastore": [
+            {"name": "ds1", "type": "VMFS", "capacity": 1024**4, "free_space": 512 * 1024**3}
+        ],
+    }
+
+    def get(self, path, headers=None):
+        if path.startswith("/webapi/entry.cgi"):
+            if "SYNO.Storage.CGI.Storage" in path:
+                return {
+                    "success": True,
+                    "data": {
+                        "volumes": [
+                            {
+                                "vol_path": "/volume1",
+                                "size": {"total": str(4 * 1024**4), "used": str(1024**4)},
+                            }
+                        ],
+                        "storagePools": [],
+                    },
+                }
+            return {
+                "success": True,
+                "data": {"shares": [{"name": "backup", "vol_path": "/volume1"}]},
+            }
+        return answers[path]
+
+    monkeypatch.setattr(inventory.Client, "request", request)
+    monkeypatch.setattr(inventory.Client, "get", get)
+    tree = make_tree()
+    admin_client.post("/tenants/switch/", {"tenant": tree["tenant"].pk}, secure=True)
+    page = admin_client.post(
+        "/compute/import/",
+        {"platform": "vmware", "url": "https://vc.lab", "username": "ro", "password": "pw"},
+        secure=True,
+    )
+    assert page.status_code == 302
+    with system():
+        app = VirtualMachine.objects.get(external_id="vm-7")
+        assert (app.cluster.name, app.memory_mb, app.disk_gb) == ("VC-CL", 2048, 40)
+        assert app.interfaces.get().bridge == "VM Network"
+        assert StorageVolume.objects.get(name="ds1").used_gb == 512
+        nas = devices.create(
+            tree["request"],
+            tree["request"].user,
+            device_type=make_type("DS920+"),
+            room=tree["room"],
+            rack=tree["rack"],
+            position=5,
+            name="NAS-1",
+        )
+    assert ("DELETE", "/api/session") in calls  # signed out again
+    admin_client.post(
+        "/compute/import/",
+        {
+            "platform": "synology",
+            "url": "https://nas.lab:5001",
+            "username": "ro",
+            "password": "pw",
+            "nas": nas.pk,
+        },
+        secure=True,
+    )
+    with system():
+        volume = StorageVolume.objects.get(name="/volume1")
+        assert (volume.device_id, volume.size_gb, volume.used_gb) == (nas.pk, 4096, 1024)
+        assert StorageVolume.objects.get(name="backup").kind == "smb"
+    device_page = admin_client.get(f"/devices/{nas.pk}/", secure=True).content.decode()
+    assert "/volume1" in device_page
+    missing = admin_client.post(
+        "/compute/import/", {"platform": "proxmox", "url": "https://p.lab"}, secure=True
+    )
+    assert "Enter the API token" in missing.content.decode()
+
+
+def test_compute_pages(admin_client: Client, make_tree, system) -> None:
+    tree = make_tree()
+    admin_client.post("/tenants/switch/", {"tenant": tree["tenant"].pk}, secure=True)
+    _ok = admin_client.post("/items/clusters/new/", {"name": "C1", "kind": "kvm"}, secure=True)
+    with system():
+        from patchmanager.compute.models import Cluster
+
+        cluster = Cluster.objects.get()
+    admin_client.post(
+        "/items/vms/new/",
+        {"name": "vm1", "kind": "vm", "status": "running", "cluster": cluster.pk},
+        secure=True,
+    )
+    with system():
+        vm = VirtualMachine.objects.get()
+    admin_client.post(
+        "/items/vm-interfaces/new/", {"parent": vm.pk, "name": "eth0", "enabled": "on"}, secure=True
+    )
+    admin_client.post(
+        "/items/vm-disks/new/", {"parent": vm.pk, "name": "sda", "size_gb": 20}, secure=True
+    )
+    page = admin_client.get(f"/items/vms/{vm.pk}/", secure=True).content.decode()
+    assert "eth0" in page and "sda" in page
+    for url in (
+        "/items/vms/",
+        "/items/clusters/",
+        "/items/storage/",
+        "/compute/connections/",
+        "/compute/connections/new/",
+        "/compute/import/",
+    ):
+        assert admin_client.get(url, secure=True).status_code == 200, url

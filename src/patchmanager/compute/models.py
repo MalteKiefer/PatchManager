@@ -194,12 +194,12 @@ class VirtualMachine(TenantWide):
     class Meta:
         ordering = ["name"]
         constraints = [
+            # One documented machine per platform ID in a cluster (names may repeat there).
             models.UniqueConstraint(
-                "tenant",
                 "cluster",
-                Lower("name"),
-                nulls_distinct=False,
-                name="vm_name_unique_per_cluster",
+                "external_id",
+                condition=~models.Q(external_id=""),
+                name="vm_external_id_unique_per_cluster",
             )
         ]
 
@@ -299,24 +299,47 @@ class Connection(TenantWide):
     name = models.CharField(_("name"), max_length=100)
     platform = models.CharField(_("platform"), max_length=10, default="proxmox", editable=False)
     url = models.URLField(_("address"))
-    fingerprint = models.CharField(_("certificate fingerprint (SHA-256)"), max_length=95, blank=True)
+    fingerprint = models.CharField(
+        _("certificate fingerprint (SHA-256)"), max_length=95, blank=True
+    )
     secret = models.TextField(editable=False)  # encrypted token
-    cluster = models.ForeignKey(Cluster, null=True, blank=True, on_delete=models.SET_NULL,
-                                related_name="connections", verbose_name=_("cluster"))
+    cluster = models.ForeignKey(
+        Cluster,
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="connections",
+        verbose_name=_("cluster"),
+    )
     # What to take over: names of nodes and storage, IDs of guests.
     nodes = models.JSONField(default=list, blank=True)
     guests = models.JSONField(default=list, blank=True)
     storage = models.JSONField(default=list, blank=True)
+    seen = models.JSONField(default=list, blank=True)  # guest IDs offered when last chosen
     add_new_guests = models.BooleanField(
-        _("take over new machines automatically"), default=True,
+        _("take over new machines automatically"),
+        default=True,
         help_text=_("Machines created on the platform later are documented by the next update."),
     )
-    node_room = models.ForeignKey("locations.Room", null=True, blank=True, on_delete=models.SET_NULL,
-                                  related_name="+", verbose_name=_("room for new servers"))
-    node_type = models.ForeignKey("library.DeviceType", null=True, blank=True, on_delete=models.SET_NULL,
-                                  related_name="+", verbose_name=_("device type for new servers"))
-    interval = models.PositiveSmallIntegerField(_("automatic update"), choices=Interval.choices,
-                                                default=Interval.DAILY)
+    node_room = models.ForeignKey(
+        "locations.Room",
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="+",
+        verbose_name=_("room for new servers"),
+    )
+    node_type = models.ForeignKey(
+        "library.DeviceType",
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="+",
+        verbose_name=_("device type for new servers"),
+    )
+    interval = models.PositiveSmallIntegerField(
+        _("automatic update"), choices=Interval.choices, default=Interval.DAILY
+    )
     last_synced_at = models.DateTimeField(null=True, blank=True, editable=False)
     last_result = models.TextField(blank=True, editable=False)
     last_error = models.CharField(max_length=300, blank=True, editable=False)
@@ -325,7 +348,9 @@ class Connection(TenantWide):
 
     class Meta:
         ordering = ["name"]
-        constraints = [models.UniqueConstraint("tenant", Lower("name"), name="connection_name_unique")]
+        constraints = [
+            models.UniqueConstraint("tenant", Lower("name"), name="connection_name_unique")
+        ]
 
     def __str__(self) -> str:
         return self.name
