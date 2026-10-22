@@ -1,6 +1,6 @@
 # 22. Editions, instance settings and accessibility
 
-* Status: accepted
+* Status: accepted; the edition part is superseded by ADR 0023 (no editions)
 * Date: 2026-10-22
 
 ## Context

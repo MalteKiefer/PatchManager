@@ -296,3 +296,94 @@ def test_huge_pdf_page_is_capped() -> None:
     document.close()
     with Image.open(io.BytesIO(services.rasterise_pdf(out.getvalue()))) as image:
         assert image.width * image.height <= services.MAX_PIXELS
+
+
+@pytest.mark.django_db
+def test_plan_links_and_add_device_from_plan(admin_client, kit, make_type, super_admin) -> None:
+    from patchmanager.cabling import services as cabling
+    from patchmanager.dcim import devices
+    from patchmanager.dcim.models import Device
+
+    _upload(kit, super_admin)
+    request = kit["request"]
+    with rls.system_context():
+        switch_type = make_type("Plan switch", ports=[{"name_pattern": "ge{n}", "count": 2}])
+        switch = devices.create(
+            request,
+            super_admin,
+            device_type=switch_type,
+            room=kit["room"],
+            rack=kit["rack"],
+            position=1,
+            name="sw-plan",
+        )
+        ap = devices.create(
+            request,
+            super_admin,
+            device_type=kit["ap"],
+            room=kit["room"],
+            name="ap-1",
+            plan_x=200,
+            plan_y=150,
+        )
+        rack = kit["rack"]
+        rack.plan_x, rack.plan_y = 100, 100
+        rack.save()
+        cabling.connect(request, super_admin, ap.ports.get(), switch.ports.get(name="ge1"))
+    response = admin_client.get(f"/plans/{kit['floor'].pk}/", secure=True)
+    links = response.context["scene"]["links"]
+    assert links == [
+        {
+            "from": ["device", str(ap.pk)],
+            "to": ["rack", str(kit["rack"].pk)],
+            "dashed": False,
+            "colour": "#2563eb",
+            "count": 1,
+        }
+    ]
+    url = f"/devices/new/?room={kit['room'].pk}&plan_x=40.5&plan_y=60"
+    assert 'name="plan_x" value="40.5"' in admin_client.get(url, secure=True).content.decode()
+    created = admin_client.post(
+        url,
+        {
+            "device_type": kit["ap"].pk,
+            "name": "ap-2",
+            "status": "active",
+            "plan_x": "40.5",
+            "plan_y": "60",
+        },
+        secure=True,
+    )
+    assert created.url == f"/plans/{kit['floor'].pk}/"
+    with rls.system_context():
+        assert (Device.objects.get(name="ap-2").plan_x, Device.objects.get(name="ap-2").plan_y) == (
+            40.5,
+            60,
+        )
+    bad = admin_client.get(f"/devices/new/?room={kit['room'].pk}&plan_x=nan&plan_y=1", secure=True)
+    assert 'name="plan_x"' not in bad.content.decode()
+
+
+@pytest.mark.django_db
+def test_new_room_from_drawn_outline(admin_client: Client, kit, super_admin) -> None:
+    from patchmanager.locations.models import Room
+
+    _upload(kit, super_admin)
+    floor = kit["floor"]
+    url = f"/locations/floor/{floor.pk}/new/"
+    outline = json.dumps([[10, 10], [200, 10], [200, 150], [10, 150]])
+    page = admin_client.get(url, {"outline": outline}, secure=True).content.decode()
+    assert 'name="outline"' in page and "outline you drew" in page
+    created = admin_client.post(
+        url, {"name": "Lab", "kind": "office", "description": "", "outline": outline}, secure=True
+    )
+    assert created.url == f"/plans/{floor.pk}/"
+    with rls.system_context():
+        assert Room.objects.get(name="Lab").outline[2] == [200.0, 150.0]
+    for bad in ("[[1, 1], [2, 2]]", "[[0, 0], [9000, 0], [0, 10]]", "nope"):
+        response = admin_client.post(
+            url, {"name": "X", "kind": "office", "description": "", "outline": bad}, secure=True
+        )
+        assert response.status_code == 200
+    with rls.system_context():
+        assert not Room.objects.filter(name="X").exists()

@@ -32,9 +32,11 @@ page shows the elevation for the **Front** or **Rear** face.
 * Settings: height (1 to 100 U), width, depth, unit numbering (from the bottom
   by default), status, serial number and asset tag.
 
-Devices, ports and cabling follow in the next releases.
-
 ## Device library
+
+*Device library → Add from catalog* searches more than 12 000 device types of the
+community device type library by manufacturer, model or part number and copies one
+with all its ports into your library, shared or for the current tenant.
 
 **Library** lists device types: shared ones and the custom types of the current
 tenant. A type defines vendor, model, form (rack mounted or floor device),
@@ -88,6 +90,25 @@ focus one and use the arrow keys (Shift for bigger steps). Dropping a floor
 device into another room's outline moves it to that room. Double click a symbol
 to open it.
 
+Lines join each placed floor device with the rack or device its cables lead to;
+dashed lines are permanent links, the number says how many paths. Choose **Add
+device here** and click inside a room outline to create a device at that point.
+**Draw new room** works like drawing an outline: click the corners, choose **Finish
+outline**, then name the new room on the next page.
+
+## Rooms
+
+A room page shows its racks, a comparison of **planned and installed** devices per
+category, the surveys of the room and every device outside the racks with each port
+and where it is patched (device, port and rack). The planned numbers come from the
+room type; **Change plan** sets numbers for this room alone (leave a field empty to
+use the room type's number, enter 0 to plan none).
+
+**New survey** records a walk through the room: date, who, status, notes and how
+many devices of each category were found. The survey page lists planned,
+documented and found side by side and marks differences. Add photos and notes to a
+survey like to any other object.
+
 ## Search
 
 Use the search field in the header. Search finds names, codes, serial numbers,
@@ -112,9 +133,44 @@ their value. Exports use the same columns, so you can export, edit and import
 again. PDF reports: site report, patch list and bill of materials per site, the
 rack elevation on rack pages and the port list on device pages.
 
+## Device configurations
+
+A device page shows its latest stored configuration; *Versions* lists all of them.
+Store a new version by pasting the text or choosing a file; an unchanged paste does
+not create a version. Open a version to read it with line numbers, download it, or
+compare two versions. Configurations are encrypted at rest and every view is
+recorded in the audit log. Backup tools can store versions through the API:
+
+```bash
+curl -H "Authorization: Bearer $TOKEN" -H "Content-Type: application/json" \
+  -d "$(jq -Rs '{content: ., comment: "nightly"}' sw1.cfg)" \
+  https://patchmanager.example.com/api/v1/devices/<device id>/configs/
+```
+
+## IP addresses
+
+*IP addresses* keeps prefixes and addresses, optionally in VRFs (separate routing
+tables; without a VRF everything is in the global table).
+
+* **Prefixes** show as a tree with how much of each is in use. A *container* holds
+  other prefixes and counts the space they take; other prefixes count addresses.
+* A prefix page lists its child prefixes, its addresses and the free ranges, and
+  offers the next free address with one click.
+* Put an address on a port from the port's page (*Add IP address*); it then shows
+  on the device page next to the port and follows the device when it moves.
+* Prefixes and addresses can be imported and exported like VLANs (*Import and
+  export*), and the search finds them by address or DNS name.
+
 ## VLANs and WLANs
 
 **Networks** holds VLANs (for the whole tenant or one site) and WLANs. On a
 network port set the mode: *access* with one VLAN, or *trunk* with an optional
 native VLAN and tagged VLANs. A WLAN can bridge into a VLAN; add the wireless
 ports of access points that broadcast it.
+
+## Your data
+
+*Profile → Download my data* gives you a JSON file with everything PatchManager
+stores about you: profile, roles, sessions, second factors (without secrets), API
+tokens, sign in links and your actions in the audit log. To have your account
+anonymised, ask an administrator.

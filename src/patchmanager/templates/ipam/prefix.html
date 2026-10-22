@@ -1,0 +1,43 @@
+{% extends "base.html" %}{% load i18n pm %}
+{% block title %}{{ prefix }}{% endblock %}
+{% block content %}
+<nav aria-label="{% translate 'Breadcrumb' %}" class="mb-3 text-sm"><a href="{% url 'ipam:prefixes' %}">{% translate "Prefixes" %}</a></nav>
+<div class="mb-2 flex flex-wrap items-center gap-3">
+  <h1 class="mr-auto tabular-nums">{{ prefix.prefix }}</h1>
+  <a class="btn-secondary" href="{% history_url prefix %}">{% translate "History" %}</a>
+  {% if next_free and can_add_address %}<a class="btn-primary" href="{% url 'ipam:address-create' %}?address={{ next_free|urlencode }}{% if prefix.vrf_id %}&amp;vrf={{ prefix.vrf_id }}{% endif %}">{% blocktranslate with a=next_free %}Add {{ a }}{% endblocktranslate %}</a>{% endif %}
+</div>
+<p class="mb-6 text-sm text-slate-500">{{ prefix.vrf|default:_("global") }}{% if prefix.site %}, {{ prefix.site.name }}{% endif %}{% if prefix.vlan %}, VLAN {{ prefix.vlan }}{% endif %}{% if prefix.description %}, {{ prefix.description }}{% endif %}</p>
+<dl class="overview-strip mb-6">
+  <div><dt>{% translate "In use" %}</dt><dd>{{ usage.percent }} %</dd></div>
+  <div><dt>{% if prefix.status == "container" %}{% translate "Addresses in child prefixes" %}{% else %}{% translate "Used addresses" %}{% endif %}</dt><dd>{{ usage.used }}<span> / {{ usage.size }}</span></dd></div>
+  <div><dt>{% translate "Child prefixes" %}</dt><dd>{{ children|length }}</dd></div>
+  <div><dt>{% translate "Gateway" %}</dt><dd class="text-lg">{{ prefix.gateway|default:"-" }}</dd></div>
+</dl>
+<div class="grid gap-6 xl:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
+  <div class="space-y-6">
+    {% if children %}<section class="card overflow-x-auto p-0" aria-labelledby="kids-h"><h2 id="kids-h" class="px-4 pt-4">{% translate "Child prefixes" %}</h2>
+      <table class="table"><tbody>{% for c in children %}<tr><td><a href="{% url 'ipam:prefix' c.pk %}" class="tabular-nums">{{ c.prefix }}</a></td><td>{{ c.get_status_display }}</td><td class="text-sm text-slate-500">{{ c.description }}</td></tr>{% endfor %}</tbody></table></section>{% endif %}
+    {% if prefix.status != "container" %}
+    <section class="card overflow-x-auto p-0" aria-labelledby="addr-h"><h2 id="addr-h" class="px-4 pt-4">{% translate "Addresses" %}</h2>
+      <table class="table">
+        <thead><tr><th>{% translate "Address" %}</th><th>{% translate "Status" %}</th><th>{% translate "DNS name" %}</th><th>{% translate "Port" %}</th></tr></thead>
+        <tbody>{% for a in addresses %}<tr>
+          <td><a href="{% url 'ipam:address' a.pk %}" class="tabular-nums">{{ a.address }}</a></td><td>{{ a.get_status_display }}</td><td>{{ a.dns_name }}</td>
+          <td>{% if a.shown_port %}<a href="{% url 'devices:port' a.shown_port.pk %}">{{ a.shown_port.device }} · {{ a.shown_port.name }}</a>{% elif a.port_id %}<span class="text-slate-500">{% translate "(not visible to you)" %}</span>{% endif %}</td>
+        </tr>{% empty %}<tr><td colspan="4" class="text-slate-500">{% translate "No addresses in this prefix yet." %}</td></tr>{% endfor %}</tbody>
+      </table></section>
+    {% endif %}
+  </div>
+  <aside class="space-y-6">
+    {% if free %}<section class="card" aria-labelledby="free-h"><h2 id="free-h" class="mb-3">{% translate "Free addresses" %}</h2>
+      <ul class="space-y-1.5 text-sm">{% for first, last, count in free %}<li class="flex items-center gap-2">
+        <span class="tabular-nums">{{ first }}{% if count > 1 %} – {{ last }}{% endif %}</span><span class="text-xs text-slate-500">{{ count }}</span>
+        {% if can_add_address %}<a class="ml-auto text-xs" href="{% url 'ipam:address-create' %}?address={{ first }}/{{ prefix.network.prefixlen }}{% if prefix.vrf_id %}&amp;vrf={{ prefix.vrf_id }}{% endif %}">{% translate "Use" %}</a>{% endif %}
+      </li>{% endfor %}</ul></section>{% endif %}
+    <form method="post" class="card" novalidate>{% csrf_token %}<h2 class="mb-3">{% translate "Details" %}</h2>
+      <fieldset {% if not can_change %}disabled{% endif %}>{% include "core/_form.html" %}</fieldset>{% if can_change %}<button class="btn-primary">{% translate "Save" %}</button>{% endif %}</form>
+    {% if can_change %}<form method="post" data-confirm="{% translate 'Delete this prefix? Its addresses stay.' %}">{% csrf_token %}<button name="action" value="delete" class="btn-danger">{% translate "Delete" %}</button></form>{% endif %}
+  </aside>
+</div>
+{% endblock %}

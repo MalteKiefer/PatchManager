@@ -58,6 +58,12 @@ Lock or unlock, deactivate or reactivate, reset second factors, sign the user
 out everywhere, or impersonate them (with a reason; a banner stays visible, it
 ends after 30 minutes and is audited). Super admins cannot be impersonated.
 
+**Anonymise** answers an erasure request: email and name are replaced, the account
+is deactivated, and its sessions, second factors, tokens, sign in links, groups and
+roles are deleted. Its changes stay in the history under the anonymous account. The
+audit log keeps its entries as the security record; see
+[ADR 0024](../adr/0024-personal-data.md). This cannot be undone.
+
 ## Single sign on
 
 *Administration → Single sign on* (super admins) adds identity providers:
@@ -90,14 +96,19 @@ Deprovisioned users are deactivated and keep their history. Provisioned groups
 start without rights: assign roles to them under *Groups*. SCIM never touches
 super admins, break glass accounts, API clients or groups created here.
 
-## Edition and branding
+## Lists
 
-*Administration → Edition and limits* shows the edition, how much of each limit is
-used and which features are on. Super admins choose the edition and override
-single limits or features (unless `PATCHMANAGER_EDITION` pins it). Shrinking an
-edition never deletes data; only new racks, users or tenants beyond a limit are
-refused. *Branding* sets the instance name, logo, brand colour and the default
-language of new accounts.
+*Administration → Lists* holds the device categories and room types everyone
+chooses from. Add your own entries or rename existing ones. A category has a short
+sign and a colour for floor plan pins. A room type lists the devices a room of that
+type should have; rooms can change the numbers for themselves. Built in entries keep
+their key, entries in use cannot be deleted.
+
+## Branding
+
+*Administration → Branding* sets the instance name, logo, brand colour and the
+default language of new accounts. Every feature is available on every
+installation; there are no editions, limits or licence keys.
 
 ## System
 

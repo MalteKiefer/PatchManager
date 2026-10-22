@@ -12,6 +12,7 @@ from django.core.exceptions import ValidationError
 from django.db.models import QuerySet
 from django.http import HttpRequest, HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
+from django.urls import reverse
 from django.utils import timezone
 from django.utils.translation import gettext as _
 from django.utils.translation import gettext_lazy
@@ -23,7 +24,6 @@ from patchmanager.accounts.models import User
 from patchmanager.api.tokens import _matches, digest
 from patchmanager.audit import services as audit
 from patchmanager.core import ratelimit
-from patchmanager.instance.gates import feature_required
 from patchmanager.scim import filters, resources
 from patchmanager.scim.models import ScimToken
 from patchmanager.scim.resources import ScimError
@@ -58,10 +58,6 @@ def _authenticated(view: Handler) -> Handler:
     @csrf_exempt  # token authenticated, no cookies
     @wraps(view)
     def wrapped(request: HttpRequest, *args: Any, **kwargs: Any) -> HttpResponse:
-        from patchmanager.instance import editions
-
-        if not editions.enabled("scim"):
-            return _error(404, "SCIM is not part of this edition.")
         header = request.headers.get("Authorization", "")
         parts = header.removeprefix("Bearer ").strip().split("_", 2)
         token = None
@@ -369,10 +365,23 @@ class TokenForm(forms.Form):
         return values
 
 
-@feature_required("scim")
 @permission_required("system.scim.manage")
 def token_list(request: HttpRequest) -> HttpResponse:
-    """SCIM tokens; create one (shown once)."""
+    """SCIM tokens and the base URL."""
+    return render(
+        request,
+        "scim/tokens.html",
+        {
+            "tokens": ScimToken.objects.all(),
+            "new_token": request.session.pop(SHOW_ONCE, None),
+            "base_url": request.build_absolute_uri("/scim/v2/"),
+        },
+    )
+
+
+@permission_required("system.scim.manage")
+def token_create(request: HttpRequest) -> HttpResponse:
+    """Page that creates a SCIM token; the list shows it once."""
     form = TokenForm(request.POST or None)
     if request.method == "POST" and form.is_valid():
         prefix = secrets.token_hex(6)
@@ -391,17 +400,11 @@ def token_list(request: HttpRequest) -> HttpResponse:
         return redirect("scim:tokens")
     return render(
         request,
-        "scim/tokens.html",
-        {
-            "form": form,
-            "tokens": ScimToken.objects.all(),
-            "new_token": request.session.pop(SHOW_ONCE, None),
-            "base_url": request.build_absolute_uri("/scim/v2/"),
-        },
+        "core/create.html",
+        {"title": _("New SCIM token"), "form": form, "back_url": reverse("scim:tokens")},
     )
 
 
-@feature_required("scim")
 @permission_required("system.scim.manage")
 @require_POST
 def token_revoke(request: HttpRequest, pk: str) -> HttpResponse:

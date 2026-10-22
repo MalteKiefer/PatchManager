@@ -1,0 +1,19 @@
+{% extends "manage/_base.html" %}{% load i18n %}
+{% block title %}{% translate "Lists" %}{% endblock %}
+{% block manage %}
+<h1 class="mb-2">{% translate "Lists" %}</h1>
+<p class="mb-6 max-w-3xl text-sm text-slate-500">{% translate "Shape the lists everyone chooses from. Device categories sort the library and mark devices on floor plans; room types say which devices a room of that type should have." %}</p>
+<div class="grid gap-6 xl:grid-cols-2">
+  {% for s in sections %}
+  <section class="card overflow-x-auto p-0" aria-labelledby="list-{{ s.kind.slug }}">
+    <div class="flex items-center gap-2 px-4 pt-4"><h2 id="list-{{ s.kind.slug }}" class="mr-auto">{{ s.kind.title }}</h2>
+      {% if s.can_add %}<a class="btn-secondary" href="{% url 'manage:list-create' s.kind.slug %}">{{ s.kind.new }}</a>{% endif %}</div>
+    <table class="table"><tbody>{% for item in s.items %}<tr>
+      <td>{% if item.colour %}<span class="mr-2 inline-block size-3 rounded-full align-middle" data-swatch="{{ item.colour }}" aria-hidden="true"></span>{% endif %}<a href="{% url 'manage:list-item' s.kind.slug item.pk %}">{{ item.label }}</a></td>
+      <td class="text-sm text-slate-500">{{ item.key }}</td>
+      <td class="text-sm">{% if item.glyph %}<span class="badge-muted">{{ item.glyph }}</span>{% endif %}{% if item.builtin %} <span class="text-xs text-slate-500">{% translate "built in" %}</span>{% endif %}</td>
+    </tr>{% endfor %}</tbody></table>
+  </section>
+  {% endfor %}
+</div>
+{% endblock %}

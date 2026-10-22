@@ -127,6 +127,9 @@ model: EX-48T
 part_number: EX48
 u_height: 1
 is_full_depth: false
+airflow: front-to-rear
+weight: 11
+weight_unit: lb
 interfaces:
 """
     + "".join(f"  - name: ge-0/0/{i}\n    type: 1000base-t\n" for i in range(48))
@@ -141,6 +144,10 @@ console-ports:
 power-ports:
   - name: PSU1
     type: iec-60320-c14
+    maximum_draw: 150
+  - name: PSU2
+    type: iec-60320-c14
+    maximum_draw: 150
 """
 )
 
@@ -166,12 +173,17 @@ def test_import_switch_compresses_ports(super_admin) -> None:
         device_type = interchange.import_type(request, super_admin, SWITCH, tenant=None)
         templates = list(device_type.port_templates.all())
     names = [n for t in templates for n in t.names()]
-    assert len(names) == 52 and "ge-0/0/0" in names and "ge-0/0/47" in names
+    assert len(names) == 53 and "ge-0/0/0" in names and "ge-0/0/47" in names
     ge = next(t for t in templates if t.name_pattern == "ge-0/0/{n}")
     assert (ge.start, ge.count, ge.connector, ge.speed_mbps) == (0, 48, "rj45", 1000)
     assert next(t for t in templates if t.name_pattern == "xe-0/1/0").connector == "sfp+"
     assert {t.kind for t in templates} == {"interface", "console", "power"}
     assert not device_type.full_depth
+    assert (device_type.airflow, device_type.mounting) == ("front-to-rear", "rack-19")
+    assert (device_type.power_supplies, device_type.max_power_w) == (2, 150)
+    assert str(device_type.weight_kg) == "4.99"
+    exported = yaml.safe_load(interchange.export_type(device_type))
+    assert exported["airflow"] == "front-to-rear" and exported["weight_unit"] == "kg"
 
 
 def test_import_panel_and_roundtrip(super_admin, make_tree) -> None:
@@ -244,10 +256,10 @@ def test_library_views(admin_client: Client, make_tenant, system) -> None:
     assert ap.tenant_id == tenant.pk
     url = f"/library/{ap.pk}/"
     assert admin_client.get(url, secure=True).status_code == 200
+    assert admin_client.get(url + "ports/new/", secure=True).status_code == 200
     admin_client.post(
-        url,
+        url + "ports/new/",
         {
-            "action": "ports",
             "name_pattern": "eth{n}",
             "kind": "interface",
             "connector": "rj45",
@@ -301,3 +313,26 @@ def test_other_tenant_cannot_open_private_type(
     grant(user, "editor", b)
     login(client, user)
     assert client.get(f"/library/{private.pk}/", secure=True).status_code == 404
+
+
+def test_type_form_height_only_for_racks(admin_client: Client, make_tenant) -> None:
+    tenant = make_tenant()
+    admin_client.post("/tenants/switch/", {"tenant": tenant.pk}, secure=True)
+    page = admin_client.get("/library/new/", secure=True).content.decode()
+    assert 'data-show-if="form=rack"' in page and "Add or rename entries" in page
+    labels = [line for line in page.splitlines() if '<option value="' in line and "Patch" in line]
+    assert labels  # built in names are capitalised
+    base = {"vendor_name": "Acme", "category": "outlet", "shared": "", "mounting": "wall"}
+    floor = admin_client.post(
+        "/library/new/", {**base, "model": "Outlet", "form": "floor", "u_height": ""}, secure=True
+    )
+    assert floor.status_code == 302
+    rack = admin_client.post(
+        "/library/new/",
+        {**base, "model": "Rack thing", "form": "rack", "u_height": ""},
+        secure=True,
+    )
+    assert "Rack mounted devices need a height." in rack.content.decode()
+    with rls.system_context():
+        outlet = DeviceType.objects.get(model="Outlet")
+    assert (outlet.u_height, outlet.full_depth, outlet.mounting) == (0, False, "wall")

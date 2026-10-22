@@ -16,7 +16,6 @@ from patchmanager.accounts.models import Group
 from patchmanager.accounts.services import ServiceError
 from patchmanager.audit import services as audit
 from patchmanager.core import crypto, ratelimit
-from patchmanager.instance.gates import feature_required
 from patchmanager.sso import oidc, saml, services
 from patchmanager.sso.models import IdentityProvider
 
@@ -60,7 +59,6 @@ def _failed(request: HttpRequest, provider: IdentityProvider, exc: ServiceError)
     return redirect("accounts:login")
 
 
-@feature_required("sso")
 @require_GET
 def login(request: HttpRequest, slug: str) -> HttpResponse:
     """Send the browser to the identity provider."""
@@ -80,7 +78,6 @@ def login(request: HttpRequest, slug: str) -> HttpResponse:
     raise Http404  # LDAP signs in through the password form
 
 
-@feature_required("sso")
 @require_GET
 def oidc_callback(request: HttpRequest, slug: str) -> HttpResponse:
     """The provider sends the browser back with a code."""
@@ -94,7 +91,6 @@ def oidc_callback(request: HttpRequest, slug: str) -> HttpResponse:
     return _done(request, provider, assertion)
 
 
-@feature_required("sso")
 @csrf_exempt  # the IdP posts cross site; the signed response and InResponseTo protect the flow
 @require_POST
 def saml_acs(request: HttpRequest, slug: str) -> HttpResponse:
@@ -109,7 +105,6 @@ def saml_acs(request: HttpRequest, slug: str) -> HttpResponse:
     return _done(request, provider, assertion)
 
 
-@feature_required("sso")
 @require_GET
 def saml_metadata(request: HttpRequest, slug: str) -> HttpResponse:
     """Service provider metadata to import at the IdP."""
@@ -122,7 +117,6 @@ def saml_metadata(request: HttpRequest, slug: str) -> HttpResponse:
         raise Http404 from exc
 
 
-@feature_required("sso")
 @require_GET
 def saml_sls(request: HttpRequest, slug: str) -> HttpResponse:
     """The IdP confirms a single logout: the local session already ended."""
@@ -353,14 +347,12 @@ def _save(request: HttpRequest, provider: IdentityProvider, form: ProviderForm) 
     )
 
 
-@feature_required("sso")
 @permission_required("system.sso.manage")
 def provider_list(request: HttpRequest) -> HttpResponse:
     """Identity providers."""
     return render(request, "sso/providers.html", {"providers": IdentityProvider.objects.all()})
 
 
-@feature_required("sso")
 @permission_required("system.sso.manage")
 @require_http_methods(["GET", "POST"])
 def provider_edit(request: HttpRequest, pk: str | None = None) -> HttpResponse:
@@ -392,7 +384,6 @@ def provider_edit(request: HttpRequest, pk: str | None = None) -> HttpResponse:
     return render(request, "sso/provider.html", {"form": form, "provider": provider, "urls": urls})
 
 
-@feature_required("sso")
 @permission_required("system.sso.manage")
 @require_POST
 def provider_delete(request: HttpRequest, pk: str) -> HttpResponse:

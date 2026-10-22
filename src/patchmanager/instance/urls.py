@@ -4,7 +4,6 @@ from patchmanager.instance import views
 
 app_name = "instance"
 urlpatterns = [
-    path("manage/edition/", views.edition, name="edition"),
     path("manage/branding/", views.branding, name="branding"),
     path("branding.css", views.branding_css, name="css"),
     path("branding/logo.png", views.logo, name="logo"),

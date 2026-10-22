@@ -1,8 +1,10 @@
 """Map, site list and one generic detail page per level of the location tree."""
 
+import json
 from dataclasses import dataclass
 from typing import Any
 
+from django import forms
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
@@ -19,6 +21,7 @@ from django.views.decorators.http import require_http_methods
 from patchmanager.accounts import policy
 from patchmanager.accounts.models import User
 from patchmanager.accounts.services import ServiceError
+from patchmanager.core import lists
 from patchmanager.core.hierarchy import HierarchyNode
 from patchmanager.dcim.models import Rack
 from patchmanager.locations import services
@@ -30,7 +33,7 @@ from patchmanager.locations.forms import (
     RoomForm,
     SiteForm,
 )
-from patchmanager.locations.models import Building, Floor, Room, Site
+from patchmanager.locations.models import Building, Floor, Room, RoomSurvey, Site
 from patchmanager.tenancy.models import Tenant
 
 
@@ -43,13 +46,25 @@ class Level:
     child_model: type[HierarchyNode] | None
     child_form: type[ModelForm] | None  # type: ignore[type-arg]
     child_label: Any
+    new_child: Any = None  # title of the page that creates a child
 
 
 LEVELS: dict[str, Level] = {
-    "site": Level(Site, SiteForm, Building, BuildingForm, gettext_lazy("Buildings")),
-    "building": Level(Building, BuildingForm, Floor, FloorForm, gettext_lazy("Floors")),
-    "floor": Level(Floor, FloorForm, Room, RoomForm, gettext_lazy("Rooms")),
-    "room": Level(Room, RoomForm, Rack, RackForm, gettext_lazy("Racks")),
+    "site": Level(
+        Site,
+        SiteForm,
+        Building,
+        BuildingForm,
+        gettext_lazy("Buildings"),
+        gettext_lazy("New building"),
+    ),
+    "building": Level(
+        Building, BuildingForm, Floor, FloorForm, gettext_lazy("Floors"), gettext_lazy("New floor")
+    ),
+    "floor": Level(
+        Floor, FloorForm, Room, RoomForm, gettext_lazy("Rooms"), gettext_lazy("New room")
+    ),
+    "room": Level(Room, RoomForm, Rack, RackForm, gettext_lazy("Racks"), gettext_lazy("New rack")),
 }
 
 
@@ -145,6 +160,115 @@ def _tree(request: HttpRequest, site: Site) -> list[Building]:
 
 @login_required
 @require_http_methods(["GET", "POST"])
+def room_plan(request: HttpRequest, pk: str) -> HttpResponse:
+    """Page that sets a room's own planned numbers per device category."""
+    from patchmanager.library.models import DeviceCategory
+    from patchmanager.locations import rooms
+
+    room: Any = get_object_or_404(Room.objects.select_related("kind"), pk=pk)
+    actor = _actor(request)
+    if not policy.has_perm(actor, "locations.room.view", room):
+        raise Http404
+    if not policy.has_perm(actor, "locations.room.change", room):
+        raise PermissionDenied
+    defaults = {n.category_id: n.count for n in room.kind.needs.all()}
+    own = {n.category_id: n.count for n in room.needs.all()}
+    categories = DeviceCategory.by_label(DeviceCategory.objects.all())
+    errors = []
+    if request.method == "POST":
+        counts: dict[str, int | None] = {}
+        for c in categories:
+            raw = request.POST.get(f"need-{c.key}", "").strip()
+            if not raw:
+                counts[c.key] = None
+            elif raw.isdecimal() and int(raw) <= 999:
+                counts[c.key] = int(raw)
+            else:
+                errors.append(c.label)
+        if not errors:
+            rooms.set_needs(request, actor, room, counts)
+            messages.success(request, _("Saved."))
+            return redirect(node_url(room))
+    return render(
+        request,
+        "locations/room_plan.html",
+        {
+            "room": room,
+            "rows": [(c, own.get(c.key), defaults.get(c.key)) for c in categories],
+            "errors": errors,
+            "breadcrumbs": [(a, node_url(a)) for a in [*room.ancestors(), room]],
+        },
+    )
+
+
+@login_required
+@require_http_methods(["GET", "POST"])
+def node_create(request: HttpRequest, level: str, pk: str) -> HttpResponse:
+    """Page that creates a child of a node (building, floor, room or rack)."""
+    config = LEVELS.get(level)
+    if config is None or config.child_model is None or config.child_form is None:
+        raise Http404
+    node: Any = get_object_or_404(config.model, pk=pk)
+    actor = _actor(request)
+    if not policy.has_perm(actor, f"{node.policy_object_type}.view", node):
+        raise Http404
+    if not policy.has_perm(actor, f"{config.child_model.policy_object_type}.add", node):
+        raise PermissionDenied
+    form = config.child_form(request.POST or None)
+    lists.link_field(form, "kind", actor, "room-types")
+    outline, outline_error = _drawn_outline(node, request.POST or request.GET)
+    if outline_error:
+        form.add_error(None, outline_error)
+    if request.method == "POST" and form.is_valid():
+        try:
+            child = services.create(
+                request,
+                actor,
+                config.child_model,
+                parent=node,
+                **form.cleaned_data,
+                **({"outline": outline} if outline else {}),
+            )
+        except ServiceError as exc:
+            form.add_error(None, str(exc))
+        else:
+            messages.success(request, _("Created."))
+            if outline:
+                return redirect("floorplans:editor", node.pk)
+            return redirect(node_url(child))
+    return render(
+        request,
+        "core/create.html",
+        {
+            "title": config.new_child,
+            "form": form,
+            "back_url": node_url(node),
+            "breadcrumbs": [(a, node_url(a)) for a in [*node.ancestors(), node]],
+            "hidden": {"outline": json.dumps(outline)} if outline else {},
+            "intro": _("The room gets the outline you drew on the floor plan.") if outline else "",
+        },
+    )
+
+
+def _drawn_outline(node: Any, params: Any) -> tuple[list[list[float]] | None, str]:
+    """Outline of a new room drawn on the floor plan (``outline`` as JSON), checked."""
+    raw = params.get("outline")
+    if not raw or not isinstance(node, Floor):
+        return None, ""
+    from patchmanager.floorplans.models import FloorPlan
+    from patchmanager.floorplans.services import clean_outline
+
+    plan = FloorPlan.objects.filter(floor=node).first()
+    try:
+        if plan is None or len(raw) > 20_000:
+            raise ServiceError(_("Invalid coordinates."))
+        return clean_outline(plan, json.loads(raw)), ""
+    except (ValueError, ServiceError) as exc:
+        return None, str(exc) if isinstance(exc, ServiceError) else _("Invalid coordinates.")
+
+
+@login_required
+@require_http_methods(["GET", "POST"])
 def node_detail(request: HttpRequest, level: str, pk: str) -> HttpResponse:
     """Show a node with its children; edit it, add children, delete it."""
     if level not in LEVELS:
@@ -160,9 +284,7 @@ def node_detail(request: HttpRequest, level: str, pk: str) -> HttpResponse:
     can_add = bool(child_type) and policy.has_perm(actor, f"{child_type}.add", node)
     action = request.POST.get("action")
     form = config.form(request.POST if action == "edit" else None, instance=node)
-    child_form = (
-        config.child_form(request.POST if action == "add" else None) if config.child_form else None
-    )
+    lists.link_field(form, "kind", actor, "room-types")
 
     if request.method == "POST":
         try:
@@ -170,13 +292,6 @@ def node_detail(request: HttpRequest, level: str, pk: str) -> HttpResponse:
                 services.update(request, actor, node, **form.cleaned_data)
                 messages.success(request, _("Saved."))
                 return redirect(node_url(node))
-            if action == "add" and child_form is not None and child_form.is_valid():
-                assert config.child_model is not None  # noqa: S101  # nosec B101
-                child = services.create(
-                    request, actor, config.child_model, parent=node, **child_form.cleaned_data
-                )
-                messages.success(request, _("Created."))
-                return redirect(node_url(child))
             if action == "delete":
                 parent = node.parent
                 services.delete(request, actor, node)
@@ -184,9 +299,9 @@ def node_detail(request: HttpRequest, level: str, pk: str) -> HttpResponse:
                 return redirect(node_url(parent) if parent else reverse("locations:index"))
         except ServiceError as exc:
             messages.error(request, str(exc))
-            if action not in ("edit", "add"):
+            if action != "edit":
                 return redirect(node_url(node))
-            (form if action == "edit" else child_form).add_error(None, str(exc))  # type: ignore[union-attr]
+            form.add_error(None, str(exc))
 
     children: Any = []
     if config.child_model is not None:
@@ -197,7 +312,7 @@ def node_detail(request: HttpRequest, level: str, pk: str) -> HttpResponse:
         "level": level,
         "node": node,
         "form": form,
-        "child_form": child_form,
+        "new_child": config.new_child,
         "children": children,
         "child_label": config.child_label,
         "can_change": can_change,
@@ -227,6 +342,11 @@ def node_detail(request: HttpRequest, level: str, pk: str) -> HttpResponse:
             request, Device, room=node, rack__isnull=True
         ).select_related("device_type__vendor")
         context["can_add_device"] = policy.has_perm(actor, "dcim.device.add", node)
+        from patchmanager.locations import rooms
+
+        context["plan"] = rooms.plan(actor, node)
+        context["surveys"] = node.surveys.all()[:10]
+        context["outlets"] = rooms.cabling(actor, node)
     return render(request, "locations/node.html", context)
 
 
@@ -254,3 +374,111 @@ def site_move(request: HttpRequest, pk: str) -> HttpResponse:
                 messages.success(request, _("Site moved."))
                 return redirect(node_url(Site.objects.get(pk=site.pk)))
     return render(request, "locations/site_move.html", {"site": site, "form": form})
+
+
+class SurveyForm(forms.ModelForm):  # type: ignore[type-arg]
+    """When, by whom, and what was noticed."""
+
+    class Meta:
+        model = RoomSurvey
+        fields = ["surveyed_on", "surveyor", "status", "notes"]
+        widgets = {
+            "surveyed_on": forms.DateInput(attrs={"type": "date"}),
+            "notes": forms.Textarea(attrs={"rows": 4}),
+        }
+
+
+def _survey_counts(
+    request: HttpRequest, keys: list[str]
+) -> tuple[dict[str, int | None], list[str]]:
+    counts: dict[str, int | None] = {}
+    errors = []
+    for key in keys:
+        raw = request.POST.get(f"found-{key}", "").strip()
+        if not raw:
+            counts[key] = None
+        elif raw.isdecimal() and int(raw) <= 999:
+            counts[key] = int(raw)
+        else:
+            errors.append(key)
+    return counts, errors
+
+
+def _survey_page(
+    request: HttpRequest, room: Any, survey: RoomSurvey, *, created: bool
+) -> HttpResponse:
+    from patchmanager.library.models import DeviceCategory
+    from patchmanager.locations import rooms
+
+    actor = _actor(request)
+    can_change = policy.has_perm(actor, "locations.room.change", room)
+    form = SurveyForm(request.POST or None, instance=survey)
+    categories = DeviceCategory.by_label(DeviceCategory.objects.all())
+    errors: list[str] = []
+    if request.method == "POST":
+        if not can_change:
+            raise PermissionDenied
+        if request.POST.get("action") == "delete" and not created:
+            rooms.delete_survey(request, actor, survey)
+            messages.success(request, _("Deleted."))
+            return redirect(node_url(room))
+        counts, errors = _survey_counts(request, [c.key for c in categories])
+        if form.is_valid() and not errors:
+            saved = rooms.save_survey(request, actor, form.save(commit=False), counts)
+            messages.success(request, _("Survey saved."))
+            return redirect("locations:survey", saved.pk)
+    current = {r.category.key: r for r in rooms.plan(actor, room)}
+    rows: list[dict[str, Any]] = [
+        {
+            "category": c,
+            "planned": current[c.key].planned if c.key in current else None,
+            "documented": current[c.key].installed if c.key in current else 0,
+            "found": survey.counts.get(c.key) if survey.pk else None,
+        }
+        for c in categories
+    ]
+    rows.sort(key=lambda r: r["planned"] is None and not r["documented"])  # stable: by name
+    return render(
+        request,
+        "locations/survey.html",
+        {
+            "room": room,
+            "survey": survey,
+            "form": form,
+            "rows": rows,
+            "errors": errors,
+            "created": created,
+            "can_change": can_change,
+            "breadcrumbs": [(a, node_url(a)) for a in [*room.ancestors(), room]],
+        },
+    )
+
+
+@login_required
+@require_http_methods(["GET", "POST"])
+def survey_create(request: HttpRequest, pk: str) -> HttpResponse:
+    """Page that records a survey of a room."""
+    room: Any = get_object_or_404(Room.objects.select_related("kind"), pk=pk)
+    if not policy.has_perm(request.user, "locations.room.view", room):
+        raise Http404
+    if not policy.has_perm(request.user, "locations.room.change", room):
+        raise PermissionDenied
+    from django.utils import timezone
+
+    user = _actor(request)
+    survey = RoomSurvey(
+        room=room,
+        surveyed_on=timezone.localdate(),
+        surveyor=user.display_name or user.email,
+    )
+    return _survey_page(request, room, survey, created=True)
+
+
+@login_required
+@require_http_methods(["GET", "POST"])
+def survey_detail(request: HttpRequest, pk: str) -> HttpResponse:
+    """A survey: found against documented and planned, notes and photos; change or delete."""
+    survey = get_object_or_404(RoomSurvey.objects.select_related("room__kind"), pk=pk)
+    if not policy.has_perm(request.user, "locations.room.view", survey.room):
+        raise Http404
+    return _survey_page(request, survey.room, survey, created=False)

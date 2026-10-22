@@ -28,6 +28,7 @@ nav:
       - Administration: guides/admin.md
       - User guide: guides/user.md
       - API: guides/api.md
+      - Performance: guides/performance.md
   - Plan:
       - Architecture: plan/architecture.md
       - Data model: plan/data-model.md
@@ -36,6 +37,8 @@ nav:
   - Stack: STACK.md
   - Security:
       - Threat model: security/threat-model.md
+      - ASVS L2 self-audit: security/asvs-l2.md
+      - Pen-test checklist: security/pentest-checklist.md
   - Decisions:
       - adr/0001-record-architecture-decisions.md
       - adr/0002-django-and-drf.md
@@ -59,3 +62,9 @@ nav:
       - adr/0020-single-sign-on.md
       - adr/0021-scim-provisioning.md
       - adr/0022-editions-and-admin-polish.md
+      - adr/0023-no-editions.md
+      - adr/0024-personal-data.md
+      - adr/0025-device-type-catalog.md
+      - adr/0026-ipam.md
+      - adr/0027-configuration-storage.md
+      - adr/0028-rooms-lists-and-surveys.md

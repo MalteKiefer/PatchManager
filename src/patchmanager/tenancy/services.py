@@ -17,9 +17,6 @@ FIELDS = ("slug", "name", "address", "contact_name", "contact_email", "requires_
 def create_tenant(request: HttpRequest, actor: User, **values: object) -> Tenant:
     """Create a tenant."""
     require(actor, "tenancy.tenant.add")
-    from patchmanager.instance import editions
-
-    editions.check_limit("tenants")
     tenant = Tenant(**{k: v for k, v in values.items() if k in FIELDS})
     tenant.full_clean()
     try:

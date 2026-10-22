@@ -1,10 +1,10 @@
 {% extends "base.html" %}{% load i18n %}
 {% block title %}{% translate "API tokens" %}{% endblock %}
 {% block content %}
-<h1 class="mb-2">{% translate "API tokens" %}</h1>
+<div class="mb-2 flex flex-wrap items-center gap-3"><h1 class="mr-auto">{% translate "API tokens" %}</h1><a class="btn-primary" href="{% url 'api-ui:token-create' %}">{% translate "New token" %}</a></div>
 <p class="mb-6 text-sm text-slate-500">{% blocktranslate %}Tokens act with your permissions. Send them as <code>Authorization: Bearer …</code>. The API is described at /api/schema/.{% endblocktranslate %}</p>
 {% include "api/_secret.html" %}
-<div class="grid gap-6 lg:grid-cols-[1fr_22rem]">
+<div>
   <div class="card overflow-x-auto p-0"><table class="table">
     <thead><tr><th>{% translate "Name" %}</th><th>{% translate "Access" %}</th><th>{% translate "Tenant" %}</th><th>{% translate "Expires" %}</th><th>{% translate "Last used" %}</th><th></th></tr></thead>
     <tbody>{% for t in tokens %}<tr>
@@ -15,10 +15,5 @@
       <td>{% if not t.revoked_at %}<form method="post" action="{% url 'api-ui:token-revoke' t.pk %}" data-confirm="{% translate 'Revoke this token?' %}">{% csrf_token %}<button class="btn-secondary py-1">{% translate "Revoke" %}</button></form>{% endif %}</td>
     </tr>{% empty %}<tr><td colspan="6" class="text-slate-500">{% translate "No tokens yet." %}</td></tr>{% endfor %}</tbody>
   </table></div>
-  <form method="post" class="card">{% csrf_token %}
-    <h2 class="mb-3">{% translate "New token" %}</h2>
-    {% include "core/_form.html" with form=form %}
-    <button class="btn-primary">{% translate "Create token" %}</button>
-  </form>
 </div>
 {% endblock %}

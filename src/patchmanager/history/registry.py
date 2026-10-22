@@ -34,5 +34,8 @@ TRACKED = {
         Tracked("cabling.cable", "label", "self", "cabling.cable"),
         Tracked("networks.vlan", "name", "site", "networks.vlan"),
         Tracked("networks.wlan", "ssid", "tenant", "networks.wlan"),
+        Tracked("ipam.vrf", "name", "tenant", "ipam.vrf"),
+        Tracked("ipam.prefix", "text", "self", "ipam.prefix"),
+        Tracked("ipam.ipaddress", "host", "self", "ipam.ipaddress"),
     )
 }

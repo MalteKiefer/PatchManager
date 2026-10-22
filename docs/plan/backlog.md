@@ -81,7 +81,8 @@ become GitHub issues under the phase milestone when the phase starts.
 
 ## Phase 8: Editions and polish (v0.9.0)
 
-* Edition presets as feature flags and limits (Free, SMB, Integrator, Enterprise)
+* Edition presets as feature flags and limits (Free, SMB, Integrator, Enterprise);
+  removed in Phase 9, every feature is free (ADR 0023)
 * i18n EN and DE complete, responsive layouts, dark mode, WCAG 2.2 AA review
 * Admin area polish: system settings, branding, webhooks, jobs, health and version
 
@@ -90,5 +91,6 @@ become GitHub issues under the phase milestone when the phase starts.
 * ASVS 5 Level 2 self audit, pen test checklist
 * Performance tests: 500 racks, 50 000 ports
 * Backup encryption and off site shipping, restore drill in CI, PITR guide
-* GDPR export and anonymisation workflow
+* GDPR export and anonymisation workflow (ADR 0024)
+* Remove editions (ADR 0023)
 * Final docs, production compose review, v1.0.0

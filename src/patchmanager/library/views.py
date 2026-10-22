@@ -9,6 +9,7 @@ from django.core.exceptions import PermissionDenied
 from django.db.models import Count, Q
 from django.http import Http404, HttpRequest, HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
+from django.urls import reverse
 from django.utils.translation import gettext as _
 from django.utils.translation import gettext_lazy
 from django.views.decorators.http import require_http_methods, require_POST
@@ -16,9 +17,10 @@ from django.views.decorators.http import require_http_methods, require_POST
 from patchmanager.accounts import policy
 from patchmanager.accounts.models import User
 from patchmanager.accounts.services import ServiceError
-from patchmanager.core.utils import parse_uuid
-from patchmanager.library import interchange, services
-from patchmanager.library.models import DeviceType, PortTemplate
+from patchmanager.core import lists
+from patchmanager.core.utils import label_choices, parse_uuid
+from patchmanager.library import catalog, interchange, services
+from patchmanager.library.models import CatalogType, DeviceType, PortTemplate
 from patchmanager.metadata.models import Attachment
 
 TYPE_FIELDS = [
@@ -27,6 +29,11 @@ TYPE_FIELDS = [
     "category",
     "u_height",
     "full_depth",
+    "mounting",
+    "airflow",
+    "power_supplies",
+    "max_power_w",
+    "weight_kg",
     "name_pattern",
     "part_number",
     "description",
@@ -42,7 +49,29 @@ class DeviceTypeForm(forms.ModelForm):  # type: ignore[type-arg]
     class Meta:
         model = DeviceType
         fields = TYPE_FIELDS
-        widgets = {"description": forms.Textarea(attrs={"rows": 2})}
+        widgets = {
+            "description": forms.Textarea(attrs={"rows": 2}),
+            # Height and depth only matter in a rack (app.js hides them otherwise).
+            "u_height": forms.NumberInput(attrs={"data-show-if": "form=rack"}),
+            "full_depth": forms.CheckboxInput(attrs={"data-show-if": "form=rack"}),
+        }
+
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
+        """Categories sorted by name; the height is optional for devices outside racks."""
+        super().__init__(*args, **kwargs)
+        label_choices(self.fields["category"])
+        self.fields["u_height"].required = False
+
+    def clean(self) -> dict[str, Any]:
+        """Devices outside racks take no rack units; rack devices need at least one."""
+        data = super().clean() or {}
+        if data.get("form") == DeviceType.Form.RACK:
+            if not data.get("u_height"):
+                self.add_error("u_height", gettext_lazy("Rack mounted devices need a height."))
+        else:
+            data["u_height"] = 0
+            data["full_depth"] = False
+        return data
 
 
 class PortTemplateForm(forms.ModelForm):  # type: ignore[type-arg]
@@ -151,6 +180,7 @@ def type_list(request: HttpRequest) -> HttpResponse:
 def type_create(request: HttpRequest) -> HttpResponse:
     """New (custom) device type."""
     form = DeviceTypeForm(request.POST or None, initial={"form": request.GET.get("form", "rack")})
+    lists.link_field(form, "category", request.user, "categories")
     if request.method == "POST" and form.is_valid():
         data = {k: form.cleaned_data[k] for k in TYPE_FIELDS}
         try:
@@ -174,6 +204,34 @@ def type_create(request: HttpRequest) -> HttpResponse:
 
 @login_required
 @require_http_methods(["GET", "POST"])
+def type_ports_create(request: HttpRequest, pk: str) -> HttpResponse:
+    """Page that adds ports to a device type."""
+    device_type = get_object_or_404(visible_types(request), pk=pk)
+    actor = _actor(request)
+    if not policy.has_perm(actor, "library.devicetype.change", device_type):
+        raise PermissionDenied
+    form = PortTemplateForm(request.POST or None, device_type=device_type)
+    if request.method == "POST" and form.is_valid():
+        try:
+            services.add_port_template(request, actor, device_type, **form.cleaned_data)
+        except ServiceError as exc:
+            form.add_error(None, str(exc))
+        else:
+            return redirect("library:type", pk)
+    return render(
+        request,
+        "core/create.html",
+        {
+            "title": _("Add ports to %(type)s") % {"type": device_type},
+            "form": form,
+            "submit": _("Add"),
+            "back_url": reverse("library:type", args=[pk]),
+        },
+    )
+
+
+@login_required
+@require_http_methods(["GET", "POST"])
 def type_detail(request: HttpRequest, pk: str) -> HttpResponse:
     """Edit a device type, its ports and images."""
     device_type = get_object_or_404(visible_types(request), pk=pk)
@@ -188,10 +246,8 @@ def type_detail(request: HttpRequest, pk: str) -> HttpResponse:
         instance=device_type,
         initial={"vendor_name": device_type.vendor.name, "shared": device_type.tenant_id is None},
     )
-    port_form = PortTemplateForm(
-        request.POST if action == "ports" else None, device_type=device_type
-    )
     del form.fields["shared"]  # scope is fixed after creation
+    lists.link_field(form, "category", request.user, "categories")
     images_form = ImagesForm(
         request.POST if action == "images" else None,
         images=images,
@@ -211,9 +267,6 @@ def type_detail(request: HttpRequest, pk: str) -> HttpResponse:
                     **{k: form.cleaned_data[k] for k in TYPE_FIELDS},
                 )
                 messages.success(request, _("Saved."))
-                return redirect("library:type", pk)
-            if action == "ports" and port_form.is_valid():
-                services.add_port_template(request, actor, device_type, **port_form.cleaned_data)
                 return redirect("library:type", pk)
             if action == "remove_ports":
                 template = get_object_or_404(
@@ -249,7 +302,6 @@ def type_detail(request: HttpRequest, pk: str) -> HttpResponse:
         {
             "device_type": device_type,
             "form": form,
-            "port_form": port_form,
             "images_form": images_form,
             "templates": device_type.port_templates.select_related("rear_template"),
             "can_change": can_change,
@@ -295,3 +347,63 @@ def type_import(request: HttpRequest) -> HttpResponse:
         messages.success(request, _("Device type imported."))
         return redirect("library:type", device_type.pk)
     return redirect("library:types")
+
+
+class AdoptForm(forms.Form):
+    """Where a catalog type goes."""
+
+    shared = forms.BooleanField(label=gettext_lazy("Shared with all tenants"), required=False)
+
+
+@login_required
+def catalog_search(request: HttpRequest) -> HttpResponse:
+    """Search the bundled device type catalog."""
+    query = request.GET.get("q", "").strip()[:100]
+    return render(
+        request,
+        "library/catalog.html",
+        {
+            "q": query,
+            "results": catalog.search(query) if len(query) >= 2 else [],
+            "total": CatalogType.objects.count(),
+            "source": CatalogType.objects.values_list("commit", flat=True).first() or "",
+        },
+    )
+
+
+@login_required
+@require_http_methods(["GET", "POST"])
+def catalog_adopt(request: HttpRequest, pk: int) -> HttpResponse:
+    """Preview a catalog type and copy it with its ports into the library."""
+    entry = get_object_or_404(CatalogType, pk=pk)
+    form = AdoptForm(request.POST or None)
+    actor = _actor(request)
+    tenant = getattr(request, "tenant", None)
+    can_add = policy.has_perm(actor, "library.devicetype.add") or (
+        tenant is not None and policy.has_perm(actor, "library.devicetype.add", tenant)
+    )
+    if request.method == "POST" and form.is_valid():
+        try:  # the service checks the permission for the chosen scope
+            device_type = catalog.adopt(
+                request, actor, entry, tenant=_scope(request, form.cleaned_data["shared"])
+            )
+        except ServiceError as exc:
+            form.add_error(None, str(exc))
+        else:
+            messages.success(request, _("Added to the library with all its ports."))
+            return redirect("library:type", device_type.pk)
+    sections = [
+        (label, entry.spec.get(key) or [])
+        for key, label in (
+            ("interfaces", _("Network ports")),
+            ("front-ports", _("Front ports")),
+            ("rear-ports", _("Rear ports")),
+            ("console-ports", _("Console ports")),
+            ("power-ports", _("Power inlets")),
+        )
+    ]
+    return render(
+        request,
+        "library/catalog_entry.html",
+        {"entry": entry, "form": form, "sections": sections, "can_add": can_add},
+    )

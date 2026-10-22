@@ -1,0 +1,19 @@
+{% extends "base.html" %}{% load i18n %}
+{% block title %}{% translate "Prefixes" %}{% endblock %}
+{% block content %}
+<div class="mb-4 flex flex-wrap items-center gap-3"><h1 class="mr-auto">{% translate "IP networks" %}{% if current_tenant %} · {{ current_tenant.name }}{% endif %}</h1>
+  {% if can_add %}<a class="btn-primary" href="{% url 'ipam:prefix-create' %}">{% translate "New prefix" %}</a>{% endif %}</div>
+{% include "ipam/_tabs.html" with tab="prefixes" %}
+<div class="card overflow-x-auto p-0"><table class="table">
+  <thead><tr><th>{% translate "Prefix" %}</th><th>VRF</th><th>{% translate "Status" %}</th><th>{% translate "Site" %}</th><th>VLAN</th><th>{% translate "In use" %}</th><th>{% translate "Description" %}</th></tr></thead>
+  <tbody>{% for row in rows %}{% with p=row.prefix %}<tr>
+    <td><span class="prefix-indent" data-depth="{{ row.depth }}"></span><a href="{% url 'ipam:prefix' p.pk %}" class="font-medium tabular-nums">{{ p.prefix }}</a></td>
+    <td>{{ p.vrf|default:_("global") }}</td>
+    <td>{% if p.status == "active" %}<span class="badge-ok">{{ p.get_status_display }}</span>{% else %}<span class="badge-muted">{{ p.get_status_display }}</span>{% endif %}</td>
+    <td>{{ p.site.name|default:"" }}</td>
+    <td>{% if p.vlan %}<a href="{% url 'networks:vlan' p.vlan.pk %}">{{ p.vlan.vid }}</a>{% endif %}</td>
+    <td><span class="flex items-center gap-2 text-sm tabular-nums"><meter class="h-2 w-24" min="0" max="100" low="70" high="90" optimum="20" value="{{ row.usage.percent }}" aria-label="{% translate 'In use' %}"></meter>{{ row.usage.percent }} %</span></td>
+    <td class="text-sm text-slate-500">{{ p.description }}</td>
+  </tr>{% endwith %}{% empty %}<tr><td colspan="7" class="text-slate-500">{% translate "No prefixes yet. Start with the networks of your sites, for example 10.0.0.0/16." %}</td></tr>{% endfor %}</tbody>
+</table></div>
+{% endblock %}

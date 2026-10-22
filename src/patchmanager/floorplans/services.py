@@ -117,6 +117,16 @@ def set_scale(
     return plan
 
 
+def clean_outline(plan: FloorPlan, points: Any) -> list[list[float]]:
+    """A polygon of 3 to MAX_POINTS points inside the plan, not too small to see."""
+    if not isinstance(points, list) or not 3 <= len(points) <= MAX_POINTS:
+        raise ServiceError(_("An outline needs 3 to %(max)s points.") % {"max": MAX_POINTS})
+    polygon = [list(_point(plan, p)) for p in points]
+    if geometry.area(polygon) < 25:
+        raise ServiceError(_("The outline is too small."))
+    return polygon
+
+
 def set_outline(
     request: HttpRequest, actor: User, plan: FloorPlan, room: Room, points: Any
 ) -> Room:
@@ -124,11 +134,7 @@ def set_outline(
     require(actor, "locations.room.change", room)
     if room.floor_id != plan.floor_id:
         raise ServiceError(_("The room is not on this floor."))
-    if not isinstance(points, list) or (points and not 3 <= len(points) <= MAX_POINTS):
-        raise ServiceError(_("An outline needs 3 to %(max)s points.") % {"max": MAX_POINTS})
-    polygon = [list(_point(plan, p)) for p in points]
-    if polygon and geometry.area(polygon) < 25:
-        raise ServiceError(_("The outline is too small."))
+    polygon = clean_outline(plan, points) if points != [] else []
     room.outline = polygon
     room.save(update_fields=["outline", "updated_at"])
     audit.record(

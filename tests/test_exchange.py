@@ -135,7 +135,7 @@ def test_import_locations_racks_devices_vlans_cables(kit, super_admin) -> None:
         assert run("locations", loc) == [("created", "")]
         assert run("locations", loc) == [("unchanged", "")]
         room = Room.objects.get(name="Lab")
-        assert (room.kind, room.floor.level) == ("office", 2)
+        assert (room.kind_id, room.floor.level) == ("office", 2)
 
         place = {"site": "hq", "building": "B2", "floor": "F1", "room": "lab"}
         assert run("racks", [{**place, "name": "L1", "u_height": "24.0", "status": "planned"}]) == [
@@ -268,6 +268,16 @@ def test_import_respects_permissions(kit, make_user) -> None:
 def test_exports_match_import_columns_and_scope(kit, super_admin, make_user) -> None:
     with rls.system_context():
         VLAN.objects.create(tenant=kit["tenant"], vid=5, name="Mgmt")
+        from patchmanager.ipam import services as ipam
+
+        ipam.create_prefix(kit["request"], super_admin, kit["tenant"], prefix="10.0.0.0/24")
+        ipam.create_address(
+            kit["request"],
+            super_admin,
+            kit["tenant"],
+            address="10.0.0.2/24",
+            port=Device.objects.get(name="sw1").ports.order_by("order").first(),
+        )
         for kind, table in TABLES.items():
             rows = list(table.export(super_admin, kit["tenant"], None))
             assert rows, kind
@@ -281,7 +291,7 @@ def test_exports_match_import_columns_and_scope(kit, super_admin, make_user) -> 
             == "=HYPERLINK(1)"
         )
         # exported files import again without changes
-        for kind in ("locations", "racks", "devices", "cables"):
+        for kind in ("locations", "racks", "devices", "cables", "prefixes", "addresses"):
             rows = formats.read(
                 formats.write_csv(
                     TABLES[kind].columns, TABLES[kind].export(super_admin, kit["tenant"], None)

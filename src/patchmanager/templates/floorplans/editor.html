@@ -12,13 +12,20 @@
 <div id="plan-text" hidden data-move="{% translate 'Drag racks and devices. Focus one and use the arrow keys for fine moves.' %}"
      data-scale="{% translate 'Click two points whose distance you know.' %}" data-outline="{% translate 'Click the corners of the room, then finish.' %}"
      data-place="{% translate 'Click where the item stands.' %}" data-two-points="{% translate 'Click two points first.' %}"
-     data-failed="{% translate 'The change could not be saved.' %}"></div>
+     data-failed="{% translate 'The change could not be saved.' %}"
+     data-add="{% translate 'Click inside a room where the new device goes.' %}"
+     data-outside="{% translate 'Click inside a drawn room outline.' %}"
+     data-new-device="{% url 'devices:device-create' %}"
+     data-room="{% translate 'Click the corners of the new room, then finish.' %}"
+     data-new-room="{% url 'locations:node-create' 'floor' floor.pk %}" data-new-room-label="{% translate 'New room' %}"></div>
 <div class="grid gap-6 xl:grid-cols-[1fr_20rem]">
   <section class="card overflow-hidden p-0" aria-labelledby="plan-h">
     <h2 id="plan-h" class="sr-only">{% translate "Plan" %}</h2>
     {% if plan %}
     <div class="flex flex-wrap items-center gap-2 border-b border-slate-200 p-3 text-sm dark:border-slate-800" role="toolbar" aria-label="{% translate 'Plan tools' %}">
       <button type="button" class="btn-secondary py-1" data-mode="move" aria-pressed="true">{% translate "Move" %}</button>
+      {% if can_add_room %}<button type="button" class="btn-secondary py-1" data-mode="room" aria-pressed="false">{% translate "Draw new room" %}</button>{% endif %}
+      {% if can_add_device %}<button type="button" class="btn-secondary py-1" data-mode="add" aria-pressed="false">{% translate "Add device here" %}</button>{% endif %}
       {% if can_change %}<button type="button" class="btn-secondary py-1" data-mode="scale" aria-pressed="false">{% translate "Set scale" %}</button>{% endif %}
       <span id="plan-hint" class="ml-2 text-slate-500" aria-live="polite">{% translate "Drag racks and devices. Focus one and use the arrow keys for fine moves." %}</span>
       <span id="plan-status" class="ml-auto text-red-600" role="alert" aria-live="assertive"></span>
@@ -38,7 +45,7 @@
            class="block max-w-none select-none" role="application" aria-label="{% translate 'Floor plan editor' %}"
            data-base="{% url 'floorplans:editor' floor.pk %}" data-width="{{ plan.width_px }}" data-height="{{ plan.height_px }}">
         <image href="{% url 'metadata:download' plan.image_id %}" x="0" y="0" width="{{ plan.width_px }}" height="{{ plan.height_px }}"/>
-        <g id="layer-rooms"></g><g id="layer-items"></g><g id="layer-draft"></g>
+        <g id="layer-rooms"></g><g id="layer-links"></g><g id="layer-items"></g><g id="layer-draft"></g>
       </svg>
     </div>
     {% else %}
@@ -48,6 +55,11 @@
 
   <aside class="space-y-6">
     {% if plan %}
+    <section class="card text-sm" aria-labelledby="legend-h"><h2 id="legend-h" class="mb-2">{% translate "Lines" %}</h2>
+      <p class="flex items-center gap-2"><svg width="34" height="6" aria-hidden="true"><line x1="0" y1="3" x2="34" y2="3" stroke="#2563eb" stroke-width="3"/></svg>{% translate "patch cable" %}</p>
+      <p class="mt-1 flex items-center gap-2"><svg width="34" height="6" aria-hidden="true"><line x1="0" y1="3" x2="34" y2="3" stroke="#ea580c" stroke-width="3" stroke-dasharray="6 4"/></svg>{% translate "permanent link (installed cabling)" %}</p>
+      <p class="mt-2 text-xs text-slate-500">{% translate "Each line ends where the paths of a device end; the number says how many." %}</p>
+    </section>
     <section class="card" aria-labelledby="unplaced-h">
       <h2 id="unplaced-h" class="mb-2">{% translate "Not on the plan" %}</h2>
       <p class="mb-3 text-xs text-slate-500">{% translate "Choose an item, then click on the plan." %}</p>

@@ -11,12 +11,12 @@
       <li><a class="nav-link" href="{% url 'manage:roles' %}" {% if '/manage/roles' in p %}aria-current="page"{% endif %}>{% translate "Roles" %}</a></li>
       <li><a class="nav-link" href="{% url 'manage:permissions' %}" {% if '/manage/permissions' in p %}aria-current="page"{% endif %}>{% translate "Permission matrix" %}</a></li>
       <li><a class="nav-link" href="{% url 'manage:explain' %}" {% if '/manage/explain' in p %}aria-current="page"{% endif %}>{% translate "Explain access" %}</a></li>
-      {% if "sso" in features %}<li><a class="nav-link" href="{% url 'sso:providers' %}" {% if '/manage/sso' in p %}aria-current="page"{% endif %}>{% translate "Single sign on" %}</a></li>{% endif %}
-      {% if "scim" in features %}<li><a class="nav-link" href="{% url 'scim:tokens' %}" {% if '/manage/scim' in p %}aria-current="page"{% endif %}>{% translate "SCIM provisioning" %}</a></li>{% endif %}
-      {% if "webhooks" in features %}<li><a class="nav-link" href="{% url 'integrations:webhooks' %}">{% translate "Webhooks" %}</a></li>{% endif %}
-      {% if "api" in features %}<li><a class="nav-link" href="{% url 'api-ui:clients' %}" {% if '/manage/api-clients' in p %}aria-current="page"{% endif %}>{% translate "API clients" %}</a></li>{% endif %}
+      <li><a class="nav-link" href="{% url 'sso:providers' %}" {% if '/manage/sso' in p %}aria-current="page"{% endif %}>{% translate "Single sign on" %}</a></li>
+      <li><a class="nav-link" href="{% url 'scim:tokens' %}" {% if '/manage/scim' in p %}aria-current="page"{% endif %}>{% translate "SCIM provisioning" %}</a></li>
+      <li><a class="nav-link" href="{% url 'integrations:webhooks' %}">{% translate "Webhooks" %}</a></li>
+      <li><a class="nav-link" href="{% url 'api-ui:clients' %}" {% if '/manage/api-clients' in p %}aria-current="page"{% endif %}>{% translate "API clients" %}</a></li>
       <li><a class="nav-link" href="{% url 'manage:audit' %}" {% if '/manage/audit' in p %}aria-current="page"{% endif %}>{% translate "Audit log" %}</a></li>
-      <li><a class="nav-link" href="{% url 'instance:edition' %}" {% if '/manage/edition' in p %}aria-current="page"{% endif %}>{% translate "Edition and limits" %}</a></li>
+      <li><a class="nav-link" href="{% url 'manage:lists' %}" {% if '/manage/lists' in p %}aria-current="page"{% endif %}>{% translate "Lists" %}</a></li>
       <li><a class="nav-link" href="{% url 'instance:branding' %}" {% if '/manage/branding' in p %}aria-current="page"{% endif %}>{% translate "Branding" %}</a></li>
       <li><a class="nav-link" href="{% url 'manage:system' %}" {% if '/manage/system' in p %}aria-current="page"{% endif %}>{% translate "System" %}</a></li>
     </ul>

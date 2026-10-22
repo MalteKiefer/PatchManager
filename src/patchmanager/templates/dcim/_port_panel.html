@@ -1,0 +1,20 @@
+{% load i18n %}<div class="panel-head">
+  <p class="text-sm text-slate-500">{{ port.device }}</p>
+  <h2>{{ port.name }}</h2>
+</div>
+<dl class="panel-facts">
+  <div><dt>{% translate "Kind" %}</dt><dd>{{ port.get_kind_display }}</dd></div>
+  <div><dt>{% translate "Connector" %}</dt><dd>{{ port.get_connector_display }}{% if port.speed_mbps %}, {{ port.speed_mbps }} Mbit/s{% endif %}</dd></div>
+  {% if port.label %}<div><dt>{% translate "Label" %}</dt><dd>{{ port.label }}</dd></div>{% endif %}
+  <div><dt>{% translate "Cable" %}</dt><dd>{% if cable %}<a href="{% url 'cabling:cable' cable.pk %}"><span class="mr-1 inline-block size-2 rounded-full" data-swatch="{{ cable.colour }}" aria-hidden="true"></span>{{ cable }}</a> <span class="text-slate-500">{{ cable.get_media_display }}{% if cable.length_m %}, {{ cable.length_m|floatformat:"-1" }} m{% endif %}</span>{% else %}{% translate "none" %}{% endif %}</dd></div>
+</dl>
+{% if hops|length > 1 %}
+<h3 class="panel-sub">{% translate "Path" %}</h3>
+<ol class="panel-path">
+  {% for hop, name in hops %}<li{% if hop.pk == port.pk %} aria-current="true"{% endif %}>{% if hop %}<a href="{% url 'devices:port' hop.pk %}">{{ name }}</a>{% else %}<span class="text-slate-500">{% translate "(not visible to you)" %}</span>{% endif %}</li>{% endfor %}
+</ol>
+{% elif cable %}<p class="mt-4 text-sm text-slate-500">{% translate "The path is not shown to you." %}</p>{% endif %}
+<div class="mt-5 flex flex-wrap gap-2">
+  <a class="btn-primary" href="{% url 'devices:port' port.pk %}">{% translate "Open port" %}</a>
+  {% if hops|length > 1 %}<a class="btn-secondary" href="{% url 'cabling:trace' port.pk %}">{% translate "Trace" %}</a>{% endif %}
+</div>

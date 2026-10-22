@@ -43,6 +43,15 @@ $$;
 """
 
 
+# The tables tracked when this migration was written; later apps add their own
+# triggers in their migrations (their tables do not exist yet at this point).
+FROZEN = [
+    t
+    for t in TRACKED.values()
+    if t.label.split(".")[0] in {"locations", "dcim", "cabling", "networks"}
+]
+
+
 def _table(label: str) -> str:
     return label.replace(".", "_")
 
@@ -50,11 +59,9 @@ def _table(label: str) -> str:
 TRIGGERS = "\n".join(
     f"CREATE TRIGGER {_table(t.label)}_history AFTER INSERT OR UPDATE OR DELETE ON {_table(t.label)}"
     f" FOR EACH ROW EXECUTE FUNCTION pm_history('{t.label}', '{t.name_column}', '{t.scope}');"
-    for t in TRACKED.values()
+    for t in FROZEN
 )
-DROP = "\n".join(
-    f"DROP TRIGGER {_table(t.label)}_history ON {_table(t.label)};" for t in TRACKED.values()
-)
+DROP = "\n".join(f"DROP TRIGGER {_table(t.label)}_history ON {_table(t.label)};" for t in FROZEN)
 
 
 class Migration(migrations.Migration):

@@ -12,6 +12,7 @@ from patchmanager.accounts import policy
 from patchmanager.accounts.services import ServiceError
 from patchmanager.cabling.models import Cable
 from patchmanager.dcim.models import Device, Port, Rack
+from patchmanager.ipam.models import IPAddress, Prefix
 from patchmanager.locations.models import Building, Floor, Room, Site
 from patchmanager.metadata import services as metadata
 from patchmanager.metadata.models import Note
@@ -67,7 +68,7 @@ SOURCES = {
             Device,
             "dcim.device.view",
             ("name", "serial", "asset_tag"),
-            related=("room", "rack", "device_type"),
+            related=("room", "rack", "device_type__vendor"),
         ),
         Source(
             "port",
@@ -90,6 +91,22 @@ SOURCES = {
         ),
         Source(
             "wlan", _("WLANs"), WLAN, "networks.wlan.view", ("ssid", "description"), path_field=None
+        ),
+        Source(
+            "prefix",
+            _("Prefixes"),
+            Prefix,
+            "ipam.prefix.view",
+            ("text", "description"),
+            related=("vrf",),
+        ),
+        Source(
+            "ipaddress",
+            _("IP addresses"),
+            IPAddress,
+            "ipam.ipaddress.view",
+            ("host", "dns_name", "description"),
+            related=("vrf", "port__device"),
         ),
     )
 }
@@ -118,12 +135,19 @@ def _matches(source: Source, query: str, tenant: Any) -> QuerySet[Any]:
     return ranked.order_by("-score", "pk")
 
 
-def _context(source: Source, obj: Any) -> str:
-    """Where the object is, in a few words."""
+def _context(source: Source, obj: Any, user: Any = None) -> str:
+    """Where the object is, in a few words (never naming what the user may not view)."""
     if source.kind == "device":
         return " · ".join(str(x) for x in (obj.device_type, obj.room, obj.rack) if x)
     if source.kind == "port":
         return str(obj.device)
+    if source.kind == "ipaddress":
+        device = obj.port.device if obj.port_id else None
+        if device is not None and not policy.has_perm(user, "dcim.device.view", device):
+            device = None
+        return " · ".join(str(x) for x in (obj.dns_name, device) if x)
+    if source.kind == "prefix":
+        return obj.description or (str(obj.vrf) if obj.vrf else "")
     if source.kind in ("building", "floor", "room", "rack", "vlan"):
         parent = getattr(obj, source.related[0])
         return str(parent) if parent else ""
@@ -159,7 +183,7 @@ def search(
             counts[source.kind] = len(visible)
             if not kind or kind == source.kind:
                 results[source.kind] = [
-                    Hit(source.kind, r, _context(source, r)) for r in visible[:limit]
+                    Hit(source.kind, r, _context(source, r, user)) for r in visible[:limit]
                 ]
     notes = _notes(user, tenant, query)
     if notes:

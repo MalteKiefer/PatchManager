@@ -13,5 +13,10 @@
     {% include "core/_form.html" with form=password %}
     <button name="action" value="password" class="btn-primary">{% translate "Change password" %}</button>
   </form>
+  <form method="post" action="{% url 'accounts:data-export' %}" class="card">{% csrf_token %}
+    <h2 class="mb-2">{% translate "Your data" %}</h2>
+    <p class="mb-4 text-sm text-slate-500">{% translate "Download everything PatchManager stores about you: profile, roles, sessions, second factors (without secrets), API tokens, sign in links and your actions in the audit log." %}</p>
+    <button class="btn-secondary">{% translate "Download my data" %}</button>
+  </form>
 </div>
 {% endblock %}

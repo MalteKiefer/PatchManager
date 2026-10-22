@@ -1,5 +1,6 @@
-"""Self service: profile, password, second factors, sessions."""
+"""Self service: profile, password, second factors, sessions, personal data."""
 
+import json
 import logging
 
 from django.contrib import messages
@@ -11,8 +12,10 @@ from django.utils.translation import gettext as _
 from django.views.decorators.http import require_http_methods, require_POST
 
 from patchmanager.accounts.forms import ChangePasswordForm, CodeForm, NameForm, ProfileForm
+from patchmanager.accounts.middleware import IMPERSONATOR
 from patchmanager.accounts.models import TOTPDevice, User
-from patchmanager.accounts.services import ServiceError, auth, mfa, users
+from patchmanager.accounts.services import ServiceError, auth, mfa, privacy, users
+from patchmanager.audit import services as audit
 
 RECOVERY_CODES = "_pm_new_recovery_codes"
 logger = logging.getLogger(__name__)
@@ -198,3 +201,20 @@ def stop_impersonation_view(request: HttpRequest) -> HttpResponse:
     """Return to the own account."""
     users.stop_impersonation(request)
     return redirect("manage:users")
+
+
+@login_required
+@require_POST
+def data_export_view(request: HttpRequest) -> HttpResponse:
+    """Download everything stored about the signed in person (JSON)."""
+    if request.session.get(IMPERSONATOR):
+        messages.error(request, _("Not available while acting as another user."))
+        return redirect("accounts:profile")
+    user = _user(request)
+    data = privacy.export(user)
+    audit.record("accounts.user.data_exported", request=request, obj=user)
+    response = HttpResponse(
+        json.dumps(data, indent=2, ensure_ascii=False), content_type="application/json"
+    )
+    response["Content-Disposition"] = 'attachment; filename="patchmanager-my-data.json"'
+    return response

@@ -72,9 +72,6 @@ BASE_URL = env(
 ).rstrip("/")
 INSTANCE_NAME = env("PATCHMANAGER_INSTANCE_NAME", "PatchManager")
 BRAND_LOGO = env("PATCHMANAGER_BRAND_LOGO", "")  # PNG or JPEG file shown on exported PDFs
-EDITION = env(
-    "PATCHMANAGER_EDITION", ""
-)  # free, smb, integrator, enterprise; empty: chosen in the admin area
 BACKUP_DIR = env(
     "PATCHMANAGER_BACKUP_DIR", ""
 )  # read only mount of the backup volume, for the status page
@@ -98,6 +95,8 @@ INSTALLED_APPS = [
     "patchmanager.library",
     "patchmanager.dcim",
     "patchmanager.networks",
+    "patchmanager.ipam",
+    "patchmanager.configs",
     "patchmanager.cabling",
     "patchmanager.floorplans",
     "patchmanager.history",
@@ -115,6 +114,7 @@ if DJANGO_ADMIN_ENABLED:
     INSTALLED_APPS.insert(0, "django.contrib.admin")
 
 MIDDLEWARE = [
+    "patchmanager.core.middleware.ClientIPMiddleware",
     "patchmanager.core.middleware.RequestIDMiddleware",
     "patchmanager.core.metrics.MetricsMiddleware",
     "django.middleware.security.SecurityMiddleware",
@@ -125,6 +125,7 @@ MIDDLEWARE = [
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
+    "patchmanager.core.middleware.PrivateCacheMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "patchmanager.accounts.middleware.SessionPolicyMiddleware",
     "patchmanager.accounts.middleware.SetupRequiredMiddleware",
@@ -288,6 +289,8 @@ _MAP_ORIGIN = f"{_tiles.scheme}://{_tiles.netloc.replace('{s}', '*')}" if MAP_TI
 # Security headers. TLS terminates at the reverse proxy, which sets
 # X-Forwarded-Proto; only trust it behind that proxy.
 SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+# Proxies whose X-Forwarded-For names the client (same variable gunicorn reads; "*" = any).
+FORWARDED_ALLOW_IPS = env_list("PATCHMANAGER_FORWARDED_ALLOW_IPS", "127.0.0.1")
 SECURE_SSL_REDIRECT = not DEBUG
 SECURE_REDIRECT_EXEMPT = [r"^health/", r"^metrics$"]
 SECURE_HSTS_SECONDS = 0 if DEBUG else 63072000

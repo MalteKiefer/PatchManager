@@ -1,11 +1,13 @@
 """Device pages: create from a type, edit, place, document ports."""
 
+import math
 from typing import Any
 
 from django import forms
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
+from django.db.models import Prefetch
 from django.http import Http404, HttpRequest, HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils.translation import gettext as _
@@ -18,6 +20,7 @@ from patchmanager.accounts.services import PermissionDeniedError, ServiceError
 from patchmanager.core.utils import parse_uuid
 from patchmanager.dcim import devices
 from patchmanager.dcim.models import Device, Port, Rack, RackSpace
+from patchmanager.ipam.models import IPAddress
 from patchmanager.library.models import DeviceType
 from patchmanager.library.views import visible_types
 from patchmanager.locations.models import Room
@@ -187,13 +190,15 @@ def _visible_or_hidden(user: Any, port: Port | None) -> Any:
 
 def neighbours(user: Any, device: Device) -> list[tuple[Port, Any]]:
     """For each cabled port: the far end of its traced path (dependency view)."""
-    from patchmanager.cabling.trace import trace
+    from patchmanager.cabling.trace import trace_many
 
     if not policy.has_perm(user, "cabling.cable.trace", device):
         return []
     result = []
-    for port in device.ports.filter(cable_end__isnull=False):
-        path = trace(port)
+    ports = list(device.ports.filter(cable_end__isnull=False).select_related("device"))
+    paths = trace_many(ports)
+    for port in ports:
+        path = paths[port.pk]
         far = path.ports[-1] if path.ports[0].pk == port.pk else path.ports[0]
         result.append((port, _visible_or_hidden(user, far if far.pk != port.pk else None)))
     return result
@@ -204,6 +209,17 @@ def device_url(device: Device) -> str:
     from django.urls import reverse
 
     return reverse("devices:device", args=[device.pk])
+
+
+def _plan_point(params: Any) -> tuple[float, float] | None:
+    """A position on the floor plan passed along when a device is added from the plan."""
+    try:
+        x, y = float(params.get("plan_x", "")), float(params.get("plan_y", ""))
+    except ValueError:
+        return None
+    if not (math.isfinite(x) and math.isfinite(y)) or x < 0 or y < 0 or max(x, y) > 1e6:
+        return None
+    return round(x, 1), round(y, 1)
 
 
 @login_required
@@ -219,6 +235,7 @@ def device_create(request: HttpRequest) -> HttpResponse:
     if not policy.has_perm(request.user, "dcim.device.add", parent):
         raise PermissionDenied
     initial = {"position": request.GET.get("position")}
+    spot = None if rack else _plan_point(request.POST if request.method == "POST" else request.GET)
     form = NewDeviceForm(
         request.POST or None, types=visible_types(request), rack=rack, initial=initial
     )
@@ -233,6 +250,7 @@ def device_create(request: HttpRequest) -> HttpResponse:
                 rack=rack,
                 position=form.cleaned_data.get("position"),
                 face=form.cleaned_data.get("face") or "front",
+                **({"plan_x": spot[0], "plan_y": spot[1]} if spot else {}),
                 **data,
             )
         except ServiceError as exc:
@@ -241,12 +259,19 @@ def device_create(request: HttpRequest) -> HttpResponse:
             messages.success(
                 request, _("Device created with %(n)s ports.") % {"n": device.ports.count()}
             )
+            if spot:
+                return redirect("floorplans:editor", room.floor_id)
             return redirect(device_url(device))
     breadcrumbs = [(a, node_url(a)) for a in [*parent.ancestors(), parent]]
     return render(
         request,
         "dcim/device_form.html",
-        {"form": form, "parent": parent, "breadcrumbs": breadcrumbs},
+        {
+            "form": form,
+            "parent": parent,
+            "breadcrumbs": breadcrumbs,
+            "hidden": {"plan_x": spot[0], "plan_y": spot[1]} if spot else {},
+        },
     )
 
 
@@ -257,6 +282,34 @@ def _device(request: HttpRequest, pk: Any) -> Device:
     if not policy.has_perm(request.user, "dcim.device.view", device):
         raise Http404
     return device
+
+
+@login_required
+@require_http_methods(["GET", "POST"])
+def port_create(request: HttpRequest, pk: str) -> HttpResponse:
+    """Page that adds a port the device type does not define."""
+    device = _device(request, pk)
+    actor = _actor(request)
+    if not policy.has_perm(actor, "dcim.device.change", device):
+        raise PermissionDenied
+    form = NewPortForm(request.POST or None)
+    if request.method == "POST" and form.is_valid():
+        try:
+            devices.add_port(request, actor, device, **form.cleaned_data)
+        except ServiceError as exc:
+            form.add_error(None, str(exc))
+        else:
+            return redirect(device_url(device))
+    return render(
+        request,
+        "core/create.html",
+        {
+            "title": _("New port on %(device)s") % {"device": device},
+            "form": form,
+            "back_url": device_url(device),
+            "breadcrumbs": [(a, node_url(a)) for a in [*device.ancestors(), device]],
+        },
+    )
 
 
 @login_required
@@ -279,7 +332,6 @@ def device_detail(request: HttpRequest, pk: str) -> HttpResponse:
             "face": space.face if space and space.face != "both" else "front",
         },
     )
-    port_form = NewPortForm(request.POST if action == "add_port" else None)
     if request.method == "POST":
         try:
             if action == "edit" and form.is_valid():
@@ -301,9 +353,6 @@ def device_detail(request: HttpRequest, pk: str) -> HttpResponse:
                 )
                 messages.success(request, _("Device moved."))
                 return redirect(device_url(device))
-            if action == "add_port" and port_form.is_valid():
-                devices.add_port(request, actor, device, **port_form.cleaned_data)
-                return redirect(device_url(device))
             if action == "delete":
                 parent = device.parent
                 devices.delete(request, actor, device)
@@ -320,9 +369,20 @@ def device_detail(request: HttpRequest, pk: str) -> HttpResponse:
             "space": space,
             "form": form,
             "place_form": place_form,
-            "port_form": port_form,
-            "ports": device.ports.select_related("rear_port", "untagged_vlan", "cable_end__cable"),
+            "ports": device.ports.select_related(
+                "rear_port", "untagged_vlan", "cable_end__cable"
+            ).prefetch_related(
+                Prefetch(
+                    "ip_addresses",
+                    queryset=policy.scope_queryset(
+                        actor, "ipam.ipaddress.view", IPAddress.objects.all()
+                    ),
+                )
+            ),
             "neighbours": neighbours(actor, device),
+            "configs": policy.scope_queryset(
+                actor, "configs.config.view", device.configs.order_by("-version")
+            )[:1],
             "can_change": can_change,
             "can_delete": policy.has_perm(actor, "dcim.device.delete", device),
             "breadcrumbs": [(a, node_url(a)) for a in device.ancestors()],
@@ -389,11 +449,57 @@ def port_detail(request: HttpRequest, pk: str) -> HttpResponse:
             "vlan_form": vlan_form,
             "peer": _visible_or_hidden(actor, _peer(port)),
             "wlans": port.wlans.all(),
+            "addresses": policy.scope_queryset(
+                actor, "ipam.ipaddress.view", port.ip_addresses.select_related("vrf")
+            ),
+            "can_add_address": policy.has_perm(actor, "ipam.ipaddress.add", device)
+            and policy.has_perm(actor, "dcim.device.change", device),
             "can_cable": policy.has_perm(actor, "cabling.cable.add", device),
             "can_trace": policy.has_perm(actor, "cabling.cable.trace", device),
             "can_change": policy.has_perm(actor, "dcim.device.change", device),
             "front_ports": port.front_ports.all() if port.kind == "rear" else [],
             "breadcrumbs": [(a, node_url(a)) for a in device.ancestors()]
             + [(device, device_url(device))],
+        },
+    )
+
+
+@login_required
+def port_panel(request: HttpRequest, pk: str) -> HttpResponse:
+    """Side panel of a selected port in a rack drawing: details, cable and the whole path."""
+    from patchmanager.cabling.trace import trace
+    from patchmanager.cabling.views import full_name
+
+    port = get_object_or_404(
+        Port.objects.select_related("device__device_type", "cable_end__cable"), pk=pk
+    )
+    if not policy.has_perm(request.user, "dcim.device.view", port.device):
+        raise Http404
+    hops: list[tuple[Any, str]] = []
+    if policy.has_perm(request.user, "cabling.cable.trace", port.device):
+        for hop in trace(port).ports:
+            visible = policy.has_perm(request.user, "dcim.device.view", hop.device)
+            hops.append((hop if visible else None, full_name(hop) if visible else ""))
+    end = getattr(port, "cable_end", None)
+    return render(
+        request,
+        "dcim/_port_panel.html",
+        {"port": port, "cable": end.cable if end else None, "hops": hops},
+    )
+
+
+@login_required
+def device_panel(request: HttpRequest, pk: str) -> HttpResponse:
+    """Side panel of a selected device in a rack drawing."""
+    device = _device(request, pk)
+    ports = device.ports.all()
+    return render(
+        request,
+        "dcim/_device_panel.html",
+        {
+            "device": device,
+            "port_count": ports.count(),
+            "cabled": ports.filter(cable_end__isnull=False).count(),
+            "space": RackSpace.objects.filter(device=device).first(),
         },
     )

@@ -11,6 +11,7 @@ from django.views.decorators.cache import never_cache
 from django.views.decorators.http import require_GET
 
 from patchmanager import __version__
+from patchmanager.accounts import policy
 
 logger = logging.getLogger(__name__)
 
@@ -39,8 +40,15 @@ def ready(request: HttpRequest) -> JsonResponse:
 
 @login_required
 def home(request: HttpRequest) -> HttpResponse:
-    """Landing page after login."""
-    return render(request, "core/home.html")
+    """Overview of the current tenant."""
+    from patchmanager.core.overview import overview
+
+    tenant = getattr(request, "tenant", None)
+    data = overview(request.user, tenant) if tenant is not None else {}
+    can_add_site = tenant is not None and policy.has_perm(
+        request.user, "locations.site.add", tenant
+    )
+    return render(request, "core/home.html", {**data, "can_add_site": can_add_site})
 
 
 def csrf_failure(request: HttpRequest, reason: str = "") -> HttpResponse:

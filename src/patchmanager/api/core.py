@@ -38,11 +38,6 @@ class TokenScopes(permissions.BasePermission):
 
     def has_permission(self, request: Request, view: Any) -> bool:
         """Check the token's scopes against the method."""
-        from patchmanager.instance import editions
-
-        if not editions.enabled("api"):
-            self.message = _("The REST API is not part of this edition.")
-            return False
         if not (request.user and request.user.is_authenticated):
             return False
         if isinstance(request.auth, ApiToken):

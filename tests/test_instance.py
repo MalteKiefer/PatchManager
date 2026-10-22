@@ -10,11 +10,9 @@ from patchmanager.accounts.services import PermissionDeniedError, ServiceError
 from patchmanager.cabling import services as cabling
 from patchmanager.dcim import devices
 from patchmanager.dcim.models import Rack
-from patchmanager.instance import editions, services, state
+from patchmanager.instance import services, state
 from patchmanager.locations import services as tree
 from patchmanager.tenancy import rls
-from patchmanager.tenancy import services as tenancy
-from tests.conftest import login
 
 pytestmark = pytest.mark.django_db
 
@@ -24,143 +22,6 @@ def fresh():
     cache.clear()
     yield
     cache.clear()
-
-
-def _edition(actor, key: str, **kw) -> None:
-    request = RequestFactory().post("/")
-    request.user = actor
-    services.save_edition(
-        request,
-        actor,
-        edition=key,
-        limits=kw.get("limits", {}),
-        enable=kw.get("enable", []),
-        disable=kw.get("disable", []),
-    )
-
-
-def test_default_is_enterprise_without_limits() -> None:
-    edition = editions.current()
-    assert edition.key == "enterprise" and edition.limits == {
-        "racks": None,
-        "users": None,
-        "tenants": None,
-    }
-    assert editions.enabled("scim") and edition.cross_rack_cabling
-
-
-def test_free_limits(make_tree, make_type, super_admin, make_user) -> None:
-    t = make_tree()
-    _edition(super_admin, "free")
-    with rls.system_context():
-        for n in range(2):
-            tree.create(t["request"], super_admin, Rack, parent=t["room"], name=f"R{n}")
-        with pytest.raises(ServiceError, match="at most 3 racks"):
-            tree.create(t["request"], super_admin, Rack, parent=t["room"], name="R9")
-        with pytest.raises(ServiceError, match="at most 1 users"):
-            make_user("second@example.com")
-        with pytest.raises(ServiceError, match="at most 1 tenants"):
-            tenancy.create_tenant(t["request"], super_admin, name="Two", slug="two")
-        switch = make_type("Sw", u_height=1, ports=[{"name_pattern": "ge{n}", "count": 1}])
-        a = devices.create(
-            t["request"],
-            super_admin,
-            device_type=switch,
-            room=t["room"],
-            rack=t["rack"],
-            position=1,
-            name="a",
-        )
-        b = devices.create(
-            t["request"],
-            super_admin,
-            device_type=switch,
-            room=t["room"],
-            rack=Rack.objects.get(name="R0"),
-            position=1,
-            name="b",
-        )
-        c = devices.create(
-            t["request"],
-            super_admin,
-            device_type=switch,
-            room=t["room"],
-            rack=t["rack"],
-            position=2,
-            name="c",
-        )
-        with pytest.raises(ServiceError, match="inside one rack"):
-            cabling.connect(t["request"], super_admin, a.ports.get(), b.ports.get())
-        cabling.connect(t["request"], super_admin, a.ports.get(), c.ports.get())
-    assert not editions.enabled("api") and editions.current().reports == ("bom",)
-
-
-def test_overrides_and_pinning(super_admin, settings) -> None:
-    _edition(super_admin, "smb", limits={"tenants": 3}, enable=["scim"], disable=["webhooks"])
-    edition = editions.current()
-    assert (
-        edition.limits["tenants"] == 3
-        and editions.enabled("scim")
-        and not editions.enabled("webhooks")
-    )
-    with pytest.raises(ServiceError):
-        _edition(super_admin, "smb", enable=["scim"], disable=["scim"])
-    with pytest.raises(ServiceError):
-        _edition(super_admin, "gold")
-    settings.EDITION = "free"
-    cache.clear()
-    assert editions.current().key == "free"
-    with pytest.raises(ServiceError, match="PATCHMANAGER_EDITION"):
-        _edition(super_admin, "enterprise")
-
-
-def test_features_are_gated(admin_client: Client, super_admin, make_tree) -> None:
-    make_tree()
-    _edition(super_admin, "free")
-    for url in (
-        "/account/tokens/",
-        "/manage/api-clients/",
-        "/manage/sso/",
-        "/manage/scim/",
-        "/integrations/webhooks/",
-    ):
-        response = admin_client.get(url, secure=True)
-        assert response.status_code == 403 and b"not part of this edition" in response.content, url
-    assert admin_client.get("/api/v1/sites/", secure=True).status_code == 403
-    assert (
-        Client()
-        .post("/api/oauth/token/", {"grant_type": "client_credentials"}, secure=True)
-        .status_code
-        == 403
-    )
-    assert Client().get("/scim/v2/Users", secure=True).status_code == 404
-    assert admin_client.post("/exchange/import/", {}, secure=True).status_code == 403
-    assert (
-        b"Imports are not part of this edition"
-        in admin_client.get("/exchange/", secure=True).content
-    )
-    nav = admin_client.get("/manage/", secure=True).content
-    assert b"/manage/sso/" not in nav and b"/manage/edition/" in nav
-    with rls.system_context():
-        site = __import__("patchmanager.locations.models", fromlist=["Site"]).Site.objects.get()
-    assert admin_client.get(f"/exchange/reports/site/{site.pk}.pdf", secure=True).status_code == 403
-    assert admin_client.get(f"/exchange/reports/bom/{site.pk}.pdf", secure=True).status_code == 200
-
-
-def test_edition_page(admin_client: Client, make_user) -> None:
-    page = admin_client.get("/manage/edition/", secure=True).content
-    assert b"Enterprise" in page and b"unlimited" in page
-    response = admin_client.post(
-        "/manage/edition/",
-        {"edition": "integrator", "limit_tenants": "5", "feature_scim": "off"},
-        secure=True,
-        follow=True,
-    )
-    assert b"Edition saved" in response.content
-    assert editions.current().limits["tenants"] == 5 and not editions.enabled("scim")
-    other = Client()
-    login(other, make_user())
-    assert other.get("/manage/edition/", secure=True).status_code == 403
 
 
 def _png(size=(800, 200)) -> bytes:
@@ -272,3 +133,47 @@ def test_backups_and_licenses(admin_client: Client, settings, tmp_path) -> None:
     page = admin_client.get("/licenses/", secure=True).content.decode()
     assert "GNU Affero" in page and "Django" in page and "htmx" in page
     assert "Source code (AGPL-3.0)" in Client().get("/auth/login/", secure=True).content.decode()
+
+
+def test_everything_is_on_without_limits(
+    admin_client: Client, make_tree, make_type, super_admin, make_user
+) -> None:
+    """No editions: every feature is reachable and nothing is counted against a limit."""
+    t = make_tree()
+    for url in (
+        "/account/tokens/",
+        "/manage/api-clients/",
+        "/manage/sso/",
+        "/manage/scim/",
+        "/integrations/webhooks/",
+        "/exchange/",
+        f"/plans/{t['floor'].pk}/",
+    ):
+        assert admin_client.get(url, secure=True).status_code == 200, url
+    assert admin_client.get("/manage/edition/", secure=True).status_code == 404
+    with rls.system_context():
+        for n in range(5):
+            tree.create(t["request"], super_admin, Rack, parent=t["room"], name=f"R{n}")
+        for n in range(3):
+            make_user(f"u{n}@example.com")
+        switch = make_type("Sw", u_height=1, ports=[{"name_pattern": "ge{n}", "count": 1}])
+        a = devices.create(
+            t["request"],
+            super_admin,
+            device_type=switch,
+            room=t["room"],
+            rack=t["rack"],
+            position=1,
+            name="a",
+        )
+        b = devices.create(
+            t["request"],
+            super_admin,
+            device_type=switch,
+            room=t["room"],
+            rack=Rack.objects.get(name="R0"),
+            position=1,
+            name="b",
+        )
+        cabling.connect(t["request"], super_admin, a.ports.get(), b.ports.get())  # across racks
+    assert not hasattr(__import__("patchmanager.instance", fromlist=["x"]), "editions")

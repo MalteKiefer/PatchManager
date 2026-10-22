@@ -189,7 +189,7 @@ def site_report(user: Any, site: Site) -> bytes:
                         building.name,
                         floor.name,
                         room.name,
-                        room.get_kind_display(),
+                        room.kind.label,
                         racks[room.pk],
                         devs[room.pk],
                     ]

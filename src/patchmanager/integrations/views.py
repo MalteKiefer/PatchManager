@@ -6,6 +6,7 @@ from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
 from django.http import Http404, HttpRequest, HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
+from django.urls import reverse
 from django.utils.translation import gettext as _
 from django.utils.translation import gettext_lazy
 from django.views.decorators.http import require_POST
@@ -13,7 +14,6 @@ from django.views.decorators.http import require_POST
 from patchmanager.accounts import policy
 from patchmanager.accounts.models import User
 from patchmanager.accounts.services import PermissionDeniedError, ServiceError
-from patchmanager.instance.gates import feature_required
 from patchmanager.integrations import services
 from patchmanager.integrations.models import Delivery, Webhook
 from patchmanager.tenancy.models import Tenant
@@ -61,11 +61,26 @@ def _events(value: str) -> list[str]:
     return [e.strip() for e in value.split(",")]
 
 
-@feature_required("webhooks")
 @login_required
 def webhook_list(request: HttpRequest) -> HttpResponse:
-    """Webhooks of the tenant; create one."""
+    """Webhooks of the tenant."""
     tenant = _tenant(request)
+    return render(
+        request,
+        "integrations/webhooks.html",
+        {
+            "webhooks": Webhook.objects.filter(tenant=tenant),
+            "can_manage": policy.has_perm(request.user, "integrations.webhook.manage", tenant),
+        },
+    )
+
+
+@login_required
+def webhook_create(request: HttpRequest) -> HttpResponse:
+    """Page that creates a webhook; its page shows the secret once."""
+    tenant = _tenant(request)
+    if not policy.has_perm(request.user, "integrations.webhook.manage", tenant):
+        raise PermissionDenied
     form = WebhookForm(request.POST or None)
     if request.method == "POST" and form.is_valid():
         try:
@@ -87,16 +102,15 @@ def webhook_list(request: HttpRequest) -> HttpResponse:
             return redirect("integrations:webhook", hook.pk)
     return render(
         request,
-        "integrations/webhooks.html",
+        "core/create.html",
         {
+            "title": _("New webhook"),
             "form": form,
-            "webhooks": Webhook.objects.filter(tenant=tenant),
-            "can_manage": policy.has_perm(request.user, "integrations.webhook.manage", tenant),
+            "back_url": reverse("integrations:webhooks"),
         },
     )
 
 
-@feature_required("webhooks")
 @login_required
 def webhook_detail(request: HttpRequest, pk: str) -> HttpResponse:
     """Settings, secret (once) and recent deliveries."""
@@ -141,7 +155,6 @@ def webhook_detail(request: HttpRequest, pk: str) -> HttpResponse:
     )
 
 
-@feature_required("webhooks")
 @login_required
 @require_POST
 def webhook_action(request: HttpRequest, pk: str, action: str) -> HttpResponse:
@@ -164,7 +177,6 @@ def webhook_action(request: HttpRequest, pk: str, action: str) -> HttpResponse:
     return redirect("integrations:webhook", hook.pk)
 
 
-@feature_required("webhooks")
 @login_required
 @require_POST
 def redeliver(request: HttpRequest, pk: str) -> HttpResponse:

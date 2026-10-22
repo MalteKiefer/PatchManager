@@ -54,3 +54,37 @@ document.addEventListener("change", (event) => {
 for (const swatch of document.querySelectorAll("[data-swatch]")) {
   if (/^#[0-9a-f]{6}$/i.test(swatch.dataset.swatch)) swatch.style.backgroundColor = swatch.dataset.swatch;
 }
+
+// Ctrl+K or Cmd+K (or "/" outside fields) jumps to the search box.
+document.addEventListener("keydown", (event) => {
+  const field = event.target.closest?.("input, textarea, select, [contenteditable]");
+  const combo = (event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "k";
+  if (combo || (event.key === "/" && !field)) {
+    const search = document.getElementById("global-search");
+    if (!search) return;
+    event.preventDefault();
+    search.focus();
+    search.select();
+  }
+});
+
+// Regions that scroll sideways (wide tables) must be reachable with the keyboard.
+for (const region of document.querySelectorAll(".overflow-x-auto, .overflow-auto, .rack-scroll")) {
+  if (region.scrollWidth > region.clientWidth || region.scrollHeight > region.clientHeight) {
+    if (!region.hasAttribute("tabindex")) region.tabIndex = 0;
+  }
+}
+
+// Form fields that only apply for one value of another field, for example
+// data-show-if="form=rack": hidden (with their label) while it has another value.
+function showIf() {
+  for (const input of document.querySelectorAll("[data-show-if]")) {
+    const [name, value] = input.dataset.showIf.split("=");
+    const source = input.form?.elements.namedItem(name);
+    if (!source) continue;
+    const update = () => { input.closest(".field").hidden = source.value !== value; };
+    source.addEventListener("change", update);
+    update();
+  }
+}
+showIf();

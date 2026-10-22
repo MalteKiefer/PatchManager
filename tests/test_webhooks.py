@@ -240,8 +240,9 @@ def test_patterns_and_permissions(make_tree, make_user, super_admin, sent) -> No
 
 def test_pages(make_tree, admin_client: Client, super_admin, make_user, sent) -> None:
     t = make_tree()
+    assert admin_client.get("/integrations/webhooks/new/", secure=True).status_code == 200
     page = admin_client.post(
-        "/integrations/webhooks/",
+        "/integrations/webhooks/new/",
         {
             "name": "CMDB",
             "url": "https://hooks.example.com/pm",

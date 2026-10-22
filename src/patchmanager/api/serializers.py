@@ -5,8 +5,10 @@ from typing import Any
 from rest_framework import serializers
 
 from patchmanager.cabling.models import Cable
+from patchmanager.configs.models import DeviceConfig
 from patchmanager.dcim.models import Device, Port, Rack
 from patchmanager.history.models import Change
+from patchmanager.ipam.models import VRF, IPAddress, Prefix
 from patchmanager.library.models import DeviceType, Vendor
 from patchmanager.locations.models import Building, Floor, Room, Site
 from patchmanager.networks.models import VLAN, WLAN
@@ -270,6 +272,83 @@ class WLANSerializer(serializers.ModelSerializer):  # type: ignore[type-arg]
         model = WLAN
         fields = [*BASE, "tenant", "ssid", "vlan", "security", "hidden", "description"]
         read_only_fields = BASE
+
+
+class VRFSerializer(serializers.ModelSerializer):  # type: ignore[type-arg]
+    """VRF as stored and as accepted on writes."""
+
+    tenant = serializers.UUIDField(source="tenant_id")
+
+    class Meta:
+        model = VRF
+        fields = [*BASE, "tenant", "name", "rd", "description"]
+        read_only_fields = BASE
+
+
+class PrefixSerializer(serializers.ModelSerializer):  # type: ignore[type-arg]
+    """Prefix as stored and as accepted on writes."""
+
+    tenant = serializers.UUIDField(source="tenant_id")
+    vrf = serializers.UUIDField(source="vrf_id", required=False, allow_null=True)
+    site = serializers.UUIDField(source="site_id", required=False, allow_null=True)
+    vlan = serializers.UUIDField(source="vlan_id", required=False, allow_null=True)
+    prefix = serializers.CharField(max_length=50)
+    gateway = serializers.CharField(max_length=50, required=False, allow_null=True)
+
+    class Meta:
+        model = Prefix
+        fields = [
+            *BASE,
+            "tenant",
+            "vrf",
+            "prefix",
+            "status",
+            "site",
+            "vlan",
+            "gateway",
+            "description",
+        ]
+        read_only_fields = BASE
+
+
+class IPAddressSerializer(serializers.ModelSerializer):  # type: ignore[type-arg]
+    """Address as stored and as accepted on writes."""
+
+    tenant = serializers.UUIDField(source="tenant_id")
+    vrf = serializers.UUIDField(source="vrf_id", required=False, allow_null=True)
+    port = serializers.UUIDField(source="port_id", required=False, allow_null=True)
+    address = serializers.CharField(max_length=50)
+
+    class Meta:
+        model = IPAddress
+        fields = [*BASE, "tenant", "vrf", "address", "status", "dns_name", "description", "port"]
+        read_only_fields = BASE
+
+
+class ConfigSerializer(serializers.ModelSerializer):  # type: ignore[type-arg]
+    """A stored configuration version (without its text)."""
+
+    class Meta:
+        model = DeviceConfig
+        fields = ["id", "version", "created_at", "sha256", "size", "lines", "source", "comment"]
+        read_only_fields = fields
+
+
+class ConfigContentSerializer(ConfigSerializer):
+    """A version with its text."""
+
+    content = serializers.CharField()
+
+    class Meta(ConfigSerializer.Meta):
+        fields = [*ConfigSerializer.Meta.fields, "content"]
+        read_only_fields = fields
+
+
+class ConfigWriteSerializer(serializers.Serializer):  # type: ignore[type-arg]
+    """A configuration to store."""
+
+    content = serializers.CharField(trim_whitespace=False)
+    comment = serializers.CharField(max_length=200, required=False, allow_blank=True)
 
 
 class ChangeSerializer(serializers.ModelSerializer):  # type: ignore[type-arg]

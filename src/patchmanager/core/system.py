@@ -32,6 +32,7 @@ VENDORED = [  # front end assets shipped in core/static/vendor
     ("htmx", "4.0.0", "0BSD"),
     ("Alpine.js (CSP build)", "3.17.5", "MIT"),
     ("Leaflet", "1.9.4", "BSD-2-Clause"),
+    ("Device type catalog (netbox-community/devicetype-library)", "bundled data", "CC0-1.0"),
 ]
 
 

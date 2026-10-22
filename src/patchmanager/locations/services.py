@@ -15,6 +15,7 @@ from patchmanager.accounts.services.users import require
 from patchmanager.audit import services as audit
 from patchmanager.core.fields import path_label
 from patchmanager.core.hierarchy import HierarchyNode
+from patchmanager.core.utils import key_fields
 from patchmanager.tenancy.models import Tenant
 from patchmanager.tenancy.rls import system_context
 
@@ -41,11 +42,7 @@ def create[N: HierarchyNode](
     """Create a node below ``parent`` (a tenant for sites)."""
     scope = parent.policy_path
     require(actor, f"{model.policy_object_type}.add", scope_path=scope)
-    if model.policy_object_type == "dcim.rack":
-        from patchmanager.instance import editions
-
-        editions.check_limit("racks")
-    node = model(created_by=actor, **fields)
+    node = model(created_by=actor, **key_fields(fields, "kind"))
     if model.parent_field:
         setattr(node, model.parent_field, parent)
     else:
@@ -68,6 +65,7 @@ def update[N: HierarchyNode](request: HttpRequest, actor: User, node: N, **field
     perm = f"{node.policy_object_type}.change"
     stored = type(node)._default_manager.get(pk=node.pk)
     require(actor, perm, stored)
+    fields = key_fields(fields, "kind")
     before = {key: str(getattr(stored, key)) for key in fields}
     for key, value in fields.items():
         setattr(stored, key, value)
@@ -87,8 +85,16 @@ def delete(request: HttpRequest, actor: User, node: HierarchyNode) -> None:
     audit.record(
         f"{node.policy_object_type}.deleted", request=request, obj=node, data={"name": str(node)}
     )
+    from patchmanager.locations.models import Room
+    from patchmanager.metadata import services as metadata
+
     try:
         with transaction.atomic():
+            # Photos and notes go with the object (rolled back if it cannot be deleted).
+            metadata.purge(node)
+            if isinstance(node, Room):
+                for survey in node.surveys.all():
+                    metadata.purge(survey)
             node.delete()
     except ProtectedError as exc:
         raise ServiceError(_("Remove everything inside it first.")) from exc
@@ -119,6 +125,15 @@ def _check_site_is_self_contained(site: Any, device_model: Any) -> None:
     if CableEnd.objects.filter(cable_id__in=inside_cables).exclude(port__in=inside_ports).exists():
         raise ServiceError(
             _("Cables connect this site to other sites of the tenant. Remove them first.")
+        )
+    from patchmanager.ipam.models import IPAddress, Prefix
+
+    if (
+        Prefix.objects.filter(site=site).exists()
+        or IPAddress.objects.filter(port__in=inside_ports).exists()
+    ):
+        raise ServiceError(
+            _("Prefixes or IP addresses belong to this site. Move or remove them first.")
         )
     if (
         WLANBroadcast.objects.filter(port__in=inside_ports).exists()
@@ -189,6 +204,19 @@ def move_site(request: HttpRequest, actor: User, site: Any, target: Tenant) -> N
                 f"UPDATE cabling_cableend SET tenant_id = %s WHERE port_id IN ({in_site})",  # noqa: S608  # nosec B608
                 [target.pk, new],
             )
+            # Surveys and planned numbers of the rooms follow the rooms.
+            for table in ("locations_roomsurvey", "locations_roomneed"):
+                cursor.execute(
+                    f"UPDATE {table} SET tenant_id = %s WHERE room_id IN"  # noqa: S608  # nosec B608: fixed names
+                    " (SELECT id FROM locations_room WHERE path <@ %s::ltree)",
+                    [target.pk, new],
+                )
+            # Stored configurations follow their devices (scope is the device path).
+            cursor.execute(
+                "UPDATE configs_deviceconfig c SET tenant_id = %s, path = d.path"
+                " FROM dcim_device d WHERE d.id = c.device_id AND d.path <@ %s::ltree",
+                [target.pk, new],
+            )
             cursor.execute(
                 "UPDATE networks_vlan SET tenant_id = %s WHERE site_id = %s", [target.pk, site.pk]
             )
@@ -205,11 +233,15 @@ def move_site(request: HttpRequest, actor: User, site: Any, target: Tenant) -> N
                 "SELECT p.id FROM dcim_port p JOIN dcim_device d ON d.id = p.device_id"
                 " WHERE d.path <@ %s::ltree"
             )
+            surveys = (
+                "SELECT s.id FROM locations_roomsurvey s JOIN locations_room r ON r.id = s.room_id"
+                " WHERE r.path <@ %s::ltree"
+            )
             for table in ("metadata_attachment", "metadata_note"):
                 cursor.execute(
                     f"UPDATE {table} SET tenant_id = %s WHERE tenant_id = %s"  # noqa: S608  # nosec B608: fixed names
-                    f" AND object_id IN ({targets} UNION {ports})",
-                    [target.pk, source_tenant, *([new] * len(_TREE_TABLES)), new],
+                    f" AND object_id IN ({targets} UNION {ports} UNION {surveys})",
+                    [target.pk, source_tenant, *([new] * len(_TREE_TABLES)), new, new],
                 )
         Assignment.objects.filter(scope_path__descendant_of=old).update(tenant=target)
         with connection.cursor() as cursor:

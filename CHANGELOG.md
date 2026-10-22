@@ -4,6 +4,76 @@ All notable changes to this project are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the project uses
 [Semantic Versioning](https://semver.org/).
 
+## [1.0.0] - 2026-10-22
+
+### Added
+
+* Rack view over the full page width: every port of every device drawn like on the
+  hardware, coloured by the state of its path, cables routed through the side
+  channels, the whole path highlighted when pointing at a port, front and rear,
+  connections table, and "add a device here" on free units.
+* Room cabling: all racks of a room side by side with the cables inside them and
+  between them over the cable tray.
+* Every object is created on its own page.
+* Rooms: planned against installed devices per category, from the room type or set
+  per room; every device outside the racks with each port and where it is patched;
+  surveys with date, who, counts found on site, photos and notes, compared with the
+  documentation (ADR 0028).
+* Floor plans draw lines between placed floor devices and the racks they are
+  patched to, and "Add device here" creates a device at the clicked point.
+* Device categories and room types are lists administrators can extend and rename,
+  sorted by name and translated; forms link to them.
+* Draw a new room on the floor plan: the outline becomes the room.
+* Device types: mounting, airflow, power supplies, maximum power and weight, filled
+  from the device type library; the height only for rack mounted types. USB, video
+  and audio ports with USB-C, HDMI, DisplayPort, DVI, VGA and audio jack connectors.
+* New layout: navigation in a sidebar with the tenant on top, search in the top bar
+  (Ctrl+K or /), and an overview start page with the tenant's racks, devices, ports
+  and cables, its sites with their load, the fullest racks and recent changes.
+* Device configurations: versions per device, encrypted at rest, every read audited,
+  view with line numbers, compare, download, store by paste, file or API (ADR 0027).
+* IP address management: VRFs, prefixes as a tree with usage and free ranges, the
+  next free address, addresses on ports (shown on devices), search, import and
+  export, REST API and history (ADR 0026).
+* Device catalog: more than 12 000 device types of the community device type library
+  (CC0) bundled and searchable; one click copies a type with all its ports
+  (ADR 0025).
+* Personal data: everyone can download their data as JSON; administrators can
+  anonymise accounts for erasure requests (ADR 0024).
+* Backup and restore drill on the production stack in every CI run; guides for
+  encrypted off-site copies and point in time recovery.
+* ASVS 5.0 Level 2 self-audit and a penetration test checklist.
+* Load test in CI with 500 racks, 50 000 ports and 12 000 cables, with time and
+  query budgets per page; `seed_scale` command for demo and load data.
+
+### Security
+
+* Deleting an object also deletes its attachments and notes; before, they stayed
+  behind.
+* A session that signed in with the password alone is ended when a second factor
+  is enrolled elsewhere, instead of staying on the enrolment page.
+* Behind the reverse proxy every request had the proxy's address, so the login
+  rate limit per IP was shared by all users (one client could block sign in for
+  everyone) and the audit log recorded the proxy. The client address now comes
+  from `X-Forwarded-For` of trusted proxies.
+* Pages for signed in users send `Cache-Control: no-store`.
+* Status messages are announced without breaking their list for screen readers.
+* Audit entries written while an administrator acts as another user name the
+  administrator; the personal data export leaves out their devices.
+
+### Fixed
+
+* Search loaded the vendor of every device hit separately.
+* Path tracing needed two queries per cable hop instead of one.
+* The status code on error pages was below AA contrast in light mode.
+* OpenStreetMap tiles were blocked because the page sent no Referer; tiles are grey.
+* The device page traced every cabled port with its own queries.
+
+### Removed
+
+* Editions, their limits and feature switches, `PATCHMANAGER_EDITION` and the edition
+  admin page. Every feature is free and available on every installation (ADR 0023).
+
 ## [0.9.0] - 2026-10-22
 
 ### Added
@@ -180,6 +250,11 @@ All notable changes to this project are documented here. The format follows
 * pre-commit hooks, Renovate configuration.
 * Documentation site, ADRs 0001 to 0010, STRIDE threat model draft, security policy.
 
+[1.0.0]: https://github.com/MalteKiefer/PatchManager/releases/tag/v1.0.0
+[0.9.0]: https://github.com/MalteKiefer/PatchManager/releases/tag/v0.9.0
+[0.8.0]: https://github.com/MalteKiefer/PatchManager/releases/tag/v0.8.0
+[0.7.0]: https://github.com/MalteKiefer/PatchManager/releases/tag/v0.7.0
+[0.6.0]: https://github.com/MalteKiefer/PatchManager/releases/tag/v0.6.0
 [0.5.0]: https://github.com/MalteKiefer/PatchManager/releases/tag/v0.5.0
 [0.4.0]: https://github.com/MalteKiefer/PatchManager/releases/tag/v0.4.0
 [0.3.1]: https://github.com/MalteKiefer/PatchManager/releases/tag/v0.3.1

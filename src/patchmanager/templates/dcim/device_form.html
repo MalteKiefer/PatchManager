@@ -2,8 +2,9 @@
 {% block title %}{% translate "New device" %}{% endblock %}
 {% block content %}
 {% include "core/_breadcrumbs.html" with current=_("New device") %}
-<form method="post" class="card mx-auto max-w-2xl" novalidate>{% csrf_token %}
+<form method="post" class="card mx-auto max-w-2xl" novalidate>{% csrf_token %}{% for name, value in hidden.items %}<input type="hidden" name="{{ name }}" value="{{ value }}">{% endfor %}
   <h1 class="mb-4">{% blocktranslate with parent=parent.name %}New device in {{ parent }}{% endblocktranslate %}</h1>
+  {% if hidden %}<p class="mb-4 text-sm text-slate-500">{% translate "The device is placed where you clicked on the floor plan." %}</p>{% endif %}
   <div class="grid gap-x-4 sm:grid-cols-2">{% include "core/_form.html" %}</div>
   <p class="mb-4 text-xs text-slate-500">{% translate "Ports are created from the device type. Missing a type? Create it in the device library." %} <a href="{% url 'library:type-create' %}">{% translate "New device type" %}</a></p>
   <button class="btn-primary">{% translate "Create" %}</button>

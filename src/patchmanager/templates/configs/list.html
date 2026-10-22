@@ -1,0 +1,26 @@
+{% extends "base.html" %}{% load i18n %}
+{% block title %}{% blocktranslate with d=device.name %}Configuration of {{ d }}{% endblocktranslate %}{% endblock %}
+{% block content %}
+{% include "core/_breadcrumbs.html" with current=_("Configuration") %}
+<div class="mb-2 flex flex-wrap items-center gap-3"><h1 class="mr-auto">{% blocktranslate with d=device.name %}Configuration of {{ d }}{% endblocktranslate %}</h1>
+  {% if can_add %}<a class="btn-primary" href="{% url 'configs:create' device.pk %}">{% translate "New version" %}</a>{% endif %}</div>
+<p class="mb-5 max-w-3xl text-sm text-slate-500">{% translate "Configurations are stored encrypted; each version is kept and every view is recorded in the audit log. Backup tools can store versions through the API." %}</p>
+{% if versions %}
+<form method="get" action="{% url 'configs:diff' device.pk %}" class="card overflow-x-auto p-0">
+  <table class="table">
+    <thead><tr><th>{% translate "Version" %}</th><th>{% translate "Stored" %}</th><th>{% translate "By" %}</th><th>{% translate "Source" %}</th><th>{% translate "Lines" %}</th><th>{% translate "Comment" %}</th><th><span class="sr-only">{% translate "Compare from" %}</span>{% translate "From" %}</th><th>{% translate "To" %}</th></tr></thead>
+    <tbody>{% for v in versions %}<tr>
+      <td><a href="{% url 'configs:version' device.pk v.version %}" class="font-medium">v{{ v.version }}</a></td>
+      <td class="whitespace-nowrap text-sm">{{ v.created_at|date:"SHORT_DATETIME_FORMAT" }}</td>
+      <td class="text-sm">{{ v.created_by|default:_("system") }}</td><td class="text-sm">{{ v.get_source_display }}</td>
+      <td class="tabular-nums">{{ v.lines }}</td><td class="text-sm text-slate-500">{{ v.comment }}</td>
+      <td><input type="radio" name="a" value="{{ v.version }}" aria-label="{% blocktranslate with n=v.version %}Compare from version {{ n }}{% endblocktranslate %}" {% if forloop.counter == 2 %}checked{% endif %}></td>
+      <td><input type="radio" name="b" value="{{ v.version }}" aria-label="{% blocktranslate with n=v.version %}Compare to version {{ n }}{% endblocktranslate %}" {% if forloop.first %}checked{% endif %}></td>
+    </tr>{% endfor %}</tbody>
+  </table>
+  {% if versions|length > 1 %}<div class="border-t border-slate-200 p-3 dark:border-slate-800"><button class="btn-secondary">{% translate "Compare" %}</button></div>{% endif %}
+</form>
+{% else %}
+<section class="card max-w-xl"><p class="text-sm text-slate-500">{% translate "No configuration stored yet." %}</p>{% if can_add %}<a class="btn-primary mt-4" href="{% url 'configs:create' device.pk %}">{% translate "Store the first version" %}</a>{% endif %}</section>
+{% endif %}
+{% endblock %}

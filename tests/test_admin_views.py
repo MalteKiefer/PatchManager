@@ -80,7 +80,7 @@ def test_switch_tenant(admin_client: Client, make_tenant) -> None:
         "/tenants/switch/", {"tenant": str(b.pk), "next": "https://evil.example/"}, secure=True
     )
     page = admin_client.get("/", secure=True).content.decode()
-    assert "Current tenant: Bbb" in page
+    assert "<h1>Bbb</h1>" in page
     a  # noqa: B018
 
 
@@ -159,7 +159,7 @@ def test_assignment_and_group_views(admin_client: Client, make_user, make_tenant
     )
     admin_client.post(url, {"action": "remove_parent", "group": other.pk}, secure=True)
     bogus = {"user": "not-a-uuid", "role": "x"}
-    assert admin_client.post("/manage/assignments/", bogus, secure=True).status_code == 302
+    assert admin_client.post("/manage/assignments/", bogus, secure=True).status_code == 404
     admin_client.post(url, {"action": "details", "name": "NOC2", "description": "x"}, secure=True)
     admin_client.post(url, {"action": "delete"}, secure=True)
     assert not Group.objects.filter(pk=group.pk).exists()

@@ -1,0 +1,12 @@
+{% extends "base.html" %}{% load i18n %}
+{% block title %}VRFs{% endblock %}
+{% block content %}
+<div class="mb-4 flex flex-wrap items-center gap-3"><h1 class="mr-auto">{% translate "IP networks" %}{% if current_tenant %} · {{ current_tenant.name }}{% endif %}</h1>
+  {% if can_add %}<a class="btn-primary" href="{% url 'ipam:vrf-create' %}">{% translate "New VRF" %}</a>{% endif %}</div>
+{% include "ipam/_tabs.html" with tab="vrfs" %}
+<div class="card overflow-x-auto p-0"><table class="table">
+  <thead><tr><th>{% translate "Name" %}</th><th>{% translate "Route distinguisher" %}</th><th>{% translate "Description" %}</th></tr></thead>
+  <tbody>{% for v in vrfs %}<tr><td><a href="{% url 'ipam:vrf' v.pk %}">{{ v.name }}</a></td><td class="tabular-nums">{{ v.rd }}</td><td class="text-sm text-slate-500">{{ v.description }}</td></tr>
+  {% empty %}<tr><td colspan="3" class="text-slate-500">{% translate "No VRFs. Prefixes and addresses without one are in the global table." %}</td></tr>{% endfor %}</tbody>
+</table></div>
+{% endblock %}

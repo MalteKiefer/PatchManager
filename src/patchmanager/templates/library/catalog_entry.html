@@ -1,0 +1,29 @@
+{% extends "base.html" %}{% load i18n %}
+{% block title %}{{ entry }}{% endblock %}
+{% block content %}
+<nav aria-label="{% translate 'Breadcrumb' %}" class="mb-3 text-sm"><a href="{% url 'library:catalog' %}?q={{ entry.manufacturer|urlencode }}">{% translate "Device catalog" %}</a></nav>
+<h1 class="mb-1">{{ entry.model }}</h1>
+<p class="mb-6 text-slate-500">{{ entry.manufacturer }}{% if entry.part_number %}, {{ entry.part_number }}{% endif %}{% if entry.u_height %}, {{ entry.u_height|floatformat:"-1" }} U{% if entry.full_depth %} {% translate "full depth" %}{% endif %}{% endif %}</p>
+<div class="grid gap-6 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
+  <section class="card" aria-labelledby="ports-h">
+    <h2 id="ports-h" class="mb-3">{% translate "Ports" %}</h2>
+    {% for label, ports in sections %}{% if ports %}
+    <h3 class="mt-4 mb-2 text-sm font-semibold">{{ label }} <span class="font-normal text-slate-500">{{ ports|length }}</span></h3>
+    <ul class="flex flex-wrap gap-1.5">{% for p in ports %}<li class="chip px-2 py-0.5 text-xs">{{ p.name }}{% if p.type %} <span class="text-slate-500">{{ p.type }}</span>{% endif %}</li>{% endfor %}</ul>
+    {% endif %}{% empty %}{% endfor %}
+    {% if not entry.ports %}<p class="text-sm text-slate-500">{% translate "This type has no ports." %}</p>{% endif %}
+  </section>
+  <aside>
+    {% if can_add %}
+    <form method="post" class="card" novalidate>{% csrf_token %}
+      <h2 class="mb-3">{% translate "Add to the library" %}</h2>
+      {% include "core/_form.html" %}
+      <p class="help mb-4 text-xs text-slate-500">{% translate "Without this option the type belongs to the current tenant only." %}</p>
+      <button class="btn-primary">{% translate "Add to the library" %}</button>
+    </form>
+    {% else %}
+    <p class="card text-sm text-slate-500">{% translate "You may not add device types." %}</p>
+    {% endif %}
+  </aside>
+</div>
+{% endblock %}

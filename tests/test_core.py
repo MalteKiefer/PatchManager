@@ -108,3 +108,46 @@ def test_german_catalog_is_complete() -> None:
         if re.search(r"^#, .*\bfuzzy\b", entry, re.M):
             fuzzy.append(entry[:60])
     assert missing == [] and fuzzy == []
+
+
+@pytest.mark.parametrize(
+    ("allowed", "peer", "header", "seen"),
+    [
+        (["10.0.0.0/8"], "10.1.2.3", "198.51.100.7", "198.51.100.7"),
+        (["10.0.0.0/8"], "10.1.2.3", "1.1.1.1, 203.0.113.9", "203.0.113.9"),  # rightmost
+        (["10.0.0.0/8"], "192.0.2.1", "198.51.100.7", "192.0.2.1"),  # untrusted peer
+        (["*"], "192.0.2.1", "2001:db8::1", "2001:db8::1"),
+        (["*"], "192.0.2.1", "not-an-ip", "192.0.2.1"),
+        (["127.0.0.1"], "127.0.0.1", "", "127.0.0.1"),
+    ],
+)
+def test_client_ip_comes_from_trusted_proxies_only(settings, allowed, peer, header, seen) -> None:
+    from django.http import HttpResponse
+    from django.test import RequestFactory
+
+    from patchmanager.core.middleware import ClientIPMiddleware
+
+    settings.FORWARDED_ALLOW_IPS = allowed
+    request = RequestFactory().get("/", REMOTE_ADDR=peer, HTTP_X_FORWARDED_FOR=header)
+    ClientIPMiddleware(lambda r: HttpResponse())(request)
+    assert request.META["REMOTE_ADDR"] == seen
+
+
+def test_pages_for_signed_in_users_are_not_cached(admin_client) -> None:
+    assert "no-store" in admin_client.get("/locations/", secure=True)["Cache-Control"]
+    assert admin_client.get("/branding.css", secure=True)["Cache-Control"].startswith("public")
+
+
+def test_overview_counts_what_the_user_may_see(admin_client, super_admin, system) -> None:
+    from patchmanager.dcim.management.commands.seed_scale import seed
+
+    seed(super_admin, racks=2, slug="ov")
+    with system():
+        from patchmanager.tenancy.models import Tenant
+
+        tenant = Tenant.objects.get(slug="ov")
+    admin_client.post("/tenants/switch/", {"tenant": tenant.pk}, secure=True)
+    page = admin_client.get("/", secure=True).content.decode()
+    assert "<dd>2</dd>" in page and "<dd>4</dd>" in page  # racks, devices
+    assert "96<span> / 200</span>" in page  # both ends of 48 cables, of all ports
+    assert "Site 1" in page and "R01" in page

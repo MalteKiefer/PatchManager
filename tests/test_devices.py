@@ -287,9 +287,10 @@ def test_device_views(admin_client: Client, make_tree, make_type, system) -> Non
     admin_client.post(
         url, {"action": "edit", "name": "srv-1", "status": "planned", "serial": "S1"}, secure=True
     )
+    assert admin_client.get(url + "ports/new/", secure=True).status_code == 200
     admin_client.post(
-        url,
-        {"action": "add_port", "name": "ipmi", "kind": "interface", "connector": "rj45"},
+        url + "ports/new/",
+        {"name": "ipmi", "kind": "interface", "connector": "rj45"},
         secure=True,
     )
     admin_client.post(

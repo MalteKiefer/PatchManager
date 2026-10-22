@@ -3,10 +3,11 @@
 import re
 from typing import Any
 
-from django.core.validators import MaxValueValidator, MinValueValidator
+from django.core.validators import MaxValueValidator, MinValueValidator, RegexValidator
 from django.db import models
 from django.db.models.functions import Lower
 from django.utils.translation import gettext_lazy as _
+from django.utils.translation import pgettext, pgettext_lazy
 
 from patchmanager.core.fields import path_label
 from patchmanager.core.models import TimestampedModel, UUIDModel
@@ -52,7 +53,14 @@ class Connector(models.TextChoices):
     QSFP = "qsfp+", "QSFP+"
     QSFP28 = "qsfp28", "QSFP28"
     COAX = "coax", "Coax (F/BNC)"
-    USB = "usb", "USB"
+    USB = "usb", "USB-A"
+    USB_C = "usb-c", "USB-C"
+    HDMI = "hdmi", "HDMI"
+    DISPLAYPORT = "dp", "DisplayPort"
+    MINI_DP = "mini-dp", "Mini DisplayPort"
+    DVI = "dvi", "DVI"
+    VGA = "vga", "VGA"
+    AUDIO = "audio", _("audio jack (3.5 mm)")
     SERIAL = "serial", "Serial (DB9/RJ45 console)"
     C13 = "c13", "IEC C13"
     C14 = "c14", "IEC C14"
@@ -72,6 +80,98 @@ class PortKind(models.TextChoices):
     CONSOLE = "console", _("console")
     POWER = "power", _("power")
     WIRELESS = "wireless", _("wireless")
+    USB = "usb", "USB"
+    VIDEO = "video", _("video output")
+    AUDIO = "audio", _("audio")
+
+
+class Airflow(models.TextChoices):
+    """Direction of the cooling air (as in the community device type library)."""
+
+    FRONT_TO_REAR = "front-to-rear", _("front to rear")
+    REAR_TO_FRONT = "rear-to-front", _("rear to front")
+    LEFT_TO_RIGHT = "left-to-right", _("left to right")
+    RIGHT_TO_LEFT = "right-to-left", _("right to left")
+    SIDE_TO_REAR = "side-to-rear", _("side to rear")
+    REAR_TO_SIDE = "rear-to-side", _("rear to side")
+    BOTTOM_TO_TOP = "bottom-to-top", _("bottom to top")
+    TOP_TO_BOTTOM = "top-to-bottom", _("top to bottom")
+    PASSIVE = "passive", _("passive (no fans)")
+    MIXED = "mixed", _("mixed")
+
+
+class Mounting(models.TextChoices):
+    """How a device is fixed in place."""
+
+    RACK_19 = "rack-19", _("19 inch rack")
+    RACK_10 = "rack-10", _("10 inch rack")
+    WALL = "wall", _("wall")
+    FLUSH = "flush", _("flush in wall or floor box")
+    CEILING = "ceiling", _("ceiling")
+    DESK = "desk", _("desk")
+    FLOOR = "floor", _("standing on the floor")
+    DIN_RAIL = "din-rail", _("DIN rail")
+    POLE = "pole", _("pole or mast")
+    SHELF = "shelf", _("shelf")
+    OTHER = "other", _("other")
+
+
+# Names of the built in rows, for translation catalogs (the rows hold the English text).
+BUILTIN_CATEGORIES = (
+    pgettext_lazy("device category", "Switch"),
+    pgettext_lazy("device category", "Router"),
+    pgettext_lazy("device category", "Firewall"),
+    pgettext_lazy("device category", "Server"),
+    pgettext_lazy("device category", "Storage"),
+    pgettext_lazy("device category", "Patch panel"),
+    pgettext_lazy("device category", "Power distribution"),
+    pgettext_lazy("device category", "UPS"),
+    pgettext_lazy("device category", "Access point"),
+    pgettext_lazy("device category", "Camera"),
+    pgettext_lazy("device category", "Printer"),
+    pgettext_lazy("device category", "Network outlet"),
+    pgettext_lazy("device category", "Phone"),
+    pgettext_lazy("device category", "Other"),
+)
+
+
+class DeviceCategory(models.Model):
+    """What a device is for (switch, access point, outlet ...); editable by administrators."""
+
+    key = models.SlugField(_("key"), max_length=30, unique=True)
+    name = models.CharField(_("name"), max_length=60)
+    glyph = models.CharField(
+        _("short sign"),
+        max_length=2,
+        blank=True,
+        help_text=_("Shown on floor plan pins, for example AP."),
+    )
+    colour = models.CharField(
+        _("colour"),
+        max_length=7,
+        default="#475569",
+        validators=[RegexValidator(r"^#[0-9a-fA-F]{6}$", _("Use a hex colour like #2563eb."))],
+    )
+    order = models.PositiveSmallIntegerField(_("order"), default=100)
+    builtin = models.BooleanField(default=False, editable=False)
+
+    policy_object_type = "library.category"
+
+    class Meta:
+        ordering = ["order", "name"]
+
+    def __str__(self) -> str:
+        return self.label
+
+    @property
+    def label(self) -> str:
+        """Built in names are translated; names given by administrators are shown as they are."""
+        return pgettext("device category", self.name) if self.builtin else self.name
+
+    @staticmethod
+    def by_label(rows: Any) -> list[DeviceCategory]:
+        """Alphabetical by shown name, "other" last."""
+        return sorted(rows, key=lambda c: (c.key == "other", c.label.casefold()))
 
 
 class DeviceType(TimestampedModel):
@@ -80,22 +180,6 @@ class DeviceType(TimestampedModel):
     class Form(models.TextChoices):
         RACK = "rack", _("rack mounted")
         FLOOR = "floor", _("floor device")
-
-    class Category(models.TextChoices):
-        SWITCH = "switch", _("switch")
-        ROUTER = "router", _("router")
-        FIREWALL = "firewall", _("firewall")
-        SERVER = "server", _("server")
-        STORAGE = "storage", _("storage")
-        PATCH_PANEL = "patch_panel", _("patch panel")
-        PDU = "pdu", _("power distribution")
-        UPS = "ups", _("UPS")
-        ACCESS_POINT = "access_point", _("access point")
-        CAMERA = "camera", _("camera")
-        PRINTER = "printer", _("printer")
-        OUTLET = "outlet", _("network outlet")
-        PHONE = "phone", _("phone")
-        OTHER = "other", _("other")
 
     tenant = models.ForeignKey(
         "tenancy.Tenant",
@@ -108,11 +192,20 @@ class DeviceType(TimestampedModel):
     vendor = models.ForeignKey(Vendor, on_delete=models.PROTECT, related_name="device_types")
     model = models.CharField(_("model"), max_length=150)
     form = models.CharField(_("form"), max_length=5, choices=Form.choices, default=Form.RACK)
-    category = models.CharField(
-        _("category"), max_length=20, choices=Category.choices, default=Category.OTHER
+    category = models.ForeignKey(
+        DeviceCategory,
+        to_field="key",
+        db_column="category",
+        on_delete=models.PROTECT,
+        default="other",
+        related_name="device_types",
+        verbose_name=_("category"),
     )
     u_height = models.PositiveSmallIntegerField(
-        _("height (U)"), default=1, validators=[MinValueValidator(0), MaxValueValidator(100)]
+        _("height (U)"),
+        default=1,
+        validators=[MinValueValidator(0), MaxValueValidator(100)],
+        help_text=_("Only for rack mounted devices."),
     )
     full_depth = models.BooleanField(
         _("full depth"), default=True, help_text=_("Occupies front and rear.")
@@ -124,6 +217,26 @@ class DeviceType(TimestampedModel):
         help_text=_("For example SW-{n:02}. {n} is a counter."),
     )
     part_number = models.CharField(_("part number"), max_length=100, blank=True)
+    mounting = models.CharField(_("mounting"), max_length=10, choices=Mounting.choices, blank=True)
+    airflow = models.CharField(_("airflow"), max_length=15, choices=Airflow.choices, blank=True)
+    power_supplies = models.PositiveSmallIntegerField(
+        _("power supplies"),
+        null=True,
+        blank=True,
+        validators=[MaxValueValidator(16)],
+        help_text=_("How many power supplies the device has."),
+    )
+    max_power_w = models.PositiveIntegerField(
+        _("maximum power (W)"), null=True, blank=True, validators=[MaxValueValidator(100_000)]
+    )
+    weight_kg = models.DecimalField(
+        _("weight (kg)"),
+        max_digits=7,
+        decimal_places=2,
+        null=True,
+        blank=True,
+        validators=[MinValueValidator(0)],
+    )
     description = models.TextField(_("description"), blank=True)
     front_image = models.ForeignKey(
         "metadata.Attachment", null=True, blank=True, on_delete=models.SET_NULL, related_name="+"
@@ -224,3 +337,24 @@ class PortTemplate(UUIDModel):
         if self.count == 1:
             return [self.name_pattern]
         return [f"{self.name_pattern}{i}" for i in numbers]
+
+
+class CatalogType(models.Model):
+    """A device type of the bundled community library (CC0), ready to copy into the library."""
+
+    slug = models.CharField(max_length=200, unique=True)
+    manufacturer = models.CharField(max_length=100)
+    model = models.CharField(max_length=150)
+    part_number = models.CharField(max_length=100, blank=True)
+    u_height = models.FloatField(default=1)
+    full_depth = models.BooleanField(default=True)
+    ports = models.PositiveIntegerField(default=0)
+    summary = models.CharField(max_length=300, blank=True)
+    spec = models.JSONField()
+    commit = models.CharField(max_length=40)
+
+    class Meta:
+        ordering = ["manufacturer", "model"]
+
+    def __str__(self) -> str:
+        return f"{self.manufacturer} {self.model}"

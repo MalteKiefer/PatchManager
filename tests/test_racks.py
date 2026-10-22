@@ -7,8 +7,8 @@ from hypothesis import strategies as st
 
 from patchmanager.accounts.services import ServiceError
 from patchmanager.dcim import services
+from patchmanager.dcim.elevation import UNIT, layout
 from patchmanager.dcim.models import Rack, RackSpace
-from patchmanager.dcim.views import UNIT_PX, elevation
 from patchmanager.tenancy import rls
 
 pytestmark = pytest.mark.django_db
@@ -114,19 +114,20 @@ def test_elevation_coordinates(make_tree, super_admin) -> None:
             t["request"], super_admin, t["rack"], start=1, size=2, face="front", label="Bottom"
         )
         rack = Rack.objects.get(pk=t["rack"].pk)
-        front = elevation(rack, "front")
-        assert front["blocks"][0].y == 8 * UNIT_PX  # units 1-2 at the bottom of a 10 U rack
-        assert elevation(rack, "rear")["blocks"] == []
+        front = layout(super_admin, rack, "front")
+        assert front.bands[0].y == 8 * UNIT  # units 1-2 at the bottom of a 10 U rack
+        assert layout(super_admin, rack, "rear").bands == []
         rack.descending_units = True
-        assert elevation(rack, "front")["blocks"][0].y == 0
+        assert layout(super_admin, rack, "front").bands[0].y == 0
 
 
 def test_rack_page_and_json_move(admin_client: Client, make_tree, system) -> None:
     t = make_tree()
     url = f"/racks/{t['rack'].pk}/"
+    assert admin_client.get(url + "spaces/new/", secure=True).status_code == 200
     admin_client.post(
-        url,
-        {"action": "reserve", "label": "Core switch", "start": 40, "size": 2, "face": "both"},
+        url + "spaces/new/",
+        {"label": "Core switch", "start": 40, "size": 2, "face": "both"},
         secure=True,
     )
     page = admin_client.get(url + "?face=rear", secure=True).content.decode()
@@ -227,3 +228,31 @@ def test_conditions_judge_stored_state_not_submitted_values(make_tree, make_user
         with pytest.raises(PermissionDeniedError):  # resulting state leaves the grant
             tree.update(request, user, Rack.objects.get(pk=rack.pk), status="active")
         tree.update(request, user, Rack.objects.get(pk=rack.pk), name="Planned rack")
+
+
+def test_rack_drawing_hides_devices_the_viewer_cannot_see(
+    client: Client, super_admin, make_user, grant
+) -> None:
+    from patchmanager.accounts.models import Assignment, Role
+    from patchmanager.dcim.management.commands.seed_scale import seed
+    from patchmanager.dcim.models import Device
+    from tests.conftest import login
+
+    seed(super_admin, racks=1, slug="deny")
+    with rls.system_context():
+        switch = Device.objects.select_related("tenant").get(name="sw-0001")
+        rack = Rack.objects.get(tenant__slug="deny")
+    user = make_user()
+    grant(user, "viewer", switch.tenant)
+    Assignment.objects.create(
+        role=Role.objects.get(key="viewer"),
+        user=user,
+        tenant=switch.tenant,
+        scope_path=switch.path,
+        effect="deny",
+    )
+    login(client, user)
+    page = client.get(f"/racks/{rack.pk}/", secure=True).content.decode()
+    assert "sw-0001" not in page and "not visible" in page
+    assert "pp-0001" in page  # the panel is visible; its cords to the switch are not traced
+    assert page.count('class="rack-port is-') == 24

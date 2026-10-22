@@ -1,0 +1,17 @@
+{% extends "base.html" %}{% load i18n %}
+{% block title %}{% translate "Addresses" %}{% endblock %}
+{% block content %}
+<div class="mb-4 flex flex-wrap items-center gap-3"><h1 class="mr-auto">{% translate "IP networks" %}{% if current_tenant %} · {{ current_tenant.name }}{% endif %}</h1>
+  {% if can_add %}<a class="btn-primary" href="{% url 'ipam:address-create' %}">{% translate "New address" %}</a>{% endif %}</div>
+{% include "ipam/_tabs.html" with tab="addresses" %}
+<form method="get" role="search" class="mb-4 flex max-w-md gap-2"><label for="ip-q" class="sr-only">{% translate "Search addresses" %}</label>
+  <input id="ip-q" name="q" value="{{ q }}" placeholder="{% translate 'Address or DNS name' %}" class="app-select w-full py-2"><button class="btn-secondary">{% translate "Search" %}</button></form>
+<div class="card overflow-x-auto p-0"><table class="table">
+  <thead><tr><th>{% translate "Address" %}</th><th>VRF</th><th>{% translate "Status" %}</th><th>{% translate "DNS name" %}</th><th>{% translate "Port" %}</th><th>{% translate "Description" %}</th></tr></thead>
+  <tbody>{% for a in page %}<tr>
+    <td><a href="{% url 'ipam:address' a.pk %}" class="tabular-nums">{{ a.address }}</a></td><td>{{ a.vrf|default:_("global") }}</td><td>{{ a.get_status_display }}</td><td>{{ a.dns_name }}</td>
+    <td>{% if a.shown_port %}<a href="{% url 'devices:port' a.shown_port.pk %}">{{ a.shown_port.device }} · {{ a.shown_port.name }}</a>{% elif a.port_id %}<span class="text-slate-500">{% translate "(not visible to you)" %}</span>{% endif %}</td><td class="text-sm text-slate-500">{{ a.description }}</td>
+  </tr>{% empty %}<tr><td colspan="6" class="text-slate-500">{% translate "No addresses found." %}</td></tr>{% endfor %}</tbody>
+</table></div>
+{% include "manage/_pager.html" %}
+{% endblock %}
