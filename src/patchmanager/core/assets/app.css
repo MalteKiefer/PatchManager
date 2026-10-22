@@ -114,6 +114,14 @@
 .plan-item:focus { outline: none; }
 .plan-item:focus-visible .plan-pin, .plan-item:focus-visible rect { stroke: #f59e0b; stroke-width: 3; }
 .plan-swatch { @apply inline-block size-3 rounded-sm; }
+/* Placing an item: the plan is framed, the cursor aims, the item's room and list entry stand out. */
+.plan-frame { transition: box-shadow 150ms ease-out; }
+.plan-frame.is-placing { box-shadow: 0 0 0 3px #f59e0b; }
+#plan-hint.is-placing { @apply rounded bg-amber-50 px-2 py-0.5 font-medium text-amber-800 dark:bg-slate-800 dark:text-amber-300; }
+#plan:is([data-plan-mode="place"], [data-plan-mode="add"], [data-plan-mode="scale"], [data-plan-mode="outline"], [data-plan-mode="room"]) { cursor: crosshair; }
+.plan-room.is-target { fill: rgb(245 158 11 / 0.18); stroke: #f59e0b; stroke-width: 3; stroke-dasharray: 8 5; }
+[data-place][aria-pressed="true"] { @apply bg-amber-50 text-slate-900 ring-2 ring-amber-500 dark:bg-slate-800 dark:text-white; }
+@media (prefers-reduced-motion: reduce) { .plan-frame { transition: none; } }
 .panel-head h2 { @apply mt-0.5 text-xl; }
 .panel-facts { @apply mt-4 grid gap-2 text-sm; }
 .panel-facts > div { @apply grid grid-cols-[7rem_minmax(0,1fr)] gap-2; }

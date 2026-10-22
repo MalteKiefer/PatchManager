@@ -44,7 +44,17 @@ def test_upload_scale_and_place(page: Page, live_server, super_admin, make_tree,
     expect(page.get_by_text("Scale: 50.0 px per metre")).to_be_visible()
     expect(page.locator("#plan[data-ready]")).to_have_count(1)
 
-    page.get_by_role("button", name="▭ A01").click()
+    choice = page.get_by_role("button", name="▭ A01")
+    choice.click()
+    # Placing is visible: chosen entry, framed plan, aiming cursor, named in the hint.
+    expect(choice).to_have_attribute("aria-pressed", "true")
+    expect(page.locator(".plan-frame.is-placing")).to_have_count(1)
+    expect(page.locator("#plan")).to_have_attribute("data-plan-mode", "place")
+    expect(page.locator("#plan-hint")).to_contain_text("A01")
+    page.keyboard.press("Escape")
+    expect(choice).to_have_attribute("aria-pressed", "false")
+    expect(page.locator(".plan-frame.is-placing")).to_have_count(0)
+    choice.click()
     _click(page, 200, 150)
     expect(page.locator(".plan-item[data-kind=rack]")).to_have_count(1)
     with rls.system_context():

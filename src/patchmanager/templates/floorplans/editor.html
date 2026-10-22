@@ -11,7 +11,7 @@
 {{ scene|json_script:"plan-scene" }}
 <div id="plan-text" hidden data-move="{% translate 'Drag racks and devices. Focus one and use the arrow keys for fine moves.' %}"
      data-scale="{% translate 'Click two points whose distance you know.' %}" data-outline="{% translate 'Click the corners of the room, then finish.' %}"
-     data-place="{% translate 'Click where the item stands.' %}" data-two-points="{% translate 'Click two points first.' %}"
+     data-place="{% translate 'Click where the item stands.' %}" data-placing="{% translate 'Placing %(name)s: click where it stands on the plan. Esc cancels.' %}" data-two-points="{% translate 'Click two points first.' %}"
      data-failed="{% translate 'The change could not be saved.' %}"
      data-add="{% translate 'Click inside a room where the new device goes.' %}"
      data-outside="{% translate 'Click inside a drawn room outline.' %}"
@@ -19,7 +19,7 @@
      data-room="{% translate 'Click the corners of the new room, then finish.' %}"
      data-new-room="{% url 'locations:node-create' 'floor' floor.pk %}" data-new-room-label="{% translate 'New room' %}"></div>
 <div class="grid gap-6 xl:grid-cols-[1fr_20rem]">
-  <section class="card overflow-hidden p-0" aria-labelledby="plan-h">
+  <section class="plan-frame card overflow-hidden p-0" aria-labelledby="plan-h">
     <h2 id="plan-h" class="sr-only">{% translate "Plan" %}</h2>
     {% if plan %}
     <div class="flex flex-wrap items-center gap-2 border-b border-slate-200 p-3 text-sm dark:border-slate-800" role="toolbar" aria-label="{% translate 'Plan tools' %}">
@@ -41,7 +41,7 @@
       <button type="button" id="outline-cancel" class="btn-secondary py-1">{% translate "Cancel" %}</button>
     </div>
     <div class="overflow-auto bg-slate-100 dark:bg-slate-950">
-      <svg id="plan" viewBox="0 0 {{ plan.width_px }} {{ plan.height_px }}" width="{{ plan.width_px }}" height="{{ plan.height_px }}"
+      <svg id="plan" data-plan-mode="move" viewBox="0 0 {{ plan.width_px }} {{ plan.height_px }}" width="{{ plan.width_px }}" height="{{ plan.height_px }}"
            class="block max-w-none select-none" role="application" aria-label="{% translate 'Floor plan editor' %}"
            data-base="{% url 'floorplans:editor' floor.pk %}" data-width="{{ plan.width_px }}" data-height="{{ plan.height_px }}">
         <image href="{% url 'metadata:download' plan.image_id %}" x="0" y="0" width="{{ plan.width_px }}" height="{{ plan.height_px }}"/>
@@ -65,8 +65,8 @@
       <h2 id="unplaced-h" class="mb-2">{% translate "Not on the plan" %}</h2>
       <p class="mb-3 text-xs text-slate-500">{% translate "Choose an item, then click on the plan." %}</p>
       <ul class="space-y-1 text-sm">
-        {% for r in unplaced_racks %}<li><button type="button" class="nav-link w-full text-left" data-place="rack" data-id="{{ r.id }}" {% if not r.can_change %}disabled{% endif %}>▭ {{ r.name }}</button></li>{% endfor %}
-        {% for d in unplaced_devices %}<li><button type="button" class="nav-link w-full text-left" data-place="device" data-id="{{ d.id }}" {% if not d.can_change %}disabled{% endif %}>● {{ d.name }} <span class="text-xs text-slate-500">{{ d.room }}</span></button></li>{% endfor %}
+        {% for r in unplaced_racks %}<li><button type="button" class="nav-link w-full text-left" data-place="rack" data-id="{{ r.id }}" data-name="{{ r.name }}" data-room="{{ r.room_id }}" aria-pressed="false" {% if not r.can_change %}disabled{% endif %}>▭ {{ r.name }} <span class="text-xs text-slate-500">{{ r.room }}</span></button></li>{% endfor %}
+        {% for d in unplaced_devices %}<li><button type="button" class="nav-link w-full text-left" data-place="device" data-id="{{ d.id }}" data-name="{{ d.name }}" data-room="{{ d.room_id }}" aria-pressed="false" {% if not d.can_change %}disabled{% endif %}>● {{ d.name }} <span class="text-xs text-slate-500">{{ d.room }}</span></button></li>{% endfor %}
         {% if not unplaced_racks and not unplaced_devices %}<li class="text-slate-500">{% translate "Everything is placed." %}</li>{% endif %}
       </ul>
     </section>
