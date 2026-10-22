@@ -182,6 +182,8 @@ class SwitchSettings(DeviceScoped):
         _("tunnel gateways"), default=list, blank=True
     )  # controller addresses for tunnelled ports
     jumbo_vlans = models.JSONField(default=list, blank=True)  # VLAN IDs with jumbo frames
+    dns_servers = models.JSONField(_("DNS servers"), default=list, blank=True)
+    domain = models.CharField(_("domain name"), max_length=253, blank=True)
     source = models.CharField(_("source"), max_length=200, blank=True)
 
     class Meta:

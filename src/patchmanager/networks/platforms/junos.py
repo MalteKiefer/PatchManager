@@ -130,7 +130,7 @@ def parse(text: str) -> Config:
         if member_vid is not None:
             vid = member_vid
             interface = config.interface(port)
-            interface.allowed = sorted({*(interface.allowed or []), vid})
+            config.allow(port, [vid])
             if interface.mode != "trunk":
                 interface.access_vlan = vid
     config.unknown = config.unknown[:200]

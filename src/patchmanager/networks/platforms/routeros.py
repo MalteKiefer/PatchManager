@@ -224,8 +224,8 @@ def _leases(config: Config) -> None:
     leases = config.pools.pop("leases", None)
     if leases is None:
         return
+    index = config.pool_index()
     for mac, ip, name in leases.reservations:
-        for pool in config.pools.values():
-            if pool.network and ipaddress.ip_address(ip) in ipaddress.ip_network(pool.network):
-                pool.reservations.append((mac, ip, name))
-                break
+        pool = config.pool_for(ip, index)
+        if pool is not None:
+            pool.reservations.append((mac, ip, name))

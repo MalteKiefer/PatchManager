@@ -173,9 +173,10 @@ def _interface(config: Config, name: str, body: list[str]) -> None:
             and len(parts) >= 5
         ):
             spec = " ".join(parts[4:])
-            port.allowed = (
-                None if spec == "all" else sorted({*(port.allowed or []), *vid_list(spec)})
-            )
+            if spec == "all":
+                port.allowed = None
+            else:
+                config.allow(name, vid_list(spec))
         elif parts[:3] == ["port", "trunk", "pvid"] and len(parts) == 5 and parts[4].isdigit():
             port.native_vlan = int(parts[4])
         elif parts[:2] == ["port", "link-aggregation"] and parts[-1].isdigit():

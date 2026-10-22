@@ -12,6 +12,10 @@ All notable changes to this project are documented here. The format follows
   instances), VLAN interfaces with addresses, static routes, OSPF, BGP neighbors,
   tunnelled ports, device profiles, and a port matrix coloured by VLAN (ADR 0029).
 * Stacks and virtual switches (stacking, VSF, VSX, MLAG, virtual chassis).
+* Read configurations of Aruba AOS-CX, Cisco IOS, IOS-XE and NX-OS, Fortinet
+  FortiOS, Juniper Junos, MikroTik RouterOS, HPE Comware, H3C, Huawei VRP and LANCOM
+  LCOS; the platform is recognised automatically. DNS servers, routed ports and DHCP
+  pools (as DHCP scopes with reservations and relays) are taken over too (ADR 0031).
 * Customers and systems: organisations with contacts, systems (telephony, building
   automation, access control ...), and links that assign devices, buildings, VLANs,
   networks, configurations and more to a system or customer (ADR 0030).
@@ -22,6 +26,11 @@ All notable changes to this project are documented here. The format follows
 * Read ArubaOS-Switch configurations and Aruba Central templates into the
   documentation with a preview of every change; write the documentation back as an
   ArubaOS-Switch configuration.
+
+### Fixed
+
+* Webhook pages highlighted "Import and export" in the menu instead of
+  "Administration".
 
 ## [1.0.0] - 2026-10-22
 

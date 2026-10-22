@@ -315,18 +315,11 @@ def _pool_ranges(
     Manual bindings are pools of their own; they become reservations of the pool whose
     network holds their address.
     """
+    index = config.pool_index()
     for name, pool in list(config.pools.items()):
         if pool.network or not pool.reservations:
             continue
-        address = ipaddress.ip_address(pool.reservations[0][1])
-        home = next(
-            (
-                p
-                for p in config.pools.values()
-                if p.network and address in ipaddress.ip_network(p.network)
-            ),
-            None,
-        )
+        home = config.pool_for(pool.reservations[0][1], index)
         if home is not None:
             home.reservations += pool.reservations
             del config.pools[name]

@@ -127,8 +127,12 @@ def parse(text: str) -> Config:
             _dhcp(config, row, networks)
         except ParseError as exc:
             config.warnings.append(f"DHCP {row.get('network-name', '')}: {exc}")
+    index = config.pool_index()
     for row in tables.get("/setup/dhcp/hosts", []):
-        _host(config, row)
+        try:
+            _host(config, row, index)
+        except ParseError as exc:
+            config.warnings.append(f"DHCP host: {exc}")
     known = {
         "/setup/tcp-ip/network-list",
         "/setup/vlan/networks",
@@ -191,7 +195,7 @@ def _vlans(config: Config, tables: dict[str, list[dict[str, str]]]) -> None:
             interface = config.interface(port)
             if modes.get(port.lower(), "trunk") == "trunk":
                 interface.mode = "trunk"
-                interface.allowed = sorted({*(interface.allowed or []), int(vid)})
+                config.allow(port, [int(vid)])
             else:
                 interface.access_vlan = int(vid)
 
@@ -233,21 +237,12 @@ def _dhcp(config: Config, row: dict[str, str], networks: dict[str, dict[str, str
     pool.lease_seconds = int(lease) * 60 if lease.isdigit() and int(lease) else None  # minutes
 
 
-def _host(config: Config, row: dict[str, str]) -> None:
+def _host(config: Config, row: dict[str, str], index: dict[str, Pool]) -> None:
     mac = re.sub(r"[^0-9a-f]", "", row.get("mac-address", "").lower())
     ip = row.get("ip-address", "")
     if len(mac) != 12 or not ip:
         return
-    pool = config.pools.get(row.get("network-name", "")[:100])
-    if pool is None:
-        pool = next(
-            (
-                p
-                for p in config.pools.values()
-                if p.network and ipaddress.ip_address(ip) in ipaddress.ip_network(p.network)
-            ),
-            None,
-        )
+    pool = config.pools.get(row.get("network-name", "")[:100]) or config.pool_for(ip, index)
     if pool is not None:
         pool.reservations.append(
             (

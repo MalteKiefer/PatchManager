@@ -170,8 +170,38 @@ class Config:
             raise TooLargeError(f"the configuration names more than {MAX_NAMES} ports")
 
     def interface(self, name: str) -> Interface:
-        """The interface entry of ``name`` (created on first use)."""
-        return self.interfaces.setdefault(name, Interface(name))
+        """The interface entry of ``name`` (created on first use, counted against the budget)."""
+        found = self.interfaces.get(name)
+        if found is None:
+            if len(name) > MAX_NAME:
+                raise ParseError(
+                    f"the port name {name[:20]}... is longer than {MAX_NAME} characters"
+                )
+            self.charge(1)
+            found = self.interfaces[name] = Interface(name)
+        return found
+
+    def allow(self, name: str, vids: list[int]) -> None:
+        """Add VLANs to a trunk's allowed list (duplicates are removed by :func:`finish`)."""
+        port = self.interface(name)
+        self.charge(len(vids))
+        port.allowed = [*(port.allowed or []), *vids]
+
+    def pool_index(self) -> dict[str, Pool]:
+        """Pools by network, for :meth:`pool_for` (build once, look up many times)."""
+        return {p.network: p for p in self.pools.values() if p.network}
+
+    def pool_for(self, address: str, index: dict[str, Pool]) -> Pool | None:
+        """The pool whose network holds ``address`` (at most one lookup per prefix length)."""
+        try:
+            host = ipaddress.ip_address(address)
+        except ValueError as exc:
+            raise ParseError(f"cannot read the address {address[:40]}") from exc
+        for length in range(host.max_prefixlen, -1, -1):
+            network = str(ipaddress.ip_network(f"{host}/{length}", strict=False))
+            if network in index:
+                return index[network]
+        return None
 
 
 class ParseError(ValueError):
@@ -346,7 +376,7 @@ def finish(config: Config) -> Config:
         elif port.mode == "trunk":
             if port.native_vlan:
                 _member(config, seen, port.native_vlan, port.name, tagged=False)
-            allowed = known if port.allowed is None else set(port.allowed)
+            allowed = known if port.allowed is None else set(port.allowed)  # also deduplicates
             for vid in sorted(allowed - {port.native_vlan}):
                 _member(config, seen, vid, port.name, tagged=True)
     return config

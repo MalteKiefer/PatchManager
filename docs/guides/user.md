@@ -168,8 +168,10 @@ VLAN with marks for tagged VLANs, edge ports, guards and tunnelled ports, then i
 VLANs with addresses, static routes, BGP neighbors, OSPF, spanning tree, link
 aggregations, device profiles and the stack it belongs to.
 
-**Read a configuration** takes an ArubaOS-Switch configuration or an Aruba Central
-template (with its variables as JSON): paste it, choose a file or a stored version.
+**Read a configuration** takes a configuration of ArubaOS-Switch (or an Aruba
+Central template with its variables as JSON), AOS-CX, Cisco IOS, IOS-XE or NX-OS,
+FortiOS, Junos, RouterOS, HPE Comware, H3C, Huawei VRP or LANCOM LCOS (a script in
+English); the platform is recognised or can be chosen: paste it, choose a file or a stored version.
 **Show changes** lists what would change and what is left out; **Apply changes**
 saves it. Passwords, keys and SNMP communities are never read. **As ArubaOS-Switch
 configuration** writes the documentation back as configuration text.

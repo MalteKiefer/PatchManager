@@ -3,7 +3,7 @@
 {% block content %}
 {% include "core/_breadcrumbs.html" with current=_("Read a configuration") %}
 <h1 class="mb-2">{% translate "Read a configuration" %} · {{ device.name }}</h1>
-<p class="mb-6 max-w-3xl text-sm text-slate-500">{% translate "ArubaOS-Switch configurations and Aruba Central templates are read: VLANs and their ports, VLAN addresses, trunks, port names and states, spanning tree, static routes, OSPF, BGP, device profiles and tunnelled ports. Passwords, keys and SNMP communities are never read. You see the changes before anything is saved." %}</p>
+<p class="mb-6 max-w-3xl text-sm text-slate-500">{% translate "Configurations of Aruba (AOS-S, AOS-CX, Central templates), Cisco (IOS, IOS-XE, NX-OS), Fortinet, Juniper, MikroTik, HPE Comware, H3C, Huawei and LANCOM are read: VLANs and their ports, addresses, aggregations, port names and states, spanning tree, static routes, OSPF, BGP, DNS servers and DHCP pools. Passwords, keys and SNMP communities are never read. You see the changes before anything is saved." %}</p>
 <div class="grid gap-6 xl:grid-cols-[minmax(0,1fr)_28rem]">
   <form method="post" enctype="multipart/form-data" class="card" novalidate>{% csrf_token %}
     {% include "core/_form.html" %}
@@ -15,6 +15,7 @@
   </form>
   {% if result %}
   <section class="card" aria-labelledby="changes-h" aria-live="polite">
+    {% if read_as %}<p class="mb-1 text-xs text-slate-500">{% blocktranslate with name=read_as %}Read as {{ name }}{% endblocktranslate %}</p>{% endif %}
     <h2 id="changes-h" class="mb-3">{% blocktranslate count n=result.changes|length %}{{ n }} change{% plural %}{{ n }} changes{% endblocktranslate %}</h2>
     <ul class="space-y-1 text-sm">{% for c in result.changes %}<li>{{ c }}</li>{% empty %}<li class="text-slate-500">{% translate "The documentation already matches." %}</li>{% endfor %}</ul>
     {% if result.skipped %}<h3 class="mt-5 mb-2 text-sm font-semibold">{% translate "Not taken over" %}</h3>

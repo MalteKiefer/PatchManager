@@ -154,7 +154,7 @@ def _interface(config: Config, name: str, node: dict[str, Any]) -> None:
         if parent:
             port = config.interface(parent)
             port.mode = "trunk"
-            port.allowed = sorted({*(port.allowed or []), int(vid)})
+            config.allow(parent, [int(vid)])
         return
     kind = _one(node, "type", "physical")
     port = config.interface(name)

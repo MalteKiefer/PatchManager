@@ -290,3 +290,41 @@ def test_webhooks_highlight_administration(admin_client: Client) -> None:
 
     current = re.findall(r'<a href="([^"]+)" aria-current="page"', page)
     assert "/manage/" in current and "/exchange/" not in current
+
+
+def test_record_pages_edit_and_delete(admin_client: Client, setup, system) -> None:
+    _post(admin_client, "/items/organizations/new/", {"name": "Edit Me", "kind": "supplier"})
+    with system():
+        org = Organization.objects.get(name="Edit Me")
+    _post(admin_client, "/items/contacts/new/", {"parent": org.pk, "name": "Jo"})
+    with system():
+        contact = Contact.objects.get()
+    page = admin_client.get(f"/items/contacts/{contact.pk}/", secure=True).content.decode()
+    assert "Edit Me" in page  # breadcrumb back to the organisation
+    _post(
+        admin_client,
+        f"/items/contacts/{contact.pk}/",
+        {"action": "edit", "name": "Jo Doe", "role": "", "email": "", "phone": "", "notes": ""},
+    )
+    with system():
+        assert Contact.objects.get().name == "Jo Doe"
+    deleted = _post(admin_client, f"/items/contacts/{contact.pk}/", {"action": "delete"})
+    assert deleted.url == f"/items/organizations/{org.pk}/"
+    _post(
+        admin_client,
+        f"/items/organizations/{org.pk}/",
+        {"action": "edit", "name": "Edited", "kind": "supplier"},
+    )
+    with system():
+        assert Organization.objects.get(pk=org.pk).name == "Edited"
+    _post(
+        admin_client,
+        "/items/circuits/new/",
+        {"circuit_id": "L1", "provider": org.pk, "kind": "dsl", "status": "active"},
+    )
+    blocked = admin_client.post(
+        f"/items/organizations/{org.pk}/", {"action": "delete"}, secure=True, follow=True
+    )
+    assert "still use" in blocked.content.decode()
+    assert admin_client.get("/items/nothing/", secure=True).status_code == 404
+    assert admin_client.get("/items/contacts/", secure=True).status_code == 404  # no own list

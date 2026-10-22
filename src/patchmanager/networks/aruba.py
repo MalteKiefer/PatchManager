@@ -172,7 +172,7 @@ def parse(text: str, variables: dict[str, Any] | None = None) -> Config:
     """Read an ArubaOS-Switch configuration (or Aruba Central template)."""
     if "\x00" in text:
         raise ParseError("the file is not a text configuration")
-    config = Config()
+    config = Config(vendor="aruba-aos-s")
     lines = fill_template(text, variables or {}, config.warnings)
     for raw in lines[:5]:
         if raw.startswith(";") and "Configuration Editor" in raw:

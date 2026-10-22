@@ -425,3 +425,32 @@ def test_other_line_breaks_stay_inside_a_value() -> None:
 def test_interface_block_applies_to_its_whole_range() -> None:
     config = aruba.parse('interface 1-3\n   name "Desk"\n   disable\n   exit\n')
     assert [(p.label, p.enabled) for p in config.interfaces.values()] == [("Desk", False)] * 3
+
+
+def test_read_from_file_and_stored_version(admin_client: Client, switch, system) -> None:
+    from django.core.files.uploadedfile import SimpleUploadedFile
+
+    from patchmanager.configs import services as configs
+
+    device = switch["device"]
+    admin_client.post("/tenants/switch/", {"tenant": switch["tenant"].pk}, secure=True)
+    base = f"/devices/{device.pk}/network/"
+    upload = SimpleUploadedFile("core.cfg", ROUTED.encode())
+    page = admin_client.post(
+        base + "read/", {"file": upload, "action": "preview", "platform": ""}, secure=True
+    ).content.decode()
+    assert "Read as ArubaOS-Switch" in page and "New VLAN 20" in page
+    with system():
+        configs.add(switch["request"], switch["request"].user, device, ROUTED)
+    stored = admin_client.post(
+        base + "read/", {"version": 1, "action": "apply", "platform": "aruba-aos-s"}, secure=True
+    )
+    assert stored.url == base
+    with system():
+        assert SwitchSettings.objects.get(device=device).source == "v1"
+    download = admin_client.get(base + "config.txt?download=1", secure=True)
+    assert download["Content-Disposition"] == 'attachment; filename="sw-01.cfg"'
+    unknown = admin_client.post(
+        base + "read/", {"content": "hello", "action": "preview"}, secure=True
+    )
+    assert "not recognised" in unknown.content.decode()

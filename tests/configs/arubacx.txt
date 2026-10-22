@@ -1,0 +1,75 @@
+Current configuration:
+!
+!Version ArubaOS-CX GL.10.13.1005
+!export-password: default
+hostname CX-01
+user admin group administrators password ciphertext AQBapW
+ntp server 10.0.0.1
+ip dns server-address 10.0.0.53
+ip dns domain-name office.lan
+!
+vsf member 1
+    type jl658a
+    priority 255
+vsf member 2
+    type jl658a
+!
+vlan 1
+vlan 10
+    name USERS
+vlan 20
+    name VOICE
+spanning-tree
+spanning-tree mode rpvst
+spanning-tree priority 2
+!
+interface lag 1
+    no shutdown
+    no routing
+    vlan trunk native 1
+    vlan trunk allowed 10,20
+    lacp mode active
+!
+interface 1/1/1
+    no shutdown
+    description Desk 1
+    vlan access 10
+    spanning-tree port-type admin-edge
+    spanning-tree bpdu-guard
+interface 1/1/2
+    description spare
+interface 1/1/47
+    no shutdown
+    lag 1
+interface 1/1/48
+    no shutdown
+    lag 1
+interface 1/1/49
+    no shutdown
+    routing
+    ip address 192.0.2.6/30
+!
+interface vlan 10
+    ip address 10.70.0.1/24
+    ip helper-address 10.0.0.5
+    ip ospf 1 area 0.0.0.0
+!
+ip route 0.0.0.0/0 192.0.2.5 distance 5
+router ospf 1
+    router-id 10.255.0.7
+    area 0.0.0.0
+router bgp 65070
+    bgp router-id 10.255.0.7
+    neighbor 192.0.2.5 remote-as 65000
+    neighbor 192.0.2.5 description Uplink
+!
+dhcp-server vrf default
+    pool USERS
+        range 10.70.0.100 10.70.0.199 prefix-len 24
+        default-router 10.70.0.1
+        dns-server 10.0.0.53
+        domain-name office.lan
+        lease 08:00:00
+        static-bind ip 10.70.0.20 mac 00:11:22:33:44:66
+        exit
+    enable
