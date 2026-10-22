@@ -216,9 +216,15 @@ def _guests(
             volume = StorageVolume.objects.filter(
                 tenant=tenant, cluster=cluster, name=storage
             ).first()
-            VirtualDisk.objects.create(
-                tenant=tenant, vm=vm, name=name, size_gb=size, storage=volume
-            )
+            disk = VirtualDisk(tenant=tenant, vm=vm, name=name[:64], size_gb=size, storage=volume)
+            try:
+                disk.full_clean(exclude=["tenant"])
+            except ValidationError:
+                result.notes.append(
+                    _("%(vm)s: disk %(disk)s was left out.") % {"vm": vm.name, "disk": name}
+                )
+                continue
+            disk.save()
 
 
 def _storage(

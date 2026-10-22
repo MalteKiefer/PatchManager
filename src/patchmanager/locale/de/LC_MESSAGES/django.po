@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-22 08:55+0000\n"
+"POT-Creation-Date: 2026-10-22 08:59+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -972,7 +972,9 @@ msgstr "Übergabeport"
 #: circuits/models.py:56
 msgid ""
 "Where the line ends, for example on the provider's router or our firewall."
-msgstr "Wo die Leitung endet, zum Beispiel am Router des Providers oder an unserer Firewall."
+msgstr ""
+"Wo die Leitung endet, zum Beispiel am Router des Providers oder an unserer "
+"Firewall."
 
 #: circuits/models.py:58
 msgid "download (Mbit/s)"
@@ -1054,112 +1056,125 @@ msgstr "Status"
 msgid "Contract end"
 msgstr "Vertragsende"
 
-#: compute/connections.py:66
+#: compute/connections.py:69
 #, python-format
 msgid "%(name)s is no longer on the platform."
 msgstr "%(name)s ist nicht mehr auf der Plattform."
 
-#: compute/connections.py:72
+#: compute/connections.py:75
 #, python-format
 msgid ""
 "%(servers)s new servers, %(created)s new and %(updated)s updated machines, "
 "%(storage)s storage."
-msgstr "%(servers)s neue Server, %(created)s neue und %(updated)s aktualisierte Maschinen, %(storage)s Speicher."
+msgstr ""
+"%(servers)s neue Server, %(created)s neue und %(updated)s aktualisierte "
+"Maschinen, %(storage)s Speicher."
 
-#: compute/connections.py:114
+#: compute/connections.py:135
 msgid "The person who set up this connection can no longer sign in."
-msgstr "Die Person, die diese Verbindung eingerichtet hat, kann sich nicht mehr anmelden."
+msgstr ""
+"Die Person, die diese Verbindung eingerichtet hat, kann sich nicht mehr "
+"anmelden."
 
-#: compute/connections.py:132 ipam/pages.py:314
+#: compute/connections.py:142
+#, python-format
+msgid "The update failed (%(kind)s)."
+msgstr "Die Aktualisierung ist fehlgeschlagen (%(kind)s)."
+
+#: compute/connections.py:161 ipam/pages.py:314
 msgid "API token"
 msgstr "API-Token"
 
-#: compute/connections.py:135
+#: compute/connections.py:164
 msgid ""
 "user@realm!tokenid=secret of a token with read rights (role PVEAuditor). It "
 "is stored encrypted and never shown again."
-msgstr "user@realm!tokenid=secret eines Tokens mit Leserechten (Rolle PVEAuditor). Es wird verschlüsselt gespeichert und nie wieder angezeigt."
+msgstr ""
+"user@realm!tokenid=secret eines Tokens mit Leserechten (Rolle PVEAuditor). "
+"Es wird verschlüsselt gespeichert und nie wieder angezeigt."
 
-#: compute/connections.py:144
+#: compute/connections.py:173
 msgid "For example https://pve1.example.lan:8006."
 msgstr "Zum Beispiel https://pve1.example.lan:8006."
 
-#: compute/connections.py:145
+#: compute/connections.py:174
 msgid "Only for self signed certificates."
 msgstr "Nur für selbstsignierte Zertifikate."
 
-#: compute/connections.py:153
+#: compute/connections.py:182
 msgid "Nodes"
 msgstr "Nodes"
 
-#: compute/connections.py:156
+#: compute/connections.py:185
 msgid "Virtual machines and containers"
 msgstr "Virtuelle Maschinen und Container"
 
-#: compute/connections.py:161 compute/pages.py:172 compute/pages.py:180
+#: compute/connections.py:190 compute/pages.py:172 compute/pages.py:180
 #: templates/dcim/device.html:42
 msgid "Storage"
 msgstr "Speicher"
 
-#: compute/connections.py:164
+#: compute/connections.py:193
 msgid "Take over new machines automatically"
 msgstr "Neue Maschinen automatisch übernehmen"
 
-#: compute/connections.py:167
+#: compute/connections.py:196
 msgid "Room for new servers"
 msgstr "Raum für neue Server"
 
-#: compute/connections.py:170
+#: compute/connections.py:199
 msgid "Device type for new servers"
 msgstr "Gerätetyp für neue Server"
 
-#: compute/connections.py:175 templates/compute/connection.html:20
+#: compute/connections.py:204 templates/compute/connection.html:20
 #: templates/compute/connections.html:9
 msgid "Automatic update"
 msgstr "Automatische Aktualisierung"
 
-#: compute/connections.py:201
+#: compute/connections.py:230
 msgid " (documented)"
 msgstr " (dokumentiert)"
 
-#: compute/connections.py:204
+#: compute/connections.py:233
 msgid " (new server)"
 msgstr " (neuer Server)"
 
-#: compute/connections.py:231
+#: compute/connections.py:260
 msgid "Choose both a room and a device type for new servers, or neither."
 msgstr "Wählen Sie für neue Server Raum und Gerätetyp, oder beides nicht."
 
-#: compute/connections.py:310
+#: compute/connections.py:339
 msgid "Connected. Choose what to take over."
 msgstr "Verbunden. Wählen Sie, was übernommen wird."
 
-#: compute/connections.py:316 templates/compute/connections.html:6
+#: compute/connections.py:345 templates/compute/connections.html:6
 msgid "Connect Proxmox VE"
 msgstr "Proxmox VE verbinden"
 
-#: compute/connections.py:318
+#: compute/connections.py:347
 msgid ""
 "PatchManager reads nodes, virtual machines, containers and storage of the "
 "cluster through its API. It never changes anything there."
-msgstr "PatchManager liest Nodes, virtuelle Maschinen, Container und Speicher des Clusters über seine API. Dort wird nie etwas geändert."
+msgstr ""
+"PatchManager liest Nodes, virtuelle Maschinen, Container und Speicher des "
+"Clusters über seine API. Dort wird nie etwas geändert."
 
-#: compute/connections.py:323 templates/cabling/connect.html:2
+#: compute/connections.py:352 templates/cabling/connect.html:2
 #: templates/cabling/connect.html:5 templates/cabling/connect.html:18
 #: templates/dcim/port.html:25
 msgid "Connect"
 msgstr "Verbinden"
 
-#: compute/connections.py:372
+#: compute/connections.py:401
 #, python-format
 msgid "Updated: %(n)s machines."
 msgstr "Aktualisiert: %(n)s Maschinen."
 
-#: compute/connections.py:398
+#: compute/connections.py:427
 msgid "Updated."
 msgstr "Aktualisiert."
 
-#: compute/connections.py:412
+#: compute/connections.py:441
 msgid "Connection removed; the documented machines stay."
 msgstr "Verbindung entfernt; die dokumentierten Maschinen bleiben."
 
@@ -1178,82 +1193,95 @@ msgstr "Host %(name)s gehört zu einem anderen Cluster."
 msgid "%(vm)s: network card %(nic)s was left out."
 msgstr "%(vm)s: Netzwerkkarte %(nic)s wurde ausgelassen."
 
-#: compute/importing.py:253 compute/pages.py:113 networks/switch_views.py:39
+#: compute/importing.py:224
+#, python-format
+msgid "%(vm)s: disk %(disk)s was left out."
+msgstr "%(vm)s: Festplatte %(disk)s wurde ausgelassen."
+
+#: compute/importing.py:259 compute/pages.py:113 networks/switch_views.py:39
 msgid "Platform"
 msgstr "Plattform"
 
-#: compute/importing.py:261 exchange/pdf.py:162 ipam/pages.py:148
+#: compute/importing.py:267 exchange/pdf.py:162 ipam/pages.py:148
 #: templates/accounts/security.html:50 templates/compute/connection.html:18
 #: templates/ipam/addresses.html:10 templates/ipam/prefix.html:24
 #: templates/manage/audit.html:18 templates/networks/switching.html:28
 msgid "Address"
 msgstr "Adresse"
 
-#: compute/importing.py:263
+#: compute/importing.py:269
 msgid ""
 "For example https://pve.example.lan:8006 or https://vcenter.example.lan."
-msgstr "Zum Beispiel https://pve.example.lan:8006 oder https://vcenter.example.lan."
+msgstr ""
+"Zum Beispiel https://pve.example.lan:8006 oder https://vcenter.example.lan."
 
-#: compute/importing.py:267
+#: compute/importing.py:273
 msgid "API token (Proxmox)"
 msgstr "API-Token (Proxmox)"
 
-#: compute/importing.py:270
+#: compute/importing.py:276
 msgid "user@realm!tokenid=secret, with read rights (PVEAuditor)."
 msgstr "user@realm!tokenid=secret, mit Leserechten (PVEAuditor)."
 
-#: compute/importing.py:273
+#: compute/importing.py:279
 msgid "User (vCenter, Synology)"
 msgstr "Benutzer (vCenter, Synology)"
 
-#: compute/importing.py:276
+#: compute/importing.py:282
 msgid "Password (vCenter, Synology)"
 msgstr "Passwort (vCenter, Synology)"
 
-#: compute/importing.py:281
+#: compute/importing.py:287
 msgid "Certificate fingerprint (SHA-256)"
 msgstr "Zertifikats-Fingerabdruck (SHA-256)"
 
-#: compute/importing.py:285
+#: compute/importing.py:291
 msgid ""
 "Only for self signed certificates; otherwise the certificate is verified."
-msgstr "Nur für selbstsignierte Zertifikate; sonst wird das Zertifikat geprüft."
+msgstr ""
+"Nur für selbstsignierte Zertifikate; sonst wird das Zertifikat geprüft."
 
-#: compute/importing.py:289
+#: compute/importing.py:295
 msgid "NAS device (Synology)"
 msgstr "NAS-Gerät (Synology)"
 
-#: compute/importing.py:305
+#: compute/importing.py:311
 msgid "Enter the API token."
 msgstr "Geben Sie das API-Token ein."
 
-#: compute/importing.py:309
+#: compute/importing.py:315
 msgid "Enter user and password."
 msgstr "Geben Sie Benutzer und Passwort ein."
 
-#: compute/importing.py:311
+#: compute/importing.py:317
 msgid "Choose the NAS device the storage belongs to."
 msgstr "Wählen Sie das NAS-Gerät, zu dem der Speicher gehört."
 
-#: compute/importing.py:350
+#: compute/importing.py:356
 #, python-format
 msgid ""
 "%(created)s new and %(updated)s updated machines, %(storage)s storage "
 "entries."
-msgstr "%(created)s neue und %(updated)s aktualisierte Maschinen, %(storage)s Speichereinträge."
+msgstr ""
+"%(created)s neue und %(updated)s aktualisierte Maschinen, %(storage)s "
+"Speichereinträge."
 
-#: compute/importing.py:362
+#: compute/importing.py:368
 msgid "Import from a platform"
 msgstr "Von einer Plattform importieren"
 
-#: compute/importing.py:364
+#: compute/importing.py:370
 msgid ""
 "Reads clusters, hosts, virtual machines and storage from Proxmox VE and "
 "VMware vCenter, or volumes and shares from a Synology NAS. Credentials are "
 "used once and not stored; give an account with read rights only."
-msgstr "Liest Cluster, Hosts, virtuelle Maschinen und Speicher aus Proxmox VE und VMware vCenter, oder Volumes und Freigaben eines Synology-NAS. Zugangsdaten werden einmal verwendet und nicht gespeichert; verwenden Sie ein Konto nur mit Leserechten."
+msgstr ""
+"Liest Cluster, Hosts, virtuelle Maschinen und Speicher aus Proxmox VE und "
+"VMware vCenter, oder Volumes und Freigaben eines Synology-NAS. Zugangsdaten "
+"werden einmal verwendet und nicht gespeichert; verwenden Sie ein Konto nur "
+"mit Leserechten."
 
-#: compute/importing.py:370 ipam/pages.py:387 templates/exchange/index.html:7
+#: compute/importing.py:376 ipam/pages.py:387 templates/exchange/index.html:7
 #: templates/library/types.html:30 templates/manage/roles.html:21
 msgid "Import"
 msgstr "Importieren"
@@ -1280,11 +1308,15 @@ msgstr "Geben Sie den SHA-256-Fingerabdruck des Zertifikats ein."
 
 #: compute/inventory.py:135
 msgid "The platform is too large or too slow to read in one go."
-msgstr "Die Plattform ist zu groß oder zu langsam, um sie in einem Durchgang zu lesen."
+msgstr ""
+"Die Plattform ist zu groß oder zu langsam, um sie in einem Durchgang zu "
+"lesen."
 
 #: compute/inventory.py:150
 msgid "The certificate could not be verified; enter its fingerprint."
-msgstr "Das Zertifikat konnte nicht geprüft werden; geben Sie seinen Fingerabdruck ein."
+msgstr ""
+"Das Zertifikat konnte nicht geprüft werden; geben Sie seinen Fingerabdruck "
+"ein."
 
 #: compute/inventory.py:153
 msgid "The host could not be reached."
@@ -1513,7 +1545,9 @@ msgstr "neue Maschinen automatisch übernehmen"
 #: compute/models.py:322
 msgid ""
 "Machines created on the platform later are documented by the next update."
-msgstr "Maschinen, die später auf der Plattform entstehen, werden bei der nächsten Aktualisierung dokumentiert."
+msgstr ""
+"Maschinen, die später auf der Plattform entstehen, werden bei der nächsten "
+"Aktualisierung dokumentiert."
 
 #: compute/models.py:330
 msgid "room for new servers"
@@ -2007,7 +2041,8 @@ msgstr "Der Rückport muss zum selben Gerät gehören."
 
 #: dcim/devices.py:246
 msgid "A port joins only a link aggregation of its own device."
-msgstr "Ein Port kann nur einer Link-Aggregation seines eigenen Geräts beitreten."
+msgstr ""
+"Ein Port kann nur einer Link-Aggregation seines eigenen Geräts beitreten."
 
 #: dcim/devices.py:272 dcim/devices.py:278
 msgid "This port name or rear position is already used."
@@ -2251,7 +2286,9 @@ msgstr "%(object)s zuordnen"
 msgid ""
 "Put it into a system, or assign it to an organization, for example a "
 "customer."
-msgstr "Ordnen Sie es einem System zu oder weisen Sie es einer Organisation zu, zum Beispiel einem Kunden."
+msgstr ""
+"Ordnen Sie es einem System zu oder weisen Sie es einer Organisation zu, zum "
+"Beispiel einem Kunden."
 
 #: directory/links.py:270 templates/directory/_links.html:3
 #: templates/instance/branding.html:14
@@ -3184,7 +3221,9 @@ msgstr "Relay-Adressen"
 #: ipam/models.py:218
 msgid ""
 "Where routers forward requests (ip helper-address), separated by commas."
-msgstr "Wohin Router Anfragen weiterleiten (ip helper-address), durch Kommas getrennt."
+msgstr ""
+"Wohin Router Anfragen weiterleiten (ip helper-address), durch Kommas "
+"getrennt."
 
 #: ipam/models.py:249
 msgid "Enter valid addresses."
@@ -3418,7 +3457,9 @@ msgstr "Fügen Sie sie hier ein oder wählen Sie eine Datei."
 #: ipam/pages.py:318
 msgid ""
 "Used once to read the zone; it is not stored. A read-only token is enough."
-msgstr "Wird einmal zum Lesen der Zone verwendet und nicht gespeichert. Ein Token mit Leserechten genügt."
+msgstr ""
+"Wird einmal zum Lesen der Zone verwendet und nicht gespeichert. Ein Token "
+"mit Leserechten genügt."
 
 #: ipam/pages.py:322
 msgid "Replace the documented records of this zone"
@@ -3441,7 +3482,9 @@ msgstr "DNS-Zone importieren"
 msgid ""
 "Read a zone file, or a zone of deSEC, Cloudflare or Hetzner DNS through "
 "their API."
-msgstr "Lesen Sie eine Zonendatei oder eine Zone von deSEC, Cloudflare oder Hetzner DNS über deren API."
+msgstr ""
+"Lesen Sie eine Zonendatei oder eine Zone von deSEC, Cloudflare oder Hetzner "
+"DNS über deren API."
 
 #: ipam/services.py:37
 msgid "This does not fit the tenant, or the gateway is outside."
@@ -3998,7 +4041,10 @@ msgstr ""
 msgid ""
 "Systems, lines, suppliers, customers, clusters, virtual machines, storage or "
 "DHCP and DNS servers refer to this site. Remove those references first."
-msgstr "Systeme, Leitungen, Lieferanten, Kunden, Cluster, virtuelle Maschinen, Speicher oder DHCP- und DNS-Server verweisen auf diesen Standort. Entfernen Sie diese Bezüge zuerst."
+msgstr ""
+"Systeme, Leitungen, Lieferanten, Kunden, Cluster, virtuelle Maschinen, "
+"Speicher oder DHCP- und DNS-Server verweisen auf diesen Standort. Entfernen "
+"Sie diese Bezüge zuerst."
 
 #: locations/services.py:210
 msgid "The site already belongs to this tenant."
@@ -4350,7 +4396,9 @@ msgstr "Die Variablen müssen ein JSON-Objekt sein."
 
 #: networks/switch_views.py:95
 msgid "Paste a configuration, choose a file or a stored version."
-msgstr "Fügen Sie eine Konfiguration ein, wählen Sie eine Datei oder eine gespeicherte Version."
+msgstr ""
+"Fügen Sie eine Konfiguration ein, wählen Sie eine Datei oder eine "
+"gespeicherte Version."
 
 #: networks/switch_views.py:193
 msgid "pasted text"
@@ -4406,7 +4454,9 @@ msgstr "Neues VLAN %(vid)s %(name)s an %(site)s"
 msgid ""
 "VLAN %(vid)s is called %(doc)s here and %(cfg)s in the configuration; the "
 "name stays."
-msgstr "VLAN %(vid)s heißt hier %(doc)s und in der Konfiguration %(cfg)s; der Name bleibt."
+msgstr ""
+"VLAN %(vid)s heißt hier %(doc)s und in der Konfiguration %(cfg)s; der Name "
+"bleibt."
 
 #: networks/switchconfig.py:272
 #, python-format
@@ -4453,12 +4503,15 @@ msgstr "%(what)s: %(n)s"
 #, python-format
 msgid ""
 "DHCP pool %(pool)s: the network %(network)s is not documented in IP networks."
-msgstr "DHCP-Pool %(pool)s: Das Netz %(network)s ist unter IP-Netze nicht dokumentiert."
+msgstr ""
+"DHCP-Pool %(pool)s: Das Netz %(network)s ist unter IP-Netze nicht "
+"dokumentiert."
 
 #: networks/switchconfig.py:443
 #, python-format
 msgid "DHCP pool %(pool)s: a scope of that name belongs to another server."
-msgstr "DHCP-Pool %(pool)s: Ein Bereich dieses Namens gehört zu einem anderen Server."
+msgstr ""
+"DHCP-Pool %(pool)s: Ein Bereich dieses Namens gehört zu einem anderen Server."
 
 #: networks/switchconfig.py:454
 #, python-format
@@ -5409,7 +5462,9 @@ msgstr "werden ausgelassen"
 #: templates/compute/connection.html:24
 msgid ""
 "Remove this connection and its stored token? The documented machines stay."
-msgstr "Diese Verbindung und ihr gespeichertes Token entfernen? Die dokumentierten Maschinen bleiben."
+msgstr ""
+"Diese Verbindung und ihr gespeichertes Token entfernen? Die dokumentierten "
+"Maschinen bleiben."
 
 #: templates/compute/connection.html:24
 msgid "Remove connection"
@@ -5427,7 +5482,11 @@ msgid ""
 "documented yet become servers in the room and with the device type below. "
 "Machines are recognised by their ID, so moving one to another node only "
 "changes its host."
-msgstr "Cluster %(c)s meldet diese Nodes, Maschinen und Speicher. Noch nicht dokumentierte Nodes werden zu Servern im Raum und mit dem Gerätetyp unten. Maschinen werden an ihrer ID erkannt; wird eine auf einen anderen Node verschoben, ändert sich nur ihr Host."
+msgstr ""
+"Cluster %(c)s meldet diese Nodes, Maschinen und Speicher. Noch nicht "
+"dokumentierte Nodes werden zu Servern im Raum und mit dem Gerätetyp unten. "
+"Maschinen werden an ihrer ID erkannt; wird eine auf einen anderen Node "
+"verschoben, ändert sich nur ihr Host."
 
 #: templates/compute/connection_select.html:17
 msgid "Save and update now"
@@ -5438,7 +5497,10 @@ msgid ""
 "Platforms PatchManager reads regularly. Nodes become servers, virtual "
 "machines and containers are kept up to date, and a machine that moves to "
 "another node keeps its documentation."
-msgstr "Plattformen, die PatchManager regelmäßig liest. Nodes werden zu Servern, virtuelle Maschinen und Container bleiben aktuell, und eine Maschine, die auf einen anderen Node wechselt, behält ihre Dokumentation."
+msgstr ""
+"Plattformen, die PatchManager regelmäßig liest. Nodes werden zu Servern, "
+"virtuelle Maschinen und Container bleiben aktuell, und eine Maschine, die "
+"auf einen anderen Node wechselt, behält ihre Dokumentation."
 
 #: templates/compute/connections.html:13 templates/exchange/preview.html:20
 msgid "error"
@@ -6132,7 +6194,9 @@ msgstr "Zugeordnete Objekte"
 msgid ""
 "Link devices, buildings, VLANs, networks, configurations or lines from their "
 "own pages."
-msgstr "Ordnen Sie Geräte, Gebäude, VLANs, Netze, Konfigurationen oder Leitungen auf deren eigenen Seiten zu."
+msgstr ""
+"Ordnen Sie Geräte, Gebäude, VLANs, Netze, Konfigurationen oder Leitungen auf "
+"deren eigenen Seiten zu."
 
 #: templates/directory/_members.html:8
 msgid "Nothing linked yet."
@@ -6371,7 +6435,9 @@ msgstr "Ausgewähltes Element"
 
 #: templates/floorplans/editor.html:58
 msgid "Click a pin to see what is there and where it is patched."
-msgstr "Klicken Sie auf eine Nadel, um zu sehen, was dort ist und wohin es gepatcht ist."
+msgstr ""
+"Klicken Sie auf eine Nadel, um zu sehen, was dort ist und wohin es gepatcht "
+"ist."
 
 #: templates/floorplans/editor.html:60
 msgid "patch cable"
@@ -7683,7 +7749,9 @@ msgstr "Stacks und virtuelle Switches"
 msgid ""
 "Switches that work as one: stacks with stacking cables, VSF, VSX and MLAG "
 "pairs or a virtual chassis."
-msgstr "Switches, die als einer arbeiten: Stacks mit Stacking-Kabeln, VSF-, VSX- und MLAG-Paare oder ein virtuelles Chassis."
+msgstr ""
+"Switches, die als einer arbeiten: Stacks mit Stacking-Kabeln, VSF-, VSX- und "
+"MLAG-Paare oder ein virtuelles Chassis."
 
 #: templates/networks/stacks.html:9
 msgid "Domain"
@@ -7706,7 +7774,13 @@ msgid ""
 "states, spanning tree, static routes, OSPF, BGP, DNS servers and DHCP pools. "
 "Passwords, keys and SNMP communities are never read. You see the changes "
 "before anything is saved."
-msgstr "Gelesen werden Konfigurationen von Aruba (AOS-S, AOS-CX, Central-Vorlagen), Cisco (IOS, IOS-XE, NX-OS), Fortinet, Juniper, MikroTik, HPE Comware, H3C, Huawei und LANCOM: VLANs und ihre Ports, Adressen, Aggregationen, Portnamen und -zustände, Spanning Tree, statische Routen, OSPF, BGP, DNS-Server und DHCP-Pools. Passwörter, Schlüssel und SNMP-Communities werden nie gelesen. Sie sehen die Änderungen, bevor etwas gespeichert wird."
+msgstr ""
+"Gelesen werden Konfigurationen von Aruba (AOS-S, AOS-CX, Central-Vorlagen), "
+"Cisco (IOS, IOS-XE, NX-OS), Fortinet, Juniper, MikroTik, HPE Comware, H3C, "
+"Huawei und LANCOM: VLANs und ihre Ports, Adressen, Aggregationen, Portnamen "
+"und -zustände, Spanning Tree, statische Routen, OSPF, BGP, DNS-Server und "
+"DHCP-Pools. Passwörter, Schlüssel und SNMP-Communities werden nie gelesen. "
+"Sie sehen die Änderungen, bevor etwas gespeichert wird."
 
 #: templates/networks/switch_read.html:11
 msgid "Show changes"
@@ -7744,7 +7818,9 @@ msgstr "Als ArubaOS-Switch-Konfiguration"
 msgid ""
 "Nothing documented yet. Read the running configuration of the switch, or set "
 "VLANs on the ports."
-msgstr "Noch nichts dokumentiert. Lesen Sie die laufende Konfiguration des Switches ein oder setzen Sie VLANs an den Ports."
+msgstr ""
+"Noch nichts dokumentiert. Lesen Sie die laufende Konfiguration des Switches "
+"ein oder setzen Sie VLANs an den Ports."
 
 #: templates/networks/switching.html:15
 msgid "Ports and VLANs"
@@ -7754,7 +7830,9 @@ msgstr "Ports und VLANs"
 msgid ""
 "Fill: untagged VLAN. Marks below: tagged VLANs. Outline: edge port. G: "
 "guard. T: tunnelled."
-msgstr "Füllung: untagged VLAN. Marken darunter: tagged VLANs. Gestrichelter Rand: Edge-Port. G: Guard. T: getunnelt."
+msgstr ""
+"Füllung: untagged VLAN. Marken darunter: tagged VLANs. Gestrichelter Rand: "
+"Edge-Port. G: Guard. T: getunnelt."
 
 #: templates/networks/switching.html:21 templates/networks/switching.html:90
 msgid "tagged"

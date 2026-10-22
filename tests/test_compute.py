@@ -381,3 +381,42 @@ def test_compute_pages(admin_client: Client, make_tree, system) -> None:
         "/compute/import/",
     ):
         assert admin_client.get(url, secure=True).status_code == 200, url
+
+
+def test_one_broken_connection_does_not_stop_the_others(
+    make_tree, super_admin, pve, system, monkeypatch
+) -> None:
+    from patchmanager.compute import tasks
+    from patchmanager.core import crypto
+
+    tree = make_tree()
+    with system():
+        broken = Connection.objects.create(
+            tenant=tree["tenant"],
+            created_by=super_admin,
+            name="Broken",
+            url="https://pve1.lab:8006",
+            secret="not-encrypted",
+            interval=1,
+        )
+        good = Connection.objects.create(
+            tenant=tree["tenant"],
+            created_by=super_admin,
+            name="Good",
+            url="https://pve1.lab:8006",
+            secret=crypto.encrypt(TOKEN),
+            interval=1,
+            guests=["100"],
+            seen=["100", "101", "200"],
+            add_new_guests=False,
+        )
+    started = []
+    monkeypatch.setattr(tasks.sync_connection, "delay", lambda pk: started.append(pk))
+    assert tasks.sync_connections() == 2 and len(started) == 2
+    assert connections.due() == []  # claimed: a second run starts nothing
+    assert connections.sync_one(broken.pk) is False  # an unreadable token is recorded
+    assert connections.sync_one(good.pk) is True
+    with system():
+        broken.refresh_from_db()
+        assert broken.last_error
+        assert VirtualMachine.objects.filter(external_id="100").exists()

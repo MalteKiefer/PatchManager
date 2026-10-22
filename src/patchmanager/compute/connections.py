@@ -1,5 +1,6 @@
 """Proxmox VE connections: what to take over, synchronisation by hand and on a schedule."""
 
+import logging
 from datetime import timedelta
 from typing import Any
 
@@ -26,6 +27,8 @@ from patchmanager.core.fields import path_label
 from patchmanager.dcim.models import Device
 from patchmanager.library.models import DeviceType
 from patchmanager.locations.models import Room
+
+logger = logging.getLogger(__name__)
 
 
 def fetch(connection: Connection) -> sources.Inventory:
@@ -92,34 +95,60 @@ def sync(
     return result
 
 
-def sync_due() -> int:
-    """Run every connection whose interval has passed (called by the scheduler)."""
+def due() -> list[Any]:
+    """Claim the connections whose interval has passed (marked as started, so none runs twice)."""
     from patchmanager.tenancy import rls
 
-    done = 0
     with rls.system_context():
         now = timezone.now()
-        for connection in Connection.objects.filter(interval__gt=0).select_related(
-            "tenant", "created_by", "cluster", "node_room", "node_type"
+        claimed = []
+        for connection in Connection.objects.filter(interval__gt=0).only(
+            "pk", "interval", "last_synced_at"
         ):
-            due = connection.last_synced_at is None or (
-                connection.last_synced_at + timedelta(hours=connection.interval) <= now
-            )
-            if not due:
-                continue
-            actor = connection.created_by
-            try:
-                if actor is None or not actor.is_active:
-                    raise ServiceError(
-                        _("The person who set up this connection can no longer sign in.")
-                    )
-                sync(connection, actor)
-                done += 1
-            except (ServiceError, PermissionDeniedError, ValidationError) as exc:
-                Connection.objects.filter(pk=connection.pk).update(
-                    last_synced_at=now, last_error=str(getattr(exc, "messages", [exc])[0])[:300]
+            last = connection.last_synced_at
+            if last is None or last + timedelta(hours=connection.interval) <= now:
+                # Claim with a compare and set: a second scheduler run skips it.
+                taken = Connection.objects.filter(pk=connection.pk, last_synced_at=last).update(
+                    last_synced_at=now
                 )
-    return done
+                if taken:
+                    claimed.append(connection.pk)
+        return claimed
+
+
+def sync_one(pk: Any) -> bool:
+    """Update one connection; any failure is recorded on it and never stops the others."""
+    from patchmanager.tenancy import rls
+
+    with rls.system_context():
+        connection = (
+            Connection.objects.filter(pk=pk)
+            .select_related("tenant", "created_by", "cluster", "node_room", "node_type")
+            .first()
+        )
+        if connection is None:
+            return False
+        actor = connection.created_by
+        try:
+            if actor is None or not actor.is_active:
+                raise ServiceError(
+                    _("The person who set up this connection can no longer sign in.")
+                )
+            sync(connection, actor)
+        except (ServiceError, PermissionDeniedError, ValidationError) as exc:
+            message = str(getattr(exc, "messages", [exc])[0])
+        except Exception as exc:  # recorded, so one broken platform stops nothing
+            logger.exception("Update of connection %s failed", pk)
+            message = _("The update failed (%(kind)s).") % {"kind": type(exc).__name__}
+        else:
+            return True
+        Connection.objects.filter(pk=pk).update(last_error=message[:300])
+        return False
+
+
+def sync_due() -> int:
+    """Update every due connection, one after the other (used without a task queue)."""
+    return sum(sync_one(pk) for pk in due())
 
 
 # --- Pages -------------------------------------------------------------------------------
