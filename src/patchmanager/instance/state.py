@@ -5,7 +5,7 @@ from dataclasses import dataclass
 
 from django.conf import settings
 from django.core.cache import cache
-from django.db import DatabaseError
+from django.db import DatabaseError, transaction
 
 logger = logging.getLogger(__name__)
 CACHE_KEY = "instance:state"
@@ -30,7 +30,9 @@ def get() -> Snapshot:
         from patchmanager.instance.models import InstanceSettings
 
         try:
-            row = InstanceSettings.objects.defer("logo").first()
+            # Savepoint: a failed read must not abort the request's transaction.
+            with transaction.atomic():
+                row = InstanceSettings.objects.defer("logo", "config").first()
         except DatabaseError:
             logger.exception("instance settings unreadable, using defaults")
             return Snapshot(default_language=settings.LANGUAGE_CODE[:2])  # error pages still render

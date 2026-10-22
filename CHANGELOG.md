@@ -8,6 +8,9 @@ All notable changes to this project are documented here. The format follows
 
 ### Added
 
+* Addresses of virtual machines are linked in IPAM: importing or synchronising a
+  machine creates missing addresses or takes over free ones and keeps them on its
+  network card; addresses used elsewhere are reported, not moved.
 * Administration → Settings: sign in rules, mail server, upload limit and virus
   scanner, S3/B2 file storage, map tiles and webhook and API limits are set in the
   web interface and apply without a restart; environment variables are only initial
@@ -59,6 +62,9 @@ All notable changes to this project are documented here. The format follows
 
 ### Fixed
 
+* Pages failed with "current transaction is aborted" when the instance settings
+  could not be read (for example before running the latest migration); the read now
+  falls back to the defaults without breaking the request.
 * Webhook pages now show the administration side menu like the other admin pages.
 * The production stack let the application containers reach nothing outside the
   host (the backend network is internal), so mail, SSO, webhooks, DNS provider

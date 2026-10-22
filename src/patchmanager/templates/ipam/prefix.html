@@ -24,7 +24,7 @@
         <thead><tr><th>{% translate "Address" %}</th><th>{% translate "Status" %}</th><th>{% translate "DNS name" %}</th><th>{% translate "Port" %}</th></tr></thead>
         <tbody>{% for a in addresses %}<tr>
           <td><a href="{% url 'ipam:address' a.pk %}" class="tabular-nums">{{ a.address }}</a></td><td>{{ a.get_status_display }}</td><td>{{ a.dns_name }}</td>
-          <td>{% if a.shown_port %}<a href="{% url 'devices:port' a.shown_port.pk %}">{{ a.shown_port.device }} · {{ a.shown_port.name }}</a>{% elif a.port_id %}<span class="text-slate-500">{% translate "(not visible to you)" %}</span>{% endif %}</td>
+          <td>{% if a.shown_port %}<a href="{% url 'devices:port' a.shown_port.pk %}">{{ a.shown_port.device }} · {{ a.shown_port.name }}</a>{% elif a.shown_card %}<a href="{% url 'objects:detail' 'vm-interfaces' a.shown_card.pk %}">{{ a.shown_card.vm }} · {{ a.shown_card.name }}</a>{% elif a.port_id or a.vm_interface_id %}<span class="text-slate-500">{% translate "(not visible to you)" %}</span>{% endif %}</td>
         </tr>{% empty %}<tr><td colspan="4" class="text-slate-500">{% translate "No addresses in this prefix yet." %}</td></tr>{% endfor %}</tbody>
       </table></section>
     {% endif %}

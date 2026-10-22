@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-22 11:46+0000\n"
+"POT-Creation-Date: 2026-10-22 14:03+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -40,8 +40,8 @@ msgid "Run the setup_token command to get one."
 msgstr "Führen Sie den Befehl setup_token aus, um eines zu erhalten."
 
 #: accounts/forms.py:49 accounts/forms.py:103 accounts/forms.py:110
-#: api/ui.py:118 api/ui.py:138 compute/pages.py:113 compute/pages.py:137
-#: compute/pages.py:156 compute/pages.py:172 compute/pages.py:184
+#: api/ui.py:118 api/ui.py:138 compute/pages.py:124 compute/pages.py:148
+#: compute/pages.py:167 compute/pages.py:185 compute/pages.py:197
 #: directory/pages.py:86 directory/pages.py:105 directory/pages.py:123
 #: exchange/pdf.py:215 integrations/views.py:27 ipam/pages.py:127
 #: ipam/pages.py:167 ipam/pages.py:186 scim/views.py:351 sso/views.py:187
@@ -218,7 +218,7 @@ msgstr "Notfallkonto"
 #: compute/models.py:299 dcim/models.py:35 dcim/models.py:188
 #: dcim/models.py:241 directory/models.py:27 directory/models.py:62
 #: directory/models.py:102 integrations/models.py:16 ipam/models.py:21
-#: ipam/models.py:187 ipam/models.py:327 ipam/models.py:391
+#: ipam/models.py:202 ipam/models.py:342 ipam/models.py:406
 #: library/models.py:26 library/models.py:144 library/models.py:292
 #: locations/models.py:19 locations/models.py:61 locations/models.py:81
 #: locations/models.py:115 locations/models.py:164 networks/models.py:32
@@ -230,8 +230,8 @@ msgstr "Name"
 #: accounts/models.py:155 accounts/models.py:186 circuits/models.py:68
 #: compute/models.py:50 compute/models.py:133 compute/models.py:190
 #: dcim/models.py:251 directory/models.py:131 ipam/models.py:23
-#: ipam/models.py:77 ipam/models.py:134 ipam/models.py:221 ipam/models.py:291
-#: ipam/models.py:348 library/models.py:242 locations/models.py:38
+#: ipam/models.py:77 ipam/models.py:134 ipam/models.py:236 ipam/models.py:306
+#: ipam/models.py:363 library/models.py:242 locations/models.py:38
 #: locations/models.py:62 locations/models.py:116 locations/models.py:174
 #: networks/models.py:36 networks/models.py:83 networks/models.py:227
 #: networks/models.py:247 networks/models.py:296
@@ -409,7 +409,7 @@ msgstr "Der letzte Super-Admin kann nicht entfernt werden."
 
 #: accounts/services/users.py:30 accounts/services/users.py:169 api/core.py:28
 #: api/tokens.py:74 api/tokens.py:134 api/tokens.py:165 cabling/services.py:50
-#: compute/importing.py:66 directory/links.py:143 directory/links.py:146
+#: compute/importing.py:70 directory/links.py:143 directory/links.py:146
 #: directory/links.py:175 exchange/importer.py:54 exchange/importer.py:70
 #: floorplans/services.py:193 floorplans/views.py:283 history/services.py:76
 #: history/services.py:97 instance/services.py:33 integrations/services.py:69
@@ -1014,7 +1014,7 @@ msgstr "Kabel entfernt."
 
 #: cabling/views.py:152 core/crud.py:271 core/lists.py:207
 #: dcim/device_views.py:395 dcim/device_views.py:473 dcim/views.py:64
-#: ipam/views.py:231 ipam/views.py:370 ipam/views.py:454 library/views.py:269
+#: ipam/views.py:242 ipam/views.py:383 ipam/views.py:468 library/views.py:269
 #: locations/views.py:190 locations/views.py:293 networks/views.py:139
 #: networks/views.py:394
 msgid "Saved."
@@ -1120,7 +1120,7 @@ msgstr "Leitungs-ID"
 msgid "Provider"
 msgstr "Provider"
 
-#: circuits/pages.py:70 compute/pages.py:185 directory/pages.py:87
+#: circuits/pages.py:70 compute/pages.py:198 directory/pages.py:87
 #: directory/pages.py:124 exchange/pdf.py:199 exchange/pdf.py:281
 #: exchange/pdf.py:325 templates/cabling/cables.html:7
 #: templates/cabling/cables.html:12 templates/dcim/_port_panel.html:6
@@ -1129,13 +1129,13 @@ msgstr "Provider"
 msgid "Kind"
 msgstr "Art"
 
-#: circuits/pages.py:71 compute/pages.py:113 directory/pages.py:126
+#: circuits/pages.py:71 compute/pages.py:124 directory/pages.py:126
 #: templates/exchange/index.html:15 templates/ipam/prefixes.html:8
 #: templates/networks/stacks.html:9 templates/networks/vlans.html:7
 msgid "Site"
 msgstr "Standort"
 
-#: circuits/pages.py:72 compute/pages.py:138 exchange/pdf.py:215
+#: circuits/pages.py:72 compute/pages.py:149 exchange/pdf.py:215
 #: templates/compute/connections.html:9 templates/dcim/_device_panel.html:7
 #: templates/dcim/place_here.html:11 templates/dcim/rack.html:66
 #: templates/floorplans/_item_panel.html:8
@@ -1205,7 +1205,7 @@ msgstr "Nodes"
 msgid "Virtual machines and containers"
 msgstr "Virtuelle Maschinen und Container"
 
-#: compute/connections.py:190 compute/pages.py:172 compute/pages.py:180
+#: compute/connections.py:190 compute/pages.py:185 compute/pages.py:193
 #: templates/dcim/device.html:42
 msgid "Storage"
 msgstr "Speicher"
@@ -1274,86 +1274,91 @@ msgstr "Aktualisiert."
 msgid "Connection removed; the documented machines stay."
 msgstr "Verbindung entfernt; die dokumentierten Maschinen bleiben."
 
-#: compute/importing.py:147
+#: compute/importing.py:151
 #, python-format
 msgid "Host %(name)s is not documented as a device."
 msgstr "Host %(name)s ist nicht als Gerät dokumentiert."
 
-#: compute/importing.py:153
+#: compute/importing.py:157
 #, python-format
 msgid "Host %(name)s belongs to another cluster."
 msgstr "Host %(name)s gehört zu einem anderen Cluster."
 
-#: compute/importing.py:211
+#: compute/importing.py:219
 #, python-format
 msgid "%(vm)s: network card %(nic)s was left out."
 msgstr "%(vm)s: Netzwerkkarte %(nic)s wurde ausgelassen."
 
-#: compute/importing.py:224
+#: compute/importing.py:236
 #, python-format
 msgid "%(vm)s: disk %(disk)s was left out."
 msgstr "%(vm)s: Festplatte %(disk)s wurde ausgelassen."
 
-#: compute/importing.py:259 compute/pages.py:113 networks/switch_views.py:39
+#: compute/importing.py:288
+#, python-format
+msgid "%(address)s of %(vm)s is already used elsewhere and was not linked."
+msgstr "%(address)s von %(vm)s wird bereits anderweitig verwendet und wurde nicht verknüpft."
+
+#: compute/importing.py:326 compute/pages.py:124 networks/switch_views.py:39
 msgid "Platform"
 msgstr "Plattform"
 
-#: compute/importing.py:268 exchange/pdf.py:162 ipam/pages.py:148
+#: compute/importing.py:335 exchange/pdf.py:162 ipam/pages.py:148
 #: templates/accounts/security.html:50 templates/compute/connection.html:18
 #: templates/ipam/addresses.html:10 templates/ipam/prefix.html:24
 #: templates/manage/audit.html:18 templates/networks/switching.html:28
 msgid "Address"
 msgstr "Adresse"
 
-#: compute/importing.py:270
+#: compute/importing.py:337
 msgid ""
 "For example https://pve.example.lan:8006 or https://vcenter.example.lan."
 msgstr ""
 "Zum Beispiel https://pve.example.lan:8006 oder https://vcenter.example.lan."
 
-#: compute/importing.py:274
+#: compute/importing.py:341
 msgid "API token (Proxmox)"
 msgstr "API-Token (Proxmox)"
 
-#: compute/importing.py:277
+#: compute/importing.py:344
 msgid "user@realm!tokenid=secret, with read rights (PVEAuditor)."
 msgstr "user@realm!tokenid=secret, mit Leserechten (PVEAuditor)."
 
-#: compute/importing.py:280
+#: compute/importing.py:347
 msgid "User (vCenter, NAS)"
 msgstr "Benutzer (vCenter, NAS)"
 
-#: compute/importing.py:283
+#: compute/importing.py:350
 msgid "Password (vCenter, NAS)"
 msgstr "Passwort (vCenter, NAS)"
 
-#: compute/importing.py:288
+#: compute/importing.py:355
 msgid "Certificate fingerprint (SHA-256)"
 msgstr "Zertifikats-Fingerabdruck (SHA-256)"
 
-#: compute/importing.py:292
+#: compute/importing.py:359
 msgid ""
 "Only for self signed certificates; otherwise the certificate is verified."
 msgstr ""
 "Nur für selbstsignierte Zertifikate; sonst wird das Zertifikat geprüft."
 
-#: compute/importing.py:296
+#: compute/importing.py:363
 msgid "NAS device (Synology, QNAP)"
 msgstr "NAS-Gerät (Synology, QNAP)"
 
-#: compute/importing.py:314
+#: compute/importing.py:381
 msgid "Enter the API token."
 msgstr "Geben Sie das API-Token ein."
 
-#: compute/importing.py:318
+#: compute/importing.py:385
 msgid "Enter user and password."
 msgstr "Geben Sie Benutzer und Passwort ein."
 
-#: compute/importing.py:320
+#: compute/importing.py:387
 msgid "Choose the NAS device the storage belongs to."
 msgstr "Wählen Sie das NAS-Gerät, zu dem der Speicher gehört."
 
-#: compute/importing.py:358
+#: compute/importing.py:425
 #, python-format
 msgid ""
 "%(created)s new and %(updated)s updated machines, %(storage)s storage "
@@ -1362,23 +1367,19 @@ msgstr ""
 "%(created)s neue und %(updated)s aktualisierte Maschinen, %(storage)s "
 "Speichereinträge."
 
-#: compute/importing.py:370
+#: compute/importing.py:437
 msgid "Import from a platform"
 msgstr "Von einer Plattform importieren"
 
-#: compute/importing.py:372
+#: compute/importing.py:439
 msgid ""
 "Reads clusters, hosts, virtual machines and storage from Proxmox VE and "
 "VMware vCenter, or volumes and shares from a Synology or QNAP NAS. "
 "Credentials are used once and not stored; give an account with read rights "
 "only."
-msgstr ""
-"Liest Cluster, Hosts, virtuelle Maschinen und Speicher aus Proxmox VE und "
-"VMware vCenter, oder Volumes und Freigaben eines Synology- oder QNAP-NAS. "
-"Zugangsdaten werden einmal verwendet und nicht gespeichert; verwenden Sie "
-"ein Konto nur mit Leserechten."
+msgstr "Liest Cluster, Hosts, virtuelle Maschinen und Speicher aus Proxmox VE und VMware vCenter, oder Volumes und Freigaben eines Synology- oder QNAP-NAS. Zugangsdaten werden einmal verwendet und nicht gespeichert; verwenden Sie ein Konto nur mit Leserechten."
 
-#: compute/importing.py:378 ipam/pages.py:387 templates/exchange/index.html:7
+#: compute/importing.py:445 ipam/pages.py:387 templates/exchange/index.html:7
 #: templates/library/types.html:30 templates/manage/roles.html:21
 msgid "Import"
 msgstr "Importieren"
@@ -1448,9 +1449,7 @@ msgstr "Der Host hat nicht mit XML geantwortet."
 msgid ""
 "The host refused the credentials (accounts with two step sign in cannot be "
 "used)."
-msgstr ""
-"Der Host hat die Zugangsdaten abgelehnt (Konten mit zweistufiger Anmeldung "
-"können nicht verwendet werden)."
+msgstr "Der Host hat die Zugangsdaten abgelehnt (Konten mit zweistufiger Anmeldung können nicht verwendet werden)."
 
 #: compute/models.py:39 compute/models.py:300
 msgid "platform"
@@ -1585,16 +1584,16 @@ msgstr "Festplatte (GB)"
 msgid "purpose"
 msgstr "Zweck"
 
-#: compute/models.py:221 compute/pages.py:157 dcim/models.py:252
-#: ipam/models.py:283 ipam/pages.py:149
+#: compute/models.py:221 compute/pages.py:168 dcim/models.py:252
+#: ipam/models.py:298 ipam/pages.py:149
 msgid "MAC address"
 msgstr "MAC-Adresse"
 
-#: compute/models.py:225 ipam/models.py:286
+#: compute/models.py:225 ipam/models.py:301
 msgid "Use aa:bb:cc:dd:ee:ff."
 msgstr "Verwenden Sie aa:bb:cc:dd:ee:ff."
 
-#: compute/models.py:234 compute/pages.py:158 exchange/pdf.py:284
+#: compute/models.py:234 compute/pages.py:169 exchange/pdf.py:284
 #: ipam/models.py:72 networks/models.py:77
 msgid "VLAN"
 msgstr "VLAN"
@@ -1611,7 +1610,7 @@ msgstr "Adressen"
 msgid "Separated by commas, for example 10.0.0.5/24."
 msgstr "Durch Kommas getrennt, zum Beispiel 10.0.0.5/24."
 
-#: compute/models.py:243 dcim/models.py:249 ipam/models.py:220
+#: compute/models.py:243 dcim/models.py:249 ipam/models.py:235
 #: networks/models.py:248 sso/models.py:22 templates/networks/switching.html:49
 #: templates/sso/providers.html:10
 msgid "enabled"
@@ -1638,7 +1637,7 @@ msgid "every day"
 msgstr "täglich"
 
 #: compute/models.py:301 directory/models.py:33 ipam/models.py:129
-#: ipam/models.py:289 locations/models.py:21 networks/models.py:242
+#: ipam/models.py:304 locations/models.py:21 networks/models.py:242
 #: tenancy/models.py:22
 msgid "address"
 msgstr "Adresse"
@@ -1670,15 +1669,15 @@ msgstr "Gerätetyp für neue Server"
 msgid "automatic update"
 msgstr "automatische Aktualisierung"
 
-#: compute/pages.py:110
+#: compute/pages.py:121
 msgid "Clusters"
 msgstr "Cluster"
 
-#: compute/pages.py:111
+#: compute/pages.py:122
 msgid "New cluster"
 msgstr "Neuer Cluster"
 
-#: compute/pages.py:115 compute/pages.py:146
+#: compute/pages.py:126 compute/pages.py:157
 #: templates/compute/connection.html:4
 #: templates/compute/connection_select.html:4
 #: templates/compute/connections.html:2 templates/compute/connections.html:4
@@ -1686,95 +1685,95 @@ msgstr "Neuer Cluster"
 msgid "Connections"
 msgstr "Verbindungen"
 
-#: compute/pages.py:121
+#: compute/pages.py:132
 msgid "Hosts"
 msgstr "Hosts"
 
-#: compute/pages.py:122
+#: compute/pages.py:133
 msgid "Add host"
 msgstr "Host hinzufügen"
 
-#: compute/pages.py:124 templates/manage/system.html:37
+#: compute/pages.py:135 templates/manage/system.html:37
 msgid "Server"
 msgstr "Server"
 
-#: compute/pages.py:133 templates/compute/connections.html:5
+#: compute/pages.py:144 templates/compute/connections.html:5
 #: templates/dcim/device.html:40
 msgid "Virtual machines"
 msgstr "Virtuelle Maschinen"
 
-#: compute/pages.py:134
+#: compute/pages.py:145
 msgid "New virtual machine"
 msgstr "Neue virtuelle Maschine"
 
-#: compute/pages.py:139 templates/compute/connection.html:19
+#: compute/pages.py:150 templates/compute/connection.html:19
 #: templates/compute/connections.html:9
 msgid "Cluster"
 msgstr "Cluster"
 
-#: compute/pages.py:140
+#: compute/pages.py:151
 msgid "Host"
 msgstr "Host"
 
-#: compute/pages.py:141
+#: compute/pages.py:152
 msgid "Operating system"
 msgstr "Betriebssystem"
 
-#: compute/pages.py:142
+#: compute/pages.py:153
 msgid "CPUs"
 msgstr "CPUs"
 
-#: compute/pages.py:143
+#: compute/pages.py:154
 msgid "Memory (MB)"
 msgstr "Arbeitsspeicher (MB)"
 
-#: compute/pages.py:146 compute/pages.py:191
+#: compute/pages.py:157 compute/pages.py:204
 msgid "Import once"
 msgstr "Einmal importieren"
 
-#: compute/pages.py:152
+#: compute/pages.py:163
 msgid "Network cards"
 msgstr "Netzwerkkarten"
 
-#: compute/pages.py:153
+#: compute/pages.py:164
 msgid "Add network card"
 msgstr "Netzwerkkarte hinzufügen"
 
-#: compute/pages.py:159
+#: compute/pages.py:170
 msgid "Bridge or port group"
 msgstr "Bridge oder Portgruppe"
 
-#: compute/pages.py:160 templates/ipam/_tabs.html:3
+#: compute/pages.py:171 templates/ipam/_tabs.html:3
 #: templates/ipam/address.html:4 templates/ipam/addresses.html:2
 #: templates/ipam/prefix.html:22
 msgid "Addresses"
 msgstr "Adressen"
 
-#: compute/pages.py:169
+#: compute/pages.py:182
 msgid "Disks"
 msgstr "Festplatten"
 
-#: compute/pages.py:170
+#: compute/pages.py:183
 msgid "Add disk"
 msgstr "Festplatte hinzufügen"
 
-#: compute/pages.py:172 compute/pages.py:187
+#: compute/pages.py:185 compute/pages.py:200
 msgid "Size (GB)"
 msgstr "Größe (GB)"
 
-#: compute/pages.py:181
+#: compute/pages.py:194
 msgid "New storage"
 msgstr "Neuer Speicher"
 
-#: compute/pages.py:186
+#: compute/pages.py:199
 msgid "Storage system"
 msgstr "Speichersystem"
 
-#: compute/pages.py:188
+#: compute/pages.py:201
 msgid "Used (GB)"
 msgstr "Belegt (GB)"
 
-#: compute/pages.py:189
+#: compute/pages.py:202
 msgid "Path or target"
 msgstr "Pfad oder Ziel"
 
@@ -1889,7 +1888,7 @@ msgid "Created."
 msgstr "Erstellt."
 
 #: core/crud.py:267 core/lists.py:203 dcim/device_views.py:413 dcim/views.py:69
-#: ipam/views.py:225 ipam/views.py:360 ipam/views.py:448 library/views.py:294
+#: ipam/views.py:236 ipam/views.py:373 ipam/views.py:462 library/views.py:294
 #: locations/views.py:298 locations/views.py:423 networks/views.py:135
 msgid "Deleted."
 msgstr "Gelöscht."
@@ -2877,7 +2876,8 @@ msgstr "Port %(port)s von %(device)s nicht gefunden."
 msgid "Prefixes"
 msgstr "Präfixe"
 
-#: exchange/tables.py:743 search/services.py:105 templates/dcim/port.html:31
+#: exchange/tables.py:743 search/services.py:105
+#: templates/compute/_interface_addresses.html:1 templates/dcim/port.html:31
 msgid "IP addresses"
 msgstr "IP-Adressen"
 
@@ -3132,9 +3132,7 @@ msgstr "Unbekannte Sprache."
 #, python-format
 msgid ""
 "The bucket could not be written (%(error)s). Check name, endpoint and key."
-msgstr ""
-"In den Bucket konnte nicht geschrieben werden (%(error)s). Prüfen Sie Name, "
-"Endpoint und Schlüssel."
+msgstr "In den Bucket konnte nicht geschrieben werden (%(error)s). Prüfen Sie Name, Endpoint und Schlüssel."
 
 #: instance/services.py:159
 msgid "Unknown setting."
@@ -3170,9 +3168,7 @@ msgstr "Branding gespeichert."
 
 #: instance/views.py:105
 msgid "Stored encrypted. Leave empty to keep the current value."
-msgstr ""
-"Wird verschlüsselt gespeichert. Leer lassen, um den aktuellen Wert zu "
-"behalten."
+msgstr "Wird verschlüsselt gespeichert. Leer lassen, um den aktuellen Wert zu behalten."
 
 #: instance/views.py:126
 msgid "Require a second factor for everyone"
@@ -3206,15 +3202,14 @@ msgstr "Einladungslinks sind gültig für (Stunden)"
 msgid "SMTP server"
 msgstr "SMTP-Server"
 
-#: instance/views.py:157 instance/views.py:182 ipam/models.py:356
-#: ipam/models.py:396 ipam/models.py:450
+#: instance/views.py:157 instance/views.py:182 ipam/models.py:371
+#: ipam/models.py:411 ipam/models.py:465
 msgid "Enter a host name."
 msgstr "Geben Sie einen Hostnamen ein."
 
 #: instance/views.py:158
 msgid "Empty: mails are not sent (shown in the log in development)."
-msgstr ""
-"Leer: Es werden keine Mails versendet (in der Entwicklung im Log ausgegeben)."
+msgstr "Leer: Es werden keine Mails versendet (in der Entwicklung im Log ausgegeben)."
 
 #: instance/views.py:161
 msgid "Use STARTTLS"
@@ -3238,9 +3233,7 @@ msgstr "Virenscanner (clamd-Host)"
 
 #: instance/views.py:183
 msgid "Empty: no scan. When set, uploads fail while it is unreachable."
-msgstr ""
-"Leer: keine Prüfung. Wenn gesetzt, schlagen Uploads fehl, solange er nicht "
-"erreichbar ist."
+msgstr "Leer: keine Prüfung. Wenn gesetzt, schlagen Uploads fehl, solange er nicht erreichbar ist."
 
 #: instance/views.py:185
 msgid "clamd port"
@@ -3258,9 +3251,7 @@ msgstr "Geben Sie einen gültigen Bucket-Namen ein."
 msgid ""
 "Empty: files stay in the media volume. Files already stored there stay "
 "readable."
-msgstr ""
-"Leer: Dateien bleiben im Media-Volume. Dort bereits gespeicherte Dateien "
-"bleiben lesbar."
+msgstr "Leer: Dateien bleiben im Media-Volume. Dort bereits gespeicherte Dateien bleiben lesbar."
 
 #: instance/views.py:200
 msgid "Endpoint"
@@ -3270,9 +3261,7 @@ msgstr "Endpoint"
 msgid ""
 "Empty for AWS. Backblaze B2 for example https://s3.eu-"
 "central-003.backblazeb2.com."
-msgstr ""
-"Leer für AWS. Backblaze B2 zum Beispiel https://s3.eu-"
-"central-003.backblazeb2.com."
+msgstr "Leer für AWS. Backblaze B2 zum Beispiel https://s3.eu-central-003.backblazeb2.com."
 
 #: instance/views.py:207
 msgid "Region"
@@ -3338,8 +3327,7 @@ msgstr "Private Netze, die Webhooks erreichen dürfen"
 
 #: instance/views.py:267
 msgid "Comma separated, for example 10.0.0.0/8. Empty: public only."
-msgstr ""
-"Kommagetrennt, zum Beispiel 10.0.0.0/8. Leer: nur öffentliche Adressen."
+msgstr "Kommagetrennt, zum Beispiel 10.0.0.0/8. Leer: nur öffentliche Adressen."
 
 #: instance/views.py:270
 msgid "Allow plain http webhook URLs"
@@ -3372,8 +3360,7 @@ msgstr "E-Mail"
 
 #: instance/views.py:296
 msgid "The server for invitations, password resets and notifications."
-msgstr ""
-"Der Server für Einladungen, Passwort-Zurücksetzungen und Benachrichtigungen."
+msgstr "Der Server für Einladungen, Passwort-Zurücksetzungen und Benachrichtigungen."
 
 #: instance/views.py:299
 msgid "Files"
@@ -3384,10 +3371,7 @@ msgid ""
 "Uploads are encrypted before they are stored, in the media volume or in S3 "
 "compatible object storage (AWS S3, Backblaze B2, Wasabi). The bucket is "
 "checked with a test file when you save."
-msgstr ""
-"Uploads werden vor dem Speichern verschlüsselt, im Media-Volume oder in S3-"
-"kompatiblem Objektspeicher (AWS S3, Backblaze B2, Wasabi). Beim Speichern "
-"wird der Bucket mit einer Testdatei geprüft."
+msgstr "Uploads werden vor dem Speichern verschlüsselt, im Media-Volume oder in S3-kompatiblem Objektspeicher (AWS S3, Backblaze B2, Wasabi). Beim Speichern wird der Bucket mit einer Testdatei geprüft."
 
 #: instance/views.py:307
 msgid "Maps"
@@ -3495,7 +3479,7 @@ msgstr "Der Provider hat mit einem Fehler geantwortet (%(status)s)."
 msgid "The provider sent an answer that is not JSON."
 msgstr "Die Antwort des Providers ist kein JSON."
 
-#: ipam/dns_import.py:289 ipam/models.py:332
+#: ipam/dns_import.py:289 ipam/models.py:347
 msgid "Enter a domain name like example.com."
 msgstr "Geben Sie einen Domainnamen wie example.com ein."
 
@@ -3519,11 +3503,11 @@ msgstr "veraltet"
 msgid "VRF"
 msgstr "VRF"
 
-#: ipam/models.py:57 ipam/models.py:189
+#: ipam/models.py:57 ipam/models.py:204
 msgid "prefix"
 msgstr "Präfix"
 
-#: ipam/models.py:78 ipam/models.py:201
+#: ipam/models.py:78 ipam/models.py:216
 msgid "gateway"
 msgstr "Gateway"
 
@@ -3540,161 +3524,169 @@ msgstr "DNS-Name"
 msgid "port"
 msgstr "Port"
 
-#: ipam/models.py:197 ipam/pages.py:131
+#: ipam/models.py:149
+msgid "network card of a virtual machine"
+msgstr "Netzwerkkarte einer virtuellen Maschine"
+
+#: ipam/models.py:172
+msgid "An address is on a port or a virtual machine, not both."
+msgstr "Eine Adresse liegt auf einem Port oder einer virtuellen Maschine, nicht auf beiden."
+
+#: ipam/models.py:212 ipam/pages.py:131
 msgid "DHCP server"
 msgstr "DHCP-Server"
 
-#: ipam/models.py:199
+#: ipam/models.py:214
 msgid "first address"
 msgstr "erste Adresse"
 
-#: ipam/models.py:200
+#: ipam/models.py:215
 msgid "last address"
 msgstr "letzte Adresse"
 
-#: ipam/models.py:203 networks/models.py:185
+#: ipam/models.py:218 networks/models.py:185
 msgid "DNS servers"
 msgstr "DNS-Server"
 
-#: ipam/models.py:203
+#: ipam/models.py:218
 msgid "Separated by commas."
 msgstr "Durch Kommas getrennt."
 
-#: ipam/models.py:205 networks/models.py:186
+#: ipam/models.py:220 networks/models.py:186
 msgid "domain name"
 msgstr "Domainname"
 
-#: ipam/models.py:207
+#: ipam/models.py:222
 msgid "lease time (seconds)"
 msgstr "Lease-Zeit (Sekunden)"
 
-#: ipam/models.py:210
+#: ipam/models.py:225
 msgid "further options"
 msgstr "weitere Optionen"
 
-#: ipam/models.py:212
+#: ipam/models.py:227
 msgid "One per line as code=value, for example 66=tftp.example.com."
 msgstr "Eine pro Zeile als Code=Wert, zum Beispiel 66=tftp.example.com."
 
-#: ipam/models.py:215
+#: ipam/models.py:230
 msgid "relay addresses"
 msgstr "Relay-Adressen"
 
-#: ipam/models.py:218
+#: ipam/models.py:233
 msgid ""
 "Where routers forward requests (ip helper-address), separated by commas."
 msgstr ""
 "Wohin Router Anfragen weiterleiten (ip helper-address), durch Kommas "
 "getrennt."
 
-#: ipam/models.py:249
+#: ipam/models.py:264
 msgid "Enter valid addresses."
 msgstr "Geben Sie gültige Adressen ein."
 
-#: ipam/models.py:251
+#: ipam/models.py:266
 msgid "The range must lie inside the prefix, first before last."
 msgstr "Der Bereich muss im Präfix liegen, die erste Adresse vor der letzten."
 
-#: ipam/models.py:253
+#: ipam/models.py:268
 msgid "The gateway must lie inside the prefix."
 msgstr "Das Gateway muss im Präfix liegen."
 
-#: ipam/models.py:260
+#: ipam/models.py:275
 #, python-format
 msgid "%(value)s is not an address."
 msgstr "%(value)s ist keine Adresse."
 
-#: ipam/models.py:265
+#: ipam/models.py:280
 msgid "Write each option as code=value."
 msgstr "Schreiben Sie jede Option als Code=Wert."
 
-#: ipam/models.py:280
+#: ipam/models.py:295
 msgid "scope"
 msgstr "Bereich"
 
-#: ipam/models.py:290 networks/models.py:161
+#: ipam/models.py:305 networks/models.py:161
 msgid "hostname"
 msgstr "Hostname"
 
-#: ipam/models.py:318
+#: ipam/models.py:333
 msgid "Enter a valid address."
 msgstr "Geben Sie eine gültige Adresse ein."
 
-#: ipam/models.py:320
+#: ipam/models.py:335
 msgid "The address must lie inside the prefix of the scope."
 msgstr "Die Adresse muss im Präfix des Bereichs liegen."
 
-#: ipam/models.py:336
+#: ipam/models.py:351
 msgid "primary name server"
 msgstr "primärer Nameserver"
 
-#: ipam/models.py:337
+#: ipam/models.py:352
 msgid "responsible email"
 msgstr "verantwortliche E-Mail"
 
-#: ipam/models.py:338
+#: ipam/models.py:353
 msgid "default TTL (seconds)"
 msgstr "Standard-TTL (Sekunden)"
 
-#: ipam/models.py:339
+#: ipam/models.py:354
 msgid "serial"
 msgstr "Seriennummer"
 
-#: ipam/models.py:346 ipam/pages.py:169
+#: ipam/models.py:361 ipam/pages.py:169
 msgid "DNS server"
 msgstr "DNS-Server"
 
-#: ipam/models.py:358
+#: ipam/models.py:373
 msgid "Enter an email address or host name."
 msgstr "Geben Sie eine E-Mail-Adresse oder einen Hostnamen ein."
 
-#: ipam/models.py:388
+#: ipam/models.py:403
 msgid "zone"
 msgstr "Zone"
 
-#: ipam/models.py:393
+#: ipam/models.py:408
 msgid "Relative to the zone; @ for the zone itself."
 msgstr "Relativ zur Zone; @ für die Zone selbst."
 
-#: ipam/models.py:400 sso/models.py:21
+#: ipam/models.py:415 sso/models.py:21
 msgid "type"
 msgstr "Typ"
 
-#: ipam/models.py:401
+#: ipam/models.py:416
 msgid "value"
 msgstr "Wert"
 
-#: ipam/models.py:402 ipam/pages.py:190
+#: ipam/models.py:417 ipam/pages.py:190
 msgid "TTL (seconds)"
 msgstr "TTL (Sekunden)"
 
-#: ipam/models.py:404 networks/models.py:204 networks/models.py:328
+#: ipam/models.py:419 networks/models.py:204 networks/models.py:328
 #: templates/networks/stack.html:14 templates/networks/switching.html:73
 #: templates/networks/switching.html:83
 msgid "priority"
 msgstr "Priorität"
 
-#: ipam/models.py:412
+#: ipam/models.py:427
 msgid "documented address"
 msgstr "dokumentierte Adresse"
 
-#: ipam/models.py:432
+#: ipam/models.py:447
 msgid "The value must be one line."
 msgstr "Der Wert muss einzeilig sein."
 
-#: ipam/models.py:437
+#: ipam/models.py:452
 msgid "Enter an address."
 msgstr "Geben Sie eine Adresse ein."
 
-#: ipam/models.py:439
+#: ipam/models.py:454
 msgid "A records take IPv4, AAAA records IPv6."
 msgstr "A-Einträge nehmen IPv4, AAAA-Einträge IPv6."
 
-#: ipam/models.py:441
+#: ipam/models.py:456
 msgid "MX and SRV records need a priority."
 msgstr "MX- und SRV-Einträge brauchen eine Priorität."
 
-#: ipam/models.py:452
+#: ipam/models.py:467
 msgid "SRV records take weight, port and target."
 msgstr "SRV-Einträge nehmen Gewicht, Port und Ziel."
 
@@ -3860,7 +3852,7 @@ msgstr "Präfixe oder Adressen nutzen dieses VRF noch."
 msgid "This prefix already exists in this VRF."
 msgstr "Dieses Präfix gibt es in diesem VRF schon."
 
-#: ipam/services.py:126 ipam/services.py:143
+#: ipam/services.py:130 ipam/services.py:149
 msgid "This address is already used in this VRF."
 msgstr "Diese Adresse wird in diesem VRF schon verwendet."
 
@@ -3869,24 +3861,24 @@ msgstr "Diese Adresse wird in diesem VRF schon verwendet."
 msgid "global"
 msgstr "global"
 
-#: ipam/views.py:206 templates/ipam/prefixes.html:5
+#: ipam/views.py:217 templates/ipam/prefixes.html:5
 msgid "New prefix"
 msgstr "Neues Präfix"
 
-#: ipam/views.py:326
+#: ipam/views.py:337
 #, python-format
 msgid "New address on %(port)s"
 msgstr "Neue Adresse auf %(port)s"
 
-#: ipam/views.py:328 templates/ipam/addresses.html:5
+#: ipam/views.py:339 templates/ipam/addresses.html:5
 msgid "New address"
 msgstr "Neue Adresse"
 
-#: ipam/views.py:364
-msgid "The address is no longer on a port."
-msgstr "Die Adresse liegt auf keinem Port mehr."
+#: ipam/views.py:377
+msgid "The address is no longer assigned."
+msgstr "Die Adresse ist keinem Port und keiner Maschine mehr zugeordnet."
 
-#: ipam/views.py:431 templates/ipam/vrfs.html:5
+#: ipam/views.py:445 templates/ipam/vrfs.html:5
 msgid "New VRF"
 msgstr "Neues VRF"
 
@@ -5251,7 +5243,7 @@ msgstr "Profil"
 
 #: templates/accounts/profile.html:7 templates/cabling/cable.html:20
 #: templates/core/crud_detail.html:25 templates/dcim/device.html:59
-#: templates/ipam/address.html:20 templates/ipam/prefix.html:39
+#: templates/ipam/address.html:22 templates/ipam/prefix.html:39
 #: templates/ipam/vrf.html:9 templates/library/type_detail.html:30
 #: templates/locations/node.html:83 templates/locations/survey.html:22
 #: templates/manage/audit.html:18 templates/manage/group_detail.html:7
@@ -5264,7 +5256,7 @@ msgstr "Details"
 #: templates/core/crud_detail.html:27 templates/dcim/device.html:61
 #: templates/dcim/port.html:42 templates/dcim/rack.html:100
 #: templates/instance/branding.html:9 templates/instance/settings.html:13
-#: templates/integrations/webhook.html:34 templates/ipam/address.html:21
+#: templates/integrations/webhook.html:34 templates/ipam/address.html:23
 #: templates/ipam/prefix.html:40 templates/ipam/vrf.html:10
 #: templates/library/type_detail.html:32 templates/locations/node.html:85
 #: templates/locations/room_plan.html:15 templates/manage/group_detail.html:9
@@ -5814,11 +5806,17 @@ msgstr "Stationen"
 
 #: templates/cabling/trace.html:32 templates/dcim/_port_panel.html:14
 #: templates/dcim/device.html:50 templates/dcim/port.html:16
-#: templates/dcim/rack.html:70 templates/ipam/address.html:12
+#: templates/dcim/rack.html:70 templates/ipam/address.html:14
 #: templates/ipam/addresses.html:13 templates/ipam/prefix.html:27
 #: templates/locations/node.html:69
 msgid "(not visible to you)"
 msgstr "(für Sie nicht sichtbar)"
+
+#: templates/compute/_interface_addresses.html:2
+msgid ""
+"No addresses in IPAM yet. They are linked when the machine is imported or "
+"synchronised."
+msgstr "Noch keine Adressen in IPAM. Sie werden beim Import oder Abgleich der Maschine verknüpft."
 
 #: templates/compute/connection.html:6
 msgid "Change selection"
@@ -6047,7 +6045,7 @@ msgid "Delete this entry?"
 msgstr "Diesen Eintrag löschen?"
 
 #: templates/core/crud_detail.html:29 templates/integrations/webhook.html:10
-#: templates/ipam/address.html:22 templates/ipam/prefix.html:41
+#: templates/ipam/address.html:24 templates/ipam/prefix.html:41
 #: templates/ipam/vrf.html:11 templates/library/type_detail.html:42
 #: templates/locations/node.html:88 templates/manage/list_item.html:24
 #: templates/metadata/_panel.html:12 templates/metadata/_panel.html:21
@@ -7113,18 +7111,22 @@ msgid "Take off the port"
 msgstr "Vom Port nehmen"
 
 #: templates/ipam/address.html:13
+msgid "Take off the virtual machine"
+msgstr "Von der virtuellen Maschine nehmen"
+
+#: templates/ipam/address.html:15
 msgid "Not on a port. Assign it from the port's page."
 msgstr "Auf keinem Port. Weisen Sie sie auf der Seite des Ports zu."
 
-#: templates/ipam/address.html:15
+#: templates/ipam/address.html:17
 msgid "In the prefixes"
 msgstr "In den Präfixen"
 
-#: templates/ipam/address.html:16
+#: templates/ipam/address.html:18
 msgid "No prefix contains this address."
 msgstr "Kein Präfix enthält diese Adresse."
 
-#: templates/ipam/address.html:22
+#: templates/ipam/address.html:24
 msgid "Delete this address?"
 msgstr "Diese Adresse löschen?"
 

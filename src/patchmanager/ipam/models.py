@@ -110,7 +110,7 @@ class Prefix(TenantScopedModel):
 
 
 class IPAddress(TenantScopedModel):
-    """An address with its prefix length, optionally on a port."""
+    """An address with its prefix length, optionally on a port or a VM network card."""
 
     class Status(models.TextChoices):
         ACTIVE = "active", _("active")
@@ -140,6 +140,14 @@ class IPAddress(TenantScopedModel):
         related_name="ip_addresses",
         verbose_name=_("port"),
     )
+    vm_interface = models.ForeignKey(
+        "compute.VMInterface",
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="ip_addresses",
+        verbose_name=_("network card of a virtual machine"),
+    )
     # Policy scope: the device of the port, or the tenant.
     path = LtreeField(editable=False)
     host = models.GeneratedField(
@@ -156,7 +164,14 @@ class IPAddress(TenantScopedModel):
         constraints = [
             models.UniqueConstraint(
                 "tenant", "vrf", "host", nulls_distinct=False, name="ipaddress_unique"
-            )
+            ),
+            models.CheckConstraint(
+                condition=models.Q(port__isnull=True) | models.Q(vm_interface__isnull=True),
+                name="ipaddress_one_place",
+                violation_error_message=_(
+                    "An address is on a port or a virtual machine, not both."
+                ),
+            ),
         ]
 
     def __str__(self) -> str:
