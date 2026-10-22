@@ -15,6 +15,7 @@ from patchmanager.networks.platforms.common import (
     _ip,
     _unquote,
     address_of,
+    declare_vlans,
     finish,
     keywords,
     lines_of,
@@ -63,14 +64,9 @@ def _command(config: Config, head: str, body: list[str]) -> None:
     if key == "sysname" and len(words) >= 2:
         config.hostname = _unquote(head.split(None, 1)[1])[:100]
     elif key == "vlan" and len(words) >= 2 and words[1] == "batch":
-        for vid in vid_list(" ".join(words[2:])):
-            config.vlans.setdefault(vid, Vlan(vid))
+        declare_vlans(config, " ".join(words[2:]), [])
     elif key == "vlan" and len(words) >= 2:
-        for vid in vid_list(" ".join(words[1:])):
-            vlan = config.vlans.setdefault(vid, Vlan(vid))
-            for line in body:
-                if line.startswith(("name ", "description ")) and len(words) == 2:
-                    vlan.name = _unquote(line.split(None, 1)[1])[:64]
+        declare_vlans(config, " ".join(words[1:]), body, ("name", "description"))
     elif key == "interface" and len(words) >= 2:
         _interface(config, "".join(words[1:]), body)
     elif key == "ip" and words[1:2] == ["route-static"] and len(words) >= 5:
@@ -157,7 +153,6 @@ def _interface(config: Config, name: str, body: list[str]) -> None:
                 vlan.ospf_area = parts[parts.index("area") + 1][:15]
         return
     port = config.interface(name)
-    vrp = config.vendor == "huawei"
     for line in body:
         parts = line.split()
         if parts[0] == "description" and len(parts) > 1:
@@ -200,11 +195,6 @@ def _interface(config: Config, name: str, body: list[str]) -> None:
             port.root_guard = True
         elif parts[:2] == ["stp", "bpdu-protection"]:
             port.bpdu_guard = True
-    if port.lag_protocol:
-        for member in config.interfaces.values():
-            if member.lag == name:
-                member.lag_protocol = "lacp"
-    _ = vrp
 
 
 def _mask(words: list[str]) -> list[str]:

@@ -159,10 +159,7 @@ def _interface(
     elif w[:2] == ["ether-options", "802.3ad"] or w[:2] == ["gigether-options", "802.3ad"]:
         port.lag = w[2]
     elif w[:2] == ["aggregated-ether-options", "lacp"]:
-        for member in config.interfaces.values():
-            if member.lag == name:
-                member.lag_protocol = "lacp"
-        port.lag_protocol = "lacp"
+        port.lag_protocol = "lacp"  # finish() hands it to the members
     elif w[:1] == ["unit"] and "address" in w:
         port.mode = "routed"
         port.addresses.append(address_of([w[w.index("address") + 1]]))

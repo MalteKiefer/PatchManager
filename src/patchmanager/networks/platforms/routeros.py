@@ -5,6 +5,8 @@ import re
 import shlex
 
 from patchmanager.networks.platforms.common import (
+    MAX_LINE,
+    MAX_NAME,
     SECRET,
     Config,
     Neighbor,
@@ -20,6 +22,16 @@ from patchmanager.networks.platforms.common import (
     vid_list,
 )
 
+_FIND = re.compile(r"\[\s{0,8}find\s{1,8}([^\]]{0,200})\]")
+
+
+def _names(spec: str) -> list[str]:
+    """A comma separated port list, without duplicates; names are at most 64 characters."""
+    names = list(dict.fromkeys(filter(None, (n.strip() for n in spec.split(",")))))
+    if any(len(n) > MAX_NAME for n in names):
+        raise ParseError("a port name is longer than 64 characters")
+    return names
+
 
 def detect(text: str) -> int:
     """How sure the text is a RouterOS export (0 to 100)."""
@@ -34,11 +46,24 @@ def detect(text: str) -> int:
 def statements(lines: list[str]) -> list[tuple[str, str, dict[str, str], int]]:
     """(menu, verb, key=value pairs, line) for every ``add`` and ``set`` command."""
     joined: list[tuple[str, int]] = []
+    parts: list[str] = []
+    size = 0
+    start = 1
     for number, raw in enumerate(lines, 1):
-        if joined and joined[-1][0].endswith("\\"):
-            joined[-1] = (joined[-1][0][:-1] + raw.strip(), joined[-1][1])
-        else:
-            joined.append((raw.strip(), number))
+        piece = raw.strip()
+        if not parts:
+            start = number
+        size += len(piece)
+        if size > MAX_LINE * 4:
+            raise ParseError(
+                f"line {start}: a continued command is longer than {MAX_LINE * 4} characters"
+            )
+        if piece.endswith("\\"):
+            parts.append(piece[:-1])
+            continue
+        parts.append(piece)
+        joined.append(("".join(parts), start))
+        parts, size = [], 0
     result = []
     menu = ""
     for line, number in joined:
@@ -54,7 +79,7 @@ def statements(lines: list[str]) -> list[tuple[str, str, dict[str, str], int]]:
                 continue
             line = " ".join(tokens[verb:])
         try:
-            words = shlex.split(re.sub(r"\[\s*find\s+([^\]]*)\]", r"find:\1", line))
+            words = shlex.split(_FIND.sub(r"find:\1", line))
         except ValueError:
             continue
         if not words or words[0] not in ("add", "set"):
@@ -75,9 +100,9 @@ def parse(text: str) -> Config:
     dhcp_servers: dict[str, str] = {}  # server name -> pool name
     names: dict[str, str] = {}  # default-name -> name
     for menu, verb, pairs, number in statements(lines_of(text)):
-        if any(SECRET.search(k) for k in pairs):
-            config.secrets_skipped += 1
-            pairs = {k: v for k, v in pairs.items() if not SECRET.search(k)}
+        if any(SECRET.search(k) or SECRET.search(v) for k, v in pairs.items()):
+            config.secrets_skipped += 1  # the whole command, as on every platform
+            continue
         try:
             if menu == "/system identity" and "name" in pairs:
                 config.hostname = pairs["name"][:100]
@@ -104,14 +129,17 @@ def parse(text: str) -> Config:
                     port = config.interface(pairs["interface"])
                     port.mode, port.access_vlan = port.mode or "access", int(pvid)
             elif menu == "/interface bridge vlan" and "vlan-ids" in pairs:
-                for vid in vid_list(pairs["vlan-ids"]):
+                tagged = _names(pairs.get("tagged", ""))
+                untagged = _names(pairs.get("untagged", ""))
+                vlan_ids = vid_list(pairs["vlan-ids"])
+                config.charge(len(vlan_ids) * (len(tagged) + len(untagged)))
+                for vid in vlan_ids:
                     vlan = config.vlans.setdefault(vid, Vlan(vid))
-                    for member in filter(None, pairs.get("tagged", "").split(",")):
-                        if member not in vlan.tagged and not member.startswith("bridge"):
-                            vlan.tagged.append(member)
-                    for member in filter(None, pairs.get("untagged", "").split(",")):
-                        if member not in vlan.untagged:
-                            vlan.untagged.append(member)
+                    have = set(vlan.tagged) | set(vlan.untagged)
+                    vlan.tagged += [
+                        m for m in tagged if m not in have and not m.startswith("bridge")
+                    ]
+                    vlan.untagged += [m for m in untagged if m not in have]
             elif menu == "/ip address" and "address" in pairs:
                 target = pairs.get("interface", "")
                 address = address_of([pairs["address"]])

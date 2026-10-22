@@ -17,6 +17,7 @@ from patchmanager.networks.platforms.common import (
     _unquote,
     address_of,
     blocks,
+    declare_vlans,
     finish,
     keywords,
     lines_of,
@@ -79,11 +80,7 @@ def _command(
     elif words[:2] == ["vlan", "configuration"]:
         return
     elif key == "vlan" and len(words) == 2:
-        for vid in vid_list(words[1]):
-            vlan = config.vlans.setdefault(vid, _new_vlan(vid))
-            for line in body:
-                if line.startswith("name "):
-                    vlan.name = _unquote(line[5:])[:64]
+        declare_vlans(config, words[1], body)
     elif key == "interface" and len(words) >= 2:
         _interface(config, "".join(words[1:]), body)
     elif words[:2] == ["ip", "route"] and len(words) >= 5 and words[2] != "vrf":

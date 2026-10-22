@@ -16,6 +16,7 @@ from patchmanager.networks.platforms.common import (
     _unquote,
     address_of,
     blocks,
+    declare_vlans,
     finish,
     keywords,
     lines_of,
@@ -66,11 +67,7 @@ def _command(config: Config, head: str, body: list[str]) -> None:
     if key == "hostname" and len(words) == 2:
         config.hostname = _unquote(words[1])[:100]
     elif key == "vlan" and len(words) == 2:
-        for vid in vid_list(words[1]):
-            vlan = config.vlans.setdefault(vid, Vlan(vid))
-            for line in body:
-                if line.startswith("name "):
-                    vlan.name = _unquote(line[5:])[:64]
+        declare_vlans(config, words[1], body)
     elif key == "interface" and words[1:2] == ["vlan"] and len(words) == 3 and words[2].isdigit():
         _svi(config, int(words[2]), body)
     elif key == "interface" and re.fullmatch(r"vlan\d+", words[1] if len(words) > 1 else ""):
@@ -194,10 +191,6 @@ def _port(config: Config, name: str, body: list[str]) -> None:
             port.bpdu_guard = True
         elif parts[:2] == ["spanning-tree", "root-guard"]:
             port.root_guard = True
-    if name.startswith("lag") and port.lag_protocol:
-        for member in config.interfaces.values():
-            if member.lag == name:
-                member.lag_protocol = "lacp"
 
 
 def _spanning_tree(config: Config, words: list[str], body: list[str]) -> None:

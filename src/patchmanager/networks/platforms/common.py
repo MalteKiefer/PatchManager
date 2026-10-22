@@ -90,6 +90,7 @@ class Route:
     prefix: str
     next_hop: str | None
     distance: int | None = None
+    interface: str = ""  # when the route points at an interface or remote site
 
 
 @dataclass
@@ -159,10 +160,14 @@ class Config:
     def expand(self, spec: str) -> list[str]:
         """:func:`expand`, counted against the budget of the whole configuration."""
         names = expand(spec)
-        self.names_left -= len(names)
+        self.charge(len(names))
+        return names
+
+    def charge(self, count: int) -> None:
+        """Count ``count`` port names (or memberships) against the budget."""
+        self.names_left -= count
         if self.names_left < 0:
             raise TooLargeError(f"the configuration names more than {MAX_NAMES} ports")
-        return names
 
     def interface(self, name: str) -> Interface:
         """The interface entry of ``name`` (created on first use)."""
@@ -307,7 +312,17 @@ def canonical(name: str) -> str:
 
 
 def finish(config: Config) -> Config:
-    """Turn per interface VLAN and aggregation settings into VLAN port lists and trunks."""
+    """Turn per interface VLAN and aggregation settings into VLAN port lists and trunks.
+
+    Every membership counts against the configuration's budget, and duplicates are
+    found with sets, so the work stays linear in what the text describes.
+    """
+    seen = {
+        (vid, tagged, name)
+        for vid, vlan in config.vlans.items()
+        for tagged, names in ((False, vlan.untagged), (True, vlan.tagged))
+        for name in names
+    }
     known = set(config.vlans)
     for trunk in config.trunks.values():  # the aggregation itself may name the protocol
         own = config.interfaces.get(trunk.name)
@@ -327,23 +342,25 @@ def finish(config: Config) -> Config:
                 trunk.protocol = port.lag_protocol
             continue  # members carry the aggregation's VLANs
         if port.mode == "access" and port.access_vlan:
-            _member(config, port.access_vlan, port.name, tagged=False)
+            _member(config, seen, port.access_vlan, port.name, tagged=False)
         elif port.mode == "trunk":
             if port.native_vlan:
-                _member(config, port.native_vlan, port.name, tagged=False)
+                _member(config, seen, port.native_vlan, port.name, tagged=False)
             allowed = known if port.allowed is None else set(port.allowed)
             for vid in sorted(allowed - {port.native_vlan}):
-                _member(config, vid, port.name, tagged=True)
+                _member(config, seen, vid, port.name, tagged=True)
     return config
 
 
-def _member(config: Config, vid: int, name: str, *, tagged: bool) -> None:
-    if not 1 <= vid <= 4094:
+def _member(
+    config: Config, seen: set[tuple[int, bool, str]], vid: int, name: str, *, tagged: bool
+) -> None:
+    if not 1 <= vid <= 4094 or (vid, tagged, name) in seen:
         return
+    config.charge(1)
+    seen.add((vid, tagged, name))
     vlan = config.vlans.setdefault(vid, Vlan(vid))
-    target = vlan.tagged if tagged else vlan.untagged
-    if name not in target:
-        target.append(name)
+    (vlan.tagged if tagged else vlan.untagged).append(name)
 
 
 def mask_to_prefix(mask: str) -> int:
@@ -440,3 +457,20 @@ def network_of(words: list[str]) -> str:
 def keywords(text: str) -> frozenset[str]:
     """A set of command words written as one string."""
     return frozenset(text.split())
+
+
+def declare_vlans(
+    config: Config, spec: str, body: list[str], keys: tuple[str, ...] = ("name",)
+) -> None:
+    """VLANs of a ``vlan`` block; its body is read once (a name only names a single VLAN)."""
+    numbers = vid_list(spec)
+    config.charge(len(numbers))
+    name = ""
+    for line in body:
+        word, _sep, rest = line.partition(" ")
+        if word in keys and rest:
+            name = _unquote(rest)[:64]
+    for vid in numbers:
+        vlan = config.vlans.setdefault(vid, Vlan(vid))
+        if name and len(numbers) == 1:
+            vlan.name = name
