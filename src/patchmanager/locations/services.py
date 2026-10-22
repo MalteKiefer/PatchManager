@@ -41,6 +41,10 @@ def create[N: HierarchyNode](
     """Create a node below ``parent`` (a tenant for sites)."""
     scope = parent.policy_path
     require(actor, f"{model.policy_object_type}.add", scope_path=scope)
+    if model.policy_object_type == "dcim.rack":
+        from patchmanager.instance import editions
+
+        editions.check_limit("racks")
     node = model(created_by=actor, **fields)
     if model.parent_field:
         setattr(node, model.parent_field, parent)

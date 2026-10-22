@@ -245,6 +245,10 @@ def _send(delivery: Delivery) -> None:
 
 def deliver_due(limit: int = BATCH) -> int:
     """Send pending deliveries that are due. Safe to run in parallel workers."""
+    from patchmanager.instance import editions
+
+    if not editions.enabled("webhooks"):
+        return 0  # deliveries wait (and expire) while the edition lacks webhooks
     with rls.system_context():
         now = timezone.now()
         with transaction.atomic():  # claim a batch: other workers skip locked rows and leased ones

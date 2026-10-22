@@ -72,6 +72,12 @@ BASE_URL = env(
 ).rstrip("/")
 INSTANCE_NAME = env("PATCHMANAGER_INSTANCE_NAME", "PatchManager")
 BRAND_LOGO = env("PATCHMANAGER_BRAND_LOGO", "")  # PNG or JPEG file shown on exported PDFs
+EDITION = env(
+    "PATCHMANAGER_EDITION", ""
+)  # free, smb, integrator, enterprise; empty: chosen in the admin area
+SOURCE_URL = env(
+    "PATCHMANAGER_SOURCE_URL", "https://github.com/MalteKiefer/PatchManager"
+)  # AGPL section 13
 DJANGO_ADMIN_ENABLED = env_bool("PATCHMANAGER_DJANGO_ADMIN", DEBUG)
 
 INSTALLED_APPS = [
@@ -100,6 +106,7 @@ INSTALLED_APPS = [
     "patchmanager.integrations",
     "patchmanager.sso",
     "patchmanager.scim",
+    "patchmanager.instance",
 ]
 if DJANGO_ADMIN_ENABLED:
     INSTALLED_APPS.insert(0, "django.contrib.admin")

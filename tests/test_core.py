@@ -6,6 +6,7 @@ from patchmanager.core import ratelimit
 from patchmanager.tenancy.rls import EnableRowLevelSecurity
 
 
+@pytest.mark.django_db  # the 404 page shows the instance name
 def test_metrics_requires_token(client: Client, monkeypatch) -> None:
     assert client.get("/metrics", secure=True).status_code == 404
     monkeypatch.setenv("PATCHMANAGER_METRICS_TOKEN", "s3cret")

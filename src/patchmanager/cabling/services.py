@@ -58,6 +58,12 @@ def connect(request: HttpRequest, actor: User, a: Port, b: Port, **fields: Any) 
         raise ServiceError(_("Ports of different tenants cannot be connected."))
     _require_endpoint(actor, a)
     _require_endpoint(actor, b)
+    from patchmanager.instance import editions
+
+    if not editions.current().cross_rack_cabling and (
+        a.device.rack_id is None or a.device.rack_id != b.device.rack_id
+    ):
+        raise ServiceError(_("This edition only documents connections inside one rack."))
     cable = Cable(
         tenant_id=a.tenant_id,
         created_by=actor,

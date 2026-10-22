@@ -34,6 +34,7 @@ from patchmanager.accounts.models import RecoveryCode, TOTPDevice, User, WebAuth
 from patchmanager.accounts.services import ServiceError
 from patchmanager.audit import services as audit
 from patchmanager.core import crypto, ratelimit
+from patchmanager.instance import state
 
 TOTP_INTERVAL = 30
 RECOVERY_CODE_COUNT = 10
@@ -50,7 +51,7 @@ def totp_begin(user: User, name: str) -> tuple[TOTPDevice, str]:
     device = TOTPDevice.objects.create(
         user=user, name=name[:100], encrypted_secret=crypto.encrypt(secret)
     )
-    uri = pyotp.TOTP(secret).provisioning_uri(name=user.email, issuer_name=settings.INSTANCE_NAME)
+    uri = pyotp.TOTP(secret).provisioning_uri(name=user.email, issuer_name=state.instance_name())
     return device, uri
 
 
@@ -140,7 +141,7 @@ def webauthn_registration_options(request: HttpRequest, user: User) -> str:
     """Options for ``navigator.credentials.create``; challenge kept in the session."""
     options = generate_registration_options(
         rp_id=settings.WEBAUTHN_RP_ID,
-        rp_name=settings.INSTANCE_NAME,
+        rp_name=state.instance_name(),
         user_id=_user_handle(user),
         user_name=user.email,
         user_display_name=user.display_name,

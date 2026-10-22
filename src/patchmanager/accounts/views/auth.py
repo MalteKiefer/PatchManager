@@ -51,11 +51,14 @@ def login_view(request: HttpRequest) -> HttpResponse:
         if result.outcome == auth.Outcome.MFA:
             return redirect("accounts:mfa")
         form.add_error(None, result.message)
+    from patchmanager.instance import editions
     from patchmanager.sso.models import IdentityProvider
 
     providers = IdentityProvider.objects.filter(enabled=True).exclude(
         kind=IdentityProvider.Kind.LDAP
     )
+    if not editions.enabled("sso"):
+        providers = providers.none()
     return render(request, "accounts/login.html", {"form": form, "providers": providers})
 
 
