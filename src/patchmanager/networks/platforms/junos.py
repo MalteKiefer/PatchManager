@@ -126,8 +126,9 @@ def parse(text: str) -> Config:
         except ParseError as exc:
             config.warnings.append(f"statement {number}: {exc}")
     for port, name in members:
-        vid = vlan_names.get(name) or (int(name) if name.isdigit() else None)
-        if vid is not None:
+        member_vid = vlan_names.get(name) or (int(name) if name.isdigit() else None)
+        if member_vid is not None:
+            vid = member_vid
             interface = config.interface(port)
             interface.allowed = sorted({*(interface.allowed or []), vid})
             if interface.mode != "trunk":
