@@ -6,9 +6,20 @@ from django import forms
 from django.http import HttpRequest
 from django.utils.translation import gettext_lazy as _
 
+from patchmanager.accounts import policy
 from patchmanager.core import crud
 from patchmanager.directory import links
 from patchmanager.directory.models import Contact, Organization, System
+
+
+def visible(actor: Any, queryset: Any) -> Any:
+    """Rows of ``queryset`` the actor may view (by path where the table has one)."""
+    model = queryset.model
+    permission = f"{model.policy_object_type}.view"
+    if any(f.name == "path" for f in model._meta.concrete_fields):
+        return policy.scope_queryset(actor, permission, queryset)
+    allowed = [o.pk for o in queryset if policy.has_perm(actor, permission, o)]
+    return queryset.filter(pk__in=allowed)
 
 
 class TenantForm(forms.ModelForm):  # type: ignore[type-arg]
@@ -17,12 +28,12 @@ class TenantForm(forms.ModelForm):  # type: ignore[type-arg]
     tenant_fields: tuple[str, ...] = ()
 
     def __init__(self, *args: Any, tenant: Any, actor: Any, **kwargs: Any) -> None:
-        """Limit foreign key choices to the tenant."""
+        """Offer only records of the tenant that the user may see."""
         super().__init__(*args, **kwargs)
         for name in self.tenant_fields:
             if name in self.fields:
                 field: Any = self.fields[name]
-                field.queryset = field.queryset.filter(tenant=tenant)
+                field.queryset = visible(actor, field.queryset.filter(tenant=tenant))
 
 
 class OrganizationForm(TenantForm):
@@ -39,6 +50,8 @@ class OrganizationForm(TenantForm):
 
 class ContactForm(TenantForm):
     """A person at an organisation."""
+
+    tenant_fields = ("organization",)
 
     class Meta:
         model = Contact
