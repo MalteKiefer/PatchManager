@@ -1,0 +1,47 @@
+# Script (10.80.0123 / 01.06.2024) (0x0020c11c,IDs:2,3,4,8,e,f,15,2b,30;0x0c000453)
+lang English
+flash No
+
+set /Setup/Name "LC-01"
+set /Setup/TCP-IP/DNS-Default 1.1.1.1
+set /Setup/TCP-IP/DNS-Backup 9.9.9.9
+set /Setup/DNS/Domain "office.lan"
+set /Setup/WAN/PPP/Key "secret"
+
+cd /Setup/TCP-IP/Network-list
+del *
+tab Network-name IP-Address IP-Netmask VLAN-ID Interface Src-check Type Rtg-tag Comment
+add "INTRANET" 192.168.1.1 255.255.255.0 0 LAN-1 loose Intranet 0 "local intranet"
+add "GUESTS" 10.60.0.1 255.255.255.0 60 any loose Intranet 0 ""
+cd /
+
+cd /Setup/VLAN/Networks
+tab Name VLAN-ID Ports
+add "GUESTS" 60 "LAN-2,LAN-3"
+cd /
+
+cd /Setup/VLAN/Port-Table
+tab Port Allow-all-VLANs Port-VLAN-Id Tagging-Mode
+add LAN-2 No 60 Access
+add LAN-3 No 1 Trunk
+cd /
+
+cd /Setup/IP-Router/IP-Routing-Table
+tab IP-Address IP-Netmask Rtg-tag Admin-Distance Peer-or-IP Distance Masquerade Active Comment
+add 255.255.255.255 0.0.0.0 0 0 "INTERNET" 0 on Yes "default route"
+add 10.99.0.0 255.255.0.0 0 5 192.168.1.254 0 off Yes ""
+cd /
+
+cd /Setup/DHCP/Network-list
+tab Network-name Start-Address-Pool End-Address-Pool Netmask Broadcast-Address Gateway-Address DNS-Default DNS-Backup Operating Def.-Lease
+add "GUESTS" 10.60.0.100 10.60.0.199 255.255.255.0 0.0.0.0 0.0.0.0 10.60.0.1 0.0.0.0 Yes 480
+cd /
+
+cd /Setup/DHCP/Hosts
+tab MAC-Address IP-Address Hostname Image-Alias Network-name
+add 00a0570011aa 10.60.0.20 "printer" "" "GUESTS"
+cd /
+
+flash Yes
+# done
+exit

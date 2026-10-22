@@ -9,6 +9,7 @@ import ipaddress
 from dataclasses import dataclass, field
 from typing import Any
 
+from django.core.exceptions import ValidationError
 from django.db import transaction
 from django.http import HttpRequest
 from django.utils.translation import gettext as _
@@ -22,7 +23,6 @@ from patchmanager.dcim.models import Device, Port
 from patchmanager.ipam import services as ipam
 from patchmanager.ipam.models import IPAddress
 from patchmanager.library.models import Connector, PortKind
-from patchmanager.networks import aruba
 from patchmanager.networks.models import (
     VLAN,
     BGPNeighbor,
@@ -32,6 +32,7 @@ from patchmanager.networks.models import (
     SwitchSettings,
     TaggedVLAN,
 )
+from patchmanager.networks.platforms import common as model
 
 
 @dataclass
@@ -54,7 +55,7 @@ def apply(
     request: HttpRequest,
     actor: User,
     device: Device,
-    config: aruba.Config,
+    config: model.Config,
     *,
     commit: bool,
     source: str = "",
@@ -91,14 +92,15 @@ def _apply(
     request: HttpRequest,
     actor: User,
     device: Device,
-    config: aruba.Config,
+    config: model.Config,
     result: Result,
     source: str,
 ) -> None:
-    ports = {p.name.lower(): p for p in Port.objects.filter(device=device)}
+    # Names are compared in their canonical form: Gi1/0/1 is GigabitEthernet1/0/1.
+    ports = {model.canonical(p.name): p for p in Port.objects.filter(device=device)}
 
     def port(name: str) -> Port | None:
-        found = ports.get(name.lower())
+        found = ports.get(model.canonical(name))
         if found is None and f"skip:{name}" not in ports:
             result.skipped.append(_("Port %(port)s is not on this device.") % {"port": name})
             ports[f"skip:{name}"] = None  # type: ignore[assignment]  # report once
@@ -106,7 +108,7 @@ def _apply(
 
     _settings(device, config, result, source)
     for trunk in config.trunks.values():
-        lag = ports.get(trunk.name.lower())
+        lag = ports.get(model.canonical(trunk.name))
         if lag is None:
             lag = Port.objects.create(
                 device=device,
@@ -115,7 +117,7 @@ def _apply(
                 connector=Connector.OTHER,
                 order=10_000,
             )
-            ports[trunk.name.lower()] = lag
+            ports[model.canonical(trunk.name)] = lag
             result.add(_("New link aggregation %(lag)s") % {"lag": trunk.name})
         if lag.lag_protocol != trunk.protocol:
             lag.lag_protocol = trunk.protocol
@@ -137,10 +139,15 @@ def _apply(
     for vlan_item in config.vlans.values():
         if vlan_item.addresses or vlan_item.dhcp or vlan_item.ospf_area:
             _vlan_interface(request, actor, device, vlan_item, ports, result)
+    for item in config.interfaces.values():
+        target = port(item.name) if item.addresses else None
+        if target is not None:
+            _addresses(request, actor, device, target, item.addresses, result)
     _replace(device, config, result)
+    _dhcp(request, actor, device, config, result)
 
 
-def _settings(device: Device, config: aruba.Config, result: Result, source: str) -> None:
+def _settings(device: Device, config: model.Config, result: Result, source: str) -> None:
     settings, _created = SwitchSettings.objects.get_or_create(
         device=device, defaults={"tenant_id": device.tenant_id}
     )
@@ -156,6 +163,8 @@ def _settings(device: Device, config: aruba.Config, result: Result, source: str)
         "ospf_router_id": config.ospf_router_id or None,
         "gateways": config.gateways,
         "jumbo_vlans": sorted(v.vid for v in config.vlans.values() if v.jumbo),
+        "dns_servers": config.dns_servers,
+        "domain": config.domain,
     }
     for name, value in wanted.items():
         current = getattr(settings, name)
@@ -170,7 +179,7 @@ def _settings(device: Device, config: aruba.Config, result: Result, source: str)
     settings.save()
 
 
-def _port_settings(target: Port, item: aruba.Interface, result: Result) -> None:
+def _port_settings(target: Port, item: model.Interface, result: Result) -> None:
     wanted: dict[str, Any] = {
         "enabled": item.enabled,
         "tunneled": item.tunneled,
@@ -227,7 +236,7 @@ def _vlan(
 
 
 def _memberships(
-    config: aruba.Config, vlans: dict[int, VLAN], port: Any, ports: dict[str, Port], result: Result
+    config: model.Config, vlans: dict[int, VLAN], port: Any, ports: dict[str, Port], result: Result
 ) -> None:
     untagged: dict[str, int] = {}
     tagged: dict[str, set[int]] = {}
@@ -273,13 +282,13 @@ def _vlan_interface(
     request: HttpRequest,
     actor: User,
     device: Device,
-    item: aruba.Vlan,
+    item: model.Vlan,
     ports: dict[str, Port],
     result: Result,
 ) -> None:
     """The routed interface of a VLAN (``vlan 100`` as a virtual port) with its addresses."""
     name = f"vlan {item.vid}"
-    svi = ports.get(name)
+    svi = ports.get(model.canonical(name))
     if svi is None:
         svi = Port.objects.create(
             device=device,
@@ -288,7 +297,7 @@ def _vlan_interface(
             connector=Connector.OTHER,
             order=20_000 + item.vid,
         )
-        ports[name] = svi
+        ports[model.canonical(name)] = svi
         result.add(_("New VLAN interface %(name)s") % {"name": name})
     wanted = {
         "description": "DHCP" if item.dhcp else svi.description,
@@ -300,24 +309,37 @@ def _vlan_interface(
         for key in changed:
             setattr(svi, key, wanted[key])
         svi.save(update_fields=[*changed, "updated_at"])
-    for text in item.addresses:
+    _addresses(request, actor, device, svi, item.addresses, result)
+
+
+def _addresses(
+    request: HttpRequest,
+    actor: User,
+    device: Device,
+    target: Port,
+    addresses: list[str],
+    result: Result,
+) -> None:
+    """Document the addresses of a port (taking over unassigned ones that already exist)."""
+    for text in addresses:
         interface = ipaddress.ip_interface(text)
         existing = IPAddress.objects.filter(
             tenant_id=device.tenant_id, vrf__isnull=True, host=str(interface.ip)
         ).first()
+        label = {"address": text, "name": target.name}
         if existing is None:
-            ipam.create_address(request, actor, device.tenant, address=text, port=svi)
-            result.add(_("Address %(address)s on %(name)s") % {"address": text, "name": name})
+            ipam.create_address(request, actor, device.tenant, address=text, port=target)
+            result.add(_("Address %(address)s on %(name)s") % label)
         elif existing.port_id is None:
-            ipam.update_address(request, actor, existing, port=svi)
-            result.add(_("Address %(address)s on %(name)s") % {"address": text, "name": name})
-        elif existing.port_id != svi.pk:
+            ipam.update_address(request, actor, existing, port=target)
+            result.add(_("Address %(address)s on %(name)s") % label)
+        elif existing.port_id != target.pk:
             result.skipped.append(
                 _("Address %(address)s is already on another port.") % {"address": text}
             )
 
 
-def _replace(device: Device, config: aruba.Config, result: Result) -> None:
+def _replace(device: Device, config: model.Config, result: Result) -> None:
     """Lists the configuration owns completely: MST instances, routes, BGP peers, profiles."""
     tenant = device.tenant_id
     instances = [
@@ -331,6 +353,7 @@ def _replace(device: Device, config: aruba.Config, result: Result) -> None:
             prefix=r.prefix,
             next_hop=r.next_hop,
             distance=r.distance,
+            interface=r.interface[:100],
         )
         for r in config.routes
     ]
@@ -363,7 +386,7 @@ def _replace(device: Device, config: aruba.Config, result: Result) -> None:
             StaticRoute,
             routes,
             _("static routes"),
-            lambda r: (str(r.prefix), str(r.next_hop), r.distance),
+            lambda r: (str(r.prefix), str(r.next_hop), r.distance, r.interface),
         ),
         (
             BGPNeighbor,
@@ -378,22 +401,116 @@ def _replace(device: Device, config: aruba.Config, result: Result) -> None:
             lambda r: (r.name, r.detects, r.untagged_vid, r.tagged_vids, r.jumbo),
         ),
     ]
-    for model, rows, label, key in lists:
-        current = list(model.objects.filter(device=device))
+    for table, rows, label, key in lists:
+        current = list(table.objects.filter(device=device))
         if sorted(map(key, current), key=str) == sorted(map(key, rows), key=str):
             continue
-        model.objects.filter(device=device).delete()
+        table.objects.filter(device=device).delete()
         for row in rows:
             row.full_clean(exclude=["tenant", "device"])
-        model.objects.bulk_create(rows)
+        table.objects.bulk_create(rows)
         result.add(_("%(what)s: %(n)s") % {"what": label, "n": len(rows)})
 
 
-def document(device: Device, user: Any) -> aruba.Config:
+def _dhcp(
+    request: HttpRequest, actor: User, device: Device, config: model.Config, result: Result
+) -> None:
+    """DHCP pools become scopes of documented prefixes (served by this device)."""
+    from patchmanager.ipam.models import DHCPReservation, DHCPScope, Prefix
+
+    relays = {
+        str(ipaddress.ip_interface(a).network): v.helpers
+        for v in config.vlans.values()
+        for a in v.addresses
+        if v.helpers
+    }
+    for pool in config.pools.values():
+        if not (pool.network and pool.start and pool.end):
+            continue
+        prefix = Prefix.objects.filter(
+            tenant_id=device.tenant_id, vrf__isnull=True, prefix=pool.network
+        ).first()
+        if prefix is None:
+            result.skipped.append(
+                _("DHCP pool %(pool)s: the network %(network)s is not documented in IP networks.")
+                % {"pool": pool.name, "network": pool.network}
+            )
+            continue
+        name = (pool.name or pool.network)[:100]
+        scope = DHCPScope.objects.filter(tenant_id=device.tenant_id, name=name).first()
+        if scope is not None and scope.server_id not in (None, device.pk):
+            result.skipped.append(
+                _("DHCP pool %(pool)s: a scope of that name belongs to another server.")
+                % {"pool": pool.name}
+            )
+            continue
+        allowed = (
+            policy.has_perm(actor, "ipam.dhcpscope.change", scope)
+            if scope is not None
+            else policy.has_perm(actor, "ipam.dhcpscope.add", device.tenant)
+        )
+        if not allowed:
+            result.skipped.append(
+                _("DHCP pool %(pool)s: you may not document DHCP scopes.") % {"pool": pool.name}
+            )
+            continue
+        created = scope is None
+        fields = {
+            "prefix": prefix,
+            "server": device,
+            "start": pool.start,
+            "end": pool.end,
+            "gateway": pool.gateway or None,
+            "dns_servers": ", ".join(pool.dns)[:200],
+            "domain_name": pool.domain,
+            "lease_seconds": pool.lease_seconds or 86400,
+            "relays": ", ".join(relays.get(pool.network, []))[:200],
+        }
+        if scope is None:
+            scope = DHCPScope(tenant_id=device.tenant_id, created_by=actor, name=name, **fields)
+            result.add(_("New DHCP scope %(name)s") % {"name": name})
+        elif any(str(getattr(scope, k) or "") != str(v or "") for k, v in fields.items()):
+            for key, value in fields.items():
+                setattr(scope, key, value)
+            result.add(_("DHCP scope %(name)s changed") % {"name": name})
+        try:
+            scope.full_clean(exclude=["tenant"])
+        except ValidationError as exc:
+            result.skipped.append(f"{name}: {'; '.join(exc.messages)}")
+            continue
+        scope.save()
+        audit.record(
+            "ipam.dhcpscope.created" if created else "ipam.dhcpscope.changed",
+            request=request,
+            obj=scope,
+            data={"name": name, "from": "configuration"},
+        )
+        have = {(r.mac_address, str(r.address).split("/")[0]) for r in scope.reservations.all()}
+        want = {(mac, ip) for mac, ip, _name in pool.reservations}
+        if have != want:
+            scope.reservations.all().delete()
+            for mac, ip, host in pool.reservations:
+                reservation = DHCPReservation(
+                    tenant_id=device.tenant_id,
+                    scope=scope,
+                    mac_address=mac,
+                    address=ip,
+                    hostname=host,
+                )
+                try:
+                    reservation.full_clean(exclude=["tenant"])
+                except ValidationError as exc:
+                    result.skipped.append(f"{ip}: {'; '.join(exc.messages)}")
+                    continue
+                reservation.save()
+            result.add(_("Reservations of %(name)s: %(n)s") % {"name": name, "n": len(want)})
+
+
+def document(device: Device, user: Any) -> model.Config:
     """The documentation of a device as a configuration (to show or export)."""
     if not policy.has_perm(user, "dcim.device.view", device):
         raise ServiceError(_("Not found."))
-    config = aruba.Config()
+    config = model.Config()
     settings = SwitchSettings.objects.filter(device=device).first()
     if settings is not None:
         config.hostname = settings.hostname
@@ -406,6 +523,8 @@ def document(device: Device, user: Any) -> aruba.Config:
         config.bgp_router_id = str(settings.bgp_router_id or "")
         config.ospf_router_id = str(settings.ospf_router_id or "")
         config.gateways = list(settings.gateways)
+        config.dns_servers = list(settings.dns_servers)
+        config.domain = settings.domain
     jumbo = set(settings.jumbo_vlans) if settings else set()
     ports = list(
         Port.objects.filter(device=device)
@@ -415,13 +534,13 @@ def document(device: Device, user: Any) -> aruba.Config:
     for p in ports:
         if p.kind == PortKind.LAG:
             members = [m.name for m in ports if m.lag_id == p.pk]
-            config.trunks[p.name] = aruba.Trunk(p.name, members, p.lag_protocol or "static")
+            config.trunks[p.name] = model.Trunk(p.name, members, p.lag_protocol or "static")
     for p in ports:
         if p.kind == PortKind.VIRTUAL and p.name.startswith("vlan "):
             vid = int(p.name.split()[1]) if p.name.split()[1].isdigit() else None
             if vid is None:
                 continue
-            vlan = config.vlans.setdefault(vid, aruba.Vlan(vid))
+            vlan = config.vlans.setdefault(vid, model.Vlan(vid))
             vlan.addresses = [str(a.address) for a in p.ip_addresses.all()]
             vlan.dhcp = p.description == "DHCP"
             vlan.ospf_area, vlan.ospf_passive = p.ospf_area, p.ospf_passive
@@ -431,14 +550,14 @@ def document(device: Device, user: Any) -> aruba.Config:
         if not p.lag_id:  # members of an aggregation carry its VLANs, not their own
             if p.untagged_vlan is not None:
                 vid = p.untagged_vlan.vid
-                config.vlans.setdefault(vid, aruba.Vlan(vid)).untagged.append(p.name)
+                config.vlans.setdefault(vid, model.Vlan(vid)).untagged.append(p.name)
             for tag in p.tagged.all():
-                config.vlans.setdefault(tag.vlan.vid, aruba.Vlan(tag.vlan.vid)).tagged.append(
+                config.vlans.setdefault(tag.vlan.vid, model.Vlan(tag.vlan.vid)).tagged.append(
                     p.name
                 )
         flags = (p.tunneled, p.stp_edge, p.stp_bpdu_guard, p.stp_root_guard)
         if p.kind == PortKind.INTERFACE and (p.label or not p.enabled or any(flags)):
-            config.interfaces[p.name] = aruba.Interface(p.name, p.label, p.enabled, *flags)
+            config.interfaces[p.name] = model.Interface(p.name, p.label, p.enabled, *flags)
     names = dict(
         VLAN.objects.filter(tenant_id=device.tenant_id, vid__in=list(config.vlans)).values_list(
             "vid", "name"
@@ -451,16 +570,19 @@ def document(device: Device, user: Any) -> aruba.Config:
         config.mst_instances[row.instance] = (list(row.vlans), row.priority)
     for route in StaticRoute.objects.filter(device=device):
         config.routes.append(
-            aruba.Route(
-                str(route.prefix), str(route.next_hop) if route.next_hop else None, route.distance
+            model.Route(
+                str(route.prefix),
+                str(route.next_hop) if route.next_hop else None,
+                route.distance,
+                route.interface,
             )
         )
     for n in BGPNeighbor.objects.filter(device=device):
-        config.neighbors[str(n.address)] = aruba.Neighbor(
+        config.neighbors[str(n.address)] = model.Neighbor(
             str(n.address), n.remote_asn, n.description, n.enabled
         )
     for profile in PortProfile.objects.filter(device=device):
-        config.profiles[profile.name] = aruba.Profile(
+        config.profiles[profile.name] = model.Profile(
             profile.name,
             profile.untagged_vid,
             list(profile.tagged_vids),

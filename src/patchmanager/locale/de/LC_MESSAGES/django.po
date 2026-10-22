@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-22 08:15+0000\n"
+"POT-Creation-Date: 2026-10-22 08:35+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -71,7 +71,7 @@ msgstr "Aktuelles Passwort"
 msgid "Authenticator app"
 msgstr "Authenticator-App"
 
-#: accounts/forms.py:111 accounts/forms.py:128 directory/links.py:195
+#: accounts/forms.py:111 accounts/forms.py:128 directory/links.py:194
 #: directory/pages.py:106 templates/manage/_assignments.html:3
 msgid "Role"
 msgstr "Rolle"
@@ -138,7 +138,7 @@ msgid "The file is too large."
 msgstr "Die Datei ist zu groß."
 
 #: accounts/forms.py:187 configs/views.py:48 library/views.py:343
-#: networks/switch_views.py:86
+#: networks/switch_views.py:92
 msgid "The file must be UTF-8 text."
 msgstr "Die Datei muss UTF-8-Text enthalten."
 
@@ -217,8 +217,8 @@ msgstr "Notfallkonto"
 #: ipam/models.py:327 ipam/models.py:391 library/models.py:26
 #: library/models.py:144 library/models.py:292 locations/models.py:19
 #: locations/models.py:61 locations/models.py:81 locations/models.py:115
-#: locations/models.py:164 networks/models.py:32 networks/models.py:263
-#: networks/models.py:291 scim/models.py:14 search/models.py:16
+#: locations/models.py:164 networks/models.py:32 networks/models.py:265
+#: networks/models.py:293 scim/models.py:14 search/models.py:16
 #: sso/models.py:19 tenancy/models.py:21
 msgid "name"
 msgstr "Name"
@@ -228,8 +228,8 @@ msgstr "Name"
 #: ipam/models.py:77 ipam/models.py:134 ipam/models.py:221 ipam/models.py:291
 #: ipam/models.py:348 library/models.py:242 locations/models.py:38
 #: locations/models.py:62 locations/models.py:116 locations/models.py:174
-#: networks/models.py:36 networks/models.py:83 networks/models.py:225
-#: networks/models.py:245 networks/models.py:294
+#: networks/models.py:36 networks/models.py:83 networks/models.py:227
+#: networks/models.py:247 networks/models.py:296
 msgid "description"
 msgstr "Beschreibung"
 
@@ -404,7 +404,7 @@ msgstr "Der letzte Super-Admin kann nicht entfernt werden."
 
 #: accounts/services/users.py:29 accounts/services/users.py:167 api/core.py:28
 #: api/tokens.py:99 api/tokens.py:130 cabling/services.py:50
-#: directory/links.py:141 directory/links.py:144 directory/links.py:173
+#: directory/links.py:140 directory/links.py:143 directory/links.py:172
 #: exchange/importer.py:54 exchange/importer.py:70 floorplans/services.py:193
 #: floorplans/views.py:283 history/services.py:76 history/services.py:97
 #: instance/services.py:23 integrations/services.py:69 metadata/services.py:107
@@ -675,7 +675,7 @@ msgstr "Keine gültige ID."
 msgid "Not a valid value."
 msgstr "Kein gültiger Wert."
 
-#: api/core.py:102 networks/switchconfig.py:395
+#: api/core.py:102 networks/switchconfig.py:512
 msgid "Not found."
 msgstr "Nicht gefunden."
 
@@ -790,7 +790,7 @@ msgstr "Strom"
 
 #: cabling/models.py:31 circuits/models.py:22 directory/models.py:25
 #: directory/models.py:94 library/models.py:71 library/models.py:118
-#: networks/models.py:288
+#: networks/models.py:290
 msgid "other"
 msgstr "Sonstiges"
 
@@ -809,7 +809,7 @@ msgstr "außer Betrieb genommen"
 
 #: cabling/models.py:38 circuits/models.py:37 dcim/models.py:243
 #: directory/models.py:28 directory/models.py:103 library/models.py:295
-#: networks/models.py:292
+#: networks/models.py:294
 msgid "kind"
 msgstr "Art"
 
@@ -1077,7 +1077,7 @@ msgstr "Größe (Bytes)"
 msgid "lines"
 msgstr "Zeilen"
 
-#: configs/models.py:25 networks/models.py:185
+#: configs/models.py:25 networks/models.py:187
 msgid "source"
 msgstr "Quelle"
 
@@ -1093,8 +1093,8 @@ msgstr "Die Konfiguration ist leer."
 msgid "The configuration must be text, not a binary file."
 msgstr "Die Konfiguration muss Text sein, keine Binärdatei."
 
-#: configs/services.py:36 configs/views.py:44 networks/switch_views.py:82
-#: networks/switch_views.py:92
+#: configs/services.py:36 configs/views.py:44 networks/switch_views.py:88
+#: networks/switch_views.py:98
 msgid "The configuration is larger than 2 MB."
 msgstr "Die Konfiguration ist größer als 2 MB."
 
@@ -1106,12 +1106,12 @@ msgstr ""
 "Diese Versionen sind zu lang für einen Vergleich hier; laden Sie beide "
 "herunter und vergleichen Sie sie lokal."
 
-#: configs/views.py:30 networks/switch_views.py:39
+#: configs/views.py:30 networks/switch_views.py:45
 #: templates/configs/list.html:4 templates/dcim/device.html:31
 msgid "Configuration"
 msgstr "Konfiguration"
 
-#: configs/views.py:35 networks/switch_views.py:44
+#: configs/views.py:35 networks/switch_views.py:50
 msgid "or a file"
 msgstr "oder eine Datei"
 
@@ -1525,7 +1525,7 @@ msgstr "Steckverbinder"
 msgid "speed (Mbit/s)"
 msgstr "Geschwindigkeit (Mbit/s)"
 
-#: dcim/models.py:249 ipam/models.py:220 networks/models.py:246
+#: dcim/models.py:249 ipam/models.py:220 networks/models.py:248
 #: sso/models.py:22 templates/networks/switching.html:49
 #: templates/sso/providers.html:10
 msgid "enabled"
@@ -1638,41 +1638,41 @@ msgstr "Ungültige Anfrage."
 msgid "These units are taken or outside the rack."
 msgstr "Diese Höheneinheiten sind belegt oder liegen außerhalb des Racks."
 
-#: directory/links.py:146
+#: directory/links.py:145
 msgid "Both must belong to the same tenant."
 msgstr "Beide müssen zum selben Mandanten gehören."
 
-#: directory/links.py:161
+#: directory/links.py:160
 msgid "This link already exists."
 msgstr "Diese Zuordnung existiert bereits."
 
-#: directory/links.py:190 templates/manage/_base.html:21
+#: directory/links.py:189 templates/manage/_base.html:21
 #: templates/manage/system.html:2 templates/manage/system.html:4
 msgid "System"
 msgstr "System"
 
-#: directory/links.py:193
+#: directory/links.py:192
 msgid "or organization"
 msgstr "oder Organisation"
 
-#: directory/links.py:212
+#: directory/links.py:211
 msgid "Choose a system or an organization."
 msgstr "Wählen Sie ein System oder eine Organisation."
 
-#: directory/links.py:216
+#: directory/links.py:215
 msgid "Choose the role of the organization."
 msgstr "Wählen Sie die Rolle der Organisation."
 
-#: directory/links.py:255
+#: directory/links.py:254
 msgid "Linked."
 msgstr "Zugeordnet."
 
-#: directory/links.py:261
+#: directory/links.py:260
 #, python-format
 msgid "Link %(object)s"
 msgstr "%(object)s zuordnen"
 
-#: directory/links.py:263
+#: directory/links.py:262
 msgid ""
 "Put it into a system, or assign it to an organization, for example a "
 "customer."
@@ -1680,12 +1680,12 @@ msgstr ""
 "Ordnen Sie es einem System zu oder weisen Sie es einer Organisation zu, zum "
 "Beispiel einem Kunden."
 
-#: directory/links.py:268 templates/directory/_links.html:3
+#: directory/links.py:267 templates/directory/_links.html:3
 #: templates/instance/branding.html:14
 msgid "Link"
 msgstr "Link"
 
-#: directory/links.py:282
+#: directory/links.py:283
 msgid "Link removed."
 msgstr "Zuordnung entfernt."
 
@@ -1718,7 +1718,7 @@ msgid "phone"
 msgstr "Telefon"
 
 #: directory/models.py:33 ipam/models.py:129 ipam/models.py:289
-#: locations/models.py:21 networks/models.py:240 tenancy/models.py:22
+#: locations/models.py:21 networks/models.py:242 tenancy/models.py:22
 msgid "address"
 msgstr "Adresse"
 
@@ -1726,7 +1726,7 @@ msgstr "Adresse"
 msgid "organization"
 msgstr "Organisation"
 
-#: directory/models.py:63 directory/models.py:178 networks/models.py:324
+#: directory/models.py:63 directory/models.py:178 networks/models.py:326
 msgid "role"
 msgstr "Rolle"
 
@@ -1963,7 +1963,7 @@ msgstr "Geräte"
 msgid "Totals: %(r)s racks, %(d)s devices"
 msgstr "Summen: %(r)s Racks, %(d)s Geräte"
 
-#: exchange/pdf.py:213 exchange/tables.py:725 networks/models.py:200
+#: exchange/pdf.py:213 exchange/tables.py:725 networks/models.py:202
 #: search/services.py:85
 msgid "VLANs"
 msgstr "VLANs"
@@ -2574,7 +2574,7 @@ msgstr "erste Adresse"
 msgid "last address"
 msgstr "letzte Adresse"
 
-#: ipam/models.py:203
+#: ipam/models.py:203 networks/models.py:185
 msgid "DNS servers"
 msgstr "DNS-Server"
 
@@ -2582,7 +2582,7 @@ msgstr "DNS-Server"
 msgid "Separated by commas."
 msgstr "Durch Kommas getrennt."
 
-#: ipam/models.py:205
+#: ipam/models.py:205 networks/models.py:186
 msgid "domain name"
 msgstr "Domainname"
 
@@ -2702,7 +2702,7 @@ msgstr "Wert"
 msgid "TTL (seconds)"
 msgstr "TTL (Sekunden)"
 
-#: ipam/models.py:404 networks/models.py:202 networks/models.py:326
+#: ipam/models.py:404 networks/models.py:204 networks/models.py:328
 #: templates/networks/stack.html:14 templates/networks/switching.html:73
 #: templates/networks/switching.html:83
 msgid "priority"
@@ -3572,77 +3572,81 @@ msgstr "OSPF-Router-ID"
 msgid "tunnel gateways"
 msgstr "Tunnel-Gateways"
 
-#: networks/models.py:188
+#: networks/models.py:190
 msgid "switch settings"
 msgstr "Switch-Einstellungen"
 
-#: networks/models.py:198
+#: networks/models.py:200
 msgid "instance"
 msgstr "Instanz"
 
-#: networks/models.py:219
+#: networks/models.py:221
 msgid "destination"
 msgstr "Ziel"
 
-#: networks/models.py:220
+#: networks/models.py:222
 msgid "next hop"
 msgstr "Next Hop"
 
-#: networks/models.py:221
+#: networks/models.py:223
 msgid "interface"
 msgstr "Schnittstelle"
 
-#: networks/models.py:223
+#: networks/models.py:225
 msgid "distance"
 msgstr "Distanz"
 
-#: networks/models.py:242
+#: networks/models.py:244
 msgid "remote AS"
 msgstr "Remote-AS"
 
-#: networks/models.py:244
+#: networks/models.py:246
 msgid "peer group"
 msgstr "Peer-Gruppe"
 
-#: networks/models.py:264
+#: networks/models.py:266
 msgid "applied to"
 msgstr "angewendet auf"
 
-#: networks/models.py:266
+#: networks/models.py:268
 msgid "untagged VLAN"
 msgstr "untagged VLAN"
 
-#: networks/models.py:268
+#: networks/models.py:270
 msgid "tagged VLANs"
 msgstr "tagged VLANs"
 
-#: networks/models.py:269
+#: networks/models.py:271
 msgid "jumbo frames"
 msgstr "Jumbo-Frames"
 
-#: networks/models.py:283
+#: networks/models.py:285
 msgid "stack (stacking cables)"
 msgstr "Stack (Stacking-Kabel)"
 
-#: networks/models.py:287
+#: networks/models.py:289
 msgid "virtual chassis"
 msgstr "virtuelles Chassis"
 
-#: networks/models.py:293
+#: networks/models.py:295
 msgid "domain ID"
 msgstr "Domain-ID"
 
-#: networks/models.py:315
+#: networks/models.py:317
 msgid "commander / primary"
 msgstr "Commander / primär"
 
-#: networks/models.py:316
+#: networks/models.py:318
 msgid "standby / secondary"
 msgstr "Standby / sekundär"
 
-#: networks/models.py:317 networks/models.py:323
+#: networks/models.py:319 networks/models.py:325
 msgid "member"
 msgstr "Mitglied"
+
+#: networks/platforms/__init__.py:60
+msgid "HPE Comware, H3C, Huawei VRP"
+msgstr "HPE Comware, H3C, Huawei VRP"
 
 #: networks/services.py:35 networks/services.py:117
 msgid "This does not fit the tenant or site."
@@ -3701,82 +3705,90 @@ msgstr "Dieser Switch ist bereits in einem Stack."
 msgid "This member number is already taken."
 msgstr "Diese Mitgliedsnummer ist bereits vergeben."
 
-#: networks/switch_views.py:46
+#: networks/switch_views.py:39
+msgid "Platform"
+msgstr "Plattform"
+
+#: networks/switch_views.py:41
+msgid "recognise automatically"
+msgstr "automatisch erkennen"
+
+#: networks/switch_views.py:52
 msgid "or a stored version"
 msgstr "oder eine gespeicherte Version"
 
-#: networks/switch_views.py:49
+#: networks/switch_views.py:55
 msgid "Template variables (JSON)"
 msgstr "Vorlagenvariablen (JSON)"
 
-#: networks/switch_views.py:52
+#: networks/switch_views.py:58
 msgid "For Aruba Central templates, for example {\"hostname\": \"SW-01\"}."
 msgstr "Für Aruba-Central-Vorlagen, zum Beispiel {\"hostname\": \"SW-01\"}."
 
-#: networks/switch_views.py:69
+#: networks/switch_views.py:75
 msgid "The variables are not valid JSON."
 msgstr "Die Variablen sind kein gültiges JSON."
 
-#: networks/switch_views.py:73
+#: networks/switch_views.py:79
 msgid "The variables must be a JSON object."
 msgstr "Die Variablen müssen ein JSON-Objekt sein."
 
-#: networks/switch_views.py:89
+#: networks/switch_views.py:95
 msgid "Paste a configuration, choose a file or a stored version."
 msgstr ""
 "Fügen Sie eine Konfiguration ein, wählen Sie eine Datei oder eine "
 "gespeicherte Version."
 
-#: networks/switch_views.py:186
+#: networks/switch_views.py:193
 msgid "pasted text"
 msgstr "eingefügter Text"
 
-#: networks/switch_views.py:209
+#: networks/switch_views.py:219
 #, python-format
 msgid "Configuration read: %(n)s changes."
 msgstr "Konfiguration eingelesen: %(n)s Änderungen."
 
-#: networks/switchconfig.py:67
+#: networks/switchconfig.py:68
 #, python-format
 msgid "%(n)s lines with secrets were not read."
 msgstr "%(n)s Zeilen mit Geheimnissen wurden nicht gelesen."
 
-#: networks/switchconfig.py:71
+#: networks/switchconfig.py:72
 #, python-format
 msgid "%(n)s commands are not documented, for example: %(first)s"
 msgstr "%(n)s Befehle werden nicht dokumentiert, zum Beispiel: %(first)s"
 
-#: networks/switchconfig.py:103
+#: networks/switchconfig.py:105
 #, python-format
 msgid "Port %(port)s is not on this device."
 msgstr "Port %(port)s gibt es an diesem Gerät nicht."
 
-#: networks/switchconfig.py:119
+#: networks/switchconfig.py:121
 #, python-format
 msgid "New link aggregation %(lag)s"
 msgstr "Neue Link-Aggregation %(lag)s"
 
-#: networks/switchconfig.py:128
+#: networks/switchconfig.py:130
 #, python-format
 msgid "%(port)s joins %(lag)s"
 msgstr "%(port)s tritt %(lag)s bei"
 
-#: networks/switchconfig.py:167
+#: networks/switchconfig.py:176
 #, python-format
 msgid "%(field)s: %(value)s"
 msgstr "%(field)s: %(value)s"
 
-#: networks/switchconfig.py:189
+#: networks/switchconfig.py:198
 #, python-format
 msgid "Port %(port)s: %(fields)s"
 msgstr "Port %(port)s: %(fields)s"
 
-#: networks/switchconfig.py:215
+#: networks/switchconfig.py:224
 #, python-format
 msgid "New VLAN %(vid)s %(name)s at %(site)s"
 msgstr "Neues VLAN %(vid)s %(name)s an %(site)s"
 
-#: networks/switchconfig.py:221
+#: networks/switchconfig.py:230
 #, python-format
 msgid ""
 "VLAN %(vid)s is called %(doc)s here and %(cfg)s in the configuration; the "
@@ -3785,46 +3797,80 @@ msgstr ""
 "VLAN %(vid)s heißt hier %(doc)s und in der Konfiguration %(cfg)s; der Name "
 "bleibt."
 
-#: networks/switchconfig.py:263
+#: networks/switchconfig.py:272
 #, python-format
 msgid "Port %(port)s: untagged %(untagged)s, tagged %(tagged)s"
 msgstr "Port %(port)s: untagged %(untagged)s, tagged %(tagged)s"
 
-#: networks/switchconfig.py:292
+#: networks/switchconfig.py:301
 #, python-format
 msgid "New VLAN interface %(name)s"
 msgstr "Neues VLAN-Interface %(name)s"
 
-#: networks/switchconfig.py:310 networks/switchconfig.py:313
+#: networks/switchconfig.py:332 networks/switchconfig.py:335
 #, python-format
 msgid "Address %(address)s on %(name)s"
 msgstr "Adresse %(address)s auf %(name)s"
 
-#: networks/switchconfig.py:316
+#: networks/switchconfig.py:338
 #, python-format
 msgid "Address %(address)s is already on another port."
 msgstr "Die Adresse %(address)s liegt bereits auf einem anderen Port."
 
-#: networks/switchconfig.py:361
+#: networks/switchconfig.py:384
 msgid "MST instances"
 msgstr "MST-Instanzen"
 
-#: networks/switchconfig.py:365
+#: networks/switchconfig.py:388
 msgid "static routes"
 msgstr "statische Routen"
 
-#: networks/switchconfig.py:371
+#: networks/switchconfig.py:394
 msgid "BGP neighbors"
 msgstr "BGP-Nachbarn"
 
-#: networks/switchconfig.py:377
+#: networks/switchconfig.py:400
 msgid "device profiles"
 msgstr "Geräteprofile"
 
-#: networks/switchconfig.py:389
+#: networks/switchconfig.py:412
 #, python-format
 msgid "%(what)s: %(n)s"
 msgstr "%(what)s: %(n)s"
+
+#: networks/switchconfig.py:435
+#, python-format
+msgid ""
+"DHCP pool %(pool)s: the network %(network)s is not documented in IP networks."
+msgstr ""
+"DHCP-Pool %(pool)s: Das Netz %(network)s ist unter IP-Netze nicht "
+"dokumentiert."
+
+#: networks/switchconfig.py:443
+#, python-format
+msgid "DHCP pool %(pool)s: a scope of that name belongs to another server."
+msgstr ""
+"DHCP-Pool %(pool)s: Ein Bereich dieses Namens gehört zu einem anderen Server."
+
+#: networks/switchconfig.py:454
+#, python-format
+msgid "DHCP pool %(pool)s: you may not document DHCP scopes."
+msgstr "DHCP-Pool %(pool)s: Sie dürfen keine DHCP-Bereiche dokumentieren."
+
+#: networks/switchconfig.py:471
+#, python-format
+msgid "New DHCP scope %(name)s"
+msgstr "Neuer DHCP-Bereich %(name)s"
+
+#: networks/switchconfig.py:475
+#, python-format
+msgid "DHCP scope %(name)s changed"
+msgstr "DHCP-Bereich %(name)s geändert"
+
+#: networks/switchconfig.py:506
+#, python-format
+msgid "Reservations of %(name)s: %(n)s"
+msgstr "Reservierungen von %(name)s: %(n)s"
 
 #: networks/views.py:45
 msgid "All sites of the tenant"
@@ -6984,17 +7030,19 @@ msgstr "Konfiguration einlesen"
 
 #: templates/networks/switch_read.html:6
 msgid ""
-"ArubaOS-Switch configurations and Aruba Central templates are read: VLANs "
-"and their ports, VLAN addresses, trunks, port names and states, spanning "
-"tree, static routes, OSPF, BGP, device profiles and tunnelled ports. "
+"Configurations of Aruba (AOS-S, AOS-CX, Central templates), Cisco (IOS, IOS-"
+"XE, NX-OS), Fortinet, Juniper, MikroTik, HPE Comware, H3C, Huawei and LANCOM "
+"are read: VLANs and their ports, addresses, aggregations, port names and "
+"states, spanning tree, static routes, OSPF, BGP, DNS servers and DHCP pools. "
 "Passwords, keys and SNMP communities are never read. You see the changes "
 "before anything is saved."
 msgstr ""
-"Gelesen werden ArubaOS-Switch-Konfigurationen und Aruba-Central-Vorlagen: "
-"VLANs und ihre Ports, VLAN-Adressen, Trunks, Portnamen und -zustände, "
-"Spanning Tree, statische Routen, OSPF, BGP, Geräteprofile und getunnelte "
-"Ports. Passwörter, Schlüssel und SNMP-Communities werden nie gelesen. Sie "
-"sehen die Änderungen, bevor etwas gespeichert wird."
+"Gelesen werden Konfigurationen von Aruba (AOS-S, AOS-CX, Central-Vorlagen), "
+"Cisco (IOS, IOS-XE, NX-OS), Fortinet, Juniper, MikroTik, HPE Comware, H3C, "
+"Huawei und LANCOM: VLANs und ihre Ports, Adressen, Aggregationen, Portnamen "
+"und -zustände, Spanning Tree, statische Routen, OSPF, BGP, DNS-Server und "
+"DHCP-Pools. Passwörter, Schlüssel und SNMP-Communities werden nie gelesen. "
+"Sie sehen die Änderungen, bevor etwas gespeichert wird."
 
 #: templates/networks/switch_read.html:11
 msgid "Show changes"
@@ -7006,16 +7054,21 @@ msgstr "Änderungen übernehmen"
 
 #: templates/networks/switch_read.html:18
 #, python-format
+msgid "Read as %(name)s"
+msgstr "Gelesen als %(name)s"
+
+#: templates/networks/switch_read.html:19
+#, python-format
 msgid "%(n)s change"
 msgid_plural "%(n)s changes"
 msgstr[0] "%(n)s Änderung"
 msgstr[1] "%(n)s Änderungen"
 
-#: templates/networks/switch_read.html:19
+#: templates/networks/switch_read.html:20
 msgid "The documentation already matches."
 msgstr "Die Dokumentation stimmt bereits überein."
 
-#: templates/networks/switch_read.html:20
+#: templates/networks/switch_read.html:21
 msgid "Not taken over"
 msgstr "Nicht übernommen"
 
