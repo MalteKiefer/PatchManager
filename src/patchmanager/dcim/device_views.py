@@ -43,6 +43,23 @@ DEVICE_FIELDS = [
 ]
 
 
+def _compute(actor: Any, device: Device) -> dict[str, Any]:
+    """Cluster, virtual machines and storage of a server or storage system."""
+    from patchmanager.compute.models import ClusterHost, StorageVolume, VirtualMachine
+
+    def visible(rows: Any, permission: str) -> list[Any]:
+        return [r for r in rows if policy.has_perm(actor, permission, r)]
+
+    host = ClusterHost.objects.filter(device=device).select_related("cluster").first()
+    return {
+        "cluster": host.cluster
+        if host and policy.has_perm(actor, "compute.cluster.view", host)
+        else None,
+        "guests": visible(VirtualMachine.objects.filter(host=device), "compute.vm.view"),
+        "volumes": visible(StorageVolume.objects.filter(device=device), "compute.storage.view"),
+    }
+
+
 def _suppliers(form: Any, tenant_id: Any, actor: Any) -> None:
     """Suppliers of the device's tenant that the user may see."""
     from patchmanager.directory.models import Organization
@@ -415,6 +432,7 @@ def device_detail(request: HttpRequest, pk: str) -> HttpResponse:
                 )
             ),
             "neighbours": neighbours(actor, device),
+            **_compute(actor, device),
             "configs": policy.scope_queryset(
                 actor, "configs.config.view", device.configs.order_by("-version")
             )[:1],

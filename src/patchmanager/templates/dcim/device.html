@@ -33,6 +33,16 @@
       {% for c in configs %}<p class="text-sm"><a href="{% url 'configs:version' device.pk c.version %}">v{{ c.version }}</a> {% blocktranslate with when=c.created_at|timesince %}stored {{ when }} ago{% endblocktranslate %}{% if c.comment %}, {{ c.comment }}{% endif %}</p>
       {% empty %}<p class="text-sm text-slate-500">{% translate "No configuration stored yet." %}</p>{% endfor %}
     </section>
+    {% if cluster or guests or volumes %}
+    <section class="card" aria-labelledby="compute-h">
+      <h2 id="compute-h" class="mb-3">{% translate "Virtualisation and storage" %}</h2>
+      {% if cluster %}<p class="mb-2 text-sm">{% translate "Host of cluster" %} <a href="{% url 'objects:detail' 'clusters' cluster.pk %}">{{ cluster.name }}</a> · {{ cluster.get_kind_display }}</p>{% endif %}
+      {% if guests %}<h3 class="mb-1 text-sm font-semibold">{% translate "Virtual machines" %}</h3>
+      <ul class="mb-3 flex flex-wrap gap-2 text-sm">{% for vm in guests %}<li><a class="badge-muted no-underline hover:underline" href="{% url 'objects:detail' 'vms' vm.pk %}">{{ vm.name }}</a></li>{% endfor %}</ul>{% endif %}
+      {% if volumes %}<h3 class="mb-1 text-sm font-semibold">{% translate "Storage" %}</h3>
+      <ul class="space-y-1 text-sm">{% for v in volumes %}<li><a href="{% url 'objects:detail' 'storage' v.pk %}">{{ v.name }}</a> · {{ v.get_kind_display }}{% if v.size_gb %} · {{ v.used_gb|default:"?" }} / {{ v.size_gb }} GB{% endif %}</li>{% endfor %}</ul>{% endif %}
+    </section>
+    {% endif %}
     {% if neighbours %}
     <section class="card" aria-labelledby="deps-h">
       <h2 id="deps-h" class="mb-3">{% translate "Connected to" %}</h2>

@@ -49,5 +49,8 @@ TRACKED = {
         Tracked("ipam.dnszone", "name", "tenant", "ipam.dnszone"),
         Tracked("ipam.dnsrecord", "name", "tenant", "ipam.dnszone"),
         Tracked("circuits.circuit", "circuit_id", "tenant", "circuits.circuit"),
+        Tracked("compute.cluster", "name", "tenant", "compute.cluster"),
+        Tracked("compute.virtualmachine", "name", "tenant", "compute.vm"),
+        Tracked("compute.storagevolume", "name", "tenant", "compute.storage"),
     )
 }

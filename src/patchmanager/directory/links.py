@@ -40,6 +40,9 @@ TARGETS = {
     "ipam.dhcpscope": "ipam.dhcpscope",
     "ipam.dnszone": "ipam.dnszone",
     "circuits.circuit": "circuits.circuit",
+    "compute.cluster": "compute.cluster",
+    "compute.virtualmachine": "compute.vm",
+    "compute.storagevolume": "compute.storage",
 }
 
 

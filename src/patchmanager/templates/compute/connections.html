@@ -1,0 +1,16 @@
+{% extends "base.html" %}{% load i18n %}
+{% block title %}{% translate "Connections" %}{% endblock %}
+{% block content %}
+<div class="mb-4 flex flex-wrap items-center gap-3"><h1 class="mr-auto">{% translate "Connections" %}{% if current_tenant %} · {{ current_tenant.name }}{% endif %}</h1>
+  <a class="btn-secondary" href="{% url 'objects:index' 'vms' %}">{% translate "Virtual machines" %}</a>
+  {% if can_add %}<a class="btn-primary" href="{% url 'compute:connection-create' %}">{% translate "Connect Proxmox VE" %}</a>{% endif %}</div>
+<p class="mb-4 max-w-3xl text-sm text-slate-500">{% translate "Platforms PatchManager reads regularly. Nodes become servers, virtual machines and containers are kept up to date, and a machine that moves to another node keeps its documentation." %}</p>
+<div class="card overflow-x-auto p-0"><table class="table">
+  <thead><tr><th>{% translate "Name" %}</th><th>{% translate "Cluster" %}</th><th>{% translate "Automatic update" %}</th><th>{% translate "Last update" %}</th><th>{% translate "Status" %}</th></tr></thead>
+  <tbody>{% for c in connections %}<tr>
+    <td><a href="{% url 'compute:connection' c.pk %}">{{ c.name }}</a></td><td>{{ c.cluster|default:"–" }}</td><td>{{ c.get_interval_display }}</td>
+    <td>{{ c.last_synced_at|date:"SHORT_DATETIME_FORMAT"|default:"–" }}</td>
+    <td>{% if c.last_error %}<span class="badge-warn">{% translate "error" %}</span>{% elif c.last_synced_at %}<span class="badge-ok">{% translate "ok" %}</span>{% endif %}</td>
+  </tr>{% empty %}<tr><td colspan="5" class="text-slate-500">{% translate "No connections yet." %}</td></tr>{% endfor %}</tbody>
+</table></div>
+{% endblock %}

@@ -27,6 +27,7 @@ urlpatterns = [
     path("ipam/", include("patchmanager.ipam.urls")),
     path("directory/", include("patchmanager.directory.urls")),
     path("items/", include("patchmanager.core.crud_urls")),
+    path("compute/", include("patchmanager.compute.urls")),
     path("plans/", include("patchmanager.floorplans.urls")),
     path("history/", include("patchmanager.history.urls")),
     path("search/", include("patchmanager.search.urls")),

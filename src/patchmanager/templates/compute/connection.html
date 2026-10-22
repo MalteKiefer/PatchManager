@@ -1,0 +1,27 @@
+{% extends "base.html" %}{% load i18n %}
+{% block title %}{{ connection.name }}{% endblock %}
+{% block content %}
+<nav aria-label="{% translate 'Breadcrumb' %}" class="mb-3 text-sm"><a href="{% url 'compute:connections' %}">{% translate "Connections" %}</a> / {{ connection.name }}</nav>
+<div class="mb-6 flex flex-wrap items-center gap-3"><h1 class="mr-auto">{{ connection.name }} <span class="text-base font-normal text-slate-500">Proxmox VE</span></h1>
+  {% if can_change %}<a class="btn-secondary" href="{% url 'compute:connection-select' connection.pk %}">{% translate "Change selection" %}</a>
+  <form method="post">{% csrf_token %}<button class="btn-primary" name="action" value="sync">{% translate "Update now" %}</button></form>{% endif %}</div>
+<div class="grid gap-6 lg:grid-cols-3">
+  <section class="card lg:col-span-2 text-sm" aria-labelledby="last-h">
+    <h2 id="last-h" class="mb-3">{% translate "Last update" %}</h2>
+    {% if connection.last_error %}<p class="mb-3 rounded border border-amber-300 bg-amber-50 p-3 text-amber-900 dark:border-amber-800 dark:bg-amber-950 dark:text-amber-200" role="alert">{{ connection.last_error }}</p>{% endif %}
+    {% if connection.last_synced_at %}<p class="mb-2 text-slate-500">{{ connection.last_synced_at|date:"DATETIME_FORMAT" }}</p>
+    <p class="whitespace-pre-line">{{ connection.last_result }}</p>{% else %}<p class="text-slate-500">{% translate "Not updated yet." %}</p>{% endif %}
+  </section>
+  <aside class="space-y-6">
+    <section class="card text-sm" aria-labelledby="set-h"><h2 id="set-h" class="mb-3">{% translate "Settings" %}</h2>
+      <dl class="panel-facts mt-0">
+        <div><dt>{% translate "Address" %}</dt><dd class="break-all">{{ connection.url }}</dd></div>
+        <div><dt>{% translate "Cluster" %}</dt><dd>{% if connection.cluster %}<a href="{% url 'objects:detail' 'clusters' connection.cluster_id %}">{{ connection.cluster }}</a>{% else %}–{% endif %}</dd></div>
+        <div><dt>{% translate "Automatic update" %}</dt><dd>{{ connection.get_interval_display }}</dd></div>
+        <div><dt>{% translate "Chosen" %}</dt><dd>{% blocktranslate with n=connection.nodes|length g=connection.guests|length s=connection.storage|length %}{{ n }} nodes, {{ g }} machines, {{ s }} storage{% endblocktranslate %}</dd></div>
+        <div><dt>{% translate "New machines" %}</dt><dd>{% if connection.add_new_guests %}{% translate "taken over" %}{% else %}{% translate "left out" %}{% endif %}</dd></div>
+      </dl></section>
+    {% if can_delete %}<form method="post" data-confirm="{% translate 'Remove this connection and its stored token? The documented machines stay.' %}">{% csrf_token %}<button class="btn-danger" name="action" value="delete">{% translate "Remove connection" %}</button></form>{% endif %}
+  </aside>
+</div>
+{% endblock %}

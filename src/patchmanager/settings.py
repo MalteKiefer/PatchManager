@@ -99,6 +99,7 @@ INSTALLED_APPS = [
     "patchmanager.configs",
     "patchmanager.directory",
     "patchmanager.circuits",
+    "patchmanager.compute",
     "patchmanager.cabling",
     "patchmanager.floorplans",
     "patchmanager.history",
@@ -197,6 +198,10 @@ CELERY_BEAT_SCHEDULE = {
         "schedule": 86400,
     },
     "prune-job-runs": {"task": "patchmanager.instance.tasks.prune_job_runs", "schedule": 86400},
+    "sync-platform-connections": {
+        "task": "patchmanager.compute.tasks.sync_connections",
+        "schedule": 900,
+    },
 }
 
 # Webhooks: only public addresses unless listed here (CIDRs, e.g. "10.0.0.0/8")

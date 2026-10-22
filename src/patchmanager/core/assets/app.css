@@ -104,6 +104,8 @@
 .vlan-tag { @apply h-1.5 w-2.5 rounded-sm; }
 .vlan-port-flags { @apply min-h-4 text-[10px] text-slate-600 dark:text-slate-400; }
 .stack-members { @apply space-y-2; }
+.pick-list ul, .pick-list > div { @apply grid gap-1 sm:grid-cols-2; }
+.pick-list label { @apply flex items-center gap-2 text-sm; }
 .stack-member { @apply flex flex-wrap items-center gap-3 rounded-lg border border-[#dde2e8] p-3 dark:border-slate-700; }
 .stack-member-id { @apply flex size-9 shrink-0 items-center justify-center rounded-md bg-slate-800 font-mono text-sm font-bold text-white dark:bg-slate-200 dark:text-slate-900; }
 .plan-pin-shadow { @apply fill-slate-900/25; }

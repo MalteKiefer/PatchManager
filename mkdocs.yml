@@ -71,3 +71,4 @@ nav:
       - adr/0029-switching-and-routing.md
       - adr/0030-customers-systems-dhcp-dns-lines.md
       - adr/0031-vendor-configuration-readers.md
+      - adr/0032-servers-virtualisation-storage.md
