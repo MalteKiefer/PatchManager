@@ -1,6 +1,5 @@
 """System status of the admin area: versions, health, jobs, backups, mail and licenses."""
 
-import json
 import platform
 import time
 from datetime import UTC, datetime, timedelta
@@ -28,12 +27,13 @@ from django.views.decorators.http import require_POST
 from patchmanager import __version__
 from patchmanager.accounts.decorators import permission_required
 from patchmanager.instance import config as instance_config
-from patchmanager.instance import state
+from patchmanager.instance import offsite, state
 
 VENDORED = [  # front end assets shipped in core/static/vendor
     ("htmx", "4.0.0", "0BSD"),
     ("Alpine.js (CSP build)", "3.17.5", "MIT"),
     ("Leaflet", "1.9.4", "BSD-2-Clause"),
+    ("restic (off-site backups, in the image)", "0.19.1", "BSD-2-Clause"),
     ("Device type catalog (netbox-community/devicetype-library)", "bundled data", "CC0-1.0"),
 ]
 
@@ -107,7 +107,7 @@ def health() -> list[dict[str, Any]]:
 def backups() -> dict[str, Any]:
     """Restore points in the mounted backup volume, newest first."""
     if not settings.BACKUP_DIR:
-        return {"configured": False, "files": []}
+        return {"configured": False, "files": [], "offsite": offsite.status()}
     folder = Path(settings.BACKUP_DIR)
     try:
         files = sorted(
@@ -132,21 +132,8 @@ def backups() -> dict[str, Any]:
         "readable": True,
         "files": rows,
         "stale": stale,
-        "offsite": _offsite(folder),
+        "offsite": offsite.status(),
     }
-
-
-def _offsite(folder: Path) -> dict[str, Any] | None:
-    """Last run of the restic off-site copy (deploy/offsite.sh), if it ever ran."""
-    try:
-        raw = (folder / ".offsite.json").read_bytes()[:4096]
-        data = json.loads(raw)
-        at = datetime.fromisoformat(data["at"])
-    except FileNotFoundError:
-        return None
-    except OSError, ValueError, KeyError, TypeError:
-        return {"ok": False, "at": None, "message": _("The off-site status file cannot be read.")}
-    return {"ok": data.get("ok") is True, "at": at, "message": str(data.get("message", ""))[:200]}
 
 
 def jobs() -> dict[str, Any]:

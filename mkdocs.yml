@@ -75,3 +75,4 @@ nav:
       - adr/0033-api-token-limits.md
       - adr/0034-object-storage-and-offsite-backups.md
       - adr/0035-settings-in-the-admin-area.md
+      - adr/0036-offsite-backups-in-the-admin-area.md

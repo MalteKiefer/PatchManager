@@ -80,36 +80,28 @@ rest of the stack.
 
 Dumps hold the documentation in plain form (uploads and MFA secrets inside are
 already encrypted by the application). Keep them on an encrypted disk and copy them
-off the host. The `offsite` service does this with [restic](https://restic.net): it
-encrypts on the host and uploads to S3 compatible storage (AWS S3, Backblaze B2,
-Wasabi, ...) after every new dump, keeps 14 daily, 8 weekly and 12 monthly snapshots
-and checks the repository. The system page shows the last run.
+off the host: set this up under *Administration → Settings → Backups*. The worker
+then copies the `backups` volume with [restic](https://restic.net) to S3 compatible
+storage (AWS S3, Backblaze B2, Wasabi) after every new dump: encrypted on this host
+with the repository password, deduplicated, with the retention you choose, and
+checked after each run. The system page shows the last run; *Copy now* starts one.
+
+Use a bucket and key only for backups, separate from the uploads bucket; for B2 a key
+restricted to that bucket, and the repository written as
+`s3:https://s3.<region>.backblazeb2.com/<bucket>/patchmanager`. Keep the repository
+password outside the installation as well: without it the copies cannot be opened.
+
+To bring a dump back from the off-site copy into the `backups` volume, then restore it
+as above:
 
 ```bash
-openssl rand -base64 48 > secrets/offsite_password    # keep a copy outside the host
-printf '%s' '<key id>' > secrets/offsite_access_key_id
-printf '%s' '<application key>' > secrets/offsite_secret_access_key
-chmod 600 secrets/offsite_*
-export PATCHMANAGER_OFFSITE_REPOSITORY=s3:https://s3.eu-central-003.backblazeb2.com/<bucket>/patchmanager
-docker compose -f compose.prod.yaml --profile offsite up -d offsite
+docker compose -f compose.prod.yaml run --rm --no-deps -v patchmanager_backups:/restore \
+  worker /app/.pixi/envs/prod/bin/python -m django offsite_fetch patchmanager-<stamp>.dump
 ```
 
-Use a separate bucket and key from the uploads bucket, so a leaked application key
-cannot delete the backups. For B2 use the S3 endpoint of the bucket's region. Retention
-is set with `OFFSITE_KEEP_DAILY`, `OFFSITE_KEEP_WEEKLY` and `OFFSITE_KEEP_MONTHLY` on
-the service.
-
-To fetch a dump from the off-site copy into the `backups` volume (then restore it as
-above; `restic snapshots` inside the container lists what is there):
-
-```bash
-docker compose -f compose.prod.yaml --profile offsite run --rm offsite \
-  restore patchmanager-<stamp>.dump
-```
-
-Keep `secrets/encryption_keys` and `secrets/offsite_password` outside the host as
-well: without the first, uploads and second factors cannot be read; without the
-second, the off-site copy cannot be opened.
+The files land below `/restore/backups/` in the volume; move them up one folder (or
+pass that path to the restore service). Keep `secrets/encryption_keys` outside the host
+too: uploads and second factors cannot be read without it.
 
 ### Point in time recovery
 
@@ -178,8 +170,8 @@ keys, domain and proxy, backup volume and log level.
 
 Photos and files are stored encrypted in the `media` volume (`/app/media`) and are
 included in the daily backup archive. A bucket in S3 compatible object storage (AWS
-S3, Backblaze B2, Wasabi, Ceph, Garage) can be used instead, set under *Settings →
-Files*. The application encrypts every file before it leaves the process, so the
+S3, Backblaze B2, Wasabi, Ceph, Garage) can be used instead, set under *Settings → File
+storage*. The application encrypts every file before it leaves the process, so the
 provider only sees ciphertext. Keep the bucket private and turn on object versioning
 or a retention lock there: the database backup does not contain the files. Initial
 values:

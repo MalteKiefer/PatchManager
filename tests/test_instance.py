@@ -127,20 +127,13 @@ def test_backups_and_licenses(admin_client: Client, settings, tmp_path) -> None:
     from patchmanager.core import system
 
     settings.BACKUP_DIR = ""
-    assert system.backups() == {"configured": False, "files": []}
+    assert system.backups() == {"configured": False, "files": [], "offsite": None}
     settings.BACKUP_DIR = str(tmp_path)
     assert system.backups()["stale"] is True
     assert system.backups()["offsite"] is None
     (tmp_path / "patchmanager-20261022T030000Z.dump").write_bytes(b"x")
-    (tmp_path / ".offsite.json").write_text(
-        '{"ok": true, "at": "2026-10-22T04:00:00Z", "message": "copied"}'
-    )
-    offsite = system.backups()["offsite"]
-    assert offsite["ok"] is True and offsite["at"].year == 2026
     page = admin_client.get("/manage/system/", secure=True).content.decode()
     assert "--profile restore run --rm restore patchmanager-20261022T030000Z.dump" in page
-    (tmp_path / ".offsite.json").write_text("not json")
-    assert system.backups()["offsite"]["ok"] is False
     page = admin_client.get("/licenses/", secure=True).content.decode()
     assert "GNU Affero" in page and "Django" in page and "htmx" in page
     assert "Source code (AGPL-3.0)" in Client().get("/auth/login/", secure=True).content.decode()

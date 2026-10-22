@@ -10,8 +10,15 @@
   <p class="mb-4 text-sm text-slate-500">{{ intro }}</p>
   {% if secret_stored %}<p class="mb-4 text-sm"><span class="badge-ok">{% translate "A secret is stored" %}</span></p>{% endif %}
   {% include "core/_form.html" %}
-  <button class="btn-primary">{% translate "Save" %}</button>
+  <div class="flex flex-wrap gap-2"><button class="btn-primary">{% translate "Save" %}</button>
+    {% if section == "storage" %}<button name="action" value="test" class="btn-secondary">{% translate "Test connection" %}</button>{% endif %}</div>
 </form>
+{% if section == "backups" %}
+<section class="card mt-4 max-w-2xl" aria-labelledby="run-h"><h2 id="run-h" class="mb-2">{% translate "Last off-site copy" %}</h2>
+  <p class="mb-3 text-sm">{% if offsite is None %}<span class="text-slate-500">{% translate "Not run yet." %}</span>{% elif offsite.ok %}<span class="badge-ok">{% translate "Copied" %}</span> {{ offsite.at|date:"SHORT_DATETIME_FORMAT" }} · {{ offsite.message }}{% else %}<span class="badge-warn">{% translate "Failed" %}</span> {{ offsite.at|date:"SHORT_DATETIME_FORMAT" }} · {{ offsite.message }}{% endif %}</p>
+  <form method="post">{% csrf_token %}<button name="action" value="copy-now" class="btn-secondary">{% translate "Copy now" %}</button></form>
+</section>
+{% endif %}
 {% if section == "mail" %}
 <form method="post" action="{% url 'manage:test-mail' %}" class="mt-4">{% csrf_token %}<input type="hidden" name="back" value="settings">
   <button class="btn-secondary">{% translate "Send a test mail to me" %}</button>
