@@ -15,6 +15,7 @@ from patchmanager.accounts.services.users import require
 from patchmanager.audit import services as audit
 from patchmanager.core.fields import path_label
 from patchmanager.core.hierarchy import HierarchyNode
+from patchmanager.core.utils import key_fields
 from patchmanager.tenancy.models import Tenant
 from patchmanager.tenancy.rls import system_context
 
@@ -41,7 +42,7 @@ def create[N: HierarchyNode](
     """Create a node below ``parent`` (a tenant for sites)."""
     scope = parent.policy_path
     require(actor, f"{model.policy_object_type}.add", scope_path=scope)
-    node = model(created_by=actor, **fields)
+    node = model(created_by=actor, **key_fields(fields, "kind"))
     if model.parent_field:
         setattr(node, model.parent_field, parent)
     else:
@@ -64,6 +65,7 @@ def update[N: HierarchyNode](request: HttpRequest, actor: User, node: N, **field
     perm = f"{node.policy_object_type}.change"
     stored = type(node)._default_manager.get(pk=node.pk)
     require(actor, perm, stored)
+    fields = key_fields(fields, "kind")
     before = {key: str(getattr(stored, key)) for key in fields}
     for key, value in fields.items():
         setattr(stored, key, value)

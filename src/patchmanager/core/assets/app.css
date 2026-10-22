@@ -196,3 +196,9 @@ tr.is-hot { @apply bg-amber-50 dark:bg-slate-800; }
 .diff-count { @apply mr-2 rounded px-2 py-0.5 font-semibold tabular-nums; }
 .diff-count.is-add { @apply bg-emerald-100 text-emerald-800 dark:bg-emerald-900 dark:text-emerald-200; }
 .diff-count.is-remove { @apply bg-rose-100 text-rose-800 dark:bg-rose-900 dark:text-rose-200; }
+
+/* Room page: devices outside racks with their ports. */
+.room-device { @apply border-t border-slate-100 py-3 first:border-t-0 dark:border-slate-800; }
+.room-glyph { @apply inline-grid h-6 min-w-6 place-items-center rounded-full px-1 text-[10px] font-bold text-white; }
+.room-ports { @apply mt-2 grid gap-x-6 gap-y-1 text-sm sm:grid-cols-2 xl:grid-cols-3; }
+.room-ports > li { @apply flex flex-wrap items-baseline gap-1.5; }

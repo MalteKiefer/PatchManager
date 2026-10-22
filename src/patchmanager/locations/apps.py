@@ -10,6 +10,7 @@ class LocationsConfig(AppConfig):
         from patchmanager.core.hierarchy import HierarchyNode
 
         attrs = HierarchyNode.condition_attrs
+        permissions.register("locations.roomtype", "Room type")
         permissions.register(
             "locations.site", "Site", extra_actions=("move_tenant",), condition_attrs=attrs
         )

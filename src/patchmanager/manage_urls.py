@@ -4,6 +4,7 @@ from django.urls import path
 
 from patchmanager.accounts.views import manage
 from patchmanager.audit import views as audit
+from patchmanager.core import lists
 from patchmanager.core.system import system_view, test_mail
 from patchmanager.tenancy import views as tenancy
 
@@ -37,5 +38,12 @@ urlpatterns = [
     path("audit/export.csv", audit.event_export, name="audit-export"),
     path("audit/verify/", audit.verify_chain, name="audit-verify"),
     path("system/", system_view, name="system"),
+    path("lists/", lists.index, name="lists"),
+    path("lists/<slug:slug>/new/", lists.create, name="list-create"),
+    path("lists/<slug:slug>/<int:pk>/", lists.detail, name="list-item"),
+    path("lists/room-types/<int:pk>/needs/new/", lists.need_create, name="need-create"),
+    path(
+        "lists/room-types/<int:pk>/needs/<int:need>/delete/", lists.need_delete, name="need-delete"
+    ),
     path("system/test-mail/", test_mail, name="test-mail"),
 ]

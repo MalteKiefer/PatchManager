@@ -1,0 +1,17 @@
+{% extends "base.html" %}{% load i18n %}
+{% block title %}{% blocktranslate with r=room.name %}Plan for {{ r }}{% endblocktranslate %}{% endblock %}
+{% block content %}
+{% include "core/_breadcrumbs.html" with current=_("Plan") %}
+<h1 class="mb-2">{% blocktranslate with r=room.name %}Plan for {{ r }}{% endblocktranslate %}</h1>
+<p class="mb-5 max-w-3xl text-sm text-slate-500">{% blocktranslate with t=room.kind.label %}Leave a field empty to use the number of the room type ({{ t }}). Enter 0 to plan none of that kind here.{% endblocktranslate %}</p>
+{% if errors %}<p class="mb-4 text-sm text-red-600" role="alert">{% translate "Enter whole numbers from 0 to 999 for:" %} {{ errors|join:", " }}</p>{% endif %}
+<form method="post" class="card max-w-2xl" novalidate>{% csrf_token %}
+  <table class="table"><thead><tr><th>{% translate "Category" %}</th><th>{% translate "Room type" %}</th><th>{% translate "This room" %}</th></tr></thead>
+  <tbody>{% for c, own, default in rows %}<tr>
+    <td><label for="need-{{ c.key }}">{{ c.label }}</label></td>
+    <td class="tabular-nums text-slate-500">{{ default|default_if_none:"–" }}</td>
+    <td><input id="need-{{ c.key }}" name="need-{{ c.key }}" inputmode="numeric" class="app-select w-24" value="{{ own|default_if_none:'' }}"{% if default is not None %} placeholder="{{ default }}"{% endif %}></td>
+  </tr>{% endfor %}</tbody></table>
+  <div class="mt-4 flex gap-2"><button class="btn-primary">{% translate "Save" %}</button><a class="btn-secondary" href="{% url 'locations:node' 'room' room.pk %}">{% translate "Cancel" %}</a></div>
+</form>
+{% endblock %}

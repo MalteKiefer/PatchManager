@@ -157,6 +157,49 @@ def _tree(request: HttpRequest, site: Site) -> list[Building]:
 
 @login_required
 @require_http_methods(["GET", "POST"])
+def room_plan(request: HttpRequest, pk: str) -> HttpResponse:
+    """Page that sets a room's own planned numbers per device category."""
+    from patchmanager.library.models import DeviceCategory
+    from patchmanager.locations import rooms
+
+    room: Any = get_object_or_404(Room.objects.select_related("kind"), pk=pk)
+    actor = _actor(request)
+    if not policy.has_perm(actor, "locations.room.view", room):
+        raise Http404
+    if not policy.has_perm(actor, "locations.room.change", room):
+        raise PermissionDenied
+    defaults = {n.category_id: n.count for n in room.kind.needs.all()}
+    own = {n.category_id: n.count for n in room.needs.all()}
+    categories = list(DeviceCategory.objects.all())
+    errors = []
+    if request.method == "POST":
+        counts: dict[str, int | None] = {}
+        for c in categories:
+            raw = request.POST.get(f"need-{c.key}", "").strip()
+            if not raw:
+                counts[c.key] = None
+            elif raw.isdecimal() and int(raw) <= 999:
+                counts[c.key] = int(raw)
+            else:
+                errors.append(c.label)
+        if not errors:
+            rooms.set_needs(request, actor, room, counts)
+            messages.success(request, _("Saved."))
+            return redirect(node_url(room))
+    return render(
+        request,
+        "locations/room_plan.html",
+        {
+            "room": room,
+            "rows": [(c, own.get(c.key), defaults.get(c.key)) for c in categories],
+            "errors": errors,
+            "breadcrumbs": [(a, node_url(a)) for a in [*room.ancestors(), room]],
+        },
+    )
+
+
+@login_required
+@require_http_methods(["GET", "POST"])
 def node_create(request: HttpRequest, level: str, pk: str) -> HttpResponse:
     """Page that creates a child of a node (building, floor, room or rack)."""
     config = LEVELS.get(level)
@@ -265,6 +308,10 @@ def node_detail(request: HttpRequest, level: str, pk: str) -> HttpResponse:
             request, Device, room=node, rack__isnull=True
         ).select_related("device_type__vendor")
         context["can_add_device"] = policy.has_perm(actor, "dcim.device.add", node)
+        from patchmanager.locations import rooms
+
+        context["plan"] = rooms.plan(actor, node)
+        context["outlets"] = rooms.cabling(actor, node)
     return render(request, "locations/node.html", context)
 
 

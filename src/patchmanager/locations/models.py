@@ -5,9 +5,11 @@ from decimal import Decimal
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 from django.db.models.functions import Lower
+from django.utils.translation import gettext, gettext_noop
 from django.utils.translation import gettext_lazy as _
 
 from patchmanager.core.hierarchy import HierarchyNode
+from patchmanager.tenancy.models import TenantScopedModel
 
 
 class Site(HierarchyNode):
@@ -95,18 +97,74 @@ class Floor(HierarchyNode):
         return self.name
 
 
+# Names of the built in rows, for translation catalogs (the rows hold the English text).
+BUILTIN_ROOM_TYPES = (
+    gettext_noop("Server room"),
+    gettext_noop("Distribution room"),
+    gettext_noop("Office"),
+    gettext_noop("Meeting room"),
+    gettext_noop("Other"),
+)
+
+
+class RoomType(models.Model):
+    """What a room is used for, with the devices such a room normally needs."""
+
+    key = models.SlugField(_("key"), max_length=30, unique=True)
+    name = models.CharField(_("name"), max_length=60)
+    description = models.TextField(_("description"), blank=True)
+    order = models.PositiveSmallIntegerField(_("order"), default=100)
+    builtin = models.BooleanField(default=False, editable=False)
+
+    policy_object_type = "locations.roomtype"
+
+    class Meta:
+        ordering = ["order", "name"]
+
+    def __str__(self) -> str:
+        return self.label
+
+    @property
+    def label(self) -> str:
+        """Built in names are translated; names given by administrators are shown as they are."""
+        return gettext(self.name) if self.builtin else self.name
+
+
+class RoomTypeNeed(models.Model):
+    """How many devices of a category a room of this type should have."""
+
+    room_type = models.ForeignKey(RoomType, on_delete=models.CASCADE, related_name="needs")
+    category = models.ForeignKey(
+        "library.DeviceCategory",
+        to_field="key",
+        on_delete=models.CASCADE,
+        related_name="+",
+        verbose_name=_("category"),
+    )
+    count = models.PositiveSmallIntegerField(_("count"))
+
+    class Meta:
+        ordering = ["category__order"]
+        constraints = [models.UniqueConstraint("room_type", "category", name="roomtypeneed_unique")]
+
+    def __str__(self) -> str:
+        return f"{self.room_type}: {self.count} x {self.category_id}"
+
+
 class Room(HierarchyNode):
     """A room on a floor that can hold racks and floor devices."""
 
-    class Kind(models.TextChoices):
-        SERVER = "server", _("Server room")
-        DISTRIBUTION = "distribution", _("Distribution room")
-        OFFICE = "office", _("Office")
-        OTHER = "other", _("Other")
-
     floor = models.ForeignKey(Floor, on_delete=models.PROTECT, related_name="rooms")
     name = models.CharField(_("name"), max_length=150)
-    kind = models.CharField(_("kind"), max_length=20, choices=Kind.choices, default=Kind.OTHER)
+    kind = models.ForeignKey(
+        RoomType,
+        to_field="key",
+        db_column="kind",
+        on_delete=models.PROTECT,
+        default="other",
+        related_name="rooms",
+        verbose_name=_("room type"),
+    )
     description = models.TextField(_("description"), blank=True)
     # Polygon on the floor plan: [[x, y], ...] in plan pixels; empty when not drawn.
     outline = models.JSONField(default=list, blank=True)
@@ -122,3 +180,29 @@ class Room(HierarchyNode):
 
     def __str__(self) -> str:
         return self.name
+
+
+class RoomNeed(TenantScopedModel):
+    """A room's own planned count for a category, replacing the count of its room type."""
+
+    room = models.ForeignKey(Room, on_delete=models.CASCADE, related_name="needs")
+    category = models.ForeignKey(
+        "library.DeviceCategory",
+        to_field="key",
+        on_delete=models.CASCADE,
+        related_name="+",
+        verbose_name=_("category"),
+    )
+    count = models.PositiveSmallIntegerField(_("count"))
+
+    class Meta:
+        ordering = ["category__order"]
+        constraints = [models.UniqueConstraint("room", "category", name="roomneed_unique")]
+
+    def __str__(self) -> str:
+        return f"{self.room}: {self.count} x {self.category_id}"
+
+    @property
+    def policy_path(self) -> str:
+        """Governed by its room."""
+        return str(self.room.path)

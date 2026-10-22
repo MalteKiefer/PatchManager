@@ -24,8 +24,6 @@ from patchmanager.floorplans.models import FloorPlan
 from patchmanager.locations.models import Floor, Room
 from patchmanager.locations.views import node_url
 
-GLYPHS = {"access_point": "A", "camera": "C", "printer": "P", "outlet": "O", "phone": "T"}
-
 
 class PlanUploadForm(forms.Form):
     """Image or PDF of the floor."""
@@ -120,7 +118,8 @@ def _scene(request: HttpRequest, floor: Floor, plan: FloorPlan | None) -> dict[s
                 "x": d.plan_x,
                 "y": d.plan_y,
                 "room": services.room_label(user, d.room),
-                "glyph": GLYPHS.get(d.device_type.category, "D"),
+                "glyph": d.device_type.category.glyph or "D",
+                "colour": d.device_type.category.colour,
                 "url": node_url(d),
                 "r": max(8.0, 0.3 * scale) if scale else 8.0,
                 "can_change": policy.has_perm(user, "dcim.device.change", d),

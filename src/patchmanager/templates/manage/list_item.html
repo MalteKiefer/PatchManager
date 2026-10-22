@@ -1,0 +1,25 @@
+{% extends "manage/_base.html" %}{% load i18n %}
+{% block title %}{{ item.label }}{% endblock %}
+{% block manage %}
+<nav aria-label="{% translate 'Breadcrumb' %}" class="mb-3 text-sm"><a href="{% url 'manage:lists' %}">{% translate "Lists" %}</a> / {{ kind.title }}</nav>
+<h1 class="mb-6">{{ item.label }}</h1>
+<div class="grid gap-6 lg:grid-cols-2">
+  <form method="post" class="card" novalidate>{% csrf_token %}<h2 class="mb-3">{% translate "Details" %}</h2>
+    <fieldset {% if not can_change %}disabled{% endif %}>{% include "core/_form.html" %}</fieldset>
+    {% if item.builtin %}<p class="help mb-3 text-xs text-slate-500">{% translate "Built in entry: the key stays, the name can change." %}</p>{% endif %}
+    {% if can_change %}<button class="btn-primary">{% translate "Save" %}</button>{% endif %}
+  </form>
+  {% if needs is not None %}
+  <section class="card" aria-labelledby="needs-h">
+    <div class="mb-3 flex items-center gap-2"><h2 id="needs-h" class="mr-auto">{% translate "Planned devices" %}</h2>
+      {% if can_change %}<a class="btn-secondary" href="{% url 'manage:need-create' item.pk %}">{% translate "Add category" %}</a>{% endif %}</div>
+    <p class="mb-3 text-sm text-slate-500">{% translate "Every room of this type should have these devices. A room can change the numbers for itself." %}</p>
+    <ul class="divide-y divide-slate-100 dark:divide-slate-800">{% for n in needs %}<li class="flex items-center gap-2 py-2">
+      <span class="w-10 font-semibold tabular-nums">{{ n.count }}</span><span class="mr-auto">{{ n.category.label }}</span>
+      {% if can_change %}<form method="post" action="{% url 'manage:need-delete' item.pk n.pk %}">{% csrf_token %}<button class="btn-secondary py-1">{% translate "Remove" %}</button></form>{% endif %}
+    </li>{% empty %}<li class="py-2 text-sm text-slate-500">{% translate "Nothing planned for this room type." %}</li>{% endfor %}</ul>
+  </section>
+  {% endif %}
+</div>
+{% if can_change %}<form method="post" class="mt-6" data-confirm="{% translate 'Delete this entry?' %}">{% csrf_token %}<button name="action" value="delete" class="btn-danger">{% translate "Delete" %}</button></form>{% endif %}
+{% endblock %}

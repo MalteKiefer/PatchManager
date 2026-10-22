@@ -9,6 +9,8 @@ class LibraryConfig(AppConfig):
     def ready(self) -> None:
         from patchmanager.accounts import permissions
 
+        permissions.register("library.category", "Device category")
+
         permissions.register("library.vendor", "Vendor")
         permissions.register("library.devicetype", "Device type")
         post_migrate.connect(_load_catalog, sender=self)

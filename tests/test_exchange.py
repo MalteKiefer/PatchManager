@@ -135,7 +135,7 @@ def test_import_locations_racks_devices_vlans_cables(kit, super_admin) -> None:
         assert run("locations", loc) == [("created", "")]
         assert run("locations", loc) == [("unchanged", "")]
         room = Room.objects.get(name="Lab")
-        assert (room.kind, room.floor.level) == ("office", 2)
+        assert (room.kind_id, room.floor.level) == ("office", 2)
 
         place = {"site": "hq", "building": "B2", "floor": "F1", "room": "lab"}
         assert run("racks", [{**place, "name": "L1", "u_height": "24.0", "status": "planned"}]) == [

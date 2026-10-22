@@ -3,9 +3,10 @@
 import re
 from typing import Any
 
-from django.core.validators import MaxValueValidator, MinValueValidator
+from django.core.validators import MaxValueValidator, MinValueValidator, RegexValidator
 from django.db import models
 from django.db.models.functions import Lower
+from django.utils.translation import gettext
 from django.utils.translation import gettext_lazy as _
 
 from patchmanager.core.fields import path_label
@@ -74,28 +75,46 @@ class PortKind(models.TextChoices):
     WIRELESS = "wireless", _("wireless")
 
 
+class DeviceCategory(models.Model):
+    """What a device is for (switch, access point, outlet ...); editable by administrators."""
+
+    key = models.SlugField(_("key"), max_length=30, unique=True)
+    name = models.CharField(_("name"), max_length=60)
+    glyph = models.CharField(
+        _("short sign"),
+        max_length=2,
+        blank=True,
+        help_text=_("Shown on floor plan pins, for example AP."),
+    )
+    colour = models.CharField(
+        _("colour"),
+        max_length=7,
+        default="#475569",
+        validators=[RegexValidator(r"^#[0-9a-fA-F]{6}$", _("Use a hex colour like #2563eb."))],
+    )
+    order = models.PositiveSmallIntegerField(_("order"), default=100)
+    builtin = models.BooleanField(default=False, editable=False)
+
+    policy_object_type = "library.category"
+
+    class Meta:
+        ordering = ["order", "name"]
+
+    def __str__(self) -> str:
+        return self.label
+
+    @property
+    def label(self) -> str:
+        """Built in names are translated; names given by administrators are shown as they are."""
+        return gettext(self.name) if self.builtin else self.name
+
+
 class DeviceType(TimestampedModel):
     """A template for devices. Shared (``tenant`` empty) or private to one tenant."""
 
     class Form(models.TextChoices):
         RACK = "rack", _("rack mounted")
         FLOOR = "floor", _("floor device")
-
-    class Category(models.TextChoices):
-        SWITCH = "switch", _("switch")
-        ROUTER = "router", _("router")
-        FIREWALL = "firewall", _("firewall")
-        SERVER = "server", _("server")
-        STORAGE = "storage", _("storage")
-        PATCH_PANEL = "patch_panel", _("patch panel")
-        PDU = "pdu", _("power distribution")
-        UPS = "ups", _("UPS")
-        ACCESS_POINT = "access_point", _("access point")
-        CAMERA = "camera", _("camera")
-        PRINTER = "printer", _("printer")
-        OUTLET = "outlet", _("network outlet")
-        PHONE = "phone", _("phone")
-        OTHER = "other", _("other")
 
     tenant = models.ForeignKey(
         "tenancy.Tenant",
@@ -108,8 +127,14 @@ class DeviceType(TimestampedModel):
     vendor = models.ForeignKey(Vendor, on_delete=models.PROTECT, related_name="device_types")
     model = models.CharField(_("model"), max_length=150)
     form = models.CharField(_("form"), max_length=5, choices=Form.choices, default=Form.RACK)
-    category = models.CharField(
-        _("category"), max_length=20, choices=Category.choices, default=Category.OTHER
+    category = models.ForeignKey(
+        DeviceCategory,
+        to_field="key",
+        db_column="category",
+        on_delete=models.PROTECT,
+        default="other",
+        related_name="device_types",
+        verbose_name=_("category"),
     )
     u_height = models.PositiveSmallIntegerField(
         _("height (U)"), default=1, validators=[MinValueValidator(0), MaxValueValidator(100)]

@@ -12,6 +12,7 @@ from patchmanager.accounts.models import User
 from patchmanager.accounts.services import ServiceError
 from patchmanager.accounts.services.users import require
 from patchmanager.audit import services as audit
+from patchmanager.core.utils import key_fields
 from patchmanager.library.models import DeviceType, PortTemplate, Vendor
 from patchmanager.tenancy.models import Tenant
 
@@ -70,7 +71,7 @@ def create_type(
 ) -> DeviceType:
     """Create a device type: shared (``tenant`` None, needs a global grant) or tenant private."""
     require(actor, "library.devicetype.add", scope_path=_scope(tenant))
-    device_type = DeviceType(tenant=tenant, **fields)
+    device_type = DeviceType(tenant=tenant, **key_fields(fields, "category"))
     _save(device_type)
     audit.record(
         "library.devicetype.created",
@@ -89,7 +90,7 @@ def update_type(
     require(actor, "library.devicetype.change", stored)
     in_use = stored.devices.exists()
     shape = (stored.form, stored.u_height, stored.full_depth)
-    for key, value in fields.items():
+    for key, value in key_fields(fields, "category").items():
         setattr(stored, key, value)
     require(actor, "library.devicetype.change", stored)
     if in_use and shape != (stored.form, stored.u_height, stored.full_depth):

@@ -17,7 +17,7 @@
 <div class="card mb-6 overflow-x-auto p-0"><table class="table">
   <thead><tr><th>{% translate "Vendor" %}</th><th>{% translate "Model" %}</th><th>{% translate "Category" %}</th><th>{% translate "Form" %}</th><th>{% translate "Height" %}</th><th>{% translate "Scope" %}</th><th>{% translate "Devices" %}</th></tr></thead>
   <tbody>{% for t in types %}<tr>
-    <td>{{ t.vendor.name }}</td><td><a href="{% url 'library:type' t.pk %}">{{ t.model }}</a></td><td>{{ t.get_category_display }}</td>
+    <td>{{ t.vendor.name }}</td><td><a href="{% url 'library:type' t.pk %}">{{ t.model }}</a></td><td>{{ t.category.label }}</td>
     <td>{{ t.get_form_display }}</td><td>{% if t.form == "rack" %}{{ t.u_height }} U{% else %}-{% endif %}</td>
     <td>{% if t.tenant_id %}<span class="badge-muted">{% translate "this tenant" %}</span>{% else %}{% translate "shared" %}{% endif %}</td><td>{{ t.device_count }}</td>
   </tr>{% empty %}<tr><td colspan="7" class="text-slate-500">{% translate "No device types yet." %}</td></tr>{% endfor %}</tbody>

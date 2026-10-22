@@ -26,7 +26,7 @@ from patchmanager.ipam import services as ipam
 from patchmanager.ipam.models import VRF, IPAddress, Prefix
 from patchmanager.library.models import DeviceType
 from patchmanager.locations import services as tree
-from patchmanager.locations.models import Building, Floor, Room, Site
+from patchmanager.locations.models import Building, Floor, Room, RoomType, Site
 from patchmanager.networks import services as networks
 from patchmanager.networks.models import VLAN
 from patchmanager.tenancy.models import Tenant
@@ -142,7 +142,9 @@ def location(request: HttpRequest, actor: User, tenant: Tenant, row: Row, *, cre
             if model is Floor:
                 extra["level"] = _int(row, "floor_level") or 0
             if model is Room and row.get("room_kind"):
-                extra["kind"] = _choice(row, "room_kind", Room.Kind.choices)
+                extra["kind_id"] = _choice(
+                    row, "room_kind", [(t.key, t.label) for t in RoomType.objects.all()]
+                )
             node = tree.create(request, actor, model, parent=parent, name=name, **extra)
         parent = node
     if node is None:
@@ -186,7 +188,7 @@ def export_locations(user: Any, tenant: Tenant, site: Site | None) -> Iterator[d
             **_names(room),
             "site_code": room.floor.building.site.code,
             "floor_level": room.floor.level,
-            "room_kind": room.kind,
+            "room_kind": room.kind_id,
         }
     floors = _scoped(user, "locations.floor.export", Floor.objects.filter(tenant=tenant), site)
     for floor in (
