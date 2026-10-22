@@ -1,0 +1,33 @@
+{% load i18n %}<div class="panel-head">
+  {% if kind == "device" %}<p class="flex items-center gap-2 text-sm text-slate-500"><span class="plan-swatch" data-swatch="{{ obj.device_type.category.colour }}" aria-hidden="true"></span>{{ obj.device_type.category.label }} · {{ obj.device_type }}</p>
+  {% else %}<p class="text-sm text-slate-500">{% translate "Rack" %}</p>{% endif %}
+  <h2>{{ obj.name }}</h2>
+</div>
+<dl class="panel-facts">
+  <div><dt>{% translate "Room" %}</dt><dd>{{ obj.room.name }}</dd></div>
+  <div><dt>{% translate "Status" %}</dt><dd>{{ obj.get_status_display }}</dd></div>
+  {% if kind == "rack" %}
+  <div><dt>{% translate "Height" %}</dt><dd>{{ obj.u_height }} U, {% blocktranslate with n=used %}{{ n }} used{% endblocktranslate %}</dd></div>
+  <div><dt>{% translate "Devices" %}</dt><dd>{{ devices }}</dd></div>
+  {% else %}
+  {% if obj.serial %}<div><dt>{% translate "Serial number" %}</dt><dd>{{ obj.serial }}</dd></div>{% endif %}
+  {% if obj.asset_tag %}<div><dt>{% translate "Asset tag" %}</dt><dd>{{ obj.asset_tag }}</dd></div>{% endif %}
+  {% if obj.responsible %}<div><dt>{% translate "Responsible" %}</dt><dd>{{ obj.responsible }}</dd></div>{% endif %}
+  {% endif %}
+  <div><dt>{% translate "Photos and notes" %}</dt><dd>{% blocktranslate count n=photos %}{{ n }} photo{% plural %}{{ n }} photos{% endblocktranslate %}, {% blocktranslate count n=files %}{{ n }} file{% plural %}{{ n }} files{% endblocktranslate %}, {% blocktranslate count n=notes %}{{ n }} note{% plural %}{{ n }} notes{% endblocktranslate %}</dd></div>
+</dl>
+{% if kind == "device" and obj.notes %}<p class="mt-3 whitespace-pre-line text-sm">{{ obj.notes }}</p>{% endif %}
+{% if kind == "device" %}
+<h3 class="mt-5 mb-2 text-sm font-semibold">{% translate "Ports" %}</h3>
+<ul class="space-y-1 text-sm">{% for o in ports %}
+  <li><span class="font-mono text-xs">{{ o.port.name }}</span>
+    {% if o.far %}<span aria-hidden="true">→</span> <a href="{% url 'devices:device' o.far.device_id %}">{{ o.far.device.name }}</a> · {{ o.far.name }}{% if o.far_rack %} <span class="text-slate-500">{{ o.far_rack }}</span>{% endif %}
+    {% elif o.hidden %}<span class="text-slate-500">{% translate "patched (not visible to you)" %}</span>
+    {% elif o.cabled %}<span class="text-slate-500">{% translate "cabled" %}</span>
+    {% else %}<span class="text-slate-500">{% translate "free" %}</span>{% endif %}</li>
+{% empty %}<li class="text-slate-500">{% translate "No ports." %}</li>{% endfor %}</ul>
+{% endif %}
+<div class="mt-5 flex flex-wrap gap-2">
+  <a class="btn-primary" href="{% if kind == 'device' %}{% url 'devices:device' obj.pk %}{% else %}{% url 'dcim:rack' obj.pk %}{% endif %}">{% if kind == "device" %}{% translate "Open device" %}{% else %}{% translate "Open rack" %}{% endif %}</a>
+  {% if can_change %}<button type="button" class="btn-secondary" data-unplace="{{ kind }}" data-id="{{ obj.pk }}">{% translate "Remove from plan" %}</button>{% endif %}
+</div>
