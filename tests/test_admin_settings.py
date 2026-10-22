@@ -108,6 +108,11 @@ def test_bucket_is_checked_and_old_files_stay_readable(
     monkeypatch.setattr(socket, "getaddrinfo", lambda h, p, **kw: [(2, 1, 6, "", ("127.0.0.1", p))])
     page = _post(admin_client, "storage", {**s3, "s3_bucket": "third-bucket"})
     assert "This address cannot be used" in page
+    monkeypatch.setattr(
+        socket, "getaddrinfo", lambda h, p, **kw: [(10, 1, 6, "", ("::ffff:169.254.169.254", p))]
+    )
+    page = _post(admin_client, "storage", {**s3, "s3_region": "eu"})  # endpoint checked again
+    assert "This address cannot be used" in page
     page = _post(admin_client, "storage", {**s3, "s3_endpoint_url": "http://minio.lan"})
     assert "must use https" in page
 

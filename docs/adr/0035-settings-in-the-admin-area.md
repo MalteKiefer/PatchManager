@@ -27,7 +27,11 @@ access and a restart.
   storage that writes to the bucket when one is set and still reads files stored in
   the volume before.
 * Saving a bucket writes and deletes a test object; the endpoint must be https and must
-  not resolve to loopback, link local or unspecified addresses.
+  not resolve to loopback, link local, multicast, reserved or unspecified addresses
+  (IPv4 mapped addresses included), checked on every save. botocore resolves the host
+  again when it connects, so a DNS rebinding window remains; it is accepted because
+  only holders of `system.settings.change` can set the endpoint, and they can already
+  change the mail server and sign in rules.
 * Bootstrap values stay in the environment: database, secret key, encryption keys,
   domain, trusted proxy, backup volume, log level. The off-site backup keeps its own
   credentials on the server, so the web process cannot delete backups.

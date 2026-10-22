@@ -121,7 +121,15 @@ def _public_host(url: str) -> None:
         raise ServiceError(_("The host cannot be resolved.")) from exc
     for answer in answers:
         address = ipaddress.ip_address(answer[4][0])
-        if address.is_loopback or address.is_link_local or address.is_unspecified:
+        if isinstance(address, ipaddress.IPv6Address) and address.ipv4_mapped:
+            address = address.ipv4_mapped
+        if (
+            address.is_loopback
+            or address.is_link_local
+            or address.is_unspecified
+            or address.is_multicast
+            or address.is_reserved
+        ):
             raise ServiceError(_("This address cannot be used."))
 
 
@@ -129,8 +137,6 @@ def _probe(config: instance_config.Config) -> None:
     """Write and delete a small object, so a wrong bucket fails here and not on upload."""
     from patchmanager.instance.runtime import s3_storage
 
-    if config.s3_endpoint_url:
-        _public_host(config.s3_endpoint_url)
     store = s3_storage(config)
     try:
         name = store.save(f"health/probe-{secrets.token_hex(8)}.txt", ContentFile(b"ok"))
@@ -159,6 +165,10 @@ def save_config(request: HttpRequest, actor: User, values: dict[str, Any]) -> No
             changed.append(name)
         stored[name] = value
     effective = instance_config.from_stored(stored)
+    if effective.s3_endpoint_url and "s3_endpoint_url" in values:
+        # botocore resolves again when it connects; only holders of system.settings.change
+        # can set this, so the remaining rebinding window is accepted (ADR 0035).
+        _public_host(effective.s3_endpoint_url)
     if effective.s3_bucket and any(n.startswith("s3_") for n in changed):
         _probe(effective)
     row.config = stored
