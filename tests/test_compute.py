@@ -420,3 +420,70 @@ def test_one_broken_connection_does_not_stop_the_others(
         broken.refresh_from_db()
         assert broken.last_error
         assert VirtualMachine.objects.filter(external_id="100").exists()
+
+
+QNAP_USAGE = b"""<?xml version="1.0" encoding="UTF-8"?>
+<QDocRoot>
+  <volumeList><volume><volumeValue>1</volumeValue><volumeLabel>DataVol1</volumeLabel></volume></volumeList>
+  <volumeUseList><volumeUse>
+    <volumeValue>1</volumeValue>
+    <total_size>4398046511104</total_size><free_size>3298534883328</free_size>
+    <folder_element><sharename>Public</sharename><used_size>10737418240</used_size></folder_element>
+    <folder_element><sharename>backup</sharename><used_size>0</used_size></folder_element>
+  </volumeUse></volumeUseList>
+</QDocRoot>"""
+
+
+def test_qnap(admin_client: Client, make_tree, make_type, monkeypatch, system) -> None:
+    from patchmanager.compute.models import StorageVolume
+    from patchmanager.dcim import devices
+
+    monkeypatch.setattr(socket, "getaddrinfo", lambda h, p, **kw: [(2, 1, 6, "", ("10.0.0.30", p))])
+    calls: list[tuple[str, str, str | None]] = []
+    passed = {"value": "1"}
+
+    def fetch(self, method, path, *, headers=None, body=None):
+        calls.append((method, path, body))
+        if path == "/cgi-bin/authLogin.cgi":
+            return 200, (
+                f"<QDocRoot><authPassed><![CDATA[{passed['value']}]]></authPassed>"
+                "<authSid><![CDATA[sid-9]]></authSid></QDocRoot>"
+            ).encode()
+        if path.startswith("/cgi-bin/management/chartReq.cgi"):
+            return 200, QNAP_USAGE
+        return 200, b"<QDocRoot/>"
+
+    monkeypatch.setattr(inventory.Client, "fetch", fetch)
+    tree = make_tree()
+    admin_client.post("/tenants/switch/", {"tenant": tree["tenant"].pk}, secure=True)
+    with system():
+        nas = devices.create(
+            tree["request"],
+            tree["request"].user,
+            device_type=make_type("TS-873A"),
+            room=tree["room"],
+            rack=tree["rack"],
+            position=7,
+            name="NAS-Q",
+        )
+    form = {
+        "platform": "qnap",
+        "url": "https://qnap.lab",
+        "username": "ro",
+        "password": "pw!",
+        "nas": nas.pk,
+    }
+    assert admin_client.post("/compute/import/", form, secure=True).status_code == 302
+    with system():
+        volume = StorageVolume.objects.get(name="DataVol1")
+        assert (volume.device_id, volume.size_gb, volume.used_gb) == (nas.pk, 4096, 1024)
+        share = StorageVolume.objects.get(name="Public")
+        assert (share.kind, share.used_gb, share.target) == ("smb", 10, "DataVol1")
+    login = calls[0]
+    assert login[0] == "POST" and "pwd=cHch" in (login[2] or "")  # base64, in the body
+    assert all("cHch" not in path for _, path, _ in calls)
+    assert calls[-1][1] == "/cgi-bin/authLogout.cgi?sid=sid-9"
+
+    passed["value"] = "0"
+    refused = admin_client.post("/compute/import/", form, secure=True).content.decode()
+    assert "two step sign in" in refused

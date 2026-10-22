@@ -1,6 +1,6 @@
-{% extends "base.html" %}{% load i18n %}
+{% extends "manage/_base.html" %}{% load i18n %}
 {% block title %}{% translate "Webhooks" %}{% endblock %}
-{% block content %}
+{% block manage %}
 <div class="mb-2 flex flex-wrap items-center gap-3"><h1 class="mr-auto">{% translate "Webhooks" %}{% if current_tenant %} · {{ current_tenant.name }}{% endif %}</h1>{% if can_manage %}<a class="btn-primary" href="{% url 'integrations:webhook-create' %}">{% translate "New webhook" %}</a>{% endif %}</div>
 <p class="mb-6 text-sm text-slate-500">{% blocktranslate %}Every change in this tenant is sent as a signed JSON POST to the matching webhooks, with retries.{% endblocktranslate %}</p>
 <div>
