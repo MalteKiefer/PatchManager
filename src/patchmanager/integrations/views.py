@@ -102,7 +102,7 @@ def webhook_create(request: HttpRequest) -> HttpResponse:
             return redirect("integrations:webhook", hook.pk)
     return render(
         request,
-        "core/create.html",
+        "manage/create.html",
         {
             "title": _("New webhook"),
             "form": form,
