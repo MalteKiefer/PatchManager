@@ -136,3 +136,18 @@ def test_client_ip_comes_from_trusted_proxies_only(settings, allowed, peer, head
 def test_pages_for_signed_in_users_are_not_cached(admin_client) -> None:
     assert "no-store" in admin_client.get("/locations/", secure=True)["Cache-Control"]
     assert admin_client.get("/branding.css", secure=True)["Cache-Control"].startswith("public")
+
+
+def test_overview_counts_what_the_user_may_see(admin_client, super_admin, system) -> None:
+    from patchmanager.dcim.management.commands.seed_scale import seed
+
+    seed(super_admin, racks=2, slug="ov")
+    with system():
+        from patchmanager.tenancy.models import Tenant
+
+        tenant = Tenant.objects.get(slug="ov")
+    admin_client.post("/tenants/switch/", {"tenant": tenant.pk}, secure=True)
+    page = admin_client.get("/", secure=True).content.decode()
+    assert "<dd>2</dd>" in page and "<dd>4</dd>" in page  # racks, devices
+    assert "96<span> / 200</span>" in page  # both ends of 48 cables, of all ports
+    assert "Site 1" in page and "R01" in page

@@ -70,3 +70,21 @@ def test_room_shows_racks_side_by_side_with_tray_cables(
     page.locator(".rack-svg .rack-port.is-complete path").first.hover()
     expect(page.locator(".rack-svg .rack-wire.is-tray.is-hot")).to_have_count(1)
     _shot(page, "room")
+
+
+@pytest.mark.parametrize("scheme", ["light", "dark"])
+def test_overview_and_shell(page: Page, live_server, super_admin, scheme) -> None:
+    seed(super_admin, racks=3, slug="shell")
+    page.emulate_media(color_scheme=scheme)
+    page.set_viewport_size({"width": 1440, "height": 900})
+    _sign_in(page, live_server, super_admin)
+    page.goto(live_server.url + "/")
+    expect(page.get_by_role("link", name="Overview")).to_have_attribute("aria-current", "page")
+    page.keyboard.press("Control+k")
+    expect(page.locator("#global-search")).to_be_focused()
+    _shot(page, f"overview-{scheme}")
+    page.get_by_role("link", name="Locations and racks").click()
+    expect(page.get_by_role("link", name="Locations and racks")).to_have_attribute(
+        "aria-current", "page"
+    )
+    _shot(page, f"locations-{scheme}")

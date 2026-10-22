@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-22 03:11+0000\n"
+"POT-Creation-Date: 2026-10-22 03:21+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -74,7 +74,7 @@ msgid "Role"
 msgstr "Rolle"
 
 #: accounts/forms.py:113 api/ui.py:42 templates/api/tokens.html:9
-#: templates/base.html:41
+#: templates/base.html:38
 msgid "Tenant"
 msgstr "Mandant"
 
@@ -1099,6 +1099,11 @@ msgstr "Der Rückport muss zum selben Gerät gehören."
 msgid "This port name or rear position is already used."
 msgstr "Dieser Portname oder diese Rückposition wird bereits verwendet."
 
+#: dcim/elevation.py:117 exchange/pdf.py:232 exchange/pdf.py:264
+#: exchange/pdf.py:312 templates/cabling/trace.html:18
+msgid "not visible"
+msgstr "nicht sichtbar"
+
 #: dcim/models.py:32
 msgid "retired"
 msgstr "außer Betrieb"
@@ -1306,7 +1311,7 @@ msgstr "Adresse"
 msgid "Description"
 msgstr "Beschreibung"
 
-#: exchange/pdf.py:198 exchange/tables.py:530 templates/base.html:54
+#: exchange/pdf.py:198 exchange/tables.py:530
 #: templates/core/_breadcrumbs.html:4 templates/locations/index.html:2
 #: templates/locations/index.html:6
 msgid "Locations"
@@ -1327,12 +1332,14 @@ msgid "Kind"
 msgstr "Art"
 
 #: exchange/pdf.py:199 exchange/tables.py:539 locations/views.py:64
-#: search/services.py:58 templates/dcim/room.html:10
+#: search/services.py:58 templates/core/home.html:19
+#: templates/dcim/room.html:10
 msgid "Racks"
 msgstr "Racks"
 
 #: exchange/pdf.py:199 exchange/tables.py:548 search/services.py:66
-#: templates/dcim/rack.html:71 templates/library/types.html:17
+#: templates/core/home.html:20 templates/dcim/rack.html:71
+#: templates/library/types.html:17
 msgid "Devices"
 msgstr "Geräte"
 
@@ -1369,11 +1376,6 @@ msgstr "Standortbericht: %(name)s"
 #: exchange/pdf.py:232 networks/models.py:16
 msgid "reserved"
 msgstr "reserviert"
-
-#: exchange/pdf.py:232 exchange/pdf.py:264 exchange/pdf.py:312
-#: templates/cabling/trace.html:18
-msgid "not visible"
-msgstr "nicht sichtbar"
 
 #: exchange/pdf.py:241
 msgid "Unit"
@@ -1537,9 +1539,10 @@ msgstr "vid muss eine Zahl sein."
 msgid "Port %(d)s %(p)s not found."
 msgstr "Port %(d)s %(p)s nicht gefunden."
 
-#: exchange/tables.py:577 search/services.py:81 templates/base.html:56
+#: exchange/tables.py:577 search/services.py:81 templates/base.html:50
 #: templates/cabling/cable.html:4 templates/cabling/cables.html:2
-#: templates/cabling/cables.html:4 templates/dcim/rack.html:13
+#: templates/cabling/cables.html:4 templates/core/home.html:22
+#: templates/dcim/rack.html:13
 msgid "Cables"
 msgstr "Kabel"
 
@@ -2421,7 +2424,8 @@ msgstr "Geben Sie Domains wie example.com ein."
 msgid "New SCIM token"
 msgstr "Neues SCIM-Token"
 
-#: search/services.py:43 templates/locations/index.html:15
+#: search/services.py:43 templates/core/home.html:34
+#: templates/locations/index.html:15
 msgid "Sites"
 msgstr "Standorte"
 
@@ -2730,7 +2734,7 @@ msgid "Cancel"
 msgstr "Abbrechen"
 
 #: templates/accounts/profile.html:2 templates/accounts/profile.html:4
-#: templates/base.html:70
+#: templates/base.html:60
 msgid "Profile"
 msgstr "Profil"
 
@@ -2773,7 +2777,7 @@ msgid "Download my data"
 msgstr "Meine Daten herunterladen"
 
 #: templates/accounts/security.html:2 templates/accounts/security.html:5
-#: templates/base.html:71 templates/networks/wlans.html:7
+#: templates/base.html:61 templates/networks/wlans.html:7
 msgid "Security"
 msgstr "Sicherheit"
 
@@ -2861,7 +2865,7 @@ msgstr "Zuletzt aktiv"
 msgid "This session"
 msgstr "Diese Sitzung"
 
-#: templates/accounts/security.html:55 templates/base.html:74
+#: templates/accounts/security.html:55 templates/base.html:63
 msgid "Sign out"
 msgstr "Abmelden"
 
@@ -2965,7 +2969,7 @@ msgid "No clients yet."
 msgstr "Noch keine Clients."
 
 #: templates/api/tokens.html:2 templates/api/tokens.html:4
-#: templates/base.html:72
+#: templates/base.html:62
 msgid "API tokens"
 msgstr "API-Token"
 
@@ -3044,51 +3048,74 @@ msgstr ""
 msgid "Stop impersonating"
 msgstr "Handeln als Benutzer beenden"
 
-#: templates/base.html:46
+#: templates/base.html:34
+msgid "Main"
+msgstr "Hauptmenü"
+
+#: templates/base.html:43
 msgid "Switch"
 msgstr "Wechseln"
 
-#: templates/base.html:50 templates/base.html:51 templates/library/types.html:7
+#: templates/base.html:47 templates/core/home.html:2
+#: templates/manage/_base.html:7
+msgid "Overview"
+msgstr "Übersicht"
+
+#: templates/base.html:48
+msgid "Infrastructure"
+msgstr "Infrastruktur"
+
+#: templates/base.html:49
+msgid "Locations and racks"
+msgstr "Orte und Racks"
+
+#: templates/base.html:51
+msgid "Networks"
+msgstr "Netze"
+
+#: templates/base.html:52 templates/library/type_detail.html:4
+#: templates/library/types.html:2 templates/library/types.html:5
+msgid "Device library"
+msgstr "Gerätebibliothek"
+
+#: templates/base.html:53
+msgid "Records"
+msgstr "Nachweise"
+
+#: templates/base.html:54 templates/history/activity.html:2
+#: templates/history/activity.html:4
+msgid "Activity"
+msgstr "Aktivität"
+
+#: templates/base.html:55 templates/exchange/index.html:2
+#: templates/exchange/index.html:4
+msgid "Import and export"
+msgstr "Import und Export"
+
+#: templates/base.html:56 templates/manage/_base.html:4
+#: templates/manage/dashboard.html:2 templates/manage/dashboard.html:4
+msgid "Administration"
+msgstr "Administration"
+
+#: templates/base.html:75 templates/library/types.html:7
 #: templates/manage/users.html:6 templates/search/results.html:2
 #: templates/search/results.html:4 templates/search/results.html:8
 msgid "Search"
 msgstr "Suchen"
 
-#: templates/base.html:53
-msgid "Main"
-msgstr "Hauptmenü"
+#: templates/base.html:77
+msgid "Search devices, ports, cables, VLANs"
+msgstr "Geräte, Ports, Kabel, VLANs suchen"
 
-#: templates/base.html:55
-msgid "Library"
-msgstr "Bibliothek"
-
-#: templates/base.html:57
-msgid "Networks"
-msgstr "Netze"
-
-#: templates/base.html:58 templates/history/activity.html:2
-#: templates/history/activity.html:4
-msgid "Activity"
-msgstr "Aktivität"
-
-#: templates/base.html:59
-msgid "Import/Export"
-msgstr "Import/Export"
-
-#: templates/base.html:60 templates/manage/_base.html:4
-#: templates/manage/dashboard.html:2 templates/manage/dashboard.html:4
-msgid "Administration"
-msgstr "Administration"
-
-#: templates/base.html:88
+#: templates/base.html:92
 msgid "Language"
 msgstr "Sprache"
 
-#: templates/base.html:93
+#: templates/base.html:97
 msgid "Source code (AGPL-3.0)"
 msgstr "Quellcode (AGPL-3.0)"
 
-#: templates/base.html:93 templates/core/licenses.html:2
+#: templates/base.html:97 templates/core/licenses.html:2
 #: templates/core/licenses.html:4
 msgid "Licenses"
 msgstr "Lizenzen"
@@ -3216,35 +3243,87 @@ msgstr "Erstellen"
 msgid "Back to start"
 msgstr "Zurück zum Start"
 
-#: templates/core/home.html:2
-msgid "Start"
-msgstr "Start"
-
-#: templates/core/home.html:4
+#: templates/core/home.html:6
 #, python-format
 msgid "Welcome, %(name)s"
 msgstr "Willkommen, %(name)s"
 
-#: templates/core/home.html:6
-#, python-format
-msgid "Current tenant: %(tenant)s"
-msgstr "Aktueller Mandant: %(tenant)s"
-
-#: templates/core/home.html:8 templates/locations/index.html:10
-msgid "You do not have access to any tenant yet."
-msgstr "Sie haben noch keinen Zugriff auf einen Mandanten."
-
-#: templates/core/home.html:11
-msgid "Getting started"
-msgstr "Erste Schritte"
-
-#: templates/core/home.html:12
+#: templates/core/home.html:7
 msgid ""
-"Sites, racks and devices arrive in the next release. Until then, set up "
-"tenants, users and roles in the administration area."
-msgstr ""
-"Standorte, Racks und Geräte folgen im nächsten Release. Richten Sie bis "
-"dahin Mandanten, Benutzer und Rollen im Administrationsbereich ein."
+"You do not have access to any tenant yet. Ask an administrator to give you a "
+"role in one."
+msgstr "Sie haben noch keinen Zugriff auf einen Mandanten. Bitten Sie eine Administratorin oder einen Administrator um eine Rolle darin."
+
+#: templates/core/home.html:13
+#, python-format
+msgid "%(n)s site documented"
+msgid_plural "%(n)s sites documented"
+msgstr[0] "%(n)s Standort dokumentiert"
+msgstr[1] "%(n)s Standorte dokumentiert"
+
+#: templates/core/home.html:15 templates/core/home.html:29
+#: templates/locations/index.html:7 templates/locations/site_form.html:2
+#: templates/locations/site_form.html:5
+msgid "New site"
+msgstr "Neuer Standort"
+
+#: templates/core/home.html:21
+msgid "Ports in use"
+msgstr "Belegte Ports"
+
+#: templates/core/home.html:27
+msgid "Start with a site"
+msgstr "Mit einem Standort beginnen"
+
+#: templates/core/home.html:28
+msgid ""
+"A site is an address with buildings, floors and rooms. Racks, devices and "
+"cables go into its rooms."
+msgstr "Ein Standort ist eine Adresse mit Gebäuden, Etagen und Räumen. Racks, Geräte und Kabel kommen in seine Räume."
+
+#: templates/core/home.html:38
+#, python-format
+msgid "%(n)s rack"
+msgid_plural "%(n)s racks"
+msgstr[0] "%(n)s Rack"
+msgstr[1] "%(n)s Racks"
+
+#: templates/core/home.html:39
+#, python-format
+msgid "%(p)s %% of the rack units in use"
+msgstr "%(p)s %% der Höheneinheiten belegt"
+
+#: templates/core/home.html:39 templates/core/home.html:48
+msgid "Units in use"
+msgstr "Belegte Höheneinheiten"
+
+#: templates/core/home.html:43
+msgid "Fullest racks"
+msgstr "Vollste Racks"
+
+#: templates/core/home.html:54
+msgid "Recent changes"
+msgstr "Letzte Änderungen"
+
+#: templates/core/home.html:54
+msgid "All activity"
+msgstr "Alle Aktivitäten"
+
+#: templates/core/home.html:58
+#, python-format
+msgid "%(n)s more change"
+msgid_plural "%(n)s more changes"
+msgstr[0] "%(n)s weitere Änderung"
+msgstr[1] "%(n)s weitere Änderungen"
+
+#: templates/core/home.html:59
+#, python-format
+msgid "%(t)s ago"
+msgstr "vor %(t)s"
+
+#: templates/core/home.html:60
+msgid "Nothing has changed yet."
+msgstr "Noch keine Änderungen."
 
 #: templates/core/licenses.html:6
 msgid ""
@@ -3488,11 +3567,15 @@ msgstr "Ansicht von Rack %(name)s"
 
 #: templates/dcim/rack.html:50
 msgid "Point at a port or cable to follow its path; select a port to open it."
-msgstr "Zeigen Sie auf einen Port, um seiner Strecke zu folgen; wählen Sie ihn aus, um ihn zu öffnen."
+msgstr ""
+"Zeigen Sie auf einen Port, um seiner Strecke zu folgen; wählen Sie ihn aus, "
+"um ihn zu öffnen."
 
 #: templates/dcim/rack.html:50
 msgid "Drag a device, or focus it and use the arrow keys, to move it."
-msgstr "Ziehen Sie ein Gerät oder fokussieren Sie es und nutzen Sie die Pfeiltasten, um es zu verschieben."
+msgstr ""
+"Ziehen Sie ein Gerät oder fokussieren Sie es und nutzen Sie die Pfeiltasten, "
+"um es zu verschieben."
 
 #: templates/dcim/rack.html:56
 msgid "Connections"
@@ -3568,15 +3651,13 @@ msgstr "Racks von %(name)s mit ihren Kabeln"
 msgid ""
 "Cables between racks run over the cable tray above them. Point at a port to "
 "follow its path."
-msgstr "Kabel zwischen Racks laufen über die Kabeltrasse darüber. Zeigen Sie auf einen Port, um seiner Strecke zu folgen."
+msgstr ""
+"Kabel zwischen Racks laufen über die Kabeltrasse darüber. Zeigen Sie auf "
+"einen Port, um seiner Strecke zu folgen."
 
 #: templates/dcim/room.html:38
 msgid "No racks in this room yet."
 msgstr "Noch keine Racks in diesem Raum."
-
-#: templates/exchange/index.html:2 templates/exchange/index.html:4
-msgid "Import and export"
-msgstr "Import und Export"
 
 #: templates/exchange/index.html:7 templates/library/types.html:29
 #: templates/manage/roles.html:21
@@ -3979,11 +4060,6 @@ msgstr ""
 msgid "No webhooks yet."
 msgstr "Noch keine Webhooks."
 
-#: templates/library/type_detail.html:4 templates/library/types.html:2
-#: templates/library/types.html:5
-msgid "Device library"
-msgstr "Gerätebibliothek"
-
 #: templates/library/type_detail.html:6 templates/library/types.html:21
 msgid "this tenant"
 msgstr "dieser Mandant"
@@ -4085,10 +4161,9 @@ msgstr "Keine Etagen."
 msgid "No buildings yet."
 msgstr "Noch keine Gebäude."
 
-#: templates/locations/index.html:7 templates/locations/site_form.html:2
-#: templates/locations/site_form.html:5
-msgid "New site"
-msgstr "Neuer Standort"
+#: templates/locations/index.html:10
+msgid "You do not have access to any tenant yet."
+msgstr "Sie haben noch keinen Zugriff auf einen Mandanten."
 
 #: templates/locations/index.html:22
 msgid "No sites yet."
@@ -4166,10 +4241,6 @@ msgstr "Keine Zuweisungen."
 #: templates/manage/_assignments.html:11
 msgid "Add assignment"
 msgstr "Zuweisung hinzufügen"
-
-#: templates/manage/_base.html:7
-msgid "Overview"
-msgstr "Übersicht"
 
 #: templates/manage/_base.html:8 templates/manage/dashboard.html:6
 #: templates/manage/tenants.html:2 templates/manage/tenants.html:4
@@ -4883,3 +4954,26 @@ msgstr "Mandant gespeichert."
 #: tenancy/views.py:105
 msgid "Tenant deleted."
 msgstr "Mandant gelöscht."
+
+#~ msgid "Library"
+#~ msgstr "Bibliothek"
+
+#~ msgid "Import/Export"
+#~ msgstr "Import/Export"
+
+#~ msgid "Start"
+#~ msgstr "Start"
+
+#, python-format
+#~ msgid "Current tenant: %(tenant)s"
+#~ msgstr "Aktueller Mandant: %(tenant)s"
+
+#~ msgid "Getting started"
+#~ msgstr "Erste Schritte"
+
+#~ msgid ""
+#~ "Sites, racks and devices arrive in the next release. Until then, set up "
+#~ "tenants, users and roles in the administration area."
+#~ msgstr ""
+#~ "Standorte, Racks und Geräte folgen im nächsten Release. Richten Sie bis "
+#~ "dahin Mandanten, Benutzer und Rollen im Administrationsbereich ein."

@@ -15,6 +15,9 @@ All notable changes to this project are documented here. The format follows
 * Room cabling: all racks of a room side by side with the cables inside them and
   between them over the cable tray.
 * Every object is created on its own page.
+* New layout: navigation in a sidebar with the tenant on top, search in the top bar
+  (Ctrl+K or /), and an overview start page with the tenant's racks, devices, ports
+  and cables, its sites with their load, the fullest racks and recent changes.
 * Personal data: everyone can download their data as JSON; administrators can
   anonymise accounts for erasure requests (ADR 0024).
 * Backup and restore drill on the production stack in every CI run; guides for

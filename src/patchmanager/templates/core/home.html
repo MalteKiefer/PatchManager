@@ -1,14 +1,66 @@
 {% extends "base.html" %}{% load i18n %}
-{% block title %}{% translate "Start" %}{% endblock %}
+{% block title %}{% translate "Overview" %}{% endblock %}
 {% block content %}
-<h1>{% blocktranslate with name=user.display_name %}Welcome, {{ name }}{% endblocktranslate %}</h1>
-{% if current_tenant %}
-<p class="mt-2 text-slate-600 dark:text-slate-400">{% blocktranslate with tenant=current_tenant.name %}Current tenant: {{ tenant }}{% endblocktranslate %}</p>
+{% if not current_tenant %}
+<section class="card max-w-xl">
+  <h1>{% blocktranslate with name=user.display_name %}Welcome, {{ name }}{% endblocktranslate %}</h1>
+  <p class="mt-2 text-[#5b6673] dark:text-slate-400">{% translate "You do not have access to any tenant yet. Ask an administrator to give you a role in one." %}</p>
+</section>
 {% else %}
-<p class="mt-2 text-slate-600 dark:text-slate-400">{% translate "You do not have access to any tenant yet." %}</p>
-{% endif %}
-<div class="card mt-6">
-  <h2>{% translate "Getting started" %}</h2>
-  <p class="mt-2 text-sm">{% translate "Sites, racks and devices arrive in the next release. Until then, set up tenants, users and roles in the administration area." %}</p>
+<div class="mb-6 flex flex-wrap items-end gap-3">
+  <div class="mr-auto">
+    <h1>{{ current_tenant.name }}</h1>
+    <p class="mt-1 text-sm text-[#5b6673] dark:text-slate-400">{% blocktranslate count n=counts.sites %}{{ n }} site documented{% plural %}{{ n }} sites documented{% endblocktranslate %}</p>
+  </div>
+  {% if can_add_site %}<a class="btn-primary" href="{% url 'locations:site-create' %}">{% translate "New site" %}</a>{% endif %}
 </div>
+
+<dl class="overview-strip mb-8">
+  <div><dt>{% translate "Racks" %}</dt><dd>{{ counts.racks }}</dd></div>
+  <div><dt>{% translate "Devices" %}</dt><dd>{{ counts.devices }}</dd></div>
+  <div><dt>{% translate "Ports in use" %}</dt><dd>{{ counts.cabled }}<span> / {{ counts.ports }}</span></dd></div>
+  <div><dt>{% translate "Cables" %}</dt><dd>{{ counts.cables }}</dd></div>
+</dl>
+
+{% if not sites %}
+<section class="card max-w-2xl">
+  <h2>{% translate "Start with a site" %}</h2>
+  <p class="mt-2 text-sm text-[#5b6673] dark:text-slate-400">{% translate "A site is an address with buildings, floors and rooms. Racks, devices and cables go into its rooms." %}</p>
+  {% if can_add_site %}<a class="btn-primary mt-4" href="{% url 'locations:site-create' %}">{% translate "New site" %}</a>{% endif %}
+</section>
+{% else %}
+<div class="grid gap-8 xl:grid-cols-[minmax(0,3fr)_minmax(0,2fr)]">
+  <section aria-labelledby="sites-h">
+    <h2 id="sites-h" class="mb-3">{% translate "Sites" %}</h2>
+    <ul class="overview-list">
+      {% for site in sites %}<li>
+        <a href="{% url 'locations:node' 'site' site.pk %}" class="font-medium">{{ site.name }}</a>
+        <span class="text-sm text-[#5b6673] dark:text-slate-400">{% blocktranslate count n=site.rack_count %}{{ n }} rack{% plural %}{{ n }} racks{% endblocktranslate %}</span>
+        {% if site.rack_count %}<span class="load" title="{% blocktranslate with p=site.load %}{{ p }} % of the rack units in use{% endblocktranslate %}"><meter min="0" max="100" value="{{ site.load }}" aria-label="{% translate 'Units in use' %}"></meter><span>{{ site.load }} %</span></span>{% endif %}
+      </li>{% endfor %}
+    </ul>
+    {% if fullest %}
+    <h2 class="mt-8 mb-3">{% translate "Fullest racks" %}</h2>
+    <ul class="overview-list">
+      {% for row in fullest %}<li>
+        <a href="{% url 'dcim:rack' row.rack.pk %}" class="font-medium">{{ row.rack.name }}</a>
+        <span class="text-sm text-[#5b6673] dark:text-slate-400">{{ row.rack.room.floor.building.name }}, {{ row.rack.room.name }}</span>
+        <span class="load"><meter min="0" max="100" low="70" high="90" optimum="20" value="{{ row.percent }}" aria-label="{% translate 'Units in use' %}"></meter><span>{{ row.percent }} %</span></span>
+      </li>{% endfor %}
+    </ul>
+    {% endif %}
+  </section>
+  <section aria-labelledby="changes-h">
+    <div class="mb-3 flex items-baseline"><h2 id="changes-h" class="mr-auto">{% translate "Recent changes" %}</h2><a class="text-sm" href="{% url 'history:activity' %}">{% translate "All activity" %}</a></div>
+    <ol class="overview-feed">
+      {% for item in changes %}{% with c=item.change %}<li>
+        <a href="{% url 'history:object' c.object_type c.object_id %}">{% if c.label %}{{ c.label }}{% else %}{{ item.kind|capfirst }}{% endif %}</a>
+        <span>{% if c.label %}{{ item.kind|capfirst }} {% endif %}{{ c.get_action_display }}{% if item.more %}, {% blocktranslate count n=item.more %}{{ n }} more change{% plural %}{{ n }} more changes{% endblocktranslate %}{% endif %}{% if c.actor_label %}, {{ c.actor_label }}{% endif %}</span>
+        <time datetime="{{ c.occurred_at|date:'c' }}">{% blocktranslate with t=c.occurred_at|timesince %}{{ t }} ago{% endblocktranslate %}</time>
+      </li>{% endwith %}{% empty %}<li class="text-sm text-[#5b6673]">{% translate "Nothing has changed yet." %}</li>{% endfor %}
+    </ol>
+  </section>
+</div>
+{% endif %}
+{% endif %}
 {% endblock %}

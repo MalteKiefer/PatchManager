@@ -80,7 +80,7 @@ def test_switch_tenant(admin_client: Client, make_tenant) -> None:
         "/tenants/switch/", {"tenant": str(b.pk), "next": "https://evil.example/"}, secure=True
     )
     page = admin_client.get("/", secure=True).content.decode()
-    assert "Current tenant: Bbb" in page
+    assert "<h1>Bbb</h1>" in page
     a  # noqa: B018
 
 

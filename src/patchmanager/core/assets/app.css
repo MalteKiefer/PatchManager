@@ -15,9 +15,9 @@
 }
 
 @layer base {
-  body { @apply bg-slate-50 text-slate-900 antialiased dark:bg-slate-950 dark:text-slate-100; }
+  body { @apply bg-[#f6f7f9] text-[#18212b] antialiased dark:bg-slate-950 dark:text-slate-100; font-feature-settings: "tnum" 1, "cv11" 1; }
   a { @apply text-brand-700 hover:underline dark:text-brand-500; }
-  h1 { @apply text-2xl font-semibold tracking-tight; }
+  h1 { @apply text-[1.6rem] leading-tight font-semibold tracking-[-0.015em]; }
   h2 { @apply text-lg font-semibold; }
   :focus-visible { @apply outline-2 outline-offset-2 outline-brand-500; }
 }
@@ -31,7 +31,7 @@
 }
 
 @layer components {
-  .card { @apply rounded-lg border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900; }
+  .card { @apply rounded-xl border border-[#dde2e8] bg-white p-5 dark:border-slate-800 dark:bg-slate-900; }
   .btn-primary { @apply btn bg-brand-600 text-white hover:bg-brand-700 hover:no-underline; }
   .btn-secondary { @apply btn border border-slate-300 bg-white text-slate-800 hover:bg-slate-50 hover:no-underline dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 dark:hover:bg-slate-700; }
   .btn-danger { @apply btn bg-red-600 text-white hover:bg-red-700 hover:no-underline; }
@@ -58,7 +58,9 @@
 
 [x-cloak] { display: none !important; }
 
-/* Secondary text: slate-500 on the dark backgrounds misses WCAG AA contrast (4.5:1). */
+/* Secondary text: slate-500 misses WCAG AA contrast (4.5:1) on the page background
+   in light mode and on the dark backgrounds. */
+.text-slate-500 { color: #56606c; }
 .dark .text-slate-500 { color: var(--color-slate-400); }
 
 /* Map tiles in black and white, so markers and the brand colour stand out. */
@@ -113,3 +115,51 @@
 tr.is-hot { @apply bg-amber-50 dark:bg-slate-800; }
 .rack-title { @apply fill-slate-800 dark:fill-slate-100; font-size: 26px; font-weight: 600; }
 .rack-wire.is-tray { stroke-linejoin: round; }
+
+/* Application shell: sidebar navigation, slim top bar. */
+@layer components {
+  .app-shell { @apply min-h-screen lg:grid lg:grid-cols-[15.5rem_minmax(0,1fr)]; }
+  .app-sidebar { @apply fixed inset-y-0 left-0 z-30 flex w-64 -translate-x-full flex-col border-r border-[#dde2e8] bg-white px-3 py-4 transition-transform lg:sticky lg:top-0 lg:h-screen lg:w-auto lg:translate-x-0 dark:border-slate-800 dark:bg-slate-900; }
+  .app-sidebar:not(.is-open) { @apply max-lg:invisible; }
+  .app-sidebar.is-open { @apply translate-x-0 shadow-xl; }
+  .app-brand { @apply mb-5 flex items-center gap-2.5 px-2 text-[15px] font-semibold text-[#18212b] no-underline hover:no-underline dark:text-white; }
+  .app-mark { @apply size-7; }
+  .app-mark rect { @apply fill-brand-600; }
+  .app-mark path { stroke: #fff; stroke-width: 2.2; stroke-linecap: round; fill: none; }
+  .app-mark circle { fill: #fbbf24; }
+  .app-select { @apply rounded-lg border border-[#dde2e8] bg-white px-2.5 py-1.5 text-sm dark:border-slate-700 dark:bg-slate-800; }
+  .app-nav { @apply flex flex-1 flex-col gap-0.5 overflow-y-auto; }
+  .app-nav-label { @apply mt-4 mb-1 block px-2.5 text-xs font-medium text-[#5b6673] dark:text-slate-400; }
+  .app-nav > a { @apply flex items-center gap-2.5 rounded-lg px-2.5 py-[7px] text-sm text-[#3a4552] no-underline hover:bg-[#eef1f4] hover:no-underline dark:text-slate-300 dark:hover:bg-slate-800; }
+  .app-nav > a[aria-current="page"] { @apply bg-brand-50 font-medium text-brand-700 dark:bg-slate-800 dark:text-white; box-shadow: inset 3px 0 0 var(--color-brand-600); }
+  .app-account { @apply relative mt-3 border-t border-[#dde2e8] pt-3 dark:border-slate-800; }
+  .app-account-button { @apply flex w-full items-center gap-2.5 rounded-lg px-2 py-1.5 text-left text-sm hover:bg-[#eef1f4] dark:hover:bg-slate-800; }
+  .app-avatar { @apply grid size-7 shrink-0 place-items-center rounded-full bg-[#18212b] text-xs font-semibold text-white dark:bg-slate-700; }
+  .app-account-menu { @apply absolute bottom-full left-0 z-40 mb-2 w-full rounded-xl border border-[#dde2e8] bg-white p-1 shadow-lg dark:border-slate-700 dark:bg-slate-900; }
+  .app-account-menu > a, .app-account-menu button { @apply block w-full rounded-lg px-2.5 py-1.5 text-left text-sm text-[#3a4552] no-underline hover:bg-[#eef1f4] hover:no-underline dark:text-slate-300 dark:hover:bg-slate-800; }
+  .app-column { @apply flex min-w-0 flex-col; }
+  .app-topbar { @apply sticky top-0 z-20 flex items-center gap-3 border-b border-[#dde2e8] bg-[#f6f7f9]/90 px-4 py-2.5 backdrop-blur sm:px-6 dark:border-slate-800 dark:bg-slate-950/90; }
+  .app-search { @apply flex w-full max-w-xl items-center gap-2 rounded-lg border border-[#dde2e8] bg-white px-3 text-[#5b6673] focus-within:border-brand-500 dark:border-slate-700 dark:bg-slate-900; }
+  .app-search input { @apply w-full border-0 bg-transparent py-1.5 text-sm text-[#18212b] outline-none placeholder:text-[#5b6673] dark:text-slate-100 dark:placeholder:text-slate-400; }
+  .app-search kbd { @apply hidden shrink-0 whitespace-nowrap rounded border border-[#dde2e8] px-1.5 text-[11px] text-[#5b6673] sm:block dark:border-slate-700 dark:text-slate-400; }
+  .app-footer { @apply mt-auto flex flex-wrap items-center gap-4 px-4 py-5 text-xs text-[#5b6673] sm:px-6 dark:text-slate-400; }
+  .btn-ghost { @apply btn text-[#3a4552] hover:bg-[#eef1f4] dark:text-slate-300 dark:hover:bg-slate-800; }
+}
+
+/* Overview page. */
+@layer components {
+  .overview-strip { @apply grid grid-cols-2 divide-[#dde2e8] overflow-hidden rounded-xl border border-[#dde2e8] bg-white sm:grid-cols-4 sm:divide-x dark:divide-slate-800 dark:border-slate-800 dark:bg-slate-900; }
+  .overview-strip > div { @apply px-5 py-4; }
+  .overview-strip dt { @apply text-sm text-[#5b6673] dark:text-slate-400; }
+  .overview-strip dd { @apply mt-1 text-2xl font-semibold tracking-tight; }
+  .overview-strip dd span { @apply text-base font-normal text-[#5b6673] dark:text-slate-400; }
+  .overview-list { @apply divide-y divide-[#dde2e8] rounded-xl border border-[#dde2e8] bg-white dark:divide-slate-800 dark:border-slate-800 dark:bg-slate-900; }
+  .overview-list > li { @apply flex flex-wrap items-center gap-x-4 gap-y-1 px-4 py-3; }
+  .overview-list .load { @apply ml-auto flex items-center gap-2 text-sm tabular-nums text-[#5b6673] dark:text-slate-400; }
+  .overview-list meter { @apply h-2 w-28; }
+  .overview-feed { @apply relative space-y-4 border-l border-[#dde2e8] pl-5 dark:border-slate-800; }
+  .overview-feed > li { @apply relative grid gap-0.5 text-sm; }
+  .overview-feed > li::before { content: ""; @apply absolute top-1.5 -left-[25px] size-2.5 rounded-full border-2 border-brand-600 bg-white dark:bg-slate-950; }
+  .overview-feed span { @apply text-[#5b6673] dark:text-slate-400; }
+  .overview-feed time { @apply text-xs text-[#5b6673] dark:text-slate-400; }
+}
