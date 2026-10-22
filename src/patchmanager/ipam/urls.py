@@ -16,4 +16,5 @@ urlpatterns = [
     path("vrfs/<uuid:pk>/", views.vrf_detail, name="vrf"),
     path("dhcp/<uuid:pk>/kea.json", pages.dhcp_export, name="dhcp-export"),
     path("dns/<uuid:pk>/zone.txt", pages.dns_export, name="dns-export"),
+    path("dns/import/", pages.dns_import_view, name="dns-import"),
 ]

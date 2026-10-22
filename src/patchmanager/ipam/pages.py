@@ -5,17 +5,23 @@ import json
 from typing import Any
 
 from django import forms
+from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from django.core.exceptions import PermissionDenied, ValidationError
 from django.http import Http404, HttpRequest, HttpResponse
-from django.shortcuts import get_object_or_404
+from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.utils.text import slugify
 from django.utils.translation import gettext as _
 from django.utils.translation import gettext_lazy
+from django.views.decorators.http import require_http_methods
 
 from patchmanager.accounts import policy
+from patchmanager.accounts.services import PermissionDeniedError, ServiceError
 from patchmanager.core import crud
+from patchmanager.core.fields import path_label
 from patchmanager.directory.pages import TenantForm
+from patchmanager.ipam import dns_import
 from patchmanager.ipam.models import DHCPReservation, DHCPScope, DNSRecord, DNSZone
 
 
@@ -165,6 +171,7 @@ crud.register(
         ),
         children=("dns-records",),
         context=_zone_extra,
+        actions=((gettext_lazy("Import zone"), "ipam:dns-import"),),
     )
 )
 crud.register(
@@ -277,3 +284,106 @@ def dhcp_export(request: HttpRequest, pk: str) -> HttpResponse:
     family = "subnet6" if ":" in str(scope.prefix.prefix) else "subnet4"
     text = json.dumps({family: [kea_subnet(scope)]}, indent=2)
     return _download(text, f"{slugify(scope.name) or 'scope'}.json", "application/json")
+
+
+# --- Import ------------------------------------------------------------------------
+
+
+class ZoneImportForm(forms.Form):
+    """A zone file, or a provider with its API token."""
+
+    name = forms.CharField(
+        label=gettext_lazy("Zone"),
+        max_length=253,
+        help_text=gettext_lazy("For example example.com."),
+    )
+    source = forms.ChoiceField(
+        label=gettext_lazy("Source"),
+        choices=[("file", gettext_lazy("zone file"))]
+        + [(key, label) for key, (label, _fetch) in dns_import.PROVIDERS.items()],
+    )
+    content = forms.CharField(
+        label=gettext_lazy("Zone file"),
+        widget=forms.Textarea(attrs={"rows": 10, "spellcheck": "false", "class": "font-mono"}),
+        required=False,
+        strip=False,
+        help_text=gettext_lazy("Paste it here, or choose a file."),
+    )
+    file = forms.FileField(label=gettext_lazy("or a file"), required=False)
+    token = forms.CharField(
+        label=gettext_lazy("API token"),
+        required=False,
+        widget=forms.PasswordInput(render_value=False, attrs={"autocomplete": "off"}),
+        help_text=gettext_lazy(
+            "Used once to read the zone; it is not stored. A read-only token is enough."
+        ),
+    )
+    replace = forms.BooleanField(
+        label=gettext_lazy("Replace the documented records of this zone"), required=False
+    )
+
+    def clean(self) -> dict[str, Any]:
+        """A zone file for "zone file", a token for a provider."""
+        data = super().clean() or {}
+        if data.get("source") == "file":
+            upload = data.get("file")
+            if upload is not None:
+                if upload.size > dns_import.MAX_BYTES:
+                    raise forms.ValidationError(_("The file is not a zone file of at most 10 MB."))
+                try:
+                    data["content"] = upload.read().decode("utf-8")
+                except UnicodeDecodeError as exc:
+                    raise forms.ValidationError(_("The file must be UTF-8 text.")) from exc
+            if not data.get("content", "").strip():
+                raise forms.ValidationError(_("Paste a zone file or choose one."))
+        elif not data.get("token"):
+            raise forms.ValidationError(_("Choose a provider and enter its token."))
+        return data
+
+
+@login_required
+@require_http_methods(["GET", "POST"])
+def dns_import_view(request: HttpRequest) -> HttpResponse:
+    """Import a zone from a file or from a DNS provider."""
+    tenant = getattr(request, "tenant", None)
+    if tenant is None:
+        raise Http404
+    actor: Any = request.user
+    if not policy.has_perm(actor, "ipam.dnszone.add", scope_path=path_label(tenant.pk)):
+        raise PermissionDenied
+    form = ZoneImportForm(request.POST or None, request.FILES or None)
+    if request.method == "POST" and form.is_valid():
+        data = form.cleaned_data
+        try:
+            if data["source"] == "file":
+                zone = dns_import.parse_zone_file(data["content"], data["name"])
+            else:
+                zone = dns_import.fetch(data["source"], data["name"], data["token"])
+            result = dns_import.save(
+                request, actor, tenant, zone, replace=data["replace"], source=data["source"]
+            )
+        except PermissionDeniedError as exc:
+            raise PermissionDenied from exc
+        except (ServiceError, ValidationError) as exc:
+            form = ZoneImportForm({k: v for k, v in request.POST.items() if k != "token"})
+            form.is_valid()
+            form.add_error(None, "; ".join(getattr(exc, "messages", [str(exc)])))
+        else:
+            messages.success(request, _("%(n)s records imported.") % {"n": result.records})
+            for note in result.skipped[:10]:
+                messages.warning(request, note)
+            return redirect("objects:detail", "dns", result.zone.pk)
+    return render(
+        request,
+        "core/create.html",
+        {
+            "title": _("Import a DNS zone"),
+            "intro": _(
+                "Read a zone file, or a zone of deSEC, Cloudflare or Hetzner DNS through their API."
+            ),
+            "form": form,
+            "back_url": reverse("objects:index", args=["dns"]),
+            "multipart": True,
+            "submit": _("Import"),
+        },
+    )

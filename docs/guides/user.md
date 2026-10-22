@@ -200,7 +200,9 @@ Devices also record their supplier, warranty, support contract and end of life.
 Under *IP networks*, **DHCP** documents scopes (range, gateway, DNS servers, domain,
 lease time, relays and further options) with reservations by MAC address, and
 **DNS** documents zones with their records. A scope downloads as a Kea
-configuration, a zone as a zone file.
+configuration, a zone as a zone file. **Import zone** reads a zone file or fetches a
+zone from deSEC, Cloudflare or Hetzner DNS with an API token that is used once and
+never stored.
 
 ## VLANs and WLANs
 
