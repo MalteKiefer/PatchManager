@@ -117,18 +117,29 @@ def _tree(prefixes: list[Prefix]) -> list[tuple[Prefix, int]]:
 
 
 def _with_ports(actor: Any, addresses: Any) -> list[IPAddress]:
-    """Attach ``shown_port``: the port, unless its device is hidden from the viewer."""
+    """Attach ``shown_port`` and ``shown_card``, unless the device or machine is hidden."""
+    from patchmanager.compute.models import VirtualMachine
+    from patchmanager.dcim.models import Device
+    from patchmanager.directory.pages import visible
+
     rows = list(addresses)
     devices = {a.port.device_id for a in rows if a.port_id}
-    from patchmanager.dcim.models import Device
-
-    visible = set(
+    machines = {a.vm_interface.vm_id for a in rows if a.vm_interface_id}
+    shown_devices = set(
         _visible(actor, "dcim.device.view", Device.objects.filter(pk__in=devices)).values_list(
             "pk", flat=True
         )
     )
+    visible_vms = set(
+        visible(actor, VirtualMachine.objects.filter(pk__in=machines)).values_list("pk", flat=True)
+    )
     for row in rows:
-        row.shown_port = row.port if row.port_id and row.port.device_id in visible else None
+        row.shown_port = row.port if row.port_id and row.port.device_id in shown_devices else None
+        row.shown_card = (
+            row.vm_interface
+            if row.vm_interface_id and row.vm_interface.vm_id in visible_vms
+            else None
+        )
     return rows
 
 
@@ -275,7 +286,7 @@ def address_list(request: HttpRequest) -> HttpResponse:
     actor = _actor(request)
     rows = _visible(
         actor, "ipam.ipaddress.view", IPAddress.objects.filter(tenant=tenant)
-    ).select_related("vrf", "port__device")
+    ).select_related("vrf", "port__device", "vm_interface__vm")
     query = request.GET.get("q", "").strip()[:100]
     if query:
         rows = rows.filter(host__icontains=query) | rows.filter(dns_name__icontains=query)
@@ -345,7 +356,9 @@ def address_create(request: HttpRequest) -> HttpResponse:
 @require_http_methods(["GET", "POST"])
 def address_detail(request: HttpRequest, pk: str) -> HttpResponse:
     """Edit an address, take it off its port, or delete it."""
-    address = get_object_or_404(IPAddress.objects.select_related("vrf", "port__device"), pk=pk)
+    address = get_object_or_404(
+        IPAddress.objects.select_related("vrf", "port__device", "vm_interface__vm"), pk=pk
+    )
     actor = _actor(request)
     if not policy.has_perm(actor, "ipam.ipaddress.view", address):
         raise Http404
@@ -360,8 +373,8 @@ def address_detail(request: HttpRequest, pk: str) -> HttpResponse:
                 messages.success(request, _("Deleted."))
                 return redirect("ipam:addresses")
             if action == "unassign":
-                services.update_address(request, actor, address, port=None)
-                messages.success(request, _("The address is no longer on a port."))
+                services.update_address(request, actor, address, port=None, vm_interface=None)
+                messages.success(request, _("The address is no longer assigned."))
                 return redirect("ipam:address", pk)
             if form.is_valid():
                 services.update_address(
@@ -390,6 +403,7 @@ def address_detail(request: HttpRequest, pk: str) -> HttpResponse:
             "form": form,
             "prefixes": containing,
             "port": address.port if port_visible else None,
+            "card": getattr(_with_ports(actor, [address])[0], "shown_card", None),
             "can_change": policy.has_perm(actor, "ipam.ipaddress.change", address),
         },
     )

@@ -1,6 +1,9 @@
 """Pages of clusters, virtual machines and storage (through the shared record pages)."""
 
+from typing import Any
+
 from django import forms
+from django.http import HttpRequest
 from django.utils.translation import gettext_lazy as _
 
 from patchmanager.compute.models import (
@@ -12,7 +15,7 @@ from patchmanager.compute.models import (
     VMInterface,
 )
 from patchmanager.core import crud
-from patchmanager.directory.pages import TenantForm
+from patchmanager.directory.pages import TenantForm, visible
 
 
 class ClusterForm(TenantForm):
@@ -102,6 +105,14 @@ class StorageForm(TenantForm):
         widgets = {"description": forms.Textarea(attrs={"rows": 2})}
 
 
+def _interface_addresses(request: HttpRequest, card: VMInterface) -> dict[str, Any]:
+    """The IPAM addresses linked to a network card that the viewer may see."""
+    from patchmanager.ipam.models import IPAddress
+
+    linked = visible(request.user, IPAddress.objects.filter(vm_interface=card))
+    return {"linked_addresses": linked.order_by("address")}
+
+
 for resource in (
     crud.Resource(
         key="clusters",
@@ -161,6 +172,8 @@ for resource in (
         ),
         parent=("vm", "vms"),
         hidden=True,
+        template="compute/_interface_addresses.html",
+        context=_interface_addresses,
     ),
     crud.Resource(
         key="vm-disks",

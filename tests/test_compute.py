@@ -7,6 +7,7 @@ from django.test import Client
 from patchmanager.accounts.services import ServiceError
 from patchmanager.compute import connections, inventory
 from patchmanager.compute.models import ClusterHost, Connection, VirtualMachine
+from patchmanager.core.fields import path_label
 from patchmanager.dcim.models import Device
 
 pytestmark = pytest.mark.django_db
@@ -487,3 +488,54 @@ def test_qnap(admin_client: Client, make_tree, make_type, monkeypatch, system) -
     passed["value"] = "0"
     refused = admin_client.post("/compute/import/", form, secure=True).content.decode()
     assert "two step sign in" in refused
+
+
+def test_vm_addresses_are_linked_in_ipam(
+    admin_client: Client, make_tree, super_admin, system
+) -> None:
+    from patchmanager.compute import importing
+    from patchmanager.compute.models import VMInterface
+    from patchmanager.ipam.models import IPAddress
+
+    tree = make_tree()
+    tenant, request = tree["tenant"], tree["request"]
+    with system():
+        free = IPAddress.objects.create(
+            tenant=tenant, address="10.0.0.6/24", path=path_label(tenant.pk)
+        )
+    nic = {"name": "net0", "mac": "bc:24:11:00:00:01", "bridge": "vmbr0", "vlan": ""}
+
+    def platform(addresses: str) -> inventory.Inventory:
+        guest = inventory.Guest("100", "web", nics=[{**nic, "addresses": addresses}])
+        return inventory.Inventory("proxmox", cluster="PVE", guests=[guest])
+
+    with system():
+        first = importing.save(
+            request, super_admin, tenant, platform("10.0.0.5/24, 10.0.0.6/24, fe80::1/64")
+        )
+        card = VMInterface.objects.get(vm__external_id="100")
+        linked = sorted(a.host for a in IPAddress.objects.filter(vm_interface=card))
+        assert linked == ["10.0.0.5", "10.0.0.6"]  # created and taken over; link local left out
+    assert first.created == 1
+
+    page = admin_client.get(f"/ipam/addresses/{free.pk}/", secure=True).content.decode()
+    assert "web" in page and "net0" in page
+    card_page = admin_client.get(f"/items/vm-interfaces/{card.pk}/", secure=True).content.decode()
+    assert "10.0.0.5/24" in card_page and "10.0.0.6/24" in card_page
+
+    with system():
+        importing.save(request, super_admin, tenant, platform("10.0.0.5/24"))
+        assert VMInterface.objects.get(vm__external_id="100").pk == card.pk  # updated in place
+        free.refresh_from_db()
+        assert free.vm_interface_id is None  # no longer reported: unlinked, record kept
+    both = inventory.Inventory(
+        "proxmox",
+        cluster="PVE",
+        guests=[
+            inventory.Guest("100", "web", nics=[{**nic, "addresses": "10.0.0.5/24"}]),
+            inventory.Guest("101", "db", nics=[{**nic, "addresses": "10.0.0.5/24"}]),
+        ],
+    )
+    with system():
+        clash = importing.save(request, super_admin, tenant, both)
+    assert "10.0.0.5 of db is already used elsewhere and was not linked." in clash.notes
