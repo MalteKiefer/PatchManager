@@ -387,3 +387,26 @@ def test_port_joins_only_own_lag(switch, make_tree, make_type, super_admin, syst
         )
         with pytest.raises(ServiceError):
             devices.update_port(switch["request"], super_admin, foreign.ports.first(), lag=lag)
+
+
+def test_limits_hold_after_template_variables() -> None:
+    long_value = {"x": "1" * 900}
+    with pytest.raises(aruba.ParseError):  # 3 variables of 900 characters in one line
+        aruba.parse("hostname %x%%x%%x%\n", long_value)
+    with pytest.raises(aruba.ParseError):
+        aruba.parse("hostname a\n" * (aruba.MAX_LINES + 1))
+    many = "".join(f"vlan {v}\n   untagged 1-1000\n   exit\n" for v in range(1, 30))
+    with pytest.raises(aruba.TooLargeError):
+        aruba.parse(many)
+
+
+def test_rendered_values_cannot_inject_lines() -> None:
+    config = aruba.Config(hostname='SW"\nip routing')
+    config.vlans[5] = aruba.Vlan(5, name="Guests\nvlan 6", untagged=["1\n2"])
+    config.interfaces["1"] = aruba.Interface("1", label='x"\r\ndisable')
+    text = aruba.render(config)
+    assert "\nip routing" not in text and "\nvlan 6" not in text and "\ndisable" not in text
+    again = aruba.parse(text)
+    assert not again.ip_routing and list(again.vlans) == [5] and again.interfaces["1"].enabled
+    with pytest.raises(aruba.ParseError):
+        aruba._vlan(aruba.Config(), 7, ["ip ospf area 1;reload"])

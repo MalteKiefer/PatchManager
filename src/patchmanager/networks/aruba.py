@@ -17,6 +17,9 @@ MAX_LINES = 50_000
 MAX_RANGE = 1024  # ports in one range like 1-48
 MAX_LINE = 2000  # characters; longer lines are not configuration
 MAX_NAME = 64  # characters of one port name
+MAX_NAMES = 20_000  # port names in all ranges of one configuration
+MAX_BYTES = 4 * 1024 * 1024  # text after template variables are filled in
+MAX_VARIABLE = 1000  # characters of one template variable
 
 _SECRET = re.compile(
     r"^(password|snmp-server community|snmpv3|radius-server.*key|tacacs-server.*key|"
@@ -55,6 +58,8 @@ _IGNORED = frozenset(
 )
 _TEMPLATE = re.compile(r"%([A-Za-z0-9_.-]+)%")
 _RANGE_END = re.compile(r"^(.*?)(\d+)$")
+OSPF_AREA = re.compile(r"^(\d{1,10}|\d{1,3}(\.\d{1,3}){3}|backbone)$")
+_UNSAFE = re.compile(r'[\x00-\x1f\x7f"]')
 
 
 @dataclass
@@ -161,6 +166,16 @@ class Config:
     unknown: list[str] = field(default_factory=list)
     warnings: list[str] = field(default_factory=list)
 
+    names_left: int = field(default=MAX_NAMES, repr=False, compare=False)
+
+    def expand(self, spec: str) -> list[str]:
+        """:func:`expand`, counted against the budget of the whole configuration."""
+        names = expand(spec)
+        self.names_left -= len(names)
+        if self.names_left < 0:
+            raise TooLargeError(f"the configuration names more than {MAX_NAMES} ports")
+        return names
+
     def interface(self, name: str) -> Interface:
         """The interface entry of ``name`` (created on first use)."""
         return self.interfaces.setdefault(name, Interface(name))
@@ -170,6 +185,10 @@ class ParseError(ValueError):
     """The text cannot be read as a configuration."""
 
 
+class TooLargeError(ParseError):
+    """The configuration names more ports than any switch has; reading stops."""
+
+
 # --- Templates ----------------------------------------------------------------
 
 
@@ -177,6 +196,10 @@ def fill_template(text: str, variables: dict[str, Any], warnings: list[str]) -> 
     """Resolve Aruba Central template syntax; unknown variables drop their line."""
     lines: list[str] = []
     active = [True]
+    size = 0
+    variables = {
+        k: v for k, v in variables.items() if len(str(v)) <= MAX_VARIABLE and "\n" not in str(v)
+    }
     for number, raw in enumerate(text.splitlines(), 1):
         stripped = raw.strip()
         if match := re.fullmatch(r"%if\s+([A-Za-z0-9_.-]+)\s*(?:(!?=)\s*(.*?))?\s*%", stripped):
@@ -206,6 +229,11 @@ def fill_template(text: str, variables: dict[str, Any], warnings: list[str]) -> 
             if not all(name.startswith("_sys_") for name in missing):
                 warnings.append(f"line {number}: no value for %{missing[0]}%, line skipped")
             continue
+        size += len(line) + 1
+        if len(line) > MAX_LINE:
+            raise ParseError(f"line {number} is longer than {MAX_LINE} characters")
+        if len(lines) >= MAX_LINES or size > MAX_BYTES:
+            raise ParseError(f"the configuration has more than {MAX_LINES} lines or 4 MB")
         lines.append(line)
     return lines
 
@@ -339,23 +367,24 @@ def parse(text: str, variables: dict[str, Any] | None = None) -> Config:
         raise ParseError("the file is not a text configuration")
     config = Config()
     lines = fill_template(text, variables or {}, config.warnings)
-    if len(lines) > MAX_LINES:
-        raise ParseError(f"the configuration has more than {MAX_LINES} lines")
     for raw in lines[:5]:
         if raw.startswith(";") and "Configuration Editor" in raw:
             config.platform = raw.lstrip("; ").strip()[:200]
     for head, body, number in _blocks(lines):
         try:
             _command(config, head, body)
+        except TooLargeError:
+            raise
         except ParseError as exc:
             config.warnings.append(f"line {number}: {exc}")
-    for vlan in config.vlans.values():  # a port is untagged in one VLAN only
+    untagged_in: dict[str, int] = {}  # a port is untagged in one VLAN only
+    for vlan in config.vlans.values():
         for name in vlan.untagged:
-            others = [v.vid for v in config.vlans.values() if v is not vlan and name in v.untagged]
-            if others:
+            if name in untagged_in:
                 config.warnings.append(
-                    f"port {name} is untagged in VLAN {vlan.vid} and {others[0]}"
+                    f"port {name} is untagged in VLAN {untagged_in[name]} and {vlan.vid}"
                 )
+            untagged_in.setdefault(name, vlan.vid)
     return config
 
 
@@ -370,12 +399,12 @@ def _command(config: Config, head: str, body: list[str]) -> None:
     elif key == "vlan" and len(words) == 2 and words[1].isdigit():
         _vlan(config, int(words[1]), body)
     elif key == "interface" and len(words) == 2:
-        for name in expand(words[1]):
+        for name in config.expand(words[1]):
             _interface(config, name, body)
     elif key == "trunk" and len(words) >= 3:
         protocol = "lacp" if len(words) > 3 and words[3].lower() == "lacp" else "static"
         name = words[2][0].upper() + words[2][1:].lower()  # trk1 -> Trk1
-        config.trunks[name] = Trunk(name, expand(words[1]), protocol)
+        config.trunks[name] = Trunk(name, config.expand(words[1]), protocol)
     elif key == "spanning-tree":
         _spanning_tree(config, words[1:])
         for line in body:
@@ -426,10 +455,11 @@ def _vlan(config: Config, vid: int, body: list[str]) -> None:
             vlan.name = _unquote(line.split(None, 1)[1])[:64]
         elif parts[0] in ("untagged", "tagged") and len(parts) == 2:
             target = vlan.untagged if parts[0] == "untagged" else vlan.tagged
-            target.extend(n for n in expand(parts[1]) if n not in target)
+            have = set(target)
+            target.extend(n for n in dict.fromkeys(config.expand(parts[1])) if n not in have)
         elif parts[:2] in (["no", "untagged"], ["no", "tagged"]) and len(parts) == 3:
             target = vlan.untagged if parts[1] == "untagged" else vlan.tagged
-            gone = set(expand(parts[2]))
+            gone = set(config.expand(parts[2]))
             target[:] = [n for n in target if n not in gone]
         elif parts[:2] == ["ip", "address"] and len(parts) >= 3:
             if parts[2] == "dhcp-bootp":
@@ -437,8 +467,11 @@ def _vlan(config: Config, vid: int, body: list[str]) -> None:
             else:
                 vlan.addresses.append(_address(parts[2], parts[3] if len(parts) > 3 else None))
         elif parts[:2] == ["ip", "ospf"]:
-            if "area" in parts:
-                vlan.ospf_area = parts[parts.index("area") + 1][:15]
+            if "area" in parts and parts.index("area") + 1 < len(parts):
+                area = parts[parts.index("area") + 1]
+                if not OSPF_AREA.match(area):
+                    raise ParseError(f"cannot read the OSPF area {area[:20]}")
+                vlan.ospf_area = "0.0.0.0" if area == "backbone" else area  # noqa: S104  # nosec B104: OSPF area 0, not a bind address
             if "passive" in parts:
                 vlan.ospf_passive = True
         elif parts[0] == "jumbo":
@@ -510,7 +543,7 @@ def _spanning_tree(config: Config, words: list[str]) -> None:
         "max-hops",
         "bpdu-throttle",
     ):
-        for name in expand(words[0]):  # spanning-tree 1-24 admin-edge-port
+        for name in config.expand(words[0]):  # spanning-tree 1-24 admin-edge-port
             _port_stp(config.interface(name), words[1:])
 
 
@@ -586,14 +619,24 @@ def _stack(config: Config, key: str, words: list[str], body: list[str]) -> None:
 # --- Writer --------------------------------------------------------------------
 
 
+def _text(value: str) -> str:
+    """A value inside double quotes: no quotes or control characters (no new lines)."""
+    return _UNSAFE.sub("", str(value))
+
+
+def _token(value: str) -> str:
+    """A bare word (port list, area): additionally no spaces."""
+    return re.sub(r"\s", "", _text(value))
+
+
 def render(config: Config) -> str:
     """An ArubaOS-Switch configuration with what :func:`parse` reads."""
     out: list[str] = []
     if config.hostname:
-        out.append(f'hostname "{config.hostname}"')
+        out.append(f'hostname "{_text(config.hostname)}"')
     for trunk in config.trunks.values():
         mode = "lacp" if trunk.protocol == "lacp" else "trunk"
-        out.append(f"trunk {compress(trunk.members)} {trunk.name.lower()} {mode}")
+        out.append(f"trunk {_token(compress(trunk.members))} {_token(trunk.name.lower())} {mode}")
     if config.ip_routing:
         out.append("ip routing")
     for route in config.routes:
@@ -603,38 +646,38 @@ def render(config: Config) -> str:
         )
     if config.gateways:
         out.append("tunneled-node-server")
-        out.append(f"   controller-ip {config.gateways[0]}")
+        out.append(f"   controller-ip {_token(config.gateways[0])}")
         if len(config.gateways) > 1:
-            out.append(f"   backup-controller-ip {config.gateways[1]}")
+            out.append(f"   backup-controller-ip {_token(config.gateways[1])}")
         out.append("   exit")
     for port in config.interfaces.values():
         lines = []
         if port.label:
-            lines.append(f'name "{port.label}"')
+            lines.append(f'name "{_text(port.label)}"')
         if not port.enabled:
             lines.append("disable")
         if port.tunneled:
             lines.append("tunneled-node-server")
         if lines:
-            out.append(f"interface {port.name}")
+            out.append(f"interface {_token(port.name)}")
             out.extend(f"   {line}" for line in lines)
             out.append("   exit")
     for vid in sorted(config.vlans):
         vlan = config.vlans[vid]
         out.append(f"vlan {vid}")
         if vlan.name:
-            out.append(f'   name "{vlan.name}"')
+            out.append(f'   name "{_text(vlan.name)}"')
         if vlan.untagged:
-            out.append(f"   untagged {compress(vlan.untagged)}")
+            out.append(f"   untagged {_token(compress(vlan.untagged))}")
         if vlan.tagged:
-            out.append(f"   tagged {compress(vlan.tagged)}")
+            out.append(f"   tagged {_token(compress(vlan.tagged))}")
         out.extend(f"   ip address {address}" for address in vlan.addresses)
         if vlan.dhcp:
             out.append("   ip address dhcp-bootp")
         if not vlan.addresses and not vlan.dhcp:
             out.append("   no ip address")
         if vlan.ospf_area:
-            out.append(f"   ip ospf area {vlan.ospf_area}")
+            out.append(f"   ip ospf area {_token(vlan.ospf_area)}")
         if vlan.ospf_passive:
             out.append("   ip ospf passive")
         if vlan.jumbo:
@@ -650,7 +693,7 @@ def render(config: Config) -> str:
         if config.stp_priority is not None:
             out.append(f"spanning-tree priority {config.stp_priority // 4096}")
         if config.mst_region:
-            out.append(f'spanning-tree config-name "{config.mst_region}"')
+            out.append(f'spanning-tree config-name "{_text(config.mst_region)}"')
         if config.mst_revision is not None:
             out.append(f"spanning-tree config-revision {config.mst_revision}")
         for number, (vlans, priority) in sorted(config.mst_instances.items()):
@@ -665,7 +708,7 @@ def render(config: Config) -> str:
         ):
             names = [p.name for p in config.interfaces.values() if getattr(p, flag)]
             if names:
-                out.append(f"spanning-tree {compress(names)} {word}")
+                out.append(f"spanning-tree {_token(compress(names))} {word}")
     if config.ospf_router_id:
         out.extend(["router ospf", f"   router-id {config.ospf_router_id}", "   enable", "   exit"])
     if config.bgp_asn:
@@ -675,12 +718,14 @@ def render(config: Config) -> str:
         for neighbor in config.neighbors.values():
             out.append(f"   neighbor {neighbor.address} remote-as {neighbor.remote_asn}")
             if neighbor.description:
-                out.append(f'   neighbor {neighbor.address} description "{neighbor.description}"')
+                out.append(
+                    f'   neighbor {neighbor.address} description "{_text(neighbor.description)}"'
+                )
             if not neighbor.enabled:
                 out.append(f"   neighbor {neighbor.address} shutdown")
         out.extend(["   enable", "   exit"])
     for profile in config.profiles.values():
-        out.append(f'device-profile name "{profile.name}"')
+        out.append(f'device-profile name "{_text(profile.name)}"')
         if profile.untagged:
             out.append(f"   untagged-vlan {profile.untagged}")
         if profile.tagged:
@@ -691,8 +736,8 @@ def render(config: Config) -> str:
         if profile.detects:
             out.extend(
                 [
-                    f'device-profile type "{profile.detects}"',
-                    f'   associate "{profile.name}"',
+                    f'device-profile type "{_text(profile.detects)}"',
+                    f'   associate "{_text(profile.name)}"',
                     "   enable",
                     "   exit",
                 ]
