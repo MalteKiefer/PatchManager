@@ -161,3 +161,30 @@ def test_deleting_a_device_drops_notes_of_it_and_its_ports(office, system) -> No
         metadata.add_note(request, actor, outlet.ports.get(name="A2"), "port note")
         devices.delete(request, actor, outlet)
         assert not Note.objects.exists()
+
+
+def test_plan_pin_panel(admin_client: Client, office, make_tree, make_user, grant, system) -> None:
+    from patchmanager.metadata import services as metadata
+    from tests.conftest import login
+
+    floor, outlet = office["floor"], office["outlet"]
+    with system():
+        metadata.add_note(office["request"], office["request"].user, outlet, "behind the cupboard")
+    url = f"/plans/{floor.pk}/device/{outlet.pk}/"
+    page = admin_client.get(url, secure=True).content.decode()
+    assert "O-01" in page and "PP1" in page and "A01" in page  # A1 is patched to PP1 in A01
+    assert "1 note" in page and "Remove from plan" in page
+    rack = admin_client.get(f"/plans/{floor.pk}/rack/{office['rack'].pk}/", secure=True)
+    assert "1 used" in rack.content.decode()
+    other = make_tree(name="Elsewhere")
+    assert (
+        admin_client.get(f"/plans/{other['floor'].pk}/device/{outlet.pk}/", secure=True).status_code
+        == 404
+    )
+    assert admin_client.get(f"/plans/{floor.pk}/cable/{outlet.pk}/", secure=True).status_code == 404
+    viewer = make_user()
+    grant(viewer, "viewer", office["tenant"])
+    client = Client()
+    login(client, viewer)
+    page = client.get(url, secure=True).content.decode()
+    assert "O-01" in page and "Remove from plan" not in page

@@ -11,7 +11,6 @@ from django.db import IntegrityError, transaction
 from django.http import Http404, HttpRequest, HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import NoReverseMatch, reverse
-from django.utils.http import url_has_allowed_host_and_scheme
 from django.utils.translation import gettext as _
 from django.utils.translation import gettext_lazy
 from django.views.decorators.http import require_http_methods, require_POST
@@ -273,16 +272,13 @@ def link_create(request: HttpRequest) -> HttpResponse:
 @login_required
 @require_POST
 def link_delete(request: HttpRequest, pk: str) -> HttpResponse:
-    """Remove a link and return to where the user came from."""
+    """Remove a link and return to the page of the linked object."""
     link = get_object_or_404(Link.objects.select_related("content_type"), pk=pk)
+    model: Any = link.content_type.model_class()
+    target = model._default_manager.filter(pk=link.object_id).first() if model else None
     try:
         remove(request, _actor(request), link)
     except PermissionDeniedError as exc:
         raise PermissionDenied from exc
     messages.success(request, _("Link removed."))
-    following = request.POST.get("next", "")
-    if not url_has_allowed_host_and_scheme(
-        following, allowed_hosts={request.get_host()}, require_https=request.is_secure()
-    ):
-        following = "/"
-    return redirect(following)
+    return redirect((url(target) if target is not None else "") or "/")

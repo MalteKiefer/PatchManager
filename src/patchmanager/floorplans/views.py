@@ -10,6 +10,7 @@ from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
 from django.http import Http404, HttpRequest, HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
+from django.urls import reverse
 from django.utils.translation import gettext as _
 from django.utils.translation import gettext_lazy
 from django.views.decorators.http import require_POST
@@ -108,6 +109,7 @@ def _scene(request: HttpRequest, floor: Floor, plan: FloorPlan | None) -> dict[s
                 "w": rack_size(r)[0],
                 "h": rack_size(r)[1],
                 "url": node_url(r),
+                "panel": reverse("floorplans:item", args=[floor.pk, "rack", r.pk]),
                 "can_change": policy.has_perm(user, "dcim.rack.change", r),
             }
             for r in racks
@@ -122,6 +124,7 @@ def _scene(request: HttpRequest, floor: Floor, plan: FloorPlan | None) -> dict[s
                 "glyph": d.device_type.category.glyph or "D",
                 "colour": d.device_type.category.colour,
                 "url": node_url(d),
+                "panel": reverse("floorplans:item", args=[floor.pk, "device", d.pk]),
                 "r": max(8.0, 0.3 * scale) if scale else 8.0,
                 "can_change": policy.has_perm(user, "dcim.device.change", d),
             }
@@ -209,6 +212,37 @@ def editor(request: HttpRequest, floor_pk: str) -> HttpResponse:
             "max_upload_mb": settings.UPLOAD_MAX_BYTES // (1024 * 1024),
         },
     )
+
+
+@login_required
+def item(request: HttpRequest, floor_pk: str, kind: str, pk: str) -> HttpResponse:
+    """Side panel of a pin on the plan: what it is, where it is patched, photos and notes."""
+    from django.contrib.contenttypes.models import ContentType
+
+    from patchmanager.locations.rooms import outlets
+    from patchmanager.metadata.models import Attachment, Note
+
+    floor = _floor(request, floor_pk)
+    model: Any = {"rack": Rack, "device": Device}.get(kind)
+    if model is None:
+        raise Http404
+    obj = get_object_or_404(model.objects.select_related("room"), pk=pk, room__floor=floor)
+    if not policy.has_perm(request.user, f"{obj.policy_object_type}.view", obj):
+        raise Http404
+    context: dict[str, Any] = {"kind": kind, "obj": obj, "floor": floor}
+    if kind == "device":
+        context["ports"] = outlets(request.user, [obj])[0][1]
+    else:
+        devices = policy.scope_queryset(request.user, "dcim.device.view", obj.devices.all())
+        context["devices"] = devices.count()
+        context["used"] = sum(space.size for space in obj.spaces.all())
+    content_type = ContentType.objects.get_for_model(model)
+    files = Attachment.objects.filter(content_type=content_type, object_id=obj.pk)
+    context["photos"] = files.filter(kind="image").count()
+    context["files"] = files.exclude(kind="image").count()
+    context["notes"] = Note.objects.filter(content_type=content_type, object_id=obj.pk).count()
+    context["can_change"] = policy.has_perm(request.user, f"{obj.policy_object_type}.change", obj)
+    return render(request, "floorplans/_item_panel.html", context)
 
 
 @login_required
