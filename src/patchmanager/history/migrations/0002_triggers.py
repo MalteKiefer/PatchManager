@@ -46,9 +46,19 @@ $$;
 # The tables tracked when this migration was written; later apps add their own
 # triggers in their migrations (their tables do not exist yet at this point).
 FROZEN = [
-    t
-    for t in TRACKED.values()
-    if t.label.split(".")[0] in {"locations", "dcim", "cabling", "networks"}
+    TRACKED[label]
+    for label in (
+        "locations.site",
+        "locations.building",
+        "locations.floor",
+        "locations.room",
+        "dcim.rack",
+        "dcim.device",
+        "dcim.port",
+        "cabling.cable",
+        "networks.vlan",
+        "networks.wlan",
+    )
 ]
 
 

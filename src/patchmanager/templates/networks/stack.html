@@ -1,0 +1,28 @@
+{% extends "base.html" %}{% load i18n %}
+{% block title %}{{ stack.name }}{% endblock %}
+{% block content %}
+<nav aria-label="{% translate 'Breadcrumb' %}" class="mb-3 text-sm"><a href="{% url 'networks:stacks' %}">{% translate "Stacks" %}</a> / {{ stack.name }}</nav>
+<div class="mb-6 flex flex-wrap items-center gap-3"><h1 class="mr-auto">{{ stack.name }} <span class="text-base font-normal text-slate-500">{{ stack.get_kind_display }} · {{ stack.site.name }}</span></h1>
+  {% if can_change %}<a class="btn-primary" href="{% url 'networks:member-create' stack.pk %}">{% translate "Add switch" %}</a>{% endif %}</div>
+<div class="grid gap-6 lg:grid-cols-3">
+  <section class="card lg:col-span-2" aria-labelledby="members-h">
+    <h2 id="members-h" class="mb-3">{% translate "Switches" %}</h2>
+    <ol class="stack-members">{% for m in members %}
+      <li class="stack-member">
+        <span class="stack-member-id">{{ m.member_id }}</span>
+        <span class="min-w-0 flex-1"><a href="{% url 'devices:device' m.device_id %}" class="font-semibold">{{ m.device.name }}</a><br><span class="text-xs text-slate-500">{{ m.device.device_type }}</span></span>
+        <span class="text-sm">{{ m.get_role_display }}{% if m.priority is not None %}<br><span class="text-xs text-slate-500">{% translate "priority" %} {{ m.priority }}</span>{% endif %}</span>
+        <a class="btn-secondary py-1" href="{% url 'switching:overview' m.device_id %}">{% translate "Switching" %}</a>
+        {% if can_change %}<form method="post">{% csrf_token %}<input type="hidden" name="member" value="{{ m.pk }}"><button class="btn-secondary py-1" name="action" value="remove">{% translate "Remove" %}</button></form>{% endif %}
+      </li>{% empty %}<li class="text-sm text-slate-500">{% translate "No switches in this stack yet." %}</li>{% endfor %}</ol>
+  </section>
+  <aside class="space-y-6">
+    <form method="post" class="card" novalidate>{% csrf_token %}<input type="hidden" name="action" value="edit">
+      <h2 class="mb-3">{% translate "Details" %}</h2>
+      <fieldset {% if not can_change %}disabled{% endif %}>{% include "core/_form.html" %}</fieldset>
+      {% if can_change %}<button class="btn-primary">{% translate "Save" %}</button>{% endif %}
+    </form>
+    {% if can_change %}<form method="post" data-confirm="{% translate 'Dissolve this stack? The switches stay.' %}">{% csrf_token %}<button class="btn-danger" name="action" value="delete">{% translate "Dissolve stack" %}</button></form>{% endif %}
+  </aside>
+</div>
+{% endblock %}

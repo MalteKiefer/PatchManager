@@ -19,10 +19,10 @@ from patchmanager.accounts.models import User
 from patchmanager.accounts.services import PermissionDeniedError, ServiceError
 from patchmanager.api.core import tenant_scope
 from patchmanager.core.utils import parse_uuid
-from patchmanager.dcim.models import Port
+from patchmanager.dcim.models import Device, Port
 from patchmanager.locations.models import Site
 from patchmanager.networks import services
-from patchmanager.networks.models import VLAN, WLAN
+from patchmanager.networks.models import VLAN, WLAN, Stack, StackMember
 
 VLAN_FIELDS = ["vid", "name", "site", "status", "description"]
 WLAN_FIELDS = ["ssid", "vlan", "security", "hidden", "description"]
@@ -285,4 +285,168 @@ def wlan_create(request: HttpRequest) -> HttpResponse:
         request,
         "core/create.html",
         {"title": _("New WLAN"), "form": form, "back_url": reverse("networks:wlans")},
+    )
+
+
+# --- Stacks and virtual switches -----------------------------------------------
+
+
+class StackForm(forms.ModelForm):  # type: ignore[type-arg]
+    """Name, kind, site and domain of a stack."""
+
+    class Meta:
+        model = Stack
+        fields = ["name", "kind", "site", "domain", "description"]
+        widgets = {"description": forms.Textarea(attrs={"rows": 2})}
+
+    def __init__(self, *args: Any, tenant: Any, actor: Any, **kwargs: Any) -> None:
+        """Sites where the user may change devices; the site of a stack is fixed."""
+        super().__init__(*args, **kwargs)
+        if not self.instance._state.adding:
+            del self.fields["site"]
+            return
+        sites = Site.objects.filter(tenant=tenant)
+        self.fields["site"].queryset = Site.objects.filter(  # type: ignore[attr-defined]
+            pk__in=[s.pk for s in sites if policy.has_perm(actor, "dcim.device.change", s)]
+        )
+
+
+class MemberForm(forms.ModelForm):  # type: ignore[type-arg]
+    """A switch of the stack's site with member number, role and priority."""
+
+    class Meta:
+        model = StackMember
+        fields = ["device", "member_id", "role", "priority"]
+
+    def __init__(self, *args: Any, stack: Stack, actor: Any, **kwargs: Any) -> None:
+        """Switches at the site that are in no stack yet."""
+        super().__init__(*args, **kwargs)
+        candidates = Device.objects.filter(
+            path__descendant_of=stack.site.path, stack_member__isnull=True
+        ).order_by("name")
+        self.fields["device"].queryset = Device.objects.filter(  # type: ignore[attr-defined]
+            pk__in=[d.pk for d in candidates if policy.has_perm(actor, "dcim.device.change", d)]
+        )
+
+
+def _stack(request: HttpRequest, pk: Any) -> Stack:
+    stack = get_object_or_404(Stack.objects.select_related("site"), pk=pk)
+    if not policy.has_perm(request.user, "dcim.device.view", stack):
+        raise Http404
+    return stack
+
+
+@login_required
+@require_http_methods(["GET"])
+def stack_list(request: HttpRequest) -> HttpResponse:
+    """Stacks, VSF, VSX and MLAG pairs of the current tenant."""
+    tenant = _tenant(request)
+    stacks = [
+        s
+        for s in Stack.objects.filter(tenant=tenant)
+        .select_related("site")
+        .annotate(n=Count("members"))
+        if policy.has_perm(request.user, "dcim.device.view", s)
+    ]
+    return render(request, "networks/stacks.html", {"stacks": stacks})
+
+
+@login_required
+@require_http_methods(["GET", "POST"])
+def stack_create(request: HttpRequest) -> HttpResponse:
+    """Page that creates a stack."""
+    tenant = _tenant(request)
+    actor = _actor(request)
+    form = StackForm(request.POST or None, tenant=tenant, actor=actor)
+    if not form.fields["site"].queryset.exists():  # type: ignore[attr-defined]
+        raise PermissionDenied
+    if request.method == "POST" and form.is_valid():
+        try:
+            stack = services.create_stack(request, actor, tenant, **form.cleaned_data)
+        except PermissionDeniedError as exc:
+            raise PermissionDenied from exc
+        except ServiceError as exc:
+            form.add_error(None, str(exc))
+        else:
+            messages.success(request, _("Stack created. Add its switches next."))
+            return redirect("networks:stack", stack.pk)
+    return render(
+        request,
+        "core/create.html",
+        {"title": _("New stack"), "form": form, "back_url": reverse("networks:stacks")},
+    )
+
+
+@login_required
+@require_http_methods(["GET", "POST"])
+def stack_detail(request: HttpRequest, pk: str) -> HttpResponse:
+    """Edit a stack, remove members, dissolve it."""
+    stack = _stack(request, pk)
+    actor = _actor(request)
+    action = request.POST.get("action")
+    form = StackForm(
+        request.POST if action == "edit" else None, instance=stack, tenant=None, actor=actor
+    )
+    if request.method == "POST":
+        try:
+            if action == "edit" and form.is_valid():
+                services.update_stack(request, actor, stack, **form.cleaned_data)
+                messages.success(request, _("Saved."))
+                return redirect("networks:stack", stack.pk)
+            if action == "remove":
+                member = get_object_or_404(
+                    StackMember, pk=parse_uuid(request.POST.get("member")), stack=stack
+                )
+                services.remove_member(request, actor, member)
+                messages.success(request, _("Removed from the stack."))
+                return redirect("networks:stack", stack.pk)
+            if action == "delete":
+                services.delete_stack(request, actor, stack)
+                messages.success(request, _("Stack dissolved."))
+                return redirect("networks:stacks")
+        except PermissionDeniedError as exc:
+            raise PermissionDenied from exc
+        except ServiceError as exc:
+            messages.error(request, str(exc))
+    return render(
+        request,
+        "networks/stack.html",
+        {
+            "stack": stack,
+            "form": form,
+            "members": stack.members.select_related("device__device_type"),
+            "can_change": policy.has_perm(actor, "dcim.device.change", stack),
+        },
+    )
+
+
+@login_required
+@require_http_methods(["GET", "POST"])
+def member_create(request: HttpRequest, pk: str) -> HttpResponse:
+    """Page that puts a switch into a stack."""
+    stack = _stack(request, pk)
+    actor = _actor(request)
+    if not policy.has_perm(actor, "dcim.device.change", stack):
+        raise PermissionDenied
+    form = MemberForm(request.POST or None, stack=stack, actor=actor)
+    if request.method == "POST" and form.is_valid():
+        data = dict(form.cleaned_data)
+        device = data.pop("device")
+        try:
+            services.add_member(request, actor, stack, device, **data)
+        except PermissionDeniedError as exc:
+            raise PermissionDenied from exc
+        except ServiceError as exc:
+            form.add_error(None, str(exc))
+        else:
+            messages.success(request, _("Added to the stack."))
+            return redirect("networks:stack", stack.pk)
+    return render(
+        request,
+        "core/create.html",
+        {
+            "title": _("Add a switch to %(stack)s") % {"stack": stack.name},
+            "form": form,
+            "back_url": reverse("networks:stack", args=[stack.pk]),
+        },
     )

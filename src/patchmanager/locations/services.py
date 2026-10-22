@@ -220,6 +220,23 @@ def move_site(request: HttpRequest, actor: User, site: Any, target: Tenant) -> N
             cursor.execute(
                 "UPDATE networks_vlan SET tenant_id = %s WHERE site_id = %s", [target.pk, site.pk]
             )
+            # Switching and routing records follow their devices, stacks their site.
+            cursor.execute(
+                "UPDATE networks_stack SET tenant_id = %s WHERE site_id = %s", [target.pk, site.pk]
+            )
+            for table in (
+                "networks_switchsettings",
+                "networks_mstinstance",
+                "networks_staticroute",
+                "networks_bgpneighbor",
+                "networks_portprofile",
+                "networks_stackmember",
+            ):
+                cursor.execute(
+                    f"UPDATE {table} SET tenant_id = %s WHERE device_id IN"  # noqa: S608  # nosec B608: fixed names
+                    " (SELECT id FROM dcim_device WHERE path <@ %s::ltree)",
+                    [target.pk, new],
+                )
             cursor.execute(
                 f"UPDATE networks_taggedvlan SET tenant_id = %s WHERE port_id IN ({in_site})",  # noqa: S608  # nosec B608
                 [target.pk, new],

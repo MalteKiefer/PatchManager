@@ -114,13 +114,26 @@ class PortForm(forms.ModelForm):  # type: ignore[type-arg]
             "description",
             "rear_port",
             "rear_position",
+            "lag",
+            "lag_protocol",
+            "mtu",
+            "tunneled",
+            "stp_edge",
+            "stp_bpdu_guard",
+            "stp_root_guard",
+            "ospf_area",
+            "ospf_passive",
         ]
         widgets = {"description": forms.Textarea(attrs={"rows": 3})}
 
     def __init__(self, *args: Any, device: Device, **kwargs: Any) -> None:
-        """Rear ports of the same device only."""
+        """Rear ports and link aggregations of the same device only."""
         super().__init__(*args, **kwargs)
         self.fields["rear_port"].queryset = device.ports.filter(kind="rear")  # type: ignore[attr-defined]
+        lags = device.ports.filter(kind="lag")
+        if not self.instance._state.adding:
+            lags = lags.exclude(pk=self.instance.pk)
+        self.fields["lag"].queryset = lags  # type: ignore[attr-defined]
 
 
 class PortVLANForm(forms.Form):

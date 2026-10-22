@@ -1,0 +1,95 @@
+{% extends "base.html" %}{% load i18n %}
+{% block title %}{% translate "Switching and routing" %} · {{ device.name }}{% endblock %}
+{% block main_class %}mx-auto max-w-[96rem] px-4 py-6{% endblock %}
+{% block content %}
+{% include "core/_breadcrumbs.html" with current=_("Switching and routing") %}
+<div class="mb-6 flex flex-wrap items-center gap-3">
+  <h1 class="mr-auto">{% translate "Switching and routing" %} · {{ device.name }}</h1>
+  {% if can_change %}<a class="btn-primary" href="{% url 'switching:read' device.pk %}">{% translate "Read a configuration" %}</a>{% endif %}
+  <a class="btn-secondary" href="{% url 'switching:export' device.pk %}">{% translate "As ArubaOS-Switch configuration" %}</a>
+</div>
+{% if not settings and not vlans %}<p class="card mb-6 text-sm text-slate-500">{% translate "Nothing documented yet. Read the running configuration of the switch, or set VLANs on the ports." %}</p>{% endif %}
+<div class="grid gap-6 xl:grid-cols-[minmax(0,1fr)_24rem]">
+  <div class="space-y-6">
+    <section class="card" aria-labelledby="matrix-h">
+      <h2 id="matrix-h" class="mb-1">{% translate "Ports and VLANs" %}</h2>
+      <p class="mb-4 text-xs text-slate-500">{% translate "Fill: untagged VLAN. Marks below: tagged VLANs. Outline: edge port. G: guard. T: tunnelled." %}</p>
+      <ul class="vlan-matrix">{% for row in matrix %}{% with p=row.port %}
+        <li class="vlan-port{% if not p.enabled %} is-off{% endif %}{% if p.stp_edge %} is-edge{% endif %}" title="{{ p.name }}{% if p.label %} · {{ p.label }}{% endif %}">
+          <span class="vlan-port-name">{{ p.name }}</span>
+          <span class="vlan-port-face"{% if row.colour %} data-swatch="{{ row.colour }}"{% endif %}>{% if row.untagged %}{{ row.untagged.vid }}{% elif p.kind == "lag" %}LAG{% else %}–{% endif %}</span>
+          <span class="vlan-port-tags">{% for vid, colour in row.tagged %}<span class="vlan-tag" data-swatch="{{ colour }}" title="{% translate 'tagged' %} {{ vid }}"></span>{% endfor %}</span>
+          <span class="vlan-port-flags">{% if p.lag %}{{ p.lag.name }}{% endif %}{% if p.stp_bpdu_guard or p.stp_root_guard %} G{% endif %}{% if p.tunneled %} T{% endif %}</span>
+        </li>{% endwith %}{% empty %}<li class="text-sm text-slate-500">{% translate "No ports." %}</li>{% endfor %}</ul>
+    </section>
+    <section class="card" aria-labelledby="vlans-h">
+      <h2 id="vlans-h" class="mb-3">VLANs</h2>
+      <div class="overflow-x-auto"><table class="table">
+        <thead><tr><th>ID</th><th>{% translate "Name" %}</th><th>{% translate "Untagged" %}</th><th>{% translate "Tagged" %}</th><th>{% translate "Address" %}</th><th>OSPF</th></tr></thead>
+        <tbody>{% for v, colour, untagged, tagged in vlans %}<tr>
+          <td><span class="mr-1 inline-block size-2.5 rounded-sm" data-swatch="{{ colour }}" aria-hidden="true"></span>{{ v.vid }}</td><td>{{ v.name }}</td>
+          <td class="font-mono text-xs">{{ untagged }}</td><td class="font-mono text-xs">{{ tagged }}</td>
+          <td class="font-mono text-xs">{{ v.addresses|join:", " }}{% if v.dhcp %}DHCP{% endif %}</td>
+          <td class="text-xs">{% if v.ospf_area %}{% translate "area" %} {{ v.ospf_area }}{% if v.ospf_passive %} ({% translate "passive" %}){% endif %}{% endif %}</td>
+        </tr>{% empty %}<tr><td colspan="6" class="text-slate-500">{% translate "No VLANs on this device." %}</td></tr>{% endfor %}</tbody>
+      </table></div>
+    </section>
+    <section class="card" aria-labelledby="routes-h">
+      <h2 id="routes-h" class="mb-3">{% translate "Routing" %}</h2>
+      <h3 class="mb-2 text-sm font-semibold">{% translate "Static routes" %}</h3>
+      <div class="overflow-x-auto"><table class="table">
+        <thead><tr><th>{% translate "Destination" %}</th><th>{% translate "Next hop" %}</th><th>{% translate "Distance" %}</th></tr></thead>
+        <tbody>{% for r in config.routes %}<tr><td class="font-mono text-xs">{{ r.prefix }}</td><td class="font-mono text-xs">{{ r.next_hop|default:_("discard") }}</td><td>{{ r.distance|default:"" }}</td></tr>
+        {% empty %}<tr><td colspan="3" class="text-slate-500">{% translate "No static routes." %}</td></tr>{% endfor %}</tbody>
+      </table></div>
+      {% if config.bgp_asn %}
+      <h3 class="mt-5 mb-2 text-sm font-semibold">BGP · AS {{ config.bgp_asn }}{% if config.bgp_router_id %} · {% translate "router ID" %} {{ config.bgp_router_id }}{% endif %}</h3>
+      <div class="overflow-x-auto"><table class="table">
+        <thead><tr><th>{% translate "Neighbor" %}</th><th>{% translate "Remote AS" %}</th><th>{% translate "Description" %}</th><th>{% translate "State" %}</th></tr></thead>
+        <tbody>{% for n in config.neighbors.values %}<tr><td class="font-mono text-xs">{{ n.address }}</td><td>{{ n.remote_asn }}</td><td>{{ n.description }}</td><td>{% if n.enabled %}<span class="badge-ok">{% translate "enabled" %}</span>{% else %}<span class="badge-muted">{% translate "shut down" %}</span>{% endif %}</td></tr>
+        {% empty %}<tr><td colspan="4" class="text-slate-500">{% translate "No neighbors." %}</td></tr>{% endfor %}</tbody>
+      </table></div>
+      {% endif %}
+      {% if config.ospf_router_id %}<p class="mt-4 text-sm">OSPF · {% translate "router ID" %} <span class="font-mono">{{ config.ospf_router_id }}</span></p>{% endif %}
+    </section>
+  </div>
+  <aside class="space-y-6">
+    <section class="card text-sm" aria-labelledby="dev-h">
+      <h2 id="dev-h" class="mb-3">{% translate "Device" %}</h2>
+      <dl class="panel-facts mt-0">
+        <div><dt>{% translate "Hostname" %}</dt><dd>{{ settings.hostname|default:"–" }}</dd></div>
+        <div><dt>{% translate "IP routing" %}</dt><dd>{% if settings.ip_routing %}{% translate "on" %}{% else %}{% translate "off" %}{% endif %}</dd></div>
+        <div><dt>{% translate "Tunnel gateways" %}</dt><dd class="font-mono text-xs">{{ settings.gateways|join:", "|default:"–" }}</dd></div>
+        {% if settings.source %}<div><dt>{% translate "Read from" %}</dt><dd>{{ settings.source }}, {{ settings.updated_at|date:"SHORT_DATETIME_FORMAT" }}</dd></div>{% endif %}
+      </dl>
+    </section>
+    <section class="card text-sm" aria-labelledby="stp-h">
+      <h2 id="stp-h" class="mb-3">{% translate "Spanning tree" %}</h2>
+      <dl class="panel-facts mt-0">
+        <div><dt>{% translate "Mode" %}</dt><dd>{{ settings.get_stp_mode_display|default:"–" }}</dd></div>
+        <div><dt>{% translate "Bridge priority" %}</dt><dd>{{ settings.stp_priority|default:"–" }}</dd></div>
+        {% if settings.mst_region %}<div><dt>{% translate "MST region" %}</dt><dd>{{ settings.mst_region }} (rev. {{ settings.mst_revision|default:0 }})</dd></div>{% endif %}
+      </dl>
+      {% if config.mst_instances %}<ul class="mt-3 space-y-1">{% for number, item in config.mst_instances.items %}<li>{% blocktranslate with n=number %}Instance {{ n }}{% endblocktranslate %}: VLAN {{ item.0|join:"," }}{% if item.1 is not None %} · {% translate "priority" %} {{ item.1 }}{% endif %}</li>{% endfor %}</ul>{% endif %}
+    </section>
+    <section class="card text-sm" aria-labelledby="lag-h">
+      <h2 id="lag-h" class="mb-3">{% translate "Link aggregations" %}</h2>
+      <ul class="space-y-1">{% for t in lags %}<li><span class="font-semibold">{{ t.name }}</span> ({% if t.protocol == "lacp" %}LACP{% else %}{% translate "static" %}{% endif %}): <span class="font-mono text-xs">{{ t.members|join:", " }}</span></li>
+      {% empty %}<li class="text-slate-500">{% translate "None." %}</li>{% endfor %}</ul>
+    </section>
+    <section class="card text-sm" aria-labelledby="stack-h">
+      <h2 id="stack-h" class="mb-3">{% translate "Stack or virtual switch" %}</h2>
+      {% if member %}<p class="mb-2">{{ member.stack.name }} · {{ member.stack.get_kind_display }}{% if member.stack.domain %} · {% translate "domain" %} {{ member.stack.domain }}{% endif %}</p>
+      <ul class="space-y-1">{% for m in stack_members %}<li>{{ m.member_id }}: <a href="{% url 'devices:device' m.device_id %}">{{ m.device.name }}</a> · {{ m.get_role_display }}{% if m.priority is not None %} · {% translate "priority" %} {{ m.priority }}{% endif %}</li>{% endfor %}</ul>
+      {% else %}<p class="text-slate-500">{% translate "Not part of a stack." %}</p>{% endif %}
+    </section>
+    {% if config.profiles %}
+    <section class="card text-sm" aria-labelledby="prof-h">
+      <h2 id="prof-h" class="mb-3">{% translate "Device profiles" %}</h2>
+      <ul class="space-y-2">{% for p in config.profiles.values %}<li><span class="font-semibold">{{ p.name }}</span>{% if p.detects %} · {% translate "for" %} {{ p.detects }}{% endif %}<br>
+        <span class="text-xs text-slate-500">{% translate "untagged" %} {{ p.untagged|default:"–" }}, {% translate "tagged" %} {{ p.tagged|join:","|default:"–" }}{% if p.jumbo %}, jumbo{% endif %}</span></li>{% endfor %}</ul>
+    </section>
+    {% endif %}
+  </aside>
+</div>
+{% endblock %}

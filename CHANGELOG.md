@@ -4,6 +4,18 @@ All notable changes to this project are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the project uses
 [Semantic Versioning](https://semver.org/).
 
+## [Unreleased]
+
+### Added
+
+* Switching and routing per device: link aggregations, spanning tree (with MST
+  instances), VLAN interfaces with addresses, static routes, OSPF, BGP neighbors,
+  tunnelled ports, device profiles, and a port matrix coloured by VLAN (ADR 0029).
+* Stacks and virtual switches (stacking, VSF, VSX, MLAG, virtual chassis).
+* Read ArubaOS-Switch configurations and Aruba Central templates into the
+  documentation with a preview of every change; write the documentation back as an
+  ArubaOS-Switch configuration.
+
 ## [1.0.0] - 2026-10-22
 
 ### Added

@@ -1,7 +1,7 @@
 {% extends "base.html" %}{% load i18n %}
 {% block title %}VLANs{% endblock %}
 {% block content %}
-<div class="mb-4 flex items-center gap-3"><h1 class="mr-auto">VLANs{% if current_tenant %} · {{ current_tenant.name }}{% endif %}</h1><a class="btn-secondary" href="{% url 'networks:wlans' %}">WLANs</a>{% if can_add %}<a class="btn-primary" href="{% url 'networks:vlan-create' %}">{% translate "New VLAN" %}</a>{% endif %}</div>
+<div class="mb-4 flex items-center gap-3"><h1 class="mr-auto">VLANs{% if current_tenant %} · {{ current_tenant.name }}{% endif %}</h1><a class="btn-secondary" href="{% url 'networks:wlans' %}">WLANs</a><a class="btn-secondary" href="{% url 'networks:stacks' %}">{% translate "Stacks" %}</a>{% if can_add %}<a class="btn-primary" href="{% url 'networks:vlan-create' %}">{% translate "New VLAN" %}</a>{% endif %}</div>
 <div>
   <div class="card overflow-x-auto p-0"><table class="table">
     <thead><tr><th>ID</th><th>{% translate "Name" %}</th><th>{% translate "Site" %}</th><th>{% translate "Status" %}</th><th>{% translate "Access ports" %}</th><th>{% translate "Trunks" %}</th></tr></thead>

@@ -210,6 +210,15 @@ PORT_FIELDS = (
     "label",
     "description",
     "mac_address",
+    "lag",
+    "lag_protocol",
+    "mtu",
+    "tunneled",
+    "stp_edge",
+    "stp_bpdu_guard",
+    "stp_root_guard",
+    "ospf_area",
+    "ospf_passive",
 )
 
 
@@ -232,6 +241,9 @@ def update_port(request: HttpRequest, actor: User, port: Port, **fields: Any) ->
     rear = fields.pop("rear_port", port.rear_port)
     if rear is not None and rear.device_id != port.device_id:
         raise ServiceError(_("The rear port must belong to the same device."))
+    lag = fields.get("lag")
+    if lag is not None and (lag.device_id != port.device_id or lag.kind != "lag" or lag == port):
+        raise ServiceError(_("A port joins only a link aggregation of its own device."))
     for key, value in fields.items():
         if key in PORT_FIELDS or key == "rear_position":
             setattr(port, key, value)

@@ -15,7 +15,7 @@ from patchmanager.accounts.services.users import require
 from patchmanager.audit import services as audit
 from patchmanager.core.fields import path_label
 from patchmanager.dcim.models import Port
-from patchmanager.networks.models import VLAN, WLAN, TaggedVLAN, WLANBroadcast
+from patchmanager.networks.models import VLAN, WLAN, Stack, StackMember, TaggedVLAN, WLANBroadcast
 from patchmanager.tenancy.models import Tenant
 
 
@@ -182,3 +182,68 @@ def vlans_for_port(port: Port, user: Any = None) -> Any:
         return candidates
     allowed = [v.pk for v in candidates if policy.has_perm(user, "networks.vlan.view", v)]
     return VLAN.objects.filter(pk__in=allowed)
+
+
+# --- Stacks and virtual switches -----------------------------------------------
+
+
+def create_stack(request: HttpRequest, actor: User, tenant: Tenant, **fields: Any) -> Stack:
+    """Create a stack (or VSF, VSX, MLAG pair, virtual chassis) at a site."""
+    site = fields["site"]
+    require(actor, "dcim.device.change", scope_path=str(site.path))
+    stack = Stack(tenant=tenant, created_by=actor, **fields)
+    _save(stack, _("A stack with this name already exists at this site."))
+    audit.record("networks.stack.created", request=request, obj=stack, data={"name": stack.name})
+    return stack
+
+
+def update_stack(request: HttpRequest, actor: User, stack: Stack, **fields: Any) -> Stack:
+    """Change name, kind, domain or description (the site stays)."""
+    stored = Stack.objects.get(pk=stack.pk)
+    require(actor, "dcim.device.change", stored)
+    for key in ("name", "kind", "domain", "description"):
+        if key in fields:
+            setattr(stored, key, fields[key])
+    _save(stored, _("A stack with this name already exists at this site."))
+    audit.record("networks.stack.changed", request=request, obj=stored)
+    return stored
+
+
+def delete_stack(request: HttpRequest, actor: User, stack: Stack) -> None:
+    """Dissolve a stack; its switches stay."""
+    require(actor, "dcim.device.change", stack)
+    audit.record("networks.stack.deleted", request=request, obj=stack, data={"name": stack.name})
+    stack.delete()
+
+
+def add_member(
+    request: HttpRequest, actor: User, stack: Stack, device: Any, **fields: Any
+) -> StackMember:
+    """Put a switch of the stack's site into the stack."""
+    require(actor, "dcim.device.change", stack)
+    require(actor, "dcim.device.change", device)
+    if not str(device.path).startswith(f"{stack.site.path}."):
+        raise ServiceError(_("The switch must be at the site of the stack."))
+    if StackMember.objects.filter(device=device).exists():
+        raise ServiceError(_("This switch is already in a stack."))
+    member = StackMember(tenant_id=stack.tenant_id, stack=stack, device=device, **fields)
+    _save(member, _("This member number is already taken."))
+    audit.record(
+        "networks.stack.member_added",
+        request=request,
+        obj=stack,
+        data={"device": device.name, "member": member.member_id},
+    )
+    return member
+
+
+def remove_member(request: HttpRequest, actor: User, member: StackMember) -> None:
+    """Take a switch out of its stack."""
+    require(actor, "dcim.device.change", member.stack)
+    audit.record(
+        "networks.stack.member_removed",
+        request=request,
+        obj=member.stack,
+        data={"device": member.device.name},
+    )
+    member.delete()

@@ -1,0 +1,13 @@
+{% extends "base.html" %}{% load i18n %}
+{% block title %}{% translate "Stacks" %}{% endblock %}
+{% block content %}
+<div class="mb-4 flex flex-wrap items-center gap-3"><h1 class="mr-auto">{% translate "Stacks and virtual switches" %}{% if current_tenant %} · {{ current_tenant.name }}{% endif %}</h1>
+  <a class="btn-secondary" href="{% url 'networks:vlans' %}">VLANs</a><a class="btn-secondary" href="{% url 'networks:wlans' %}">WLANs</a>
+  <a class="btn-primary" href="{% url 'networks:stack-create' %}">{% translate "New stack" %}</a></div>
+<p class="mb-4 max-w-3xl text-sm text-slate-500">{% translate "Switches that work as one: stacks with stacking cables, VSF, VSX and MLAG pairs or a virtual chassis." %}</p>
+<div class="card overflow-x-auto p-0"><table class="table">
+  <thead><tr><th>{% translate "Name" %}</th><th>{% translate "Kind" %}</th><th>{% translate "Site" %}</th><th>{% translate "Domain" %}</th><th>{% translate "Switches" %}</th></tr></thead>
+  <tbody>{% for s in stacks %}<tr><td><a href="{% url 'networks:stack' s.pk %}">{{ s.name }}</a></td><td>{{ s.get_kind_display }}</td><td>{{ s.site.name }}</td><td>{{ s.domain|default:"" }}</td><td>{{ s.n }}</td></tr>
+  {% empty %}<tr><td colspan="5" class="text-slate-500">{% translate "No stacks yet." %}</td></tr>{% endfor %}</tbody>
+</table></div>
+{% endblock %}
