@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-22 03:21+0000\n"
+"POT-Creation-Date: 2026-10-22 03:32+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -82,7 +82,7 @@ msgstr "Mandant"
 msgid "All tenants (global)"
 msgstr "Alle Mandanten (global)"
 
-#: accounts/forms.py:130 exchange/pdf.py:215 templates/library/types.html:17
+#: accounts/forms.py:130 exchange/pdf.py:215 templates/library/types.html:18
 #: templates/manage/_assignments.html:3
 msgid "Scope"
 msgstr "Geltungsbereich"
@@ -892,98 +892,98 @@ msgstr "Kabel entfernt."
 msgid "Saved."
 msgstr "Gespeichert."
 
-#: core/system.py:56
+#: core/system.py:57
 msgid "reachable"
 msgstr "erreichbar"
 
-#: core/system.py:65
+#: core/system.py:66
 msgid "up to date"
 msgstr "aktuell"
 
-#: core/system.py:72
+#: core/system.py:73
 msgid "working"
 msgstr "funktioniert"
 
-#: core/system.py:79
+#: core/system.py:80
 msgid "writable"
 msgstr "beschreibbar"
 
-#: core/system.py:84
+#: core/system.py:85
 msgid "jobs run in the web process (no broker)"
 msgstr "Aufgaben laufen im Webprozess (kein Broker)"
 
-#: core/system.py:90
+#: core/system.py:91
 #, python-format
 msgid "%(n)s worker(s) answering"
 msgstr "%(n)s Worker antworten"
 
-#: core/system.py:96
+#: core/system.py:97
 msgid "Database"
 msgstr "Datenbank"
 
-#: core/system.py:97
+#: core/system.py:98
 msgid "Migrations"
 msgstr "Migrationen"
 
-#: core/system.py:98
+#: core/system.py:99
 msgid "Cache and rate limits"
 msgstr "Cache und Ratenbegrenzung"
 
-#: core/system.py:99
+#: core/system.py:100
 msgid "File storage"
 msgstr "Dateispeicher"
 
-#: core/system.py:100
+#: core/system.py:101
 msgid "Background workers"
 msgstr "Hintergrund-Worker"
 
-#: core/system.py:179
+#: core/system.py:180
 msgid "MFA required for everyone"
 msgstr "MFA für alle erforderlich"
 
-#: core/system.py:180
+#: core/system.py:181
 msgid "Minimum password length"
 msgstr "Mindestlänge des Passworts"
 
-#: core/system.py:181
+#: core/system.py:182
 msgid "Session lifetime (s)"
 msgstr "Sitzungsdauer (s)"
 
-#: core/system.py:182
+#: core/system.py:183
 msgid "Session idle timeout (s)"
 msgstr "Leerlauf-Timeout der Sitzung (s)"
 
-#: core/system.py:183
+#: core/system.py:184
 msgid "Lockout after failures"
 msgstr "Sperre nach Fehlversuchen"
 
-#: core/system.py:184
+#: core/system.py:185
 msgid "Lockout duration (s)"
 msgstr "Sperrdauer (s)"
 
-#: core/system.py:185
+#: core/system.py:186
 msgid "Login attempts per IP in 10 minutes"
 msgstr "Anmeldeversuche pro IP in 10 Minuten"
 
-#: core/system.py:186
+#: core/system.py:187
 msgid "WebAuthn relying party"
 msgstr "WebAuthn Relying Party"
 
-#: core/system.py:200
+#: core/system.py:201
 #, python-format
 msgid "Test mail from %(name)s"
 msgstr "Testmail von %(name)s"
 
-#: core/system.py:201
+#: core/system.py:202
 msgid "Mail delivery works."
 msgstr "Der Mailversand funktioniert."
 
-#: core/system.py:207
+#: core/system.py:208
 #, python-format
 msgid "The mail could not be sent: %(error)s"
 msgstr "Die E-Mail konnte nicht gesendet werden: %(error)s"
 
-#: core/system.py:210
+#: core/system.py:211
 #, python-format
 msgid "A test mail was sent to %(email)s."
 msgstr "Eine Testmail wurde an %(email)s gesendet."
@@ -1339,7 +1339,7 @@ msgstr "Racks"
 
 #: exchange/pdf.py:199 exchange/tables.py:548 search/services.py:66
 #: templates/core/home.html:20 templates/dcim/rack.html:71
-#: templates/library/types.html:17
+#: templates/library/types.html:18
 msgid "Devices"
 msgstr "Geräte"
 
@@ -1452,15 +1452,16 @@ msgstr "B"
 msgid "Patch list: %(name)s"
 msgstr "Patchliste: %(name)s"
 
-#: exchange/pdf.py:344 library/views.py:40 templates/library/types.html:17
+#: exchange/pdf.py:344 library/views.py:40 templates/library/types.html:18
 msgid "Vendor"
 msgstr "Hersteller"
 
-#: exchange/pdf.py:344 templates/library/types.html:17
+#: exchange/pdf.py:344 templates/library/catalog.html:16
+#: templates/library/types.html:18
 msgid "Model"
 msgstr "Modell"
 
-#: exchange/pdf.py:344
+#: exchange/pdf.py:344 templates/library/catalog.html:16
 msgid "Part number"
 msgstr "Artikelnummer"
 
@@ -1547,6 +1548,7 @@ msgid "Cables"
 msgstr "Kabel"
 
 #: exchange/tables.py:597 search/services.py:74 templates/dcim/device.html:14
+#: templates/library/catalog.html:16 templates/library/catalog_entry.html:9
 #: templates/library/type_detail.html:14
 msgid "Ports"
 msgstr "Ports"
@@ -1888,20 +1890,20 @@ msgstr "Webhook gelöscht."
 msgid "Delivery queued again."
 msgstr "Zustellung erneut eingereiht."
 
-#: library/interchange.py:105
+#: library/interchange.py:124
 #, python-format
 msgid "%(section)s must be a list of ports with names."
 msgstr "%(section)s muss eine Liste von Ports mit Namen sein."
 
-#: library/interchange.py:108
+#: library/interchange.py:127
 msgid "Too many ports."
 msgstr "Zu viele Ports."
 
-#: library/interchange.py:119
+#: library/interchange.py:138
 msgid "The file is not valid YAML or JSON."
 msgstr "Die Datei ist kein gültiges YAML oder JSON."
 
-#: library/interchange.py:125
+#: library/interchange.py:144
 msgid "The file needs a manufacturer and a model."
 msgstr "Die Datei benötigt einen Hersteller und ein Modell."
 
@@ -2005,7 +2007,7 @@ msgstr "Bauform"
 msgid "category"
 msgstr "Kategorie"
 
-#: library/models.py:118
+#: library/models.py:118 templates/library/catalog_entry.html:6
 msgid "full depth"
 msgstr "volle Tiefe"
 
@@ -2072,7 +2074,7 @@ msgstr "Frontports können nur Rückports desselben Typs zugeordnet werden."
 msgid "The number of front ports must be a multiple of the rear ports."
 msgstr "Die Anzahl der Frontports muss ein Vielfaches der Rückports sein."
 
-#: library/views.py:41 library/views.py:92
+#: library/views.py:41 library/views.py:92 library/views.py:325
 msgid "Shared with all tenants"
 msgstr "Für alle Mandanten freigegeben"
 
@@ -2112,6 +2114,30 @@ msgstr "Wählen Sie eine Datei mit höchstens 1 MB."
 #: library/views.py:317
 msgid "Device type imported."
 msgstr "Gerätetyp importiert."
+
+#: library/views.py:363
+msgid "Added to the library with all its ports."
+msgstr "Mit allen Ports in die Bibliothek übernommen."
+
+#: library/views.py:368
+msgid "Network ports"
+msgstr "Netzwerkports"
+
+#: library/views.py:369
+msgid "Front ports"
+msgstr "Frontports"
+
+#: library/views.py:370
+msgid "Rear ports"
+msgstr "Rückports"
+
+#: library/views.py:371
+msgid "Console ports"
+msgstr "Konsolenports"
+
+#: library/views.py:372
+msgid "Power inlets"
+msgstr "Stromeingänge"
 
 #: locations/forms.py:73
 msgid "Target tenant"
@@ -3097,9 +3123,10 @@ msgstr "Import und Export"
 msgid "Administration"
 msgstr "Administration"
 
-#: templates/base.html:75 templates/library/types.html:7
-#: templates/manage/users.html:6 templates/search/results.html:2
-#: templates/search/results.html:4 templates/search/results.html:8
+#: templates/base.html:75 templates/library/catalog.html:12
+#: templates/library/types.html:7 templates/manage/users.html:6
+#: templates/search/results.html:2 templates/search/results.html:4
+#: templates/search/results.html:8
 msgid "Search"
 msgstr "Suchen"
 
@@ -3125,8 +3152,9 @@ msgid "Choose a port"
 msgstr "Port wählen"
 
 #: templates/cabling/cable.html:4 templates/cabling/trace.html:4
-#: templates/core/_breadcrumbs.html:2 templates/library/type_detail.html:4
-#: templates/networks/vlan.html:4 templates/networks/wlan.html:4
+#: templates/core/_breadcrumbs.html:2 templates/library/catalog_entry.html:4
+#: templates/library/type_detail.html:4 templates/networks/vlan.html:4
+#: templates/networks/wlan.html:4
 msgid "Breadcrumb"
 msgstr "Brotkrumen-Navigation"
 
@@ -3252,7 +3280,9 @@ msgstr "Willkommen, %(name)s"
 msgid ""
 "You do not have access to any tenant yet. Ask an administrator to give you a "
 "role in one."
-msgstr "Sie haben noch keinen Zugriff auf einen Mandanten. Bitten Sie eine Administratorin oder einen Administrator um eine Rolle darin."
+msgstr ""
+"Sie haben noch keinen Zugriff auf einen Mandanten. Bitten Sie eine "
+"Administratorin oder einen Administrator um eine Rolle darin."
 
 #: templates/core/home.html:13
 #, python-format
@@ -3279,7 +3309,9 @@ msgstr "Mit einem Standort beginnen"
 msgid ""
 "A site is an address with buildings, floors and rooms. Racks, devices and "
 "cables go into its rooms."
-msgstr "Ein Standort ist eine Adresse mit Gebäuden, Etagen und Räumen. Racks, Geräte und Kabel kommen in seine Räume."
+msgstr ""
+"Ein Standort ist eine Adresse mit Gebäuden, Etagen und Räumen. Racks, Geräte "
+"und Kabel kommen in seine Räume."
 
 #: templates/core/home.html:38
 #, python-format
@@ -3442,7 +3474,7 @@ msgstr ""
 "der Gerätebibliothek an."
 
 #: templates/dcim/device_form.html:8 templates/library/type_form.html:2
-#: templates/library/type_form.html:5 templates/library/types.html:14
+#: templates/library/type_form.html:5 templates/library/types.html:15
 msgid "New device type"
 msgstr "Neuer Gerätetyp"
 
@@ -3474,8 +3506,8 @@ msgstr "Diesen Port löschen?"
 msgid "Delete port"
 msgstr "Port löschen"
 
-#: templates/dcim/rack.html:10 templates/library/types.html:17
-#: templates/locations/node.html:23
+#: templates/dcim/rack.html:10 templates/library/catalog.html:16
+#: templates/library/types.html:18 templates/locations/node.html:23
 msgid "Height"
 msgstr "Höhe"
 
@@ -3659,7 +3691,7 @@ msgstr ""
 msgid "No racks in this room yet."
 msgstr "Noch keine Racks in diesem Raum."
 
-#: templates/exchange/index.html:7 templates/library/types.html:29
+#: templates/exchange/index.html:7 templates/library/types.html:30
 #: templates/manage/roles.html:21
 msgid "Import"
 msgstr "Importieren"
@@ -4060,7 +4092,71 @@ msgstr ""
 msgid "No webhooks yet."
 msgstr "Noch keine Webhooks."
 
-#: templates/library/type_detail.html:6 templates/library/types.html:21
+#: templates/library/catalog.html:2 templates/library/catalog.html:5
+#: templates/library/catalog_entry.html:4
+msgid "Device catalog"
+msgstr "Gerätekatalog"
+
+#: templates/library/catalog.html:6
+msgid "Back to the library"
+msgstr "Zurück zur Bibliothek"
+
+#: templates/library/catalog.html:8
+#, python-format
+msgid ""
+"%(n)s device type from the community device type library, with all ports. "
+"Pick one to copy it into your library."
+msgid_plural ""
+"%(n)s device types from the community device type library, with all ports. "
+"Pick one to copy it into your library."
+msgstr[0] "%(n)s Gerätetyp aus der Community-Gerätebibliothek, mit allen Ports. Wählen Sie einen aus, um ihn in Ihre Bibliothek zu übernehmen."
+msgstr[1] "%(n)s Gerätetypen aus der Community-Gerätebibliothek, mit allen Ports. Wählen Sie einen aus, um ihn in Ihre Bibliothek zu übernehmen."
+
+#: templates/library/catalog.html:10
+msgid "Search the catalog"
+msgstr "Katalog durchsuchen"
+
+#: templates/library/catalog.html:11
+msgid "Manufacturer, model or part number, for example cisco 9300 48"
+msgstr "Hersteller, Modell oder Teilenummer, zum Beispiel cisco 9300 48"
+
+#: templates/library/catalog.html:16
+msgid "Manufacturer"
+msgstr "Hersteller"
+
+#: templates/library/catalog.html:21
+msgid "not rack mounted"
+msgstr "nicht im Rack"
+
+#: templates/library/catalog.html:23
+msgid "Nothing found. Try fewer or shorter words."
+msgstr "Nichts gefunden. Versuchen Sie weniger oder kürzere Wörter."
+
+#: templates/library/catalog.html:26
+#, python-format
+msgid ""
+"Source: netbox-community/devicetype-library, commit %(commit)s, released "
+"into the public domain (CC0-1.0)."
+msgstr "Quelle: netbox-community/devicetype-library, Commit %(commit)s, gemeinfrei (CC0-1.0)."
+
+#: templates/library/catalog_entry.html:14
+msgid "This type has no ports."
+msgstr "Dieser Typ hat keine Ports."
+
+#: templates/library/catalog_entry.html:19
+#: templates/library/catalog_entry.html:22
+msgid "Add to the library"
+msgstr "In die Bibliothek übernehmen"
+
+#: templates/library/catalog_entry.html:21
+msgid "Without this option the type belongs to the current tenant only."
+msgstr "Ohne diese Option gehört der Typ nur dem aktuellen Mandanten."
+
+#: templates/library/catalog_entry.html:25
+msgid "You may not add device types."
+msgstr "Sie dürfen keine Gerätetypen hinzufügen."
+
+#: templates/library/type_detail.html:6 templates/library/types.html:22
 msgid "this tenant"
 msgstr "dieser Mandant"
 
@@ -4112,7 +4208,7 @@ msgstr ""
 msgid "Vendor, model, part number"
 msgstr "Hersteller, Modell, Artikelnummer"
 
-#: templates/library/types.html:9 templates/library/types.html:17
+#: templates/library/types.html:9 templates/library/types.html:18
 msgid "Form"
 msgstr "Bauform"
 
@@ -4121,23 +4217,27 @@ msgstr "Bauform"
 msgid "All"
 msgstr "Alle"
 
-#: templates/library/types.html:17
+#: templates/library/types.html:14
+msgid "Add from catalog"
+msgstr "Aus dem Katalog hinzufügen"
+
+#: templates/library/types.html:18
 msgid "Category"
 msgstr "Kategorie"
 
-#: templates/library/types.html:21
+#: templates/library/types.html:22
 msgid "shared"
 msgstr "freigegeben"
 
-#: templates/library/types.html:22
+#: templates/library/types.html:23
 msgid "No device types yet."
 msgstr "Noch keine Gerätetypen."
 
-#: templates/library/types.html:26
+#: templates/library/types.html:27
 msgid "Import device type"
 msgstr "Gerätetyp importieren"
 
-#: templates/library/types.html:27
+#: templates/library/types.html:28
 msgid "YAML or JSON in the community device type library format."
 msgstr "YAML oder JSON im Format der Community-Gerätetypbibliothek."
 

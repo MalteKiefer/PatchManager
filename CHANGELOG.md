@@ -18,6 +18,9 @@ All notable changes to this project are documented here. The format follows
 * New layout: navigation in a sidebar with the tenant on top, search in the top bar
   (Ctrl+K or /), and an overview start page with the tenant's racks, devices, ports
   and cables, its sites with their load, the fullest racks and recent changes.
+* Device catalog: more than 12 000 device types of the community device type library
+  (CC0) bundled and searchable; one click copies a type with all its ports
+  (ADR 0025).
 * Personal data: everyone can download their data as JSON; administrators can
   anonymise accounts for erasure requests (ADR 0024).
 * Backup and restore drill on the production stack in every CI run; guides for

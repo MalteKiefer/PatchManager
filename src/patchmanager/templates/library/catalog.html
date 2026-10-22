@@ -1,0 +1,27 @@
+{% extends "base.html" %}{% load i18n %}
+{% block title %}{% translate "Device catalog" %}{% endblock %}
+{% block content %}
+<div class="mb-2 flex flex-wrap items-center gap-3">
+  <h1 class="mr-auto">{% translate "Device catalog" %}</h1>
+  <a class="btn-secondary" href="{% url 'library:types' %}">{% translate "Back to the library" %}</a>
+</div>
+<p class="mb-5 max-w-3xl text-sm text-slate-500">{% blocktranslate count n=total %}{{ n }} device type from the community device type library, with all ports. Pick one to copy it into your library.{% plural %}{{ n }} device types from the community device type library, with all ports. Pick one to copy it into your library.{% endblocktranslate %}</p>
+<form method="get" role="search" class="mb-5 flex max-w-2xl gap-2">
+  <label for="catalog-q" class="sr-only">{% translate "Search the catalog" %}</label>
+  <input id="catalog-q" name="q" value="{{ q }}" autofocus minlength="2" placeholder="{% translate 'Manufacturer, model or part number, for example cisco 9300 48' %}" class="app-select w-full py-2">
+  <button class="btn-primary">{% translate "Search" %}</button>
+</form>
+{% if q %}
+<div class="card overflow-x-auto p-0"><table class="table">
+  <thead><tr><th>{% translate "Manufacturer" %}</th><th>{% translate "Model" %}</th><th>{% translate "Part number" %}</th><th>{% translate "Height" %}</th><th>{% translate "Ports" %}</th></tr></thead>
+  <tbody>{% for c in results %}<tr>
+    <td>{{ c.manufacturer }}</td>
+    <td><a href="{% url 'library:catalog-entry' c.pk %}">{{ c.model }}</a></td>
+    <td class="text-sm text-slate-500">{{ c.part_number }}</td>
+    <td>{% if c.u_height %}{{ c.u_height|floatformat:"-1" }} U{% else %}{% translate "not rack mounted" %}{% endif %}</td>
+    <td class="text-sm">{{ c.summary|default:"-" }}</td>
+  </tr>{% empty %}<tr><td colspan="5" class="text-slate-500">{% translate "Nothing found. Try fewer or shorter words." %}</td></tr>{% endfor %}</tbody>
+</table></div>
+{% endif %}
+<p class="mt-6 text-xs text-slate-500">{% blocktranslate with commit=source|slice:":12" %}Source: netbox-community/devicetype-library, commit {{ commit }}, released into the public domain (CC0-1.0).{% endblocktranslate %}</p>
+{% endblock %}

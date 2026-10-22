@@ -34,6 +34,10 @@ page shows the elevation for the **Front** or **Rear** face.
 
 ## Device library
 
+*Device library → Add from catalog* searches more than 12 000 device types of the
+community device type library by manufacturer, model or part number and copies one
+with all its ports into your library, shared or for the current tenant.
+
 **Library** lists device types: shared ones and the custom types of the current
 tenant. A type defines vendor, model, form (rack mounted or floor device),
 category, height in units, whether it is full depth, a naming convention (for

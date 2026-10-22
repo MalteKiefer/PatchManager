@@ -224,3 +224,24 @@ class PortTemplate(UUIDModel):
         if self.count == 1:
             return [self.name_pattern]
         return [f"{self.name_pattern}{i}" for i in numbers]
+
+
+class CatalogType(models.Model):
+    """A device type of the bundled community library (CC0), ready to copy into the library."""
+
+    slug = models.CharField(max_length=200, unique=True)
+    manufacturer = models.CharField(max_length=100)
+    model = models.CharField(max_length=150)
+    part_number = models.CharField(max_length=100, blank=True)
+    u_height = models.FloatField(default=1)
+    full_depth = models.BooleanField(default=True)
+    ports = models.PositiveIntegerField(default=0)
+    summary = models.CharField(max_length=300, blank=True)
+    spec = models.JSONField()
+    commit = models.CharField(max_length=40)
+
+    class Meta:
+        ordering = ["manufacturer", "model"]
+
+    def __str__(self) -> str:
+        return f"{self.manufacturer} {self.model}"

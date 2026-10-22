@@ -64,3 +64,4 @@ nav:
       - adr/0022-editions-and-admin-polish.md
       - adr/0023-no-editions.md
       - adr/0024-personal-data.md
+      - adr/0025-device-type-catalog.md

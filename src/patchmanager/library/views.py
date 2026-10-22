@@ -18,8 +18,8 @@ from patchmanager.accounts import policy
 from patchmanager.accounts.models import User
 from patchmanager.accounts.services import ServiceError
 from patchmanager.core.utils import parse_uuid
-from patchmanager.library import interchange, services
-from patchmanager.library.models import DeviceType, PortTemplate
+from patchmanager.library import catalog, interchange, services
+from patchmanager.library.models import CatalogType, DeviceType, PortTemplate
 from patchmanager.metadata.models import Attachment
 
 TYPE_FIELDS = [
@@ -317,3 +317,63 @@ def type_import(request: HttpRequest) -> HttpResponse:
         messages.success(request, _("Device type imported."))
         return redirect("library:type", device_type.pk)
     return redirect("library:types")
+
+
+class AdoptForm(forms.Form):
+    """Where a catalog type goes."""
+
+    shared = forms.BooleanField(label=gettext_lazy("Shared with all tenants"), required=False)
+
+
+@login_required
+def catalog_search(request: HttpRequest) -> HttpResponse:
+    """Search the bundled device type catalog."""
+    query = request.GET.get("q", "").strip()[:100]
+    return render(
+        request,
+        "library/catalog.html",
+        {
+            "q": query,
+            "results": catalog.search(query) if len(query) >= 2 else [],
+            "total": CatalogType.objects.count(),
+            "source": CatalogType.objects.values_list("commit", flat=True).first() or "",
+        },
+    )
+
+
+@login_required
+@require_http_methods(["GET", "POST"])
+def catalog_adopt(request: HttpRequest, pk: int) -> HttpResponse:
+    """Preview a catalog type and copy it with its ports into the library."""
+    entry = get_object_or_404(CatalogType, pk=pk)
+    form = AdoptForm(request.POST or None)
+    actor = _actor(request)
+    tenant = getattr(request, "tenant", None)
+    can_add = policy.has_perm(actor, "library.devicetype.add") or (
+        tenant is not None and policy.has_perm(actor, "library.devicetype.add", tenant)
+    )
+    if request.method == "POST" and form.is_valid():
+        try:  # the service checks the permission for the chosen scope
+            device_type = catalog.adopt(
+                request, actor, entry, tenant=_scope(request, form.cleaned_data["shared"])
+            )
+        except ServiceError as exc:
+            form.add_error(None, str(exc))
+        else:
+            messages.success(request, _("Added to the library with all its ports."))
+            return redirect("library:type", device_type.pk)
+    sections = [
+        (label, entry.spec.get(key) or [])
+        for key, label in (
+            ("interfaces", _("Network ports")),
+            ("front-ports", _("Front ports")),
+            ("rear-ports", _("Rear ports")),
+            ("console-ports", _("Console ports")),
+            ("power-ports", _("Power inlets")),
+        )
+    ]
+    return render(
+        request,
+        "library/catalog_entry.html",
+        {"entry": entry, "form": form, "sections": sections, "can_add": can_add},
+    )

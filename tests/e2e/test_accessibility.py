@@ -46,6 +46,7 @@ def _pages(live_server, tree) -> list[str]:
         f"/locations/floor/{tree['floor'].pk}/",
         f"/racks/{tree['rack'].pk}/",
         "/library/",
+        "/library/catalog/?q=cisco 9300",
         "/cabling/",
         "/networks/vlans/",
         "/history/",
