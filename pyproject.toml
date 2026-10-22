@@ -34,8 +34,11 @@ DJANGO_SETTINGS_MODULE = "tests.settings"
 pythonpath = ["src", "."]
 django_find_project = false
 testpaths = ["tests"]
-markers = ["e2e: browser tests (Playwright), run with -m e2e"]
-addopts = "-m 'not e2e' --strict-markers --cov=patchmanager --cov-report=term-missing --cov-fail-under=90"
+markers = [
+    "e2e: browser tests (Playwright), run with -m e2e",
+    "perf: load tests with a large inventory, run with pixi run perf",
+]
+addopts = "-m 'not e2e and not perf' --strict-markers --cov=patchmanager --cov-report=term-missing --cov-fail-under=90"
 # collectstatic only runs in the image build, not before tests.
 filterwarnings = [
     "error",

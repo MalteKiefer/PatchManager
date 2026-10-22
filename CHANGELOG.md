@@ -6,6 +6,16 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+### Added
+
+* Load test in CI with 500 racks, 50 000 ports and 12 000 cables, with time and
+  query budgets per page; `seed_scale` command for demo and load data.
+
+### Fixed
+
+* Search loaded the vendor of every device hit separately.
+* Path tracing needed two queries per cable hop instead of one.
+
 ### Removed
 
 * Editions, their limits and feature switches, `PATCHMANAGER_EDITION` and the edition

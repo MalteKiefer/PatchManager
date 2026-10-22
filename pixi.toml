@@ -83,6 +83,8 @@ factory_boy = ">=3.3.3,<4"
 
 [feature.test.tasks]
 test = { cmd = "pytest", depends-on = ["db-start", "compilemessages"], env = { DJANGO_SETTINGS_MODULE = "tests.settings", PATCHMANAGER_TESTING = "true", PATCHMANAGER_DEBUG = "false", DJANGO_SECRET_KEY = "test-only-insecure-key-0123456789-0123456789-0123456789", PATCHMANAGER_ENCRYPTION_KEYS = "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=" } }
+# Load test with 500 racks and 50 000 ports (PERF_RACKS scales it down).
+perf = { cmd = "pytest -m perf tests/perf --no-cov -s -p no:cacheprovider", depends-on = ["db-start", "compilemessages"], env = { DJANGO_SETTINGS_MODULE = "tests.settings", PATCHMANAGER_TESTING = "true", PATCHMANAGER_DEBUG = "false", DJANGO_SECRET_KEY = "test-only-insecure-key-0123456789-0123456789-0123456789", PATCHMANAGER_ENCRYPTION_KEYS = "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=" } }
 
 # Browser end to end tests (Playwright, Chromium).
 [feature.e2e.dependencies]

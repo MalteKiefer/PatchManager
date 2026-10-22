@@ -67,7 +67,7 @@ SOURCES = {
             Device,
             "dcim.device.view",
             ("name", "serial", "asset_tag"),
-            related=("room", "rack", "device_type"),
+            related=("room", "rack", "device_type__vendor"),
         ),
         Source(
             "port",

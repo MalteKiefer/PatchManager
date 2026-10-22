@@ -65,16 +65,13 @@ class Path:
 
 
 def _cable_peer(port: Port) -> tuple[Any, Port] | None:
-    end = CableEnd.objects.select_related("cable").filter(port=port).first()
-    if end is None:
-        return None
     other = (
-        CableEnd.objects.select_related("port__device")
-        .filter(cable=end.cable)
-        .exclude(pk=end.pk)
+        CableEnd.objects.select_related("cable", "port__device")
+        .filter(cable__ends__port=port)
+        .exclude(port=port)
         .first()
     )
-    return (end.cable, other.port) if other is not None else None
+    return (other.cable, other.port) if other is not None else None
 
 
 def _internal_peer(port: Port, position: int | None) -> tuple[Port, int] | None:

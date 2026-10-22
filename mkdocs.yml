@@ -28,6 +28,7 @@ nav:
       - Administration: guides/admin.md
       - User guide: guides/user.md
       - API: guides/api.md
+      - Performance: guides/performance.md
   - Plan:
       - Architecture: plan/architecture.md
       - Data model: plan/data-model.md
