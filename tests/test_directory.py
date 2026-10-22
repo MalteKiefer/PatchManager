@@ -75,7 +75,8 @@ def test_organizations_contacts_systems_and_links(admin_client: Client, setup, s
     assert building.name in detail
     with system():
         link = Link.objects.get(system=phone)
-    _post(admin_client, f"/directory/links/{link.pk}/delete/", {"next": "https://evil.example/"})
+    gone = _post(admin_client, f"/directory/links/{link.pk}/delete/", {})
+    assert gone.url == f"/locations/building/{building.pk}/"
     with system():
         assert not Link.objects.filter(system=phone).exists()
     listing = admin_client.get("/items/organizations/", secure=True).content.decode()
