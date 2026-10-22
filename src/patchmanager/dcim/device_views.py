@@ -1,5 +1,6 @@
 """Device pages: create from a type, edit, place, document ports."""
 
+import math
 from typing import Any
 
 from django import forms
@@ -210,6 +211,17 @@ def device_url(device: Device) -> str:
     return reverse("devices:device", args=[device.pk])
 
 
+def _plan_point(params: Any) -> tuple[float, float] | None:
+    """A position on the floor plan passed along when a device is added from the plan."""
+    try:
+        x, y = float(params.get("plan_x", "")), float(params.get("plan_y", ""))
+    except ValueError:
+        return None
+    if not (math.isfinite(x) and math.isfinite(y)) or x < 0 or y < 0 or max(x, y) > 1e6:
+        return None
+    return round(x, 1), round(y, 1)
+
+
 @login_required
 @require_http_methods(["GET", "POST"])
 def device_create(request: HttpRequest) -> HttpResponse:
@@ -223,6 +235,7 @@ def device_create(request: HttpRequest) -> HttpResponse:
     if not policy.has_perm(request.user, "dcim.device.add", parent):
         raise PermissionDenied
     initial = {"position": request.GET.get("position")}
+    spot = None if rack else _plan_point(request.POST if request.method == "POST" else request.GET)
     form = NewDeviceForm(
         request.POST or None, types=visible_types(request), rack=rack, initial=initial
     )
@@ -237,6 +250,7 @@ def device_create(request: HttpRequest) -> HttpResponse:
                 rack=rack,
                 position=form.cleaned_data.get("position"),
                 face=form.cleaned_data.get("face") or "front",
+                **({"plan_x": spot[0], "plan_y": spot[1]} if spot else {}),
                 **data,
             )
         except ServiceError as exc:
@@ -245,12 +259,19 @@ def device_create(request: HttpRequest) -> HttpResponse:
             messages.success(
                 request, _("Device created with %(n)s ports.") % {"n": device.ports.count()}
             )
+            if spot:
+                return redirect("floorplans:editor", room.floor_id)
             return redirect(device_url(device))
     breadcrumbs = [(a, node_url(a)) for a in [*parent.ancestors(), parent]]
     return render(
         request,
         "dcim/device_form.html",
-        {"form": form, "parent": parent, "breadcrumbs": breadcrumbs},
+        {
+            "form": form,
+            "parent": parent,
+            "breadcrumbs": breadcrumbs,
+            "hidden": {"plan_x": spot[0], "plan_y": spot[1]} if spot else {},
+        },
     )
 
 

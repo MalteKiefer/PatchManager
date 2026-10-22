@@ -28,6 +28,7 @@ TARGETS = {
     "locations.building": "locations.building",
     "locations.floor": "locations.floor",
     "locations.room": "locations.room",
+    "locations.roomsurvey": "locations.room",
     "dcim.rack": "dcim.rack",
     "dcim.device": "dcim.device",
     "dcim.port": "dcim.device",
@@ -166,6 +167,21 @@ def read(actor: Any, attachment: Attachment) -> tuple[Any, bytes]:
         raise PermissionDeniedError(_("You do not have permission to do that."))
     with storages["attachments"].open(attachment.storage_name, "rb") as handle:
         return target, crypto.decrypt_bytes(handle.read())
+
+
+def purge(target: Any) -> None:
+    """Drop the attachments and notes of an object that is being deleted (files on commit)."""
+    content_type = ContentType.objects.get_for_model(target)
+    rows = Attachment.objects.filter(content_type=content_type, object_id=target.pk)
+    names = list(rows.values_list("storage_name", flat=True))
+    rows.delete()
+    Note.objects.filter(content_type=content_type, object_id=target.pk).delete()
+
+    def drop() -> None:
+        for name in names:
+            storages["attachments"].delete(name)
+
+    transaction.on_commit(drop)
 
 
 def remove(request: HttpRequest, actor: User, attachment: Attachment) -> None:

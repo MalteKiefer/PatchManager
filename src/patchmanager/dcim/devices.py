@@ -192,7 +192,13 @@ def delete(request: HttpRequest, actor: User, device: Device) -> None:
     """Delete a device with its ports and rack space."""
     require(actor, "dcim.device.delete", device)
     audit.record("dcim.device.deleted", request=request, obj=device, data={"name": device.name})
-    device.delete()
+    from patchmanager.metadata import services as metadata
+
+    with transaction.atomic():
+        metadata.purge(device)
+        for port in device.ports.all():
+            metadata.purge(port)
+        device.delete()
 
 
 PORT_FIELDS = (
@@ -239,7 +245,11 @@ def delete_port(request: HttpRequest, actor: User, port: Port) -> None:
     """Remove a port."""
     require(actor, "dcim.device.change", port.device)
     audit.record("dcim.port.deleted", request=request, obj=port.device, data={"port": port.name})
-    port.delete()
+    from patchmanager.metadata import services as metadata
+
+    with transaction.atomic():
+        metadata.purge(port)
+        port.delete()
 
 
 def _save_port(port: Port) -> None:

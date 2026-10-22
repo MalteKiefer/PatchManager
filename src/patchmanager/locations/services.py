@@ -85,8 +85,16 @@ def delete(request: HttpRequest, actor: User, node: HierarchyNode) -> None:
     audit.record(
         f"{node.policy_object_type}.deleted", request=request, obj=node, data={"name": str(node)}
     )
+    from patchmanager.locations.models import Room
+    from patchmanager.metadata import services as metadata
+
     try:
         with transaction.atomic():
+            # Photos and notes go with the object (rolled back if it cannot be deleted).
+            metadata.purge(node)
+            if isinstance(node, Room):
+                for survey in node.surveys.all():
+                    metadata.purge(survey)
             node.delete()
     except ProtectedError as exc:
         raise ServiceError(_("Remove everything inside it first.")) from exc
@@ -196,6 +204,13 @@ def move_site(request: HttpRequest, actor: User, site: Any, target: Tenant) -> N
                 f"UPDATE cabling_cableend SET tenant_id = %s WHERE port_id IN ({in_site})",  # noqa: S608  # nosec B608
                 [target.pk, new],
             )
+            # Surveys and planned numbers of the rooms follow the rooms.
+            for table in ("locations_roomsurvey", "locations_roomneed"):
+                cursor.execute(
+                    f"UPDATE {table} SET tenant_id = %s WHERE room_id IN"  # noqa: S608  # nosec B608: fixed names
+                    " (SELECT id FROM locations_room WHERE path <@ %s::ltree)",
+                    [target.pk, new],
+                )
             # Stored configurations follow their devices (scope is the device path).
             cursor.execute(
                 "UPDATE configs_deviceconfig c SET tenant_id = %s, path = d.path"
@@ -218,11 +233,15 @@ def move_site(request: HttpRequest, actor: User, site: Any, target: Tenant) -> N
                 "SELECT p.id FROM dcim_port p JOIN dcim_device d ON d.id = p.device_id"
                 " WHERE d.path <@ %s::ltree"
             )
+            surveys = (
+                "SELECT s.id FROM locations_roomsurvey s JOIN locations_room r ON r.id = s.room_id"
+                " WHERE r.path <@ %s::ltree"
+            )
             for table in ("metadata_attachment", "metadata_note"):
                 cursor.execute(
                     f"UPDATE {table} SET tenant_id = %s WHERE tenant_id = %s"  # noqa: S608  # nosec B608: fixed names
-                    f" AND object_id IN ({targets} UNION {ports})",
-                    [target.pk, source_tenant, *([new] * len(_TREE_TABLES)), new],
+                    f" AND object_id IN ({targets} UNION {ports} UNION {surveys})",
+                    [target.pk, source_tenant, *([new] * len(_TREE_TABLES)), new, new],
                 )
         Assignment.objects.filter(scope_path__descendant_of=old).update(tenant=target)
         with connection.cursor() as cursor:

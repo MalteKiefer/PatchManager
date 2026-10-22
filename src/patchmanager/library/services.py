@@ -105,8 +105,11 @@ def update_type(
 def delete_type(request: HttpRequest, actor: User, device_type: DeviceType) -> None:
     """Delete an unused device type."""
     require(actor, "library.devicetype.delete", device_type)
+    from patchmanager.metadata import services as metadata
+
     try:
         with transaction.atomic():
+            metadata.purge(device_type)
             device_type.delete()
     except ProtectedError as exc:
         raise ServiceError(_("Devices of this type exist.")) from exc

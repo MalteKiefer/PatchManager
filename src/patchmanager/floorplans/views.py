@@ -88,6 +88,7 @@ def _scene(request: HttpRequest, floor: Floor, plan: FloorPlan | None) -> dict[s
         return 0.6 * scale, ((rack.depth_mm or 1000) / 1000) * scale
 
     return {
+        "links": _links(user, racks, devices),
         "rooms": [
             {
                 "id": str(r.pk),
@@ -129,6 +130,61 @@ def _scene(request: HttpRequest, floor: Floor, plan: FloorPlan | None) -> dict[s
     }
 
 
+def _links(user: Any, racks: list[Rack], devices: list[Device]) -> list[dict[str, Any]]:
+    """Lines between placed floor devices and the racks or devices their paths end at.
+
+    One line per pair, with the number of paths; permanent links are dashed.
+    """
+    from patchmanager.cabling.trace import trace_many
+    from patchmanager.dcim.models import Port
+
+    placed_racks = {r.pk for r in racks if r.plan_x is not None}
+    placed_devices = {d.pk for d in devices if d.plan_x is not None}
+    sources = [
+        d
+        for d in devices
+        if d.pk in placed_devices and policy.has_perm(user, "cabling.cable.trace", d)
+    ]
+    ports = list(
+        Port.objects.filter(device__in=sources, cable_end__isnull=False).select_related("device")
+    )
+    paths = trace_many(ports)
+    far_devices = {
+        d.pk: d
+        for d in Device.objects.filter(
+            pk__in={p.device_id for path in paths.values() for p in path.ports}
+        )
+    }
+    lines: dict[tuple[str, str, str, str, bool], dict[str, Any]] = {}
+    for port in ports:
+        path = paths[port.pk]
+        end = path.ports[-1] if path.ports[0].pk == port.pk else path.ports[0]
+        target = far_devices.get(end.device_id)
+        if target is None or target.pk == port.device_id:
+            continue
+        if target.rack_id in placed_racks:
+            to_kind, to_id = "rack", str(target.rack_id)
+        elif target.pk in placed_devices:
+            to_kind, to_id = "device", str(target.pk)
+        else:
+            continue  # the other end is not on this plan (or not visible)
+        first = path.cables[0] if path.cables else None
+        dashed = bool(first is not None and first.kind == "permanent")
+        key = ("device", str(port.device_id), to_kind, to_id, dashed)
+        line = lines.setdefault(
+            key,
+            {
+                "from": ["device", str(port.device_id)],
+                "to": [to_kind, to_id],
+                "dashed": dashed,
+                "colour": (first.colour if first is not None else "") or "#2563eb",
+                "count": 0,
+            },
+        )
+        line["count"] += 1
+    return list(lines.values())
+
+
 @login_required
 def editor(request: HttpRequest, floor_pk: str) -> HttpResponse:
     """The plan of a floor with rooms, racks and floor devices."""
@@ -144,6 +200,7 @@ def editor(request: HttpRequest, floor_pk: str) -> HttpResponse:
             "plan": plan,
             "scene": scene,
             "can_change": can_change,
+            "can_add_device": policy.has_perm(request.user, "dcim.device.add", floor),
             "upload_form": PlanUploadForm(),
             "breadcrumbs": [(a, node_url(a)) for a in [*floor.ancestors(), floor]],
             "unplaced_racks": [r for r in scene["racks"] if r["x"] is None],

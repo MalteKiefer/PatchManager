@@ -8,7 +8,7 @@
   {% if can_move %}<a class="btn-secondary" href="{% url 'locations:site-move' node.pk %}">{% translate "Move to tenant" %}</a>{% endif %}
   {% if level == "site" %}<a class="btn-secondary" href="{% url 'exchange:report' 'site' node.pk %}">{% translate "Site report (PDF)" %}</a>{% endif %}
   {% if level == "floor" %}<a class="btn-primary" href="{% url 'floorplans:editor' node.pk %}">{% translate "Floor plan" %}</a>{% endif %}
-  {% if level == "room" %}<a class="btn-primary" href="{% url 'locations:room-cabling' node.pk %}">{% translate "Racks and cabling" %}</a>{% endif %}
+  {% if level == "room" %}<a class="btn-secondary" href="{% url 'floorplans:editor' node.floor_id %}">{% translate "Floor plan" %}</a><a class="btn-primary" href="{% url 'locations:room-cabling' node.pk %}">{% translate "Racks and cabling" %}</a>{% endif %}
 </div>
 <div class="grid gap-6 lg:grid-cols-3">
   <div class="space-y-6 lg:col-span-2">
@@ -47,6 +47,14 @@
           <td>{% if r.status == "missing" %}<span class="badge-bad">{% blocktranslate count n=r.missing %}{{ n }} missing{% plural %}{{ n }} missing{% endblocktranslate %}</span>{% elif r.status == "done" %}<span class="badge-ok">{% translate "complete" %}</span>{% elif r.status == "extra" %}<span class="badge-muted">{% translate "more than planned" %}</span>{% else %}<span class="badge-muted">{% translate "not planned" %}</span>{% endif %}</td>
         </tr>{% endfor %}</tbody></table></div>
       {% else %}<p class="text-sm text-slate-500">{% translate "Nothing planned or installed yet." %}</p>{% endif %}
+    </section>
+    <section class="card" aria-labelledby="surveys-h">
+      <div class="mb-3 flex items-center gap-2"><h2 id="surveys-h" class="mr-auto">{% translate "Surveys" %}</h2>
+        {% if can_change %}<a class="btn-secondary" href="{% url 'locations:survey-create' node.pk %}">{% translate "New survey" %}</a>{% endif %}</div>
+      <ul class="divide-y divide-slate-100 text-sm dark:divide-slate-800">{% for s in surveys %}<li class="flex flex-wrap items-center gap-2 py-2">
+        <a href="{% url 'locations:survey' s.pk %}" class="font-medium">{{ s.surveyed_on|date:"SHORT_DATE_FORMAT" }}</a><span class="text-slate-500">{{ s.surveyor }}</span>
+        {% if s.status == "done" %}<span class="badge-ok">{{ s.get_status_display }}</span>{% else %}<span class="badge-muted">{{ s.get_status_display }}</span>{% endif %}
+      </li>{% empty %}<li class="py-2 text-slate-500">{% translate "Not surveyed yet." %}</li>{% endfor %}</ul>
     </section>
     <section class="card" aria-labelledby="outlets-h">
       <div class="mb-3 flex items-center gap-2"><h2 id="outlets-h" class="mr-auto">{% translate "Devices and their cabling" %}</h2>

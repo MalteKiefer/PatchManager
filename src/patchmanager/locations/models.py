@@ -206,3 +206,33 @@ class RoomNeed(TenantScopedModel):
     def policy_path(self) -> str:
         """Governed by its room."""
         return str(self.room.path)
+
+
+class RoomSurvey(TenantScopedModel):
+    """A walk through a room: what was found on site, when and by whom, with photos and notes."""
+
+    class Status(models.TextChoices):
+        PLANNED = "planned", _("planned")
+        DONE = "done", _("done")
+
+    room = models.ForeignKey(Room, on_delete=models.CASCADE, related_name="surveys")
+    surveyed_on = models.DateField(_("date"))
+    surveyor = models.CharField(_("by"), max_length=150)
+    status = models.CharField(
+        _("status"), max_length=10, choices=Status.choices, default=Status.DONE
+    )
+    notes = models.TextField(_("notes"), blank=True)
+    counts = models.JSONField(default=dict, blank=True)  # category key -> devices found
+
+    policy_object_type = "locations.room"
+
+    class Meta:
+        ordering = ["room", "-surveyed_on", "-created_at"]
+
+    def __str__(self) -> str:
+        return f"{self.room} {self.surveyed_on}"
+
+    @property
+    def policy_path(self) -> str:
+        """Governed by its room."""
+        return str(self.room.path)

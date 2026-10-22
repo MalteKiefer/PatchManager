@@ -14,7 +14,7 @@ from patchmanager.audit import services as audit
 from patchmanager.cabling.trace import trace_many
 from patchmanager.dcim.models import Device, Port
 from patchmanager.library.models import DeviceCategory
-from patchmanager.locations.models import Room, RoomNeed
+from patchmanager.locations.models import Room, RoomNeed, RoomSurvey
 
 
 @dataclass(frozen=True)
@@ -33,7 +33,7 @@ class PlanRow:
 
     @property
     def status(self) -> str:
-        """ "missing", "done", "extra" (more than planned) or "unplanned"."""
+        """One of missing, done, extra (more than planned) or unplanned."""
         if self.planned is None:
             return "unplanned"
         if self.installed < self.planned:
@@ -140,3 +140,74 @@ def cabling(user: Any, room: Room) -> list[tuple[Device, list[Outlet]]]:
             for o in outlets
         ]
     return [(d, rows[d.pk]) for d in devices]
+
+
+# --- Surveys ----------------------------------------------------------------
+
+
+@dataclass(frozen=True)
+class SurveyRow:
+    """One category of a survey: planned, documented and found on site."""
+
+    category: DeviceCategory
+    planned: int | None
+    documented: int
+    found: int | None
+
+    @property
+    def differs(self) -> bool:
+        """The site does not match the documentation."""
+        return self.found is not None and self.found != self.documented
+
+
+def survey_rows(user: Any, survey: RoomSurvey) -> list[SurveyRow]:
+    """Planned, documented and found per category, for one survey."""
+    current = {r.category.key: r for r in plan(user, survey.room)}
+    keys = set(current) | set(survey.counts)
+    categories = DeviceCategory.objects.filter(key__in=keys)
+    return [
+        SurveyRow(
+            c,
+            current[c.key].planned if c.key in current else None,
+            current[c.key].installed if c.key in current else 0,
+            survey.counts.get(c.key),
+        )
+        for c in categories
+    ]
+
+
+def save_survey(
+    request: HttpRequest, actor: User, survey: RoomSurvey, counts: dict[str, int | None]
+) -> RoomSurvey:
+    """Create or change a survey; counts left empty were not counted."""
+    require(actor, "locations.room.change", survey.room)
+    created = survey.pk is None
+    survey.tenant_id = survey.room.tenant_id
+    survey.counts = {k: v for k, v in counts.items() if v is not None}
+    if created:
+        survey.created_by = actor
+    survey.full_clean(exclude=["tenant", "created_by"])
+    survey.save()
+    audit.record(
+        "locations.room.surveyed" if created else "locations.room.survey_changed",
+        request=request,
+        obj=survey.room,
+        data={"date": str(survey.surveyed_on), "status": survey.status},
+    )
+    return survey
+
+
+def delete_survey(request: HttpRequest, actor: User, survey: RoomSurvey) -> None:
+    """Delete a survey (its photos and notes go with it)."""
+    require(actor, "locations.room.change", survey.room)
+    from patchmanager.metadata import services as metadata
+
+    with transaction.atomic():
+        metadata.purge(survey)
+        survey.delete()
+    audit.record(
+        "locations.room.survey_deleted",
+        request=request,
+        obj=survey.room,
+        data={"date": str(survey.surveyed_on)},
+    )

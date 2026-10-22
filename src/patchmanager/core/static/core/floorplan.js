@@ -63,7 +63,7 @@ function itemNode(kind, item) {
                           class: "fill-slate-700 stroke-white", "stroke-width": 1.5 }));
     g.append(el("text", { y: item.h / 2 + 14, "text-anchor": "middle", class: "fill-slate-900 text-[12px] font-semibold dark:fill-white" }, item.name));
   } else {
-    g.append(el("circle", { r: item.r, class: "fill-amber-500 stroke-white", "stroke-width": 1.5 }));
+    g.append(el("circle", { r: item.r, fill: item.colour || "#f59e0b", class: "stroke-white", "stroke-width": 1.5 }));
     g.append(el("text", { y: 4, "text-anchor": "middle", class: "fill-white text-[11px] font-bold" }, item.glyph));
     g.append(el("text", { y: item.r + 13, "text-anchor": "middle", class: "fill-slate-900 text-[11px] dark:fill-white" }, item.name));
   }
@@ -71,11 +71,48 @@ function itemNode(kind, item) {
   return g;
 }
 
+function position(kind, id) {
+  const item = (kind === "rack" ? scene.racks : scene.devices).find((i) => i.id === id);
+  return item && item.x !== null ? [item.x, item.y] : null;
+}
+
+// Cabling between pins: one line per pair, solid for patch cables, dashed for permanent links.
+function drawLinks() {
+  const layer = document.getElementById("layer-links");
+  layer.replaceChildren();
+  for (const link of scene.links || []) {
+    const a = position(...link.from);
+    const b = position(...link.to);
+    if (!a || !b) continue;
+    const attrs = { x1: a[0], y1: a[1], x2: b[0], y2: b[1], stroke: link.colour, "stroke-width": 3, class: "plan-link", "stroke-linecap": "round" };
+    if (link.dashed) attrs["stroke-dasharray"] = "8 6";
+    layer.append(el("line", attrs));
+    if (link.count > 1) {
+      layer.append(el("text", { x: (a[0] + b[0]) / 2, y: (a[1] + b[1]) / 2 - 6, "text-anchor": "middle", class: "plan-link-count" }, `${link.count}`));
+    }
+  }
+}
+
+function roomAt([x, y]) {
+  // Ray casting, as on the server (geometry.contains).
+  return scene.rooms.find((room) => {
+    const pts = room.points;
+    let inside = false;
+    for (let i = 0, j = pts.length - 1; i < pts.length; j = i++) {
+      const [xi, yi] = pts[i];
+      const [xj, yj] = pts[j];
+      if ((yi > y) !== (yj > y) && x < ((xj - xi) * (y - yi)) / (yj - yi) + xi) inside = !inside;
+    }
+    return pts.length >= 3 && inside;
+  });
+}
+
 function drawItems() {
   const layer = document.getElementById("layer-items");
   layer.replaceChildren();
   for (const rack of scene.racks) if (rack.x !== null) layer.append(itemNode("rack", rack));
   for (const device of scene.devices) if (device.x !== null) layer.append(itemNode("device", device));
+  drawLinks();
 }
 
 function drawDraft() {
@@ -129,6 +166,8 @@ if (svg) {
     if (!drag) return;
     const [x, y] = toPlan(event);
     drag.group.setAttribute("transform", `translate(${x} ${y})`);
+    const item = (drag.kind === "rack" ? scene.racks : scene.devices).find((i) => i.id === drag.id);
+    if (item) { item.x = x; item.y = y; drawLinks(); }
   });
   svg.addEventListener("pointerup", (event) => {
     if (!drag) return;
@@ -141,7 +180,12 @@ if (svg) {
 
   svg.addEventListener("click", (event) => {
     const point = toPlan(event);
-    if (mode === "place" && pending) {
+    if (mode === "add") {
+      const room = roomAt(point);
+      if (!room) { say(text.outside); return; }
+      const query = new URLSearchParams({ room: room.id, plan_x: point[0].toFixed(1), plan_y: point[1].toFixed(1) });
+      location.assign(`${text.newDevice}?${query}`);
+    } else if (mode === "place" && pending) {
       moveItem(pending.kind, pending.id, point).then(() => location.reload());
       setMode("move");
     } else if (mode === "scale") {

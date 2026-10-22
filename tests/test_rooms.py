@@ -67,3 +67,97 @@ def test_room_page_shows_plan_and_patch_targets(admin_client: Client, office) ->
     assert "3 missing" not in page
     bad = admin_client.post(url + "plan/", {"need-outlet": "x"}, secure=True)
     assert "whole numbers" in bad.content.decode()
+
+
+def test_surveys(admin_client: Client, office, system) -> None:
+    from patchmanager.locations.models import RoomSurvey
+    from patchmanager.metadata import services as metadata
+    from patchmanager.metadata.models import Note
+
+    room = office["room"]
+    url = f"/locations/room/{room.pk}/surveys/new/"
+    page = admin_client.get(url, secure=True).content.decode()
+    assert 'name="found-outlet"' in page and "Planned" in page
+    saved = admin_client.post(
+        url,
+        {
+            "surveyed_on": "2026-10-20",
+            "surveyor": "Kim",
+            "status": "done",
+            "notes": "Two outlets behind the cupboard.",
+            "found-outlet": "3",
+            "found-access_point": "",
+        },
+        secure=True,
+    )
+    with system():
+        survey = RoomSurvey.objects.get()
+    assert saved.url == f"/locations/surveys/{survey.pk}/"
+    assert survey.counts == {"outlet": 3}
+    detail = admin_client.get(saved.url, secure=True).content.decode()
+    assert "differs" in detail  # 3 found, 1 documented
+    room_page = admin_client.get(f"/locations/room/{room.pk}/", secure=True).content.decode()
+    assert "Kim" in room_page
+    bad = admin_client.post(
+        saved.url,
+        {"surveyed_on": "2026-10-20", "surveyor": "K", "status": "done", "found-outlet": "lots"},
+        secure=True,
+    )
+    assert "whole numbers" in bad.content.decode()
+    with system():
+        metadata.add_note(office["request"], office["request"].user, survey, "behind the door")
+    admin_client.post(saved.url, {"action": "delete"}, secure=True)
+    with system():
+        assert not RoomSurvey.objects.exists() and not Note.objects.exists()
+
+
+def test_surveys_need_change_permission(client: Client, office, make_user, grant) -> None:
+    from tests.conftest import login
+
+    viewer = make_user()
+    grant(viewer, "viewer", office["tenant"])
+    login(client, viewer)
+    url = f"/locations/room/{office['room'].pk}/surveys/new/"
+    assert client.get(url, secure=True).status_code == 403
+
+
+def test_surveys_and_needs_follow_a_site_to_another_tenant(office, make_tenant, system) -> None:
+    import datetime
+
+    from patchmanager.locations import services as tree
+    from patchmanager.locations.models import RoomSurvey
+    from patchmanager.metadata import services as metadata
+    from patchmanager.metadata.models import Note
+
+    request, actor = office["request"], office["request"].user
+    target = make_tenant()
+    with system():
+        room = Room.objects.get(pk=office["room"].pk)
+        rooms.set_needs(request, actor, room, {"outlet": 2})
+        survey = rooms.save_survey(
+            request,
+            actor,
+            RoomSurvey(room=room, surveyed_on=datetime.date(2026, 10, 20), surveyor="Kim"),
+            {"outlet": 1},
+        )
+        note = metadata.add_note(request, actor, survey, "fine")
+        # Devices are removed so the site holds no private device types.
+        for device in (office["outlet"], office["panel"]):
+            devices.delete(request, actor, type(device).objects.get(pk=device.pk))
+        tree.move_site(request, actor, office["site"], target)
+        assert RoomSurvey.objects.get(pk=survey.pk).tenant_id == target.pk
+        assert RoomNeed.objects.get(room=room).tenant_id == target.pk
+        assert Note.objects.get(pk=note.pk).tenant_id == target.pk
+
+
+def test_deleting_a_device_drops_notes_of_it_and_its_ports(office, system) -> None:
+    from patchmanager.metadata import services as metadata
+    from patchmanager.metadata.models import Note
+
+    request, actor = office["request"], office["request"].user
+    with system():
+        outlet = type(office["outlet"]).objects.get(pk=office["outlet"].pk)
+        metadata.add_note(request, actor, outlet, "device note")
+        metadata.add_note(request, actor, outlet.ports.get(name="A2"), "port note")
+        devices.delete(request, actor, outlet)
+        assert not Note.objects.exists()

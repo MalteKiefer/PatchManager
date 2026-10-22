@@ -1,0 +1,31 @@
+{% extends "base.html" %}{% load i18n pm %}
+{% block title %}{% if created %}{% translate "New survey" %}{% else %}{% translate "Survey" %} {{ survey.surveyed_on }}{% endif %}{% endblock %}
+{% block content %}
+{% include "core/_breadcrumbs.html" with current=_("Survey") %}
+<h1 class="mb-2">{% if created %}{% blocktranslate with r=room.name %}New survey of {{ r }}{% endblocktranslate %}{% else %}{% blocktranslate with r=room.name d=survey.surveyed_on %}Survey of {{ r }} on {{ d }}{% endblocktranslate %}{% endif %}</h1>
+<p class="mb-5 max-w-3xl text-sm text-slate-500">{% translate "Count what you find on site. Fields left empty were not counted. Differences to the documentation are marked." %}</p>
+{% if errors %}<p class="mb-4 text-sm text-red-600" role="alert">{% translate "Enter whole numbers from 0 to 999." %}</p>{% endif %}
+<form method="post" novalidate class="grid gap-6 xl:grid-cols-[minmax(0,3fr)_minmax(0,2fr)]">{% csrf_token %}
+  <section class="card overflow-x-auto p-0" aria-labelledby="count-h">
+    <h2 id="count-h" class="px-4 pt-4">{% translate "Devices found" %}</h2>
+    <table class="table">
+      <thead><tr><th>{% translate "Category" %}</th><th>{% translate "Planned" %}</th><th>{% translate "Documented" %}</th><th>{% translate "Found on site" %}</th><th></th></tr></thead>
+      <tbody>{% for r in rows %}<tr>
+        <td><label for="found-{{ r.category.key }}">{{ r.category.label }}</label></td>
+        <td class="tabular-nums">{{ r.planned|default_if_none:"–" }}</td>
+        <td class="tabular-nums">{{ r.documented }}</td>
+        <td><input id="found-{{ r.category.key }}" name="found-{{ r.category.key }}" inputmode="numeric" class="app-select w-20" value="{{ r.found|default_if_none:'' }}" {% if not can_change %}disabled{% endif %}></td>
+        <td>{% if r.found is not None and r.found != r.documented %}<span class="badge-bad">{% translate "differs" %}</span>{% elif r.found is not None %}<span class="badge-ok">{% translate "matches" %}</span>{% endif %}</td>
+      </tr>{% endfor %}</tbody>
+    </table>
+  </section>
+  <section class="card" aria-labelledby="survey-h"><h2 id="survey-h" class="mb-3">{% translate "Details" %}</h2>
+    <fieldset {% if not can_change %}disabled{% endif %}>{% include "core/_form.html" %}</fieldset>
+    {% if can_change %}<div class="flex gap-2"><button class="btn-primary">{% translate "Save survey" %}</button><a class="btn-secondary" href="{% url 'locations:node' 'room' room.pk %}">{% translate "Cancel" %}</a></div>{% endif %}
+  </section>
+</form>
+{% if not created %}
+<div class="mt-6 grid gap-6 lg:grid-cols-2">{% metadata_panel survey %}</div>
+{% if can_change %}<form method="post" class="mt-6" data-confirm="{% translate 'Delete this survey with its photos and notes?' %}">{% csrf_token %}<button name="action" value="delete" class="btn-danger">{% translate "Delete survey" %}</button></form>{% endif %}
+{% endif %}
+{% endblock %}

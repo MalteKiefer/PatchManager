@@ -3,6 +3,7 @@
 from dataclasses import dataclass
 from typing import Any
 
+from django import forms
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
@@ -30,7 +31,7 @@ from patchmanager.locations.forms import (
     RoomForm,
     SiteForm,
 )
-from patchmanager.locations.models import Building, Floor, Room, Site
+from patchmanager.locations.models import Building, Floor, Room, RoomSurvey, Site
 from patchmanager.tenancy.models import Tenant
 
 
@@ -311,6 +312,7 @@ def node_detail(request: HttpRequest, level: str, pk: str) -> HttpResponse:
         from patchmanager.locations import rooms
 
         context["plan"] = rooms.plan(actor, node)
+        context["surveys"] = node.surveys.all()[:10]
         context["outlets"] = rooms.cabling(actor, node)
     return render(request, "locations/node.html", context)
 
@@ -339,3 +341,111 @@ def site_move(request: HttpRequest, pk: str) -> HttpResponse:
                 messages.success(request, _("Site moved."))
                 return redirect(node_url(Site.objects.get(pk=site.pk)))
     return render(request, "locations/site_move.html", {"site": site, "form": form})
+
+
+class SurveyForm(forms.ModelForm):  # type: ignore[type-arg]
+    """When, by whom, and what was noticed."""
+
+    class Meta:
+        model = RoomSurvey
+        fields = ["surveyed_on", "surveyor", "status", "notes"]
+        widgets = {
+            "surveyed_on": forms.DateInput(attrs={"type": "date"}),
+            "notes": forms.Textarea(attrs={"rows": 4}),
+        }
+
+
+def _survey_counts(
+    request: HttpRequest, keys: list[str]
+) -> tuple[dict[str, int | None], list[str]]:
+    counts: dict[str, int | None] = {}
+    errors = []
+    for key in keys:
+        raw = request.POST.get(f"found-{key}", "").strip()
+        if not raw:
+            counts[key] = None
+        elif raw.isdecimal() and int(raw) <= 999:
+            counts[key] = int(raw)
+        else:
+            errors.append(key)
+    return counts, errors
+
+
+def _survey_page(
+    request: HttpRequest, room: Any, survey: RoomSurvey, *, created: bool
+) -> HttpResponse:
+    from patchmanager.library.models import DeviceCategory
+    from patchmanager.locations import rooms
+
+    actor = _actor(request)
+    can_change = policy.has_perm(actor, "locations.room.change", room)
+    form = SurveyForm(request.POST or None, instance=survey)
+    categories = list(DeviceCategory.objects.all())
+    errors: list[str] = []
+    if request.method == "POST":
+        if not can_change:
+            raise PermissionDenied
+        if request.POST.get("action") == "delete" and not created:
+            rooms.delete_survey(request, actor, survey)
+            messages.success(request, _("Deleted."))
+            return redirect(node_url(room))
+        counts, errors = _survey_counts(request, [c.key for c in categories])
+        if form.is_valid() and not errors:
+            saved = rooms.save_survey(request, actor, form.save(commit=False), counts)
+            messages.success(request, _("Survey saved."))
+            return redirect("locations:survey", saved.pk)
+    current = {r.category.key: r for r in rooms.plan(actor, room)}
+    rows: list[dict[str, Any]] = [
+        {
+            "category": c,
+            "planned": current[c.key].planned if c.key in current else None,
+            "documented": current[c.key].installed if c.key in current else 0,
+            "found": survey.counts.get(c.key) if survey.pk else None,
+        }
+        for c in categories
+    ]
+    rows.sort(key=lambda r: (r["planned"] is None and not r["documented"], r["category"].order))
+    return render(
+        request,
+        "locations/survey.html",
+        {
+            "room": room,
+            "survey": survey,
+            "form": form,
+            "rows": rows,
+            "errors": errors,
+            "created": created,
+            "can_change": can_change,
+            "breadcrumbs": [(a, node_url(a)) for a in [*room.ancestors(), room]],
+        },
+    )
+
+
+@login_required
+@require_http_methods(["GET", "POST"])
+def survey_create(request: HttpRequest, pk: str) -> HttpResponse:
+    """Page that records a survey of a room."""
+    room: Any = get_object_or_404(Room.objects.select_related("kind"), pk=pk)
+    if not policy.has_perm(request.user, "locations.room.view", room):
+        raise Http404
+    if not policy.has_perm(request.user, "locations.room.change", room):
+        raise PermissionDenied
+    from django.utils import timezone
+
+    user = _actor(request)
+    survey = RoomSurvey(
+        room=room,
+        surveyed_on=timezone.localdate(),
+        surveyor=user.display_name or user.email,
+    )
+    return _survey_page(request, room, survey, created=True)
+
+
+@login_required
+@require_http_methods(["GET", "POST"])
+def survey_detail(request: HttpRequest, pk: str) -> HttpResponse:
+    """A survey: found against documented and planned, notes and photos; change or delete."""
+    survey = get_object_or_404(RoomSurvey.objects.select_related("room__kind"), pk=pk)
+    if not policy.has_perm(request.user, "locations.room.view", survey.room):
+        raise Http404
+    return _survey_page(request, survey.room, survey, created=False)
