@@ -187,13 +187,15 @@ def _visible_or_hidden(user: Any, port: Port | None) -> Any:
 
 def neighbours(user: Any, device: Device) -> list[tuple[Port, Any]]:
     """For each cabled port: the far end of its traced path (dependency view)."""
-    from patchmanager.cabling.trace import trace
+    from patchmanager.cabling.trace import trace_many
 
     if not policy.has_perm(user, "cabling.cable.trace", device):
         return []
     result = []
-    for port in device.ports.filter(cable_end__isnull=False):
-        path = trace(port)
+    ports = list(device.ports.filter(cable_end__isnull=False).select_related("device"))
+    paths = trace_many(ports)
+    for port in ports:
+        path = paths[port.pk]
         far = path.ports[-1] if path.ports[0].pk == port.pk else path.ports[0]
         result.append((port, _visible_or_hidden(user, far if far.pk != port.pk else None)))
     return result

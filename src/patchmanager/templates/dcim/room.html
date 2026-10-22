@@ -1,0 +1,41 @@
+{% extends "base.html" %}{% load i18n static %}
+{% block title %}{% blocktranslate with name=room.name %}Cabling of {{ name }}{% endblocktranslate %}{% endblock %}
+{% block main_class %}px-4 py-6 sm:px-6{% endblock %}
+{% block head %}<script type="module" src="{% static 'core/rack.js' %}"></script>{% endblock %}
+{% block content %}
+{% include "core/_breadcrumbs.html" with current=_("Cabling") %}
+<div class="mb-4 flex flex-wrap items-center gap-3">
+  <h1 class="mr-auto">{% blocktranslate with name=room.name %}Cabling of {{ name }}{% endblocktranslate %}</h1>
+  <dl class="flex flex-wrap gap-2 text-sm">
+    <div class="chip"><dt>{% translate "Racks" %}</dt><dd class="font-semibold">{{ elevations|length }}</dd></div>
+    <div class="chip"><dt>{% translate "Cables between racks" %}</dt><dd class="font-semibold">{{ between|length }}</dd></div>
+  </dl>
+</div>
+<div class="toolbar mb-3" role="toolbar" aria-label="{% translate 'Room view' %}">
+  <nav class="segmented" aria-label="{% translate 'Rack face' %}">
+    <a href="?face=front" {% if face == "front" %}aria-current="page"{% endif %}>{% translate "Front" %}</a>
+    <a href="?face=rear" {% if face == "rear" %}aria-current="page"{% endif %}>{% translate "Rear" %}</a>
+  </nav>
+  <div class="segmented" id="rack-fit">
+    <button type="button" data-fit="width" aria-pressed="true">{% translate "Fill width" %}</button>
+    <button type="button" data-fit="height" aria-pressed="false">{% translate "Whole room" %}</button>
+  </div>
+</div>
+<section class="card p-3 sm:p-4" aria-label="{% translate 'Racks and cables' %}">
+  {% if elevations %}
+  <div class="rack-scroll">
+    <svg class="rack-svg select-none" data-fit="width" viewBox="{{ box.x }} {{ box.y }} {{ box.w }} {{ box.h }}" role="group"
+         aria-label="{% blocktranslate with name=room.name %}Racks of {{ name }} with their cables{% endblocktranslate %}">
+      {% for e in elevations %}
+      <a href="{% url 'dcim:rack' e.rack.pk %}{% if face == 'rear' %}?face=rear{% endif %}"><text x="{{ e.centre_x }}" y="{{ title_y }}" text-anchor="middle" class="rack-title">{{ e.rack.name }}</text></a>
+      {% include "dcim/_elevation.html" with can_change=False add_url="" %}
+      {% endfor %}
+      {% for w in between %}<path d="{{ w.d }}" stroke="{{ w.colour }}" class="rack-wire is-tray" data-path="{{ w.path_id }}"><title>{{ w.title }}</title></path>{% endfor %}
+    </svg>
+  </div>
+  <p class="mt-2 text-xs text-slate-500">{% translate "Cables between racks run over the cable tray above them. Point at a port to follow its path." %}</p>
+  {% else %}
+  <p class="text-sm text-slate-500">{% translate "No racks in this room yet." %}</p>
+  {% endif %}
+</section>
+{% endblock %}

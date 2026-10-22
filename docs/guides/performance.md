@@ -10,8 +10,7 @@ PERF_RACKS=50 pixi run -e test perf   # quick local check
 ```
 
 The test fails when a page takes longer than 1.5 seconds or needs more than 60
-database queries. The device page may add four queries per cabled port, because it
-traces every connection to its far end.
+database queries, whatever the size of the inventory.
 
 Measured on a laptop (Apple M5, PostgreSQL 18, debug off):
 

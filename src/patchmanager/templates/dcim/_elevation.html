@@ -1,0 +1,38 @@
+{% load i18n %}{# One face of one rack. Context: e (Elevation), can_change, add_url (optional) #}
+<g class="rack" data-rack="{{ e.rack.pk }}">
+  <rect x="{{ e.frame_x }}" y="{{ e.top }}" width="{{ e.frame_w }}" height="{{ e.height }}" rx="6" class="rack-frame"/>
+  {% for row in e.rows %}
+  <line x1="{{ e.area_x }}" x2="{{ e.area_x|add:e.area_w }}" y1="{{ row.y }}" y2="{{ row.y }}" class="rack-unit-line"/>
+  <text x="{{ e.left_numbers_x }}" y="{{ row.y|add:44 }}" text-anchor="end" class="rack-unit-number">{{ row.unit }}</text>
+  <text x="{{ e.right_numbers_x }}" y="{{ row.y|add:44 }}" class="rack-unit-number">{{ row.unit }}</text>
+  {% endfor %}
+  {% if add_url %}{% for row in e.free %}
+  <a href="{{ add_url }}&amp;position={{ row.unit }}" class="rack-add" aria-label="{% blocktranslate with unit=row.unit %}Add a device at unit {{ unit }}{% endblocktranslate %}">
+    <rect x="{{ e.area_x|add:2 }}" y="{{ row.y|add:2 }}" width="{{ e.area_w|add:-4 }}" height="72" rx="4"/>
+    <text x="{{ e.centre_x }}" y="{{ row.y|add:48 }}" text-anchor="middle">+</text>
+  </a>
+  {% endfor %}{% endif %}
+  {% for b in e.bands %}
+  <g class="rack-block{% if not b.space.device_id %} is-reserved{% endif %}{% if can_change %} cursor-grab{% endif %}" {% if can_change %}tabindex="0" role="{% if b.ports %}group{% else %}button{% endif %}"{% elif b.ports %}role="group"{% endif %}
+     aria-label="{{ b.space.label }}, {% blocktranslate with start=b.space.start end=b.space.end %}units {{ start }} to {{ end }}{% endblocktranslate %}"
+     data-start="{{ b.space.start }}" data-size="{{ b.space.size }}" data-y="{{ b.y }}"
+     {% if b.space.device_id %}data-href="{% url 'devices:device' b.space.device_id %}"{% endif %}
+     {% if can_change %}data-move-url="{% url 'dcim:space-move' e.rack.pk b.space.pk %}"{% endif %}>
+    <rect x="{{ e.area_x|add:2 }}" y="{{ b.y|add:3 }}" width="{{ e.area_w|add:-4 }}" height="{{ b.height|add:-6 }}" rx="8" class="{% if b.space.device_id %}rack-device{% if b.passive %} is-passive{% endif %}{% else %}rack-reserved{% endif %}"/>
+    {% if b.image and not b.ports %}<image href="{% url 'metadata:download' b.image %}" x="{{ e.area_x|add:36 }}" y="{{ b.y|add:6 }}" width="{{ e.area_w|add:-64 }}" height="{{ b.height|add:-12 }}" preserveAspectRatio="xMidYMid meet"/>{% endif %}
+    <rect x="{{ e.area_x|add:2 }}" y="{{ b.y|add:3 }}" width="32" height="{{ b.height|add:-6 }}" rx="8" class="rack-strip"/>
+    <text transform="translate({{ e.area_x|add:23 }} {{ b.y|add:b.half }}) rotate(-90)" text-anchor="middle" font-size="{{ b.name_font }}" class="rack-device-name">{{ b.space.label }}</text>
+    {% if can_change %}<g class="rack-grip" aria-hidden="true">{% for dot in b.grip %}<circle cx="{{ dot.0 }}" cy="{{ dot.1 }}" r="2"/>{% endfor %}</g>{% endif %}
+    {% for g in b.ports %}
+    <a href="{% url 'devices:port' g.port.pk %}" class="rack-port is-{{ g.state }}{% if g.passive %} on-passive{% endif %}" data-path="{{ g.path_id }}">
+      <title>{{ g.title }}</title>
+      <path d="{{ g.shape }}" {% if g.state == "complete" %}fill="{{ g.colour }}"{% elif g.state == "partial" %}fill="{{ g.colour }}" fill-opacity="0.45"{% endif %}/>
+      {% if not g.copper %}<path d="{{ g.inner }}" class="rack-port-inner"/>{% endif %}
+      {% if g.label_y %}<text x="{{ g.centre_x }}" y="{{ g.label_y }}" font-size="{{ g.font }}" text-anchor="middle">{{ g.short }}</text>{% endif %}
+      {% if g.leaves %}<circle cx="{{ g.mark_x }}" cy="{{ g.y }}" r="4.5" class="rack-port-leaves is-{{ g.leaves }}"/>{% endif %}
+    </a>
+    {% endfor %}
+  </g>
+  {% endfor %}
+  {% for w in e.wires %}<path d="{{ w.d }}" stroke="{{ w.colour }}" class="rack-wire" data-path="{{ w.path_id }}"><title>{{ w.title }}</title></path>{% endfor %}
+</g>

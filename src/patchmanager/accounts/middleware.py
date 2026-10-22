@@ -100,6 +100,13 @@ class MFAEnforcementMiddleware:
     def __call__(self, request: HttpRequest) -> HttpResponse:
         """Confine the session to the security page until a factor exists."""
         if request.user.is_authenticated and request.session.get(MFA_SETUP_REQUIRED):
+            from patchmanager.accounts.services import auth
+
+            if auth.has_mfa(request.user):
+                # Enrolled in another session: this one never proved the second factor.
+                auth.logout_user(request)
+                messages.info(request, _("Sign in again with your second factor."))
+                return redirect(settings.LOGIN_URL)
             allowed = (reverse("accounts:security"), reverse("accounts:logout"), "/account/mfa/")
             if not request.path.startswith(allowed) and not request.path.startswith(ALWAYS_OPEN):
                 messages.warning(request, _("Set up a second factor to continue."))

@@ -8,6 +8,13 @@ All notable changes to this project are documented here. The format follows
 
 ### Added
 
+* Rack view over the full page width: every port of every device drawn like on the
+  hardware, coloured by the state of its path, cables routed through the side
+  channels, the whole path highlighted when pointing at a port, front and rear,
+  connections table, and "add a device here" on free units.
+* Room cabling: all racks of a room side by side with the cables inside them and
+  between them over the cable tray.
+* Every object is created on its own page.
 * Personal data: everyone can download their data as JSON; administrators can
   anonymise accounts for erasure requests (ADR 0024).
 * Backup and restore drill on the production stack in every CI run; guides for
@@ -18,6 +25,8 @@ All notable changes to this project are documented here. The format follows
 
 ### Security
 
+* A session that signed in with the password alone is ended when a second factor
+  is enrolled elsewhere, instead of staying on the enrolment page.
 * Behind the reverse proxy every request had the proxy's address, so the login
   rate limit per IP was shared by all users (one client could block sign in for
   everyone) and the audit log recorded the proxy. The client address now comes
@@ -31,6 +40,8 @@ All notable changes to this project are documented here. The format follows
 * Search loaded the vendor of every device hit separately.
 * Path tracing needed two queries per cable hop instead of one.
 * The status code on error pages was below AA contrast in light mode.
+* OpenStreetMap tiles were blocked because the page sent no Referer; tiles are grey.
+* The device page traced every cabled port with its own queries.
 
 ### Removed
 

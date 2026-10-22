@@ -51,5 +51,5 @@ def test_type_to_mounted_device_with_photo(
     page.get_by_role("button", name="Upload").click()
     expect(page.get_by_alt_text("Front view")).to_be_visible()
     page.goto(f"{live_server.url}/racks/{tree['rack'].pk}/")
-    expect(page.get_by_role("button", name=re.compile("edge-01, units 4 to 4"))).to_be_visible()
+    expect(page.get_by_role("group", name=re.compile("edge-01, units 4 to 4"))).to_be_visible()
     assert not [e for e in errors if "Content-Security-Policy" in e]

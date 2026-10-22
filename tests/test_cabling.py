@@ -79,6 +79,19 @@ def _port(device, name):
     return device.ports.get(name=name)
 
 
+def _batched_matches_single() -> None:
+    """``trace_many`` finds exactly what ``trace`` finds, for every port."""
+    ports = list(Port.objects.all())
+    many = trace.trace_many(ports)
+    for port in ports:
+        one = trace.trace(port)
+        assert [p.pk for p in many[port.pk].ports] == [p.pk for p in one.ports], port
+        assert [(link.kind, link.position) for link in many[port.pk].links] == [
+            (link.kind, link.position) for link in one.links
+        ]
+        assert many[port.pk].loop == one.loop
+
+
 def test_connect_rules(kit, super_admin) -> None:
     with rls.system_context():
         a = _device(kit, "switch", "sw-a")
@@ -188,6 +201,7 @@ def test_trace_through_two_panels(kit, super_admin) -> None:
         middle = trace.trace(_port(p2, "R7"))
         assert middle.ends[0].pk in {_port(sw, "ge5").pk, _port(pc, "ge1").pk}
         assert {middle.ends[0].pk, middle.ends[1].pk} == {_port(sw, "ge5").pk, _port(pc, "ge1").pk}
+        _batched_matches_single()
 
 
 def test_trace_through_mpo_trunk_keeps_position(kit, super_admin) -> None:
@@ -209,6 +223,7 @@ def test_trace_through_mpo_trunk_keeps_position(kit, super_admin) -> None:
         path = trace.trace(_port(a, "ge1"))
         assert path.ends[1].pk == _port(b, "ge1").pk
         assert [link.position for link in path.links if link.kind == "internal"] == [5, 5]
+        _batched_matches_single()
 
 
 def test_incomplete_and_loop(kit, super_admin) -> None:
@@ -220,6 +235,7 @@ def test_incomplete_and_loop(kit, super_admin) -> None:
         assert not open_path.complete and open_path.ends[1].name == "R1"
         lonely = trace.trace(_port(sw, "ge2"))
         assert lonely.ports == [_port(sw, "ge2")] and not lonely.complete
+        _batched_matches_single()
 
 
 def test_loop_detection(kit, super_admin) -> None:
@@ -230,6 +246,7 @@ def test_loop_detection(kit, super_admin) -> None:
         services.connect(kit["request"], super_admin, _port(p2, "F1"), _port(p1, "F1"))
         path = trace.trace(_port(p1, "F1"))
         assert path.loop and not path.complete
+        _batched_matches_single()
 
 
 @settings(
@@ -262,6 +279,7 @@ def test_trace_property_any_panel_chain(kit, super_admin, panels, index) -> None
         for hop in forward.ports[1:-1]:
             via = trace.trace(Port.objects.get(pk=hop.pk))
             assert {via.ends[0].pk, via.ends[1].pk} == expected
+        _batched_matches_single()
 
 
 def test_cabling_views(admin_client: Client, kit, system) -> None:

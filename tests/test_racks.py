@@ -7,8 +7,8 @@ from hypothesis import strategies as st
 
 from patchmanager.accounts.services import ServiceError
 from patchmanager.dcim import services
+from patchmanager.dcim.elevation import UNIT, layout
 from patchmanager.dcim.models import Rack, RackSpace
-from patchmanager.dcim.views import UNIT_PX, elevation
 from patchmanager.tenancy import rls
 
 pytestmark = pytest.mark.django_db
@@ -114,11 +114,11 @@ def test_elevation_coordinates(make_tree, super_admin) -> None:
             t["request"], super_admin, t["rack"], start=1, size=2, face="front", label="Bottom"
         )
         rack = Rack.objects.get(pk=t["rack"].pk)
-        front = elevation(rack, "front")
-        assert front["blocks"][0].y == 8 * UNIT_PX  # units 1-2 at the bottom of a 10 U rack
-        assert elevation(rack, "rear")["blocks"] == []
+        front = layout(super_admin, rack, "front")
+        assert front.bands[0].y == 8 * UNIT  # units 1-2 at the bottom of a 10 U rack
+        assert layout(super_admin, rack, "rear").bands == []
         rack.descending_units = True
-        assert elevation(rack, "front")["blocks"][0].y == 0
+        assert layout(super_admin, rack, "front").bands[0].y == 0
 
 
 def test_rack_page_and_json_move(admin_client: Client, make_tree, system) -> None:

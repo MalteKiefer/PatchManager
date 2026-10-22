@@ -63,3 +63,53 @@
 
 /* Map tiles in black and white, so markers and the brand colour stand out. */
 .leaflet-tile-pane { filter: grayscale(1); }
+
+/* Toolbars and small status chips. */
+@layer components {
+  .toolbar { @apply flex flex-wrap items-center gap-2; }
+  .chip { @apply flex items-center gap-1.5 rounded-full border border-slate-200 bg-white px-3 py-1 text-slate-600 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300; }
+  .segmented { @apply inline-flex overflow-hidden rounded-md border border-slate-300 bg-white text-sm font-medium dark:border-slate-700 dark:bg-slate-800; }
+  .segmented > a, .segmented > button { @apply px-3 py-2 text-slate-700 no-underline hover:bg-slate-50 dark:text-slate-200 dark:hover:bg-slate-700; }
+  .segmented > [aria-current="page"], .segmented > [aria-pressed="true"] { @apply bg-brand-600 text-white hover:bg-brand-600 dark:bg-brand-600; }
+  .legend { @apply flex flex-wrap gap-x-5 gap-y-1 text-xs text-slate-600 dark:text-slate-300; }
+  .legend > li { @apply flex items-center gap-1.5; }
+  .legend-swatch { @apply inline-block size-3.5 rounded-sm border-2; }
+  .legend-swatch.is-complete { @apply border-blue-600 bg-blue-600; }
+  .legend-swatch.is-partial { @apply border-dashed border-blue-600 bg-blue-600/35; }
+  .legend-swatch.is-ready { @apply border-slate-950 bg-slate-950 dark:border-white dark:bg-white; }
+  .legend-swatch.is-none { @apply border-slate-300 bg-slate-300 dark:border-slate-600 dark:bg-slate-600; }
+  .legend-swatch.is-empty { @apply border-slate-400 bg-white dark:bg-slate-900; }
+  .legend-dot { @apply inline-block size-2.5 rounded-full; }
+  .legend-dot.is-face, .rack-port-leaves.is-face { @apply bg-amber-400 fill-amber-400; }
+  .legend-dot.is-rack, .rack-port-leaves.is-rack { @apply bg-fuchsia-500 fill-fuchsia-500; }
+}
+
+/* Rack elevation drawing (dcim/_elevation.html). */
+.rack-scroll { @apply max-h-[85vh] overflow-auto; }
+.rack-svg[data-fit="width"] { width: 100%; height: auto; }
+.rack-svg[data-fit="height"] { display: block; height: 80vh; width: auto; max-width: 100%; margin: 0 auto; }
+.rack-frame { @apply fill-slate-100 stroke-slate-300 dark:fill-slate-900 dark:stroke-slate-700; stroke-width: 2; }
+.rack-unit-line { @apply stroke-slate-200 dark:stroke-slate-800; }
+.rack-unit-number { @apply fill-slate-500 dark:fill-slate-400; font-size: 15px; font-variant-numeric: tabular-nums; }
+.rack-add rect { @apply fill-transparent; }
+.rack-add text { @apply fill-slate-300 dark:fill-slate-700; font-size: 28px; }
+.rack-add:hover rect, .rack-add:focus-visible rect { @apply fill-brand-50 dark:fill-slate-800; }
+.rack-add:hover text, .rack-add:focus-visible text { @apply fill-brand-600; }
+.rack-device { @apply fill-white stroke-slate-300 dark:fill-slate-900 dark:stroke-slate-600; stroke-width: 1.5; }
+.rack-device.is-passive { @apply fill-slate-50 dark:fill-slate-900; }
+.rack-reserved { @apply fill-brand-50 stroke-brand-600 dark:fill-slate-800; stroke-dasharray: 6 4; stroke-width: 1.5; }
+.rack-strip { @apply fill-slate-100 dark:fill-slate-800; }
+.rack-device-name { @apply fill-slate-700 dark:fill-slate-200; font-weight: 600; letter-spacing: 0.02em; }
+.rack-grip circle { @apply fill-slate-300 dark:fill-slate-600; }
+.rack-port.is-none path { @apply fill-slate-300 dark:fill-slate-600; }
+.rack-port.on-passive.is-none path { @apply fill-white stroke-slate-400 dark:fill-slate-900 dark:stroke-slate-500; stroke-width: 1.5; }
+.rack-port.is-ready path { @apply fill-slate-950 dark:fill-white; }
+.rack-port .rack-port-inner { @apply fill-white dark:fill-slate-900; pointer-events: none; stroke: none; }
+.rack-port text { @apply fill-slate-500 dark:fill-slate-400; font-weight: 600; pointer-events: none; font-variant-numeric: tabular-nums; }
+.rack-port:hover path, .rack-port:focus-visible path, .rack-svg .rack-port.is-hot path { stroke: #f59e0b; stroke-width: 2.5; }
+.rack-wire { fill: none; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; opacity: 0.9; pointer-events: none; }
+.rack-svg.is-tracing [data-path]:not(.is-hot) { opacity: 0.18; }
+.rack-svg .rack-wire.is-hot { stroke: #f59e0b; stroke-width: 4; opacity: 1; }
+tr.is-hot { @apply bg-amber-50 dark:bg-slate-800; }
+.rack-title { @apply fill-slate-800 dark:fill-slate-100; font-size: 26px; font-weight: 600; }
+.rack-wire.is-tray { stroke-linejoin: round; }

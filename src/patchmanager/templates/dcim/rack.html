@@ -1,61 +1,74 @@
 {% extends "base.html" %}{% load i18n static pm %}
 {% block title %}{{ rack.name }}{% endblock %}
+{% block main_class %}px-4 py-6 sm:px-6{% endblock %}
 {% block head %}<script type="module" src="{% static 'core/rack.js' %}"></script>{% endblock %}
 {% block content %}
 {% include "core/_breadcrumbs.html" with current=rack.name %}
-<div class="mb-6 flex flex-wrap items-center gap-3">
-  <h1 class="mr-auto">{{ rack.name }} <span class="text-base font-normal text-slate-500">{{ rack.u_height }} U · {{ rack.get_width_display }}</span></h1>
-  <a class="btn-secondary" href="{% url 'exchange:report' 'rack' rack.pk %}">{% translate "Elevation (PDF)" %}</a>
-  <nav class="flex gap-1" aria-label="{% translate 'Rack face' %}">
-    <a class="btn-secondary" href="?face=front" {% if face == "front" %}aria-current="page"{% endif %}>{% translate "Front" %}</a>
-    <a class="btn-secondary" href="?face=rear" {% if face == "rear" %}aria-current="page"{% endif %}>{% translate "Rear" %}</a>
-  </nav>
+<div class="mb-4 flex flex-wrap items-center gap-3">
+  <h1 class="mr-auto">{{ rack.name }}</h1>
+  <dl class="flex flex-wrap gap-2 text-sm">
+    <div class="chip"><dt class="sr-only">{% translate "Height" %}</dt><dd>{{ rack.u_height }} U · {{ rack.get_width_display }}</dd></div>
+    <div class="chip"><dt>{% translate "Used" %}</dt><dd class="font-semibold">{{ stats.used }} U ({{ stats.percent }} %)</dd></div>
+    <div class="chip"><dt>{% translate "Free" %}</dt><dd class="font-semibold">{{ stats.free }} U</dd></div>
+    <div class="chip"><dt>{% translate "Cables" %}</dt><dd class="font-semibold">{{ cable_count }}</dd></div>
+  </dl>
 </div>
-<div class="grid gap-6 lg:grid-cols-3">
-  <section class="card" aria-labelledby="elevation-h">
-    <h2 id="elevation-h" class="mb-3">{% if face == "front" %}{% translate "Front view" %}{% else %}{% translate "Rear view" %}{% endif %}</h2>
-    {% with e=elevation %}
-    <svg id="rack-elevation" class="mx-auto block w-full max-w-xs select-none" viewBox="0 0 280 {{ e.height }}" role="img"
+
+<div class="toolbar mb-3" role="toolbar" aria-label="{% translate 'Rack view' %}">
+  <nav class="segmented" aria-label="{% translate 'Rack face' %}">
+    <a href="?face=front" {% if face == "front" %}aria-current="page"{% endif %}>{% translate "Front" %}</a>
+    <a href="?face=rear" {% if face == "rear" %}aria-current="page"{% endif %}>{% translate "Rear" %}</a>
+  </nav>
+  <div class="segmented" id="rack-fit">
+    <button type="button" data-fit="width" aria-pressed="true">{% translate "Fill width" %}</button>
+    <button type="button" data-fit="height" aria-pressed="false">{% translate "Whole rack" %}</button>
+  </div>
+  <span class="mr-auto"></span>
+  {% if add_url %}<a class="btn-primary" href="{{ add_url }}">{% translate "Mount device" %}</a>{% endif %}
+  {% if can_change %}<a class="btn-secondary" href="{% url 'dcim:space-create' rack.pk %}">{% translate "Reserve units" %}</a>{% endif %}
+  <a class="btn-secondary" href="{% url 'exchange:report' 'rack' rack.pk %}">{% translate "Elevation (PDF)" %}</a>
+</div>
+
+<section class="card mb-6 p-3 sm:p-4" aria-labelledby="elevation-h">
+  <h2 id="elevation-h" class="sr-only">{% if face == "front" %}{% translate "Front view" %}{% else %}{% translate "Rear view" %}{% endif %}</h2>
+  <ul class="legend mb-3" aria-label="{% translate 'Legend' %}">
+    <li><span class="legend-swatch is-complete" aria-hidden="true"></span>{% translate "connected end to end" %}</li>
+    <li><span class="legend-swatch is-partial" aria-hidden="true"></span>{% translate "cabled, path open" %}</li>
+    <li><span class="legend-swatch is-ready" aria-hidden="true"></span>{% translate "wired behind, nothing plugged in" %}</li>
+    <li><span class="legend-swatch is-none" aria-hidden="true"></span>{% translate "free" %}</li>
+    <li><span class="legend-swatch is-empty" aria-hidden="true"></span>{% translate "panel port, nothing behind" %}</li>
+    <li><span class="legend-dot is-face" aria-hidden="true"></span>{% if face == "front" %}{% translate "continues on the rear" %}{% else %}{% translate "continues on the front" %}{% endif %}</li>
+    <li><span class="legend-dot is-rack" aria-hidden="true"></span>{% translate "leaves the rack" %}</li>
+  </ul>
+  <div class="rack-scroll">
+    <svg id="rack-elevation" class="rack-svg select-none" viewBox="0 -8 {{ e.width }} {{ e.height|add:16 }}" data-fit="width" role="group"
          aria-label="{% blocktranslate with name=rack.name %}Elevation of rack {{ name }}{% endblocktranslate %}"
-         data-unit-px="{{ e.unit_px }}" data-units="{{ rack.u_height }}" data-descending="{% if rack.descending_units %}1{% endif %}" data-face="{{ face }}">
-      {% for row in e.rows %}
-      <g class="rack-row">
-        <rect x="32" y="{{ row.y }}" width="240" height="{{ e.unit_px }}" class="fill-slate-50 stroke-slate-300 dark:fill-slate-900 dark:stroke-slate-700"/>
-        <text x="26" y="{{ row.y|add:15 }}" text-anchor="end" class="fill-slate-500 text-[10px]">{{ row.unit }}</text>
-      </g>
-      {% endfor %}
-      {% for b in e.blocks %}
-      <g class="rack-block {% if can_change %}cursor-grab{% endif %}" {% if can_change %}tabindex="0" role="button"{% endif %}
-         aria-label="{{ b.space.label }}, {% blocktranslate with start=b.space.start end=b.space.end %}units {{ start }} to {{ end }}{% endblocktranslate %}"
-         data-start="{{ b.space.start }}" data-size="{{ b.space.size }}" data-y="{{ b.y }}"
-         {% if b.space.device_id %}data-href="{% url 'devices:device' b.space.device_id %}"{% endif %}
-         {% if can_change %}data-move-url="{% url 'dcim:space-move' rack.pk b.space.pk %}"{% endif %}>
-        <rect x="34" y="{{ b.y|add:1 }}" width="236" height="{{ b.height|add:-2 }}" rx="3" class="{% if b.space.device_id %}fill-slate-200 stroke-slate-500 dark:fill-slate-800{% else %}fill-brand-100 stroke-brand-600 dark:fill-slate-700{% endif %}"/>
-        {% if b.image %}<image href="{% url 'metadata:download' b.image %}" x="35" y="{{ b.y|add:2 }}" width="234" height="{{ b.height|add:-4 }}" preserveAspectRatio="none"/>{% endif %}
-        <text x="152" y="{{ b.y|add:15 }}" text-anchor="middle" class="fill-slate-800 text-[11px] dark:fill-slate-100{% if b.image %} paint-order-stroke{% endif %}">{{ b.space.label|truncatechars:34 }}</text>
-      </g>
-      {% endfor %}
+         data-unit-px="76" data-units="{{ rack.u_height }}" data-descending="{% if rack.descending_units %}1{% endif %}" data-face="{{ face }}">
+      {% include "dcim/_elevation.html" %}
     </svg>
-    {% endwith %}
-    {% if can_change %}<p class="mt-2 text-xs text-slate-500">{% translate "Drag a block, or focus it and use the arrow keys, to move it." %}</p>{% endif %}
-    <p id="rack-status" class="mt-2 text-sm text-red-600" role="alert" aria-live="polite"></p>
+  </div>
+  <p class="mt-2 text-xs text-slate-500">{% translate "Point at a port or cable to follow its path; select a port to open it." %}{% if can_change %} {% translate "Drag a device, or focus it and use the arrow keys, to move it." %}{% endif %}</p>
+  <p id="rack-status" class="mt-2 text-sm text-red-600" role="alert" aria-live="polite"></p>
+</section>
+
+<div class="grid gap-6 xl:grid-cols-3">
+  <section class="card overflow-x-auto p-0 xl:col-span-2" aria-labelledby="conn-h">
+    <h2 id="conn-h" class="px-4 pt-4">{% translate "Connections" %}</h2>
+    <table class="table">
+      <thead><tr><th>{% translate "Port" %}</th><th>{% translate "Cable" %}</th><th>{% translate "Far end" %}</th><th>{% translate "Hops" %}</th><th>{% translate "Status" %}</th></tr></thead>
+      <tbody>{% for c in connections %}<tr data-path="{{ c.path_id }}">
+        <td><a href="{% url 'devices:port' c.port.pk %}">{{ c.port.device }} · {{ c.port.name }}</a></td>
+        <td><a href="{% url 'cabling:cable' c.cable.pk %}"><span class="mr-1 inline-block size-2 rounded-full" data-swatch="{{ c.cable.colour }}" aria-hidden="true"></span>{{ c.cable }}</a> <span class="text-xs text-slate-500">{{ c.cable.get_media_display }}</span></td>
+        <td>{% if c.far %}<a href="{% url 'devices:port' c.far.pk %}">{{ c.far.device }} · {{ c.far.name }}</a>{% else %}<span class="text-slate-500">{% translate "(not visible to you)" %}</span>{% endif %}</td>
+        <td>{{ c.hops }}</td>
+        <td>{% if c.complete %}<span class="badge-ok">{% translate "complete" %}</span>{% else %}<span class="badge-muted">{% translate "open" %}</span>{% endif %}</td>
+      </tr>{% empty %}<tr><td colspan="5" class="text-slate-500">{% translate "No cables in this rack yet." %}</td></tr>{% endfor %}</tbody>
+    </table>
   </section>
 
-  <div class="space-y-6 lg:col-span-2">
-    <section class="card" aria-labelledby="stats-h">
-      <h2 id="stats-h" class="mb-3">{% translate "Utilisation" %}</h2>
-      <dl class="grid grid-cols-2 gap-3 sm:grid-cols-4">
-        <div><dt class="text-xs text-slate-500">{% translate "Used" %}</dt><dd class="text-xl font-semibold">{{ stats.used }} U</dd></div>
-        <div><dt class="text-xs text-slate-500">{% translate "Free" %}</dt><dd class="text-xl font-semibold">{{ stats.free }} U</dd></div>
-        <div><dt class="text-xs text-slate-500">{% translate "Front" %}</dt><dd class="text-xl font-semibold">{{ stats.front }} U</dd></div>
-        <div><dt class="text-xs text-slate-500">{% translate "Rear" %}</dt><dd class="text-xl font-semibold">{{ stats.rear }} U</dd></div>
-      </dl>
-      <meter class="mt-3 w-full" min="0" max="100" value="{{ stats.percent }}" aria-label="{% translate 'Used' %}">{{ stats.percent }} %</meter>
-    </section>
-
+  <div class="space-y-6">
     <section class="card" aria-labelledby="devices-h">
-      <div class="mb-3 flex items-center"><h2 id="devices-h" class="mr-auto">{% translate "Devices" %}</h2>
-        {% if can_add_device %}<a class="btn-secondary" href="{% url 'devices:device-create' %}?rack={{ rack.pk }}">{% translate "Mount device" %}</a>{% endif %}</div>
+      <h2 id="devices-h" class="mb-3">{% translate "Devices" %}</h2>
       <ul class="divide-y divide-slate-100 dark:divide-slate-800">
         {% for s in device_spaces %}<li class="flex items-center gap-2 py-2"><span class="w-16 font-mono text-xs text-slate-500">U{{ s.start }}{% if s.size > 1 %}–{{ s.end }}{% endif %}</span><a href="{% url 'devices:device' s.device_id %}">{{ s.label }}</a><span class="text-xs text-slate-500">{{ s.device.device_type }}</span></li>
         {% empty %}<li class="py-2 text-sm text-slate-500">{% translate "No devices mounted." %}</li>{% endfor %}
@@ -64,13 +77,11 @@
 
     <section class="card" aria-labelledby="spaces-h">
       <h2 id="spaces-h" class="mb-3">{% translate "Reserved units" %}</h2>
-      <div class="overflow-x-auto"><table class="table">
-        <thead><tr><th>{% translate "Label" %}</th><th>{% translate "Units" %}</th><th>{% translate "Face" %}</th><th></th></tr></thead>
-        <tbody>{% for s in reservations %}<tr><td>{{ s.label }}</td><td>{{ s.start }}{% if s.size > 1 %}–{{ s.end }}{% endif %}</td><td>{{ s.get_face_display }}</td>
-          <td>{% if can_change %}<form method="post" action="{% url 'dcim:space-delete' rack.pk s.pk %}" data-confirm="{% translate 'Free these units?' %}">{% csrf_token %}<button class="btn-secondary py-1">{% translate "Free" %}</button></form>{% endif %}</td></tr>
-        {% empty %}<tr><td colspan="4" class="text-slate-500">{% translate "No units reserved." %}</td></tr>{% endfor %}</tbody>
-      </table></div>
-      {% if can_change %}<a class="btn-secondary mt-4" href="{% url 'dcim:space-create' rack.pk %}">{% translate "Reserve units" %}</a>{% endif %}
+      <ul class="divide-y divide-slate-100 dark:divide-slate-800">
+        {% for s in reservations %}<li class="flex items-center gap-2 py-2"><span class="w-16 font-mono text-xs text-slate-500">U{{ s.start }}{% if s.size > 1 %}–{{ s.end }}{% endif %}</span><span class="mr-auto">{{ s.label }} <span class="text-xs text-slate-500">{{ s.get_face_display }}</span></span>
+          {% if can_change %}<form method="post" action="{% url 'dcim:space-delete' rack.pk s.pk %}" data-confirm="{% translate 'Free these units?' %}">{% csrf_token %}<button class="btn-secondary py-1">{% translate "Free" %}</button></form>{% endif %}</li>
+        {% empty %}<li class="py-2 text-sm text-slate-500">{% translate "No units reserved." %}</li>{% endfor %}
+      </ul>
     </section>
 
     {% metadata_panel rack %}

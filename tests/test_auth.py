@@ -129,6 +129,17 @@ def test_super_admin_must_enrol_mfa(client: Client, super_admin) -> None:
     assert client.get("/account/security/", secure=True).status_code == 200
 
 
+def test_enrolment_elsewhere_ends_the_single_factor_session(client: Client, super_admin) -> None:
+    from tests.conftest import add_totp
+
+    login(client, super_admin)
+    assert client.get("/manage/", secure=True).url == "/account/security/"
+    add_totp(super_admin)  # enrolled in another browser
+    response = client.get("/manage/", secure=True)
+    assert response.url.startswith("/auth/login/")
+    assert client.get("/manage/", secure=True).url.startswith("/auth/login/")  # signed out
+
+
 def test_tenant_requiring_mfa_forces_enrolment(
     client: Client, make_user, make_tenant, grant
 ) -> None:

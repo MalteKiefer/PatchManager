@@ -49,6 +49,7 @@ if (svg) {
     });
 
     block.addEventListener("pointerdown", (event) => {
+      if (event.target.closest("a")) return; // ports are links, not drag handles
       block.setPointerCapture(event.pointerId);
       const scale = svg.viewBox.baseVal.height / svg.getBoundingClientRect().height;
       const originY = event.clientY;
@@ -78,4 +79,53 @@ if (svg) {
       if (event.key === "Enter") location.assign(block.dataset.href);
     });
   }
+}
+
+// Point at a port, cable or table row: highlight every port and cable of its path.
+const drawing = document.querySelector(".rack-svg");
+if (drawing) {
+  const marked = () => document.querySelectorAll("[data-path].is-hot");
+  const show = (id) => {
+    for (const el of marked()) el.classList.remove("is-hot");
+    if (!id) {
+      drawing.classList.remove("is-tracing");
+      return;
+    }
+    for (const el of document.querySelectorAll(`[data-path="${CSS.escape(id)}"]`)) {
+      el.classList.add("is-hot");
+    }
+    drawing.classList.add("is-tracing");
+  };
+  for (const el of document.querySelectorAll("[data-path]")) {
+    el.addEventListener("pointerenter", () => show(el.dataset.path));
+    el.addEventListener("pointerleave", () => show(""));
+    el.addEventListener("focusin", () => show(el.dataset.path));
+    el.addEventListener("focusout", () => show(""));
+  }
+}
+
+// Fill the page width, or show the whole rack; remembered per browser.
+const fit = document.getElementById("rack-fit");
+if (fit && drawing) {
+  const apply = (mode) => {
+    drawing.dataset.fit = mode;
+    for (const b of fit.querySelectorAll("button")) {
+      b.setAttribute("aria-pressed", String(b.dataset.fit === mode));
+    }
+  };
+  try {
+    apply(localStorage.getItem("pm-rack-fit") || "width");
+  } catch {
+    apply("width");
+  }
+  fit.addEventListener("click", (event) => {
+    const mode = event.target.closest("button")?.dataset.fit;
+    if (!mode) return;
+    apply(mode);
+    try {
+      localStorage.setItem("pm-rack-fit", mode);
+    } catch {
+      // storage blocked: the choice lasts for this page only
+    }
+  });
 }

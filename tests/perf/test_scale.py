@@ -22,9 +22,6 @@ pytestmark = [pytest.mark.perf, pytest.mark.django_db]
 RACKS = int(os.environ.get("PERF_RACKS", "500"))
 SECONDS = 1.5  # per page, measured on CI runners
 QUERIES = 60  # a page must not grow with the inventory (no N+1)
-# ponytail: the device page traces each cabled port on its own (a few queries per hop);
-# that grows with the device, not the inventory. Batch the traces if devices get huge.
-QUERIES_PER_CABLED_PORT = 4
 
 
 def _measure(client, url: str, **extra) -> tuple[float, int]:
@@ -57,6 +54,8 @@ def test_pages_stay_fast_with_a_large_inventory(admin_client, super_admin) -> No
         "/locations/": admin_client,
         f"/locations/room/{room.pk}/": admin_client,
         f"/racks/{rack.pk}/": admin_client,
+        f"/racks/{rack.pk}/?face=rear": admin_client,
+        f"/locations/room/{room.pk}/cabling/": admin_client,
         f"/devices/{switch.pk}/": admin_client,
         f"/devices/ports/{port.pk}/": admin_client,
         f"/cabling/trace/{port.pk}/": admin_client,
@@ -74,12 +73,9 @@ def test_pages_stay_fast_with_a_large_inventory(admin_client, super_admin) -> No
         f"{t * 1000:7.0f} ms {q:4} queries  {url}" for url, (t, q) in results.items()
     )
     print(f"\n{counts}\n{report}")
-    with rls.system_context():
-        cabled = switch.ports.filter(cable_end__isnull=False).count()
-    budget = {f"/devices/{switch.pk}/": QUERIES + QUERIES_PER_CABLED_PORT * cabled}
     slow = {
         url: (took, count)
         for url, (took, count) in results.items()
-        if took > SECONDS or count > budget.get(url, QUERIES)
+        if took > SECONDS or count > QUERIES
     }
     assert not slow, report
