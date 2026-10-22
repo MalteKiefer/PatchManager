@@ -172,8 +172,10 @@ def place(
         if rack is not None and position is not None:
             _mount(device, rack, position, face)
         from patchmanager.cabling.services import refresh_paths
+        from patchmanager.ipam import services as ipam
 
         refresh_paths(device)
+        ipam.refresh_paths(device)
     audit.record(
         "dcim.device.moved",
         request=request,

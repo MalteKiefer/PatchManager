@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-22 03:32+0000\n"
+"POT-Creation-Date: 2026-10-22 03:41+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -192,9 +192,9 @@ msgid "language"
 msgstr "Sprache"
 
 #: accounts/models.py:46 dcim/models.py:31 dcim/models.py:178
-#: integrations/models.py:22 networks/models.py:15
-#: templates/manage/tenants.html:8 templates/manage/user_detail.html:6
-#: templates/manage/users.html:13
+#: integrations/models.py:22 ipam/models.py:42 ipam/models.py:113
+#: networks/models.py:15 templates/manage/tenants.html:8
+#: templates/manage/user_detail.html:6 templates/manage/users.html:13
 msgid "active"
 msgstr "aktiv"
 
@@ -208,16 +208,17 @@ msgstr "Notfallkonto"
 
 #: accounts/models.py:151 accounts/models.py:182 api/models.py:16
 #: api/models.py:56 dcim/models.py:35 dcim/models.py:188 dcim/models.py:227
-#: integrations/models.py:16 library/models.py:25 library/models.py:177
-#: locations/models.py:16 locations/models.py:58 locations/models.py:78
-#: locations/models.py:108 networks/models.py:30 scim/models.py:14
-#: search/models.py:16 sso/models.py:19 tenancy/models.py:21
+#: integrations/models.py:16 ipam/models.py:18 library/models.py:25
+#: library/models.py:177 locations/models.py:16 locations/models.py:58
+#: locations/models.py:78 locations/models.py:108 networks/models.py:30
+#: scim/models.py:14 search/models.py:16 sso/models.py:19 tenancy/models.py:21
 msgid "name"
 msgstr "Name"
 
 #: accounts/models.py:152 accounts/models.py:183 dcim/models.py:237
-#: library/models.py:127 locations/models.py:35 locations/models.py:59
-#: locations/models.py:110 networks/models.py:34 networks/models.py:81
+#: ipam/models.py:20 ipam/models.py:74 ipam/models.py:131 library/models.py:127
+#: locations/models.py:35 locations/models.py:59 locations/models.py:110
+#: networks/models.py:34 networks/models.py:81
 msgid "description"
 msgstr "Beschreibung"
 
@@ -816,8 +817,8 @@ msgstr "Länge (m)"
 msgid "label"
 msgstr "Bezeichnung"
 
-#: cabling/models.py:57 dcim/models.py:45 dcim/models.py:190
-#: networks/models.py:32
+#: cabling/models.py:57 dcim/models.py:45 dcim/models.py:190 ipam/models.py:72
+#: ipam/models.py:128 networks/models.py:32
 msgid "status"
 msgstr "Status"
 
@@ -874,7 +875,7 @@ msgid "Device"
 msgstr "Gerät"
 
 #: cabling/views.py:44 exchange/pdf.py:280 templates/dcim/device.html:16
-#: templates/dcim/port.html:35 templates/dcim/rack.html:58
+#: templates/dcim/port.html:35 templates/dcim/rack.html:66
 msgid "Port"
 msgstr "Port"
 
@@ -891,6 +892,14 @@ msgstr "Kabel entfernt."
 #: networks/views.py:131
 msgid "Saved."
 msgstr "Gespeichert."
+
+#: core/fields.py:82
+msgid "Enter a network such as 10.0.0.0/24 or 2001:db8::/48 (host bits zero)."
+msgstr "Geben Sie ein Netz wie 10.0.0.0/24 oder 2001:db8::/48 ein (Host-Bits null)."
+
+#: core/fields.py:94
+msgid "Enter an address such as 10.0.0.5/24 or 2001:db8::5/64."
+msgstr "Geben Sie eine Adresse wie 10.0.0.5/24 oder 2001:db8::5/64 ein."
 
 #: core/system.py:57
 msgid "reachable"
@@ -1091,11 +1100,11 @@ msgstr "Rackgeräte benötigen einen Typ für den Rackeinbau und eine Position."
 msgid "The rack is not in this room."
 msgstr "Das Rack befindet sich nicht in diesem Raum."
 
-#: dcim/devices.py:223
+#: dcim/devices.py:225
 msgid "The rear port must belong to the same device."
 msgstr "Der Rückport muss zum selben Gerät gehören."
 
-#: dcim/devices.py:245 dcim/devices.py:251
+#: dcim/devices.py:247 dcim/devices.py:253
 msgid "This port name or rear position is already used."
 msgstr "Dieser Portname oder diese Rückposition wird bereits verwendet."
 
@@ -1205,7 +1214,8 @@ msgstr "Die Höheneinheiten müssen zwischen 1 und %(height)s liegen."
 msgid "Move or delete the device instead."
 msgstr "Verschieben oder löschen Sie stattdessen das Gerät."
 
-#: dcim/views.py:31 exchange/pdf.py:285 templates/dcim/device.html:16
+#: dcim/views.py:31 exchange/pdf.py:285 templates/dcim/_port_panel.html:8
+#: templates/dcim/device.html:16
 msgid "Label"
 msgstr "Bezeichnung"
 
@@ -1327,7 +1337,8 @@ msgstr "Etage"
 
 #: exchange/pdf.py:199 exchange/pdf.py:281 exchange/pdf.py:325
 #: templates/cabling/cables.html:7 templates/cabling/cables.html:12
-#: templates/dcim/device.html:16 templates/library/type_detail.html:16
+#: templates/dcim/_port_panel.html:6 templates/dcim/device.html:16
+#: templates/library/type_detail.html:16
 msgid "Kind"
 msgstr "Art"
 
@@ -1338,7 +1349,7 @@ msgid "Racks"
 msgstr "Racks"
 
 #: exchange/pdf.py:199 exchange/tables.py:548 search/services.py:66
-#: templates/core/home.html:20 templates/dcim/rack.html:71
+#: templates/core/home.html:20 templates/dcim/rack.html:79
 #: templates/library/types.html:18
 msgid "Devices"
 msgstr "Geräte"
@@ -1356,11 +1367,11 @@ msgstr "VLANs"
 msgid "VID"
 msgstr "VID"
 
-#: exchange/pdf.py:215 templates/dcim/rack.html:58
-#: templates/integrations/webhook.html:23 templates/locations/node.html:23
-#: templates/manage/system.html:17 templates/manage/tenants.html:6
-#: templates/manage/users.html:10 templates/networks/vlans.html:7
-#: templates/sso/providers.html:7
+#: exchange/pdf.py:215 templates/dcim/_device_panel.html:7
+#: templates/dcim/rack.html:66 templates/integrations/webhook.html:23
+#: templates/locations/node.html:23 templates/manage/system.html:17
+#: templates/manage/tenants.html:6 templates/manage/users.html:10
+#: templates/networks/vlans.html:7 templates/sso/providers.html:7
 msgid "Status"
 msgstr "Status"
 
@@ -1373,7 +1384,8 @@ msgstr "Mandant"
 msgid "Site report: %(name)s"
 msgstr "Standortbericht: %(name)s"
 
-#: exchange/pdf.py:232 networks/models.py:16
+#: exchange/pdf.py:232 ipam/models.py:43 ipam/models.py:114
+#: networks/models.py:16
 msgid "reserved"
 msgstr "reserviert"
 
@@ -1400,8 +1412,8 @@ msgstr "%(n)s Höheneinheiten belegt"
 msgid "Rack %(name)s"
 msgstr "Rack %(name)s"
 
-#: exchange/pdf.py:282 templates/dcim/device.html:16
-#: templates/library/type_detail.html:16
+#: exchange/pdf.py:282 templates/dcim/_port_panel.html:7
+#: templates/dcim/device.html:16 templates/library/type_detail.html:16
 msgid "Connector"
 msgstr "Steckverbinder"
 
@@ -1409,7 +1421,7 @@ msgstr "Steckverbinder"
 msgid "Mbit/s"
 msgstr "Mbit/s"
 
-#: exchange/pdf.py:284 networks/models.py:75
+#: exchange/pdf.py:284 ipam/models.py:69 networks/models.py:75
 msgid "VLAN"
 msgstr "VLAN"
 
@@ -1425,8 +1437,8 @@ msgstr "Ports von %(name)s"
 
 #: exchange/pdf.py:325 templates/cabling/cable.html:2
 #: templates/cabling/cable.html:6 templates/cabling/cables.html:12
-#: templates/dcim/device.html:16 templates/dcim/port.html:14
-#: templates/dcim/rack.html:58
+#: templates/dcim/_port_panel.html:9 templates/dcim/device.html:16
+#: templates/dcim/port.html:14 templates/dcim/rack.html:66
 msgid "Cable"
 msgstr "Kabel"
 
@@ -1547,7 +1559,8 @@ msgstr "Port %(d)s %(p)s nicht gefunden."
 msgid "Cables"
 msgstr "Kabel"
 
-#: exchange/tables.py:597 search/services.py:74 templates/dcim/device.html:14
+#: exchange/tables.py:597 search/services.py:74
+#: templates/dcim/_device_panel.html:8 templates/dcim/device.html:14
 #: templates/library/catalog.html:16 templates/library/catalog_entry.html:9
 #: templates/library/type_detail.html:14
 msgid "Ports"
@@ -1890,6 +1903,70 @@ msgstr "Webhook gelöscht."
 msgid "Delivery queued again."
 msgstr "Zustellung erneut eingereiht."
 
+#: ipam/models.py:19
+msgid "route distinguisher"
+msgstr "Route Distinguisher"
+
+#: ipam/models.py:41
+msgid "container"
+msgstr "Container"
+
+#: ipam/models.py:44 ipam/models.py:116 networks/models.py:17
+msgid "deprecated"
+msgstr "veraltet"
+
+#: ipam/models.py:52 ipam/models.py:124
+msgid "VRF"
+msgstr "VRF"
+
+#: ipam/models.py:54
+msgid "prefix"
+msgstr "Präfix"
+
+#: ipam/models.py:61 networks/models.py:25
+msgid "site"
+msgstr "Standort"
+
+#: ipam/models.py:75
+msgid "gateway"
+msgstr "Gateway"
+
+#: ipam/models.py:115
+msgid "DHCP"
+msgstr "DHCP"
+
+#: ipam/models.py:126 locations/models.py:18 tenancy/models.py:22
+msgid "address"
+msgstr "Adresse"
+
+#: ipam/models.py:130
+msgid "DNS name"
+msgstr "DNS-Name"
+
+#: ipam/models.py:138
+msgid "port"
+msgstr "Port"
+
+#: ipam/services.py:37
+msgid "This does not fit the tenant, or the gateway is outside."
+msgstr "Das passt nicht zum Mandanten, oder das Gateway liegt außerhalb."
+
+#: ipam/services.py:57 ipam/services.py:67
+msgid "A VRF with this name already exists."
+msgstr "Ein VRF mit diesem Namen gibt es schon."
+
+#: ipam/services.py:79
+msgid "Prefixes or addresses still use this VRF."
+msgstr "Präfixe oder Adressen nutzen dieses VRF noch."
+
+#: ipam/services.py:91 ipam/services.py:104
+msgid "This prefix already exists in this VRF."
+msgstr "Dieses Präfix gibt es in diesem VRF schon."
+
+#: ipam/services.py:126 ipam/services.py:143
+msgid "This address is already used in this VRF."
+msgstr "Diese Adresse wird in diesem VRF schon verwendet."
+
 #: library/interchange.py:124
 #, python-format
 msgid "%(section)s must be a list of ports with names."
@@ -2155,10 +2232,6 @@ msgstr "Geben Sie zur Bestätigung den Standortnamen ein."
 msgid "short code"
 msgstr "Kürzel"
 
-#: locations/models.py:18 tenancy/models.py:22
-msgid "address"
-msgstr "Adresse"
-
 #: locations/models.py:20
 msgid "latitude"
 msgstr "Breitengrad"
@@ -2212,17 +2285,22 @@ msgstr ""
 
 #: locations/services.py:126
 msgid ""
+"Prefixes or IP addresses belong to this site. Move or remove them first."
+msgstr "Präfixe oder IP-Adressen gehören zu diesem Standort. Verschieben oder entfernen Sie sie zuerst."
+
+#: locations/services.py:135
+msgid ""
 "Ports in this site use tenant wide VLANs or WLANs. Remove those assignments "
 "first."
 msgstr ""
 "Ports in diesem Standort verwenden mandantenweite VLANs oder WLANs. "
 "Entfernen Sie diese Zuweisungen zuerst."
 
-#: locations/services.py:140
+#: locations/services.py:149
 msgid "The site already belongs to this tenant."
 msgstr "Der Standort gehört bereits zu diesem Mandanten."
 
-#: locations/services.py:147
+#: locations/services.py:156
 msgid "Devices in this site use device types private to the current tenant."
 msgstr ""
 "Geräte an diesem Standort verwenden Gerätetypen, die nur für den aktuellen "
@@ -2345,19 +2423,11 @@ msgstr "Markdown wird unterstützt."
 msgid "File attached."
 msgstr "Datei angehängt."
 
-#: networks/models.py:17
-msgid "deprecated"
-msgstr "veraltet"
-
-#: networks/models.py:25
-msgid "site"
-msgstr "Standort"
-
 #: networks/models.py:28
 msgid "VLAN ID"
 msgstr "VLAN-ID"
 
-#: networks/models.py:62 templates/dcim/rack.html:64
+#: networks/models.py:62 templates/dcim/rack.html:72
 msgid "open"
 msgstr "offen"
 
@@ -2774,7 +2844,7 @@ msgstr "Details"
 
 #: templates/accounts/profile.html:9 templates/cabling/cable.html:22
 #: templates/dcim/device.html:42 templates/dcim/port.html:37
-#: templates/dcim/rack.html:91 templates/instance/branding.html:9
+#: templates/dcim/rack.html:99 templates/instance/branding.html:9
 #: templates/integrations/webhook.html:34 templates/library/type_detail.html:32
 #: templates/locations/node.html:53 templates/manage/group_detail.html:9
 #: templates/manage/role_detail.html:15 templates/manage/tenant_detail.html:7
@@ -3169,7 +3239,7 @@ msgid "Ends"
 msgstr "Enden"
 
 #: templates/cabling/cable.html:15 templates/cabling/trace.html:2
-#: templates/cabling/trace.html:4
+#: templates/cabling/trace.html:4 templates/dcim/_port_panel.html:19
 msgid "Trace"
 msgstr "Verfolgen"
 
@@ -3215,7 +3285,7 @@ msgstr ""
 msgid "Without JavaScript: choose the device, submit, then choose the port."
 msgstr "Ohne JavaScript: Gerät wählen, absenden, dann den Port wählen."
 
-#: templates/cabling/trace.html:6
+#: templates/cabling/trace.html:6 templates/dcim/_port_panel.html:12
 msgid "Path"
 msgstr "Pfad"
 
@@ -3223,7 +3293,7 @@ msgstr "Pfad"
 msgid "loop"
 msgstr "Schleife"
 
-#: templates/cabling/trace.html:7 templates/dcim/rack.html:64
+#: templates/cabling/trace.html:7 templates/dcim/rack.html:72
 msgid "complete"
 msgstr "vollständig"
 
@@ -3253,12 +3323,13 @@ msgstr ""
 "Durchgezogen: Patchkabel. Gestrichelt: Festverkabelung. Gepunktet: innerhalb "
 "eines Patchfelds."
 
-#: templates/cabling/trace.html:31 templates/dcim/rack.html:58
+#: templates/cabling/trace.html:31 templates/dcim/rack.html:66
 msgid "Hops"
 msgstr "Stationen"
 
-#: templates/cabling/trace.html:32 templates/dcim/device.html:32
-#: templates/dcim/port.html:16 templates/dcim/rack.html:62
+#: templates/cabling/trace.html:32 templates/dcim/_port_panel.html:14
+#: templates/dcim/device.html:32 templates/dcim/port.html:16
+#: templates/dcim/rack.html:70
 msgid "(not visible to you)"
 msgstr "(für Sie nicht sichtbar)"
 
@@ -3394,6 +3465,27 @@ msgstr "Version"
 msgid "License"
 msgstr "Lizenz"
 
+#: templates/dcim/_device_panel.html:6
+msgid "Units"
+msgstr "Höheneinheiten"
+
+#: templates/dcim/_device_panel.html:8
+#, python-format
+msgid "%(cabled)s of %(total)s cabled"
+msgstr "%(cabled)s von %(total)s verkabelt"
+
+#: templates/dcim/_device_panel.html:9
+msgid "Serial number"
+msgstr "Seriennummer"
+
+#: templates/dcim/_device_panel.html:10
+msgid "Asset tag"
+msgstr "Inventarnummer"
+
+#: templates/dcim/_device_panel.html:12
+msgid "Open device"
+msgstr "Gerät öffnen"
+
 #: templates/dcim/_elevation.html:10
 #, python-format
 msgid "Add a device at unit %(unit)s"
@@ -3403,6 +3495,18 @@ msgstr "Gerät in Höheneinheit %(unit)s einbauen"
 #, python-format
 msgid "units %(start)s to %(end)s"
 msgstr "Höheneinheiten %(start)s bis %(end)s"
+
+#: templates/dcim/_port_panel.html:9
+msgid "none"
+msgstr "keins"
+
+#: templates/dcim/_port_panel.html:16
+msgid "The path is not shown to you."
+msgstr "Die Strecke wird Ihnen nicht angezeigt."
+
+#: templates/dcim/_port_panel.html:18
+msgid "Open port"
+msgstr "Port öffnen"
 
 #: templates/dcim/device.html:7
 msgid "Port list (PDF)"
@@ -3516,7 +3620,7 @@ msgstr "Höhe"
 msgid "Used"
 msgstr "Belegt"
 
-#: templates/dcim/rack.html:12 templates/dcim/rack.html:82
+#: templates/dcim/rack.html:12 templates/dcim/rack.html:90
 msgid "Free"
 msgstr "Frei"
 
@@ -3528,124 +3632,156 @@ msgstr "Rack-Ansicht"
 msgid "Rack face"
 msgstr "Rack-Seite"
 
+#: templates/dcim/rack.html:22 templates/dcim/room.html:19
+msgid "Zoom"
+msgstr "Zoom"
+
 #: templates/dcim/rack.html:23 templates/dcim/room.html:20
-msgid "Fill width"
-msgstr "Volle Breite"
+msgid "Zoom out"
+msgstr "Verkleinern"
 
-#: templates/dcim/rack.html:24
-msgid "Whole rack"
-msgstr "Ganzes Rack"
+#: templates/dcim/rack.html:25 templates/dcim/room.html:22
+msgid "Zoom in"
+msgstr "Vergrößern"
 
-#: templates/dcim/rack.html:27
+#: templates/dcim/rack.html:26 templates/dcim/room.html:23
+msgid "Fit the width"
+msgstr "An Breite anpassen"
+
+#: templates/dcim/rack.html:26 templates/dcim/room.html:23
+msgid "Width"
+msgstr "Breite"
+
+#: templates/dcim/rack.html:27 templates/dcim/room.html:24
+msgid "Show everything"
+msgstr "Alles zeigen"
+
+#: templates/dcim/rack.html:27 templates/dcim/room.html:24
+#: templates/library/types.html:11 templates/search/results.html:7
+#: templates/search/results.html:25
+msgid "All"
+msgstr "Alle"
+
+#: templates/dcim/rack.html:30
 msgid "Mount device"
 msgstr "Gerät einbauen"
 
-#: templates/dcim/rack.html:28
+#: templates/dcim/rack.html:31
 msgid "Reserve units"
 msgstr "Höheneinheiten reservieren"
 
-#: templates/dcim/rack.html:29
+#: templates/dcim/rack.html:32
 msgid "Elevation (PDF)"
 msgstr "Rackansicht (PDF)"
 
-#: templates/dcim/rack.html:33
+#: templates/dcim/rack.html:36
 msgid "Front view"
 msgstr "Vorderansicht"
 
-#: templates/dcim/rack.html:33
+#: templates/dcim/rack.html:36
 msgid "Rear view"
 msgstr "Rückansicht"
 
-#: templates/dcim/rack.html:34
+#: templates/dcim/rack.html:37
 msgid "Legend"
 msgstr "Legende"
 
-#: templates/dcim/rack.html:35
+#: templates/dcim/rack.html:38
 msgid "connected end to end"
 msgstr "durchgehend verbunden"
 
-#: templates/dcim/rack.html:36
+#: templates/dcim/rack.html:39
 msgid "cabled, path open"
 msgstr "verkabelt, Strecke offen"
 
-#: templates/dcim/rack.html:37
+#: templates/dcim/rack.html:40
 msgid "wired behind, nothing plugged in"
 msgstr "dahinter verkabelt, nichts eingesteckt"
 
-#: templates/dcim/rack.html:38
+#: templates/dcim/rack.html:41
 msgid "free"
 msgstr "frei"
 
-#: templates/dcim/rack.html:39
+#: templates/dcim/rack.html:42
 msgid "panel port, nothing behind"
 msgstr "Panel-Port, dahinter nichts"
 
-#: templates/dcim/rack.html:40
+#: templates/dcim/rack.html:43
 msgid "continues on the rear"
 msgstr "geht auf der Rückseite weiter"
 
-#: templates/dcim/rack.html:40
+#: templates/dcim/rack.html:43
 msgid "continues on the front"
 msgstr "geht auf der Vorderseite weiter"
 
-#: templates/dcim/rack.html:41
+#: templates/dcim/rack.html:44
 msgid "leaves the rack"
 msgstr "verlässt das Rack"
 
-#: templates/dcim/rack.html:45
+#: templates/dcim/rack.html:47 templates/dcim/room.html:30
+msgid "Drawing; use + and - to zoom"
+msgstr "Zeichnung; mit + und - zoomen"
+
+#: templates/dcim/rack.html:49
 #, python-format
 msgid "Elevation of rack %(name)s"
 msgstr "Ansicht von Rack %(name)s"
 
-#: templates/dcim/rack.html:50
-msgid "Point at a port or cable to follow its path; select a port to open it."
-msgstr ""
-"Zeigen Sie auf einen Port, um seiner Strecke zu folgen; wählen Sie ihn aus, "
-"um ihn zu öffnen."
+#: templates/dcim/rack.html:55 templates/dcim/room.html:41
+msgid ""
+"Select a port or device to see its details and the whole path. Double click "
+"opens it."
+msgstr "Wählen Sie einen Port oder ein Gerät, um Details und die ganze Strecke zu sehen. Doppelklick öffnet es."
 
-#: templates/dcim/rack.html:50
+#: templates/dcim/rack.html:58
+msgid ""
+"Point at a port to follow its path. Ctrl and the mouse wheel zoom; drag an "
+"empty area to move the view."
+msgstr "Zeigen Sie auf einen Port, um seiner Strecke zu folgen. Strg und Mausrad zoomen; ziehen Sie eine leere Fläche, um die Ansicht zu verschieben."
+
+#: templates/dcim/rack.html:58
 msgid "Drag a device, or focus it and use the arrow keys, to move it."
 msgstr ""
 "Ziehen Sie ein Gerät oder fokussieren Sie es und nutzen Sie die Pfeiltasten, "
 "um es zu verschieben."
 
-#: templates/dcim/rack.html:56
+#: templates/dcim/rack.html:64
 msgid "Connections"
 msgstr "Verbindungen"
 
-#: templates/dcim/rack.html:58
+#: templates/dcim/rack.html:66
 msgid "Far end"
 msgstr "Gegenstelle"
 
-#: templates/dcim/rack.html:65
+#: templates/dcim/rack.html:73
 msgid "No cables in this rack yet."
 msgstr "Noch keine Kabel in diesem Rack."
 
-#: templates/dcim/rack.html:74
+#: templates/dcim/rack.html:82
 msgid "No devices mounted."
 msgstr "Keine Geräte eingebaut."
 
-#: templates/dcim/rack.html:79
+#: templates/dcim/rack.html:87
 msgid "Reserved units"
 msgstr "Reservierte Höheneinheiten"
 
-#: templates/dcim/rack.html:82
+#: templates/dcim/rack.html:90
 msgid "Free these units?"
 msgstr "Diese Höheneinheiten freigeben?"
 
-#: templates/dcim/rack.html:83
+#: templates/dcim/rack.html:91
 msgid "No units reserved."
 msgstr "Keine Höheneinheiten reserviert."
 
-#: templates/dcim/rack.html:89
+#: templates/dcim/rack.html:97
 msgid "Rack details"
 msgstr "Rack-Details"
 
-#: templates/dcim/rack.html:94
+#: templates/dcim/rack.html:102
 msgid "Delete this rack and its reservations?"
 msgstr "Dieses Rack und seine Reservierungen löschen?"
 
-#: templates/dcim/rack.html:94
+#: templates/dcim/rack.html:102
 msgid "Delete rack"
 msgstr "Rack löschen"
 
@@ -3666,20 +3802,16 @@ msgstr "Kabel zwischen Racks"
 msgid "Room view"
 msgstr "Raumansicht"
 
-#: templates/dcim/room.html:21
-msgid "Whole room"
-msgstr "Ganzer Raum"
-
-#: templates/dcim/room.html:24
+#: templates/dcim/room.html:27
 msgid "Racks and cables"
 msgstr "Racks und Kabel"
 
-#: templates/dcim/room.html:28
+#: templates/dcim/room.html:32
 #, python-format
 msgid "Racks of %(name)s with their cables"
 msgstr "Racks von %(name)s mit ihren Kabeln"
 
-#: templates/dcim/room.html:36
+#: templates/dcim/room.html:44
 msgid ""
 "Cables between racks run over the cable tray above them. Point at a port to "
 "follow its path."
@@ -3687,7 +3819,7 @@ msgstr ""
 "Kabel zwischen Racks laufen über die Kabeltrasse darüber. Zeigen Sie auf "
 "einen Port, um seiner Strecke zu folgen."
 
-#: templates/dcim/room.html:38
+#: templates/dcim/room.html:46
 msgid "No racks in this room yet."
 msgstr "Noch keine Racks in diesem Raum."
 
@@ -4109,8 +4241,12 @@ msgid ""
 msgid_plural ""
 "%(n)s device types from the community device type library, with all ports. "
 "Pick one to copy it into your library."
-msgstr[0] "%(n)s Gerätetyp aus der Community-Gerätebibliothek, mit allen Ports. Wählen Sie einen aus, um ihn in Ihre Bibliothek zu übernehmen."
-msgstr[1] "%(n)s Gerätetypen aus der Community-Gerätebibliothek, mit allen Ports. Wählen Sie einen aus, um ihn in Ihre Bibliothek zu übernehmen."
+msgstr[0] ""
+"%(n)s Gerätetyp aus der Community-Gerätebibliothek, mit allen Ports. Wählen "
+"Sie einen aus, um ihn in Ihre Bibliothek zu übernehmen."
+msgstr[1] ""
+"%(n)s Gerätetypen aus der Community-Gerätebibliothek, mit allen Ports. "
+"Wählen Sie einen aus, um ihn in Ihre Bibliothek zu übernehmen."
 
 #: templates/library/catalog.html:10
 msgid "Search the catalog"
@@ -4137,7 +4273,9 @@ msgstr "Nichts gefunden. Versuchen Sie weniger oder kürzere Wörter."
 msgid ""
 "Source: netbox-community/devicetype-library, commit %(commit)s, released "
 "into the public domain (CC0-1.0)."
-msgstr "Quelle: netbox-community/devicetype-library, Commit %(commit)s, gemeinfrei (CC0-1.0)."
+msgstr ""
+"Quelle: netbox-community/devicetype-library, Commit %(commit)s, gemeinfrei "
+"(CC0-1.0)."
 
 #: templates/library/catalog_entry.html:14
 msgid "This type has no ports."
@@ -4211,11 +4349,6 @@ msgstr "Hersteller, Modell, Artikelnummer"
 #: templates/library/types.html:9 templates/library/types.html:18
 msgid "Form"
 msgstr "Bauform"
-
-#: templates/library/types.html:11 templates/search/results.html:7
-#: templates/search/results.html:25
-msgid "All"
-msgstr "Alle"
 
 #: templates/library/types.html:14
 msgid "Add from catalog"
@@ -5054,6 +5187,12 @@ msgstr "Mandant gespeichert."
 #: tenancy/views.py:105
 msgid "Tenant deleted."
 msgstr "Mandant gelöscht."
+
+#~ msgid "Whole rack"
+#~ msgstr "Ganzes Rack"
+
+#~ msgid "Whole room"
+#~ msgstr "Ganzer Raum"
 
 #~ msgid "Library"
 #~ msgstr "Bibliothek"

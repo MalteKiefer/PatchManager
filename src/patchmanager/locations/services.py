@@ -116,6 +116,15 @@ def _check_site_is_self_contained(site: Any, device_model: Any) -> None:
         raise ServiceError(
             _("Cables connect this site to other sites of the tenant. Remove them first.")
         )
+    from patchmanager.ipam.models import IPAddress, Prefix
+
+    if (
+        Prefix.objects.filter(site=site).exists()
+        or IPAddress.objects.filter(port__in=inside_ports).exists()
+    ):
+        raise ServiceError(
+            _("Prefixes or IP addresses belong to this site. Move or remove them first.")
+        )
     if (
         WLANBroadcast.objects.filter(port__in=inside_ports).exists()
         or VLAN.objects.filter(site__isnull=True, untagged_on__in=inside_ports).exists()
