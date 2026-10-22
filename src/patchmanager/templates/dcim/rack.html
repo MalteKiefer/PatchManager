@@ -99,6 +99,14 @@
       <fieldset class="grid gap-x-4 sm:grid-cols-2" {% if not can_change %}disabled{% endif %}>{% include "core/_form.html" %}</fieldset>
       {% if can_change %}<button class="btn-primary">{% translate "Save" %}</button>{% endif %}
     </form>
+    {% if can_change and move_form.fields.room.queryset.exists %}
+    <form method="post" class="card" novalidate>{% csrf_token %}<input type="hidden" name="action" value="move">
+      <h2 class="mb-1">{% translate "Move rack" %}</h2>
+      <p class="mb-3 text-sm text-slate-500">{% translate "To another room, also on another site. The devices in it move along with their cables, addresses and configurations; the position on the floor plan is cleared." %}</p>
+      {% include "core/_form.html" with form=move_form %}
+      <button class="btn-secondary">{% translate "Move" %}</button>
+    </form>
+    {% endif %}
     {% if can_delete %}
     <form method="post" data-confirm="{% translate 'Delete this rack and its reservations?' %}">{% csrf_token %}<input type="hidden" name="action" value="delete"><button class="btn-danger">{% translate "Delete rack" %}</button></form>
     {% endif %}

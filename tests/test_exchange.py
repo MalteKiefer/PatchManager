@@ -374,6 +374,14 @@ def test_pdf_reports(kit, super_admin, make_user, settings, tmp_path) -> None:
             pdf.bill_of_materials(super_admin, kit["site"]),
         ):
             assert data.startswith(b"%PDF-") and len(data) > 1000
+        rack = pdf.rack_elevation(super_admin, kit["rack"])
+    import pypdfium2
+
+    pages = pypdfium2.PdfDocument(rack)
+    text = [pages[i].get_textpage().get_text_range() for i in range(len(pages))]
+    assert "Front view" in text[0] and "sw1" in text[0] and "sw2" in text[0]
+    assert "Rear view" in text[1]
+    assert any("Connections" in t and "ge1" in t for t in text[2:])  # the cable sw1 to sw2
     assert pdf.logo_problem() is None
     settings.BRAND_LOGO = str(tmp_path / "missing.png")
     assert "readable" in (pdf.logo_problem() or "")

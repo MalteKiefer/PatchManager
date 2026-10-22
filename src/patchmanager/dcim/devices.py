@@ -171,14 +171,7 @@ def place(
         _save(device)
         if rack is not None and position is not None:
             _mount(device, rack, position, face)
-        from patchmanager.cabling.services import refresh_paths
-        from patchmanager.ipam import services as ipam
-
-        refresh_paths(device)
-        ipam.refresh_paths(device)
-        from patchmanager.configs.models import DeviceConfig
-
-        DeviceConfig.objects.filter(device=device).update(path=str(device.path))
+        follow(device)
     audit.record(
         "dcim.device.moved",
         request=request,
@@ -186,6 +179,17 @@ def place(
         data={"room": str(room), "rack": str(rack) if rack else None, "position": position},
     )
     return device
+
+
+def follow(device: Device) -> None:
+    """Re-scope what hangs on ``device`` (cables, addresses, configurations) after it moved."""
+    from patchmanager.cabling.services import refresh_paths
+    from patchmanager.configs.models import DeviceConfig
+    from patchmanager.ipam import services as ipam
+
+    refresh_paths(device)
+    ipam.refresh_paths(device)
+    DeviceConfig.objects.filter(device=device).update(path=str(device.path))
 
 
 def delete(request: HttpRequest, actor: User, device: Device) -> None:

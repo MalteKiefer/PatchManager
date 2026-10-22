@@ -31,6 +31,12 @@ page shows the elevation for the **Front** or **Rear** face.
 * Utilisation shows used and free units per face.
 * Settings: height (1 to 100 U), width, depth, unit numbering (from the bottom
   by default), status, serial number and asset tag.
+* **Move rack** puts the rack into another room, also on another site. The devices
+  in it keep their units and move along with their cables, addresses and stored
+  configurations; the rack's position on the old floor plan is cleared.
+* The PDF of a rack shows the front and the rear like the page, with every port
+  and its connection state and the cables inside the rack, followed by the units
+  and the list of connections.
 
 ## Device library
 

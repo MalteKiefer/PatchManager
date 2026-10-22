@@ -19,11 +19,21 @@ from reportlab.lib.styles import ParagraphStyle
 from reportlab.lib.units import mm
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import TTFont
-from reportlab.platypus import Image, Paragraph, SimpleDocTemplate, Spacer, Table, TableStyle
+from reportlab.platypus import (
+    Image,
+    PageBreak,
+    Paragraph,
+    SimpleDocTemplate,
+    Spacer,
+    Table,
+    TableStyle,
+)
 
 from patchmanager.accounts import policy
 from patchmanager.cabling.models import Cable
+from patchmanager.dcim import elevation
 from patchmanager.dcim.models import Device, Port, Rack, RackSpace
+from patchmanager.exchange import rack_drawing
 from patchmanager.instance import state
 from patchmanager.locations.models import Building, Floor, Room, Site
 from patchmanager.networks.models import VLAN
@@ -241,7 +251,36 @@ def rack_elevation(user: Any, rack: Rack) -> bytes:
     table = _table([_("Unit"), _("Front"), _("Rear")], rows, widths=[14 * mm, 80 * mm, 80 * mm])
     used = len(set(front) | set(rear))
     subtitle = f"{rack.room} · {rack.u_height} U · " + _("%(n)s units used") % {"n": used}
-    return _render(_("Rack %(name)s") % {"name": rack.name}, subtitle, [table], user)
+    story: list[Any] = []
+    # The elevation as on the page: every port with its state and the cables in the rack.
+    for face, heading in (("front", _("Front view")), ("rear", _("Rear view"))):
+        story += [
+            _p(heading, "h2"),
+            rack_drawing.drawing(elevation.layout(user, rack, face), 180 * mm, 215 * mm),
+            PageBreak(),
+        ]
+    story += [_p(_("Units"), "h2"), table]
+    links = elevation.connections(user, rack)
+    if links:
+        story += [
+            Spacer(1, 6 * mm),
+            _p(_("Connections"), "h2"),
+            _table(
+                [_("Device"), _("Port"), _("Cable"), _("Other end"), _("Complete")],
+                [
+                    [
+                        c.port.device,
+                        c.port.name,
+                        c.cable,
+                        f"{c.far.device} · {c.far.name}" if c.far else _("not visible"),
+                        _("yes") if c.complete else _("no"),
+                    ]
+                    for c in links
+                ],
+                widths=[40 * mm, 28 * mm, 30 * mm, 62 * mm, 20 * mm],
+            ),
+        ]
+    return _render(_("Rack %(name)s") % {"name": rack.name}, subtitle, story, user)
 
 
 def port_list(user: Any, device: Device) -> bytes:

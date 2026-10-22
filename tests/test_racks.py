@@ -256,3 +256,58 @@ def test_rack_drawing_hides_devices_the_viewer_cannot_see(
     assert "sw-0001" not in page and "not visible" in page
     assert "pp-0001" in page  # the panel is visible; its cords to the switch are not traced
     assert page.count('class="rack-port is-') == 24
+
+
+def test_move_rack_with_its_devices(
+    admin_client: Client, make_tree, make_type, super_admin, make_user, system
+) -> None:
+    from patchmanager.accounts.services import PermissionDeniedError
+    from patchmanager.dcim import devices
+    from patchmanager.ipam.models import IPAddress
+
+    t = make_tree()
+    other = make_tree(t["tenant"], name="Branch")
+    switch = make_type("Switch 2", u_height=1, ports=[{"name_pattern": "ge{n}", "count": 2}])
+    with system():
+        sw = devices.create(
+            t["request"],
+            super_admin,
+            device_type=switch,
+            room=t["room"],
+            rack=t["rack"],
+            position=1,
+            name="core1",
+        )
+        port = sw.ports.get(name="ge1")
+        address = IPAddress.objects.create(
+            tenant=t["tenant"], address="10.1.0.1/24", port=port, path=str(sw.path)
+        )
+        Rack.objects.filter(pk=t["rack"].pk).update(plan_x=1.0, plan_y=2.0)
+    page = admin_client.get(f"/racks/{t['rack'].pk}/", secure=True).content.decode()
+    assert "Move rack" in page and "Branch / B1 / F1 / R1" in page
+    taken = admin_client.post(
+        f"/racks/{t['rack'].pk}/",
+        {"action": "move", "room": other["room"].pk},
+        secure=True,
+    ).content.decode()
+    assert "A rack with this name already exists in that room." in taken
+    with system():
+        Rack.objects.filter(pk=other["rack"].pk).update(name="B01")
+    response = admin_client.post(
+        f"/racks/{t['rack'].pk}/", {"action": "move", "room": other["room"].pk}, secure=True
+    )
+    assert response.status_code == 302
+    with system():
+        rack = Rack.objects.get(pk=t["rack"].pk)
+        sw.refresh_from_db()
+        address.refresh_from_db()
+        assert rack.room_id == other["room"].pk and rack.plan_x is None
+        assert sw.room_id == other["room"].pk
+        assert str(rack.path).startswith(str(other["room"].path))
+        assert str(sw.path).startswith(str(rack.path)) and str(address.path) == str(sw.path)
+        assert rack.spaces.get(device=sw).start == 1  # still mounted at the same unit
+        with pytest.raises(PermissionDeniedError):
+            services.relocate(t["request"], make_user(), rack, t["room"])
+        foreign = make_tree(name="Elsewhere")
+        with pytest.raises(ServiceError, match="another tenant"):
+            services.relocate(t["request"], super_admin, rack, foreign["room"])

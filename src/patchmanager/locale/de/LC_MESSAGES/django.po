@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-22 14:03+0200\n"
+"POT-Creation-Date: 2026-10-22 14:27+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -27,7 +27,7 @@ msgstr "E-Mail"
 msgid "Password"
 msgstr "Passwort"
 
-#: accounts/forms.py:32 exchange/pdf.py:162
+#: accounts/forms.py:32 exchange/pdf.py:172
 msgid "Code"
 msgstr "Code"
 
@@ -43,7 +43,7 @@ msgstr "Führen Sie den Befehl setup_token aus, um eines zu erhalten."
 #: api/ui.py:118 api/ui.py:138 compute/pages.py:124 compute/pages.py:148
 #: compute/pages.py:167 compute/pages.py:185 compute/pages.py:197
 #: directory/pages.py:86 directory/pages.py:105 directory/pages.py:123
-#: exchange/pdf.py:215 integrations/views.py:27 ipam/pages.py:127
+#: exchange/pdf.py:225 integrations/views.py:27 ipam/pages.py:127
 #: ipam/pages.py:167 ipam/pages.py:186 scim/views.py:351 sso/views.py:187
 #: templates/api/clients.html:9 templates/api/tokens.html:9
 #: templates/compute/connections.html:9 templates/integrations/webhooks.html:8
@@ -87,7 +87,7 @@ msgstr "Mandant"
 msgid "All tenants (global)"
 msgstr "Alle Mandanten (global)"
 
-#: accounts/forms.py:130 exchange/pdf.py:215 templates/library/types.html:18
+#: accounts/forms.py:130 exchange/pdf.py:225 templates/library/types.html:18
 #: templates/manage/_assignments.html:3
 msgid "Scope"
 msgstr "Geltungsbereich"
@@ -734,7 +734,7 @@ msgstr "Der Ort gehört zu einem anderen Mandanten."
 msgid "Read and write"
 msgstr "Lesen und schreiben"
 
-#: api/ui.py:29 exchange/pdf.py:198 exchange/tables.py:687
+#: api/ui.py:29 exchange/pdf.py:208 exchange/tables.py:687
 #: templates/core/_breadcrumbs.html:4 templates/locations/index.html:2
 #: templates/locations/index.html:6
 msgid "Locations"
@@ -992,15 +992,15 @@ msgstr "Einer der Ports hat bereits ein Kabel."
 msgid "These ports cannot be connected."
 msgstr "Diese Ports können nicht verbunden werden."
 
-#: cabling/views.py:43 templates/accounts/security.html:50
+#: cabling/views.py:43 exchange/pdf.py:269 templates/accounts/security.html:50
 #: templates/dcim/place_here.html:11 templates/networks/switching.html:58
 msgid "Device"
 msgstr "Gerät"
 
-#: cabling/views.py:44 exchange/pdf.py:280 instance/views.py:160
-#: templates/dcim/device.html:17 templates/dcim/port.html:40
-#: templates/dcim/rack.html:66 templates/ipam/addresses.html:10
-#: templates/ipam/prefix.html:24
+#: cabling/views.py:44 exchange/pdf.py:269 exchange/pdf.py:319
+#: instance/views.py:160 templates/dcim/device.html:17
+#: templates/dcim/port.html:40 templates/dcim/rack.html:66
+#: templates/ipam/addresses.html:10 templates/ipam/prefix.html:24
 msgid "Port"
 msgstr "Port"
 
@@ -1013,7 +1013,7 @@ msgid "Cable removed."
 msgstr "Kabel entfernt."
 
 #: cabling/views.py:152 core/crud.py:271 core/lists.py:207
-#: dcim/device_views.py:395 dcim/device_views.py:473 dcim/views.py:64
+#: dcim/device_views.py:395 dcim/device_views.py:473 dcim/views.py:92
 #: ipam/views.py:242 ipam/views.py:383 ipam/views.py:468 library/views.py:269
 #: locations/views.py:190 locations/views.py:293 networks/views.py:139
 #: networks/views.py:394
@@ -1121,8 +1121,8 @@ msgid "Provider"
 msgstr "Provider"
 
 #: circuits/pages.py:70 compute/pages.py:198 directory/pages.py:87
-#: directory/pages.py:124 exchange/pdf.py:199 exchange/pdf.py:281
-#: exchange/pdf.py:325 templates/cabling/cables.html:7
+#: directory/pages.py:124 exchange/pdf.py:209 exchange/pdf.py:320
+#: exchange/pdf.py:364 templates/cabling/cables.html:7
 #: templates/cabling/cables.html:12 templates/dcim/_port_panel.html:6
 #: templates/dcim/device.html:17 templates/library/type_detail.html:16
 #: templates/networks/stacks.html:9
@@ -1135,7 +1135,7 @@ msgstr "Art"
 msgid "Site"
 msgstr "Standort"
 
-#: circuits/pages.py:72 compute/pages.py:149 exchange/pdf.py:215
+#: circuits/pages.py:72 compute/pages.py:149 exchange/pdf.py:225
 #: templates/compute/connections.html:9 templates/dcim/_device_panel.html:7
 #: templates/dcim/place_here.html:11 templates/dcim/rack.html:66
 #: templates/floorplans/_item_panel.html:8
@@ -1297,13 +1297,15 @@ msgstr "%(vm)s: Festplatte %(disk)s wurde ausgelassen."
 #: compute/importing.py:288
 #, python-format
 msgid "%(address)s of %(vm)s is already used elsewhere and was not linked."
-msgstr "%(address)s von %(vm)s wird bereits anderweitig verwendet und wurde nicht verknüpft."
+msgstr ""
+"%(address)s von %(vm)s wird bereits anderweitig verwendet und wurde nicht "
+"verknüpft."
 
 #: compute/importing.py:326 compute/pages.py:124 networks/switch_views.py:39
 msgid "Platform"
 msgstr "Plattform"
 
-#: compute/importing.py:335 exchange/pdf.py:162 ipam/pages.py:148
+#: compute/importing.py:335 exchange/pdf.py:172 ipam/pages.py:148
 #: templates/accounts/security.html:50 templates/compute/connection.html:18
 #: templates/ipam/addresses.html:10 templates/ipam/prefix.html:24
 #: templates/manage/audit.html:18 templates/networks/switching.html:28
@@ -1377,7 +1379,11 @@ msgid ""
 "VMware vCenter, or volumes and shares from a Synology or QNAP NAS. "
 "Credentials are used once and not stored; give an account with read rights "
 "only."
-msgstr "Liest Cluster, Hosts, virtuelle Maschinen und Speicher aus Proxmox VE und VMware vCenter, oder Volumes und Freigaben eines Synology- oder QNAP-NAS. Zugangsdaten werden einmal verwendet und nicht gespeichert; verwenden Sie ein Konto nur mit Leserechten."
+msgstr ""
+"Liest Cluster, Hosts, virtuelle Maschinen und Speicher aus Proxmox VE und "
+"VMware vCenter, oder Volumes und Freigaben eines Synology- oder QNAP-NAS. "
+"Zugangsdaten werden einmal verwendet und nicht gespeichert; verwenden Sie "
+"ein Konto nur mit Leserechten."
 
 #: compute/importing.py:445 ipam/pages.py:387 templates/exchange/index.html:7
 #: templates/library/types.html:30 templates/manage/roles.html:21
@@ -1449,7 +1455,9 @@ msgstr "Der Host hat nicht mit XML geantwortet."
 msgid ""
 "The host refused the credentials (accounts with two step sign in cannot be "
 "used)."
-msgstr "Der Host hat die Zugangsdaten abgelehnt (Konten mit zweistufiger Anmeldung können nicht verwendet werden)."
+msgstr ""
+"Der Host hat die Zugangsdaten abgelehnt (Konten mit zweistufiger Anmeldung "
+"können nicht verwendet werden)."
 
 #: compute/models.py:39 compute/models.py:300
 msgid "platform"
@@ -1593,7 +1601,7 @@ msgstr "MAC-Adresse"
 msgid "Use aa:bb:cc:dd:ee:ff."
 msgstr "Verwenden Sie aa:bb:cc:dd:ee:ff."
 
-#: compute/models.py:234 compute/pages.py:169 exchange/pdf.py:284
+#: compute/models.py:234 compute/pages.py:169 exchange/pdf.py:323
 #: ipam/models.py:72 networks/models.py:77
 msgid "VLAN"
 msgstr "VLAN"
@@ -1677,7 +1685,7 @@ msgstr "Cluster"
 msgid "New cluster"
 msgstr "Neuer Cluster"
 
-#: compute/pages.py:126 compute/pages.py:157
+#: compute/pages.py:126 compute/pages.py:157 exchange/pdf.py:267
 #: templates/compute/connection.html:4
 #: templates/compute/connection_select.html:4
 #: templates/compute/connections.html:2 templates/compute/connections.html:4
@@ -1887,7 +1895,7 @@ msgstr "Andere Einträge verwenden diesen noch."
 msgid "Created."
 msgstr "Erstellt."
 
-#: core/crud.py:267 core/lists.py:203 dcim/device_views.py:413 dcim/views.py:69
+#: core/crud.py:267 core/lists.py:203 dcim/device_views.py:413 dcim/views.py:97
 #: ipam/views.py:236 ipam/views.py:373 ipam/views.py:462 library/views.py:294
 #: locations/views.py:298 locations/views.py:423 networks/views.py:135
 msgid "Deleted."
@@ -2051,12 +2059,12 @@ msgstr "Eine Testmail wurde an %(email)s gesendet."
 msgid "Device type"
 msgstr "Gerätetyp"
 
-#: dcim/device_views.py:100 dcim/device_views.py:127 dcim/views.py:32
+#: dcim/device_views.py:100 dcim/device_views.py:127 dcim/views.py:55
 #: templates/dcim/place_here.html:19
 msgid "Lowest unit"
 msgstr "Unterste Höheneinheit"
 
-#: dcim/device_views.py:102 dcim/device_views.py:129 dcim/views.py:35
+#: dcim/device_views.py:102 dcim/device_views.py:129 dcim/views.py:58
 msgid "Face"
 msgstr "Seite"
 
@@ -2072,7 +2080,7 @@ msgstr "Rückseite"
 msgid "Leave empty to use the type's naming convention."
 msgstr "Leer lassen, um die Namenskonvention des Typs zu verwenden."
 
-#: dcim/device_views.py:123 exchange/pdf.py:199
+#: dcim/device_views.py:123 dcim/views.py:39 exchange/pdf.py:209
 #: templates/floorplans/_item_panel.html:7
 msgid "Room"
 msgstr "Raum"
@@ -2146,7 +2154,7 @@ msgstr "Dieser Gerätetyp kann hier nicht verwendet werden."
 msgid "The device does not fit at this position."
 msgstr "Das Gerät passt nicht an diese Position."
 
-#: dcim/devices.py:96 dcim/services.py:24
+#: dcim/devices.py:96 dcim/services.py:25
 msgid "These units are already taken."
 msgstr "Diese Höheneinheiten sind bereits belegt."
 
@@ -2162,21 +2170,21 @@ msgstr "Rackgeräte benötigen einen Typ für den Rackeinbau und eine Position."
 msgid "The rack is not in this room."
 msgstr "Das Rack befindet sich nicht in diesem Raum."
 
-#: dcim/devices.py:243
+#: dcim/devices.py:247
 msgid "The rear port must belong to the same device."
 msgstr "Der Rückport muss zum selben Gerät gehören."
 
-#: dcim/devices.py:246
+#: dcim/devices.py:250
 msgid "A port joins only a link aggregation of its own device."
 msgstr ""
 "Ein Port kann nur einer Link-Aggregation seines eigenen Geräts beitreten."
 
-#: dcim/devices.py:272 dcim/devices.py:278
+#: dcim/devices.py:276 dcim/devices.py:282
 msgid "This port name or rear position is already used."
 msgstr "Dieser Portname oder diese Rückposition wird bereits verwendet."
 
-#: dcim/elevation.py:151 exchange/pdf.py:232 exchange/pdf.py:264
-#: exchange/pdf.py:312 templates/cabling/trace.html:18
+#: dcim/elevation.py:151 exchange/pdf.py:242 exchange/pdf.py:275
+#: exchange/pdf.py:303 exchange/pdf.py:351 templates/cabling/trace.html:18
 msgid "not visible"
 msgstr "nicht sichtbar"
 
@@ -2336,42 +2344,58 @@ msgstr "Verwenden Sie eine Zahl oder eine Area-ID mit Punkten."
 msgid "OSPF passive"
 msgstr "OSPF passiv"
 
-#: dcim/services.py:18
+#: dcim/services.py:19
 #, python-format
 msgid "The units must lie between 1 and %(height)s."
 msgstr "Die Höheneinheiten müssen zwischen 1 und %(height)s liegen."
 
-#: dcim/services.py:77
+#: dcim/services.py:78
 msgid "Move or delete the device instead."
 msgstr "Verschieben oder löschen Sie stattdessen das Gerät."
 
-#: dcim/views.py:31 exchange/pdf.py:285 templates/dcim/_port_panel.html:8
+#: dcim/services.py:95
+msgid "The room belongs to another tenant."
+msgstr "Der Raum gehört zu einem anderen Mandanten."
+
+#: dcim/services.py:111
+msgid "A rack with this name already exists in that room."
+msgstr "In diesem Raum gibt es bereits ein Rack mit diesem Namen."
+
+#: dcim/services.py:113 locations/services.py:36
+msgid "This change conflicts with existing data."
+msgstr "Diese Änderung steht im Konflikt mit vorhandenen Daten."
+
+#: dcim/views.py:54 exchange/pdf.py:324 templates/dcim/_port_panel.html:8
 #: templates/dcim/device.html:17
 msgid "Label"
 msgstr "Bezeichnung"
 
-#: dcim/views.py:33
+#: dcim/views.py:56
 msgid "Height (U)"
 msgstr "Höhe (HE)"
 
-#: dcim/views.py:118
+#: dcim/views.py:88
+msgid "The rack and its devices were moved."
+msgstr "Das Rack und seine Geräte wurden verschoben."
+
+#: dcim/views.py:147
 msgid "Units reserved."
 msgstr "Höheneinheiten reserviert."
 
-#: dcim/views.py:124
+#: dcim/views.py:153
 #, python-format
 msgid "Reserve units in %(rack)s"
 msgstr "Höheneinheiten in %(rack)s reservieren"
 
-#: dcim/views.py:126
+#: dcim/views.py:155
 msgid "Reserve"
 msgstr "Reservieren"
 
-#: dcim/views.py:146 floorplans/views.py:58 floorplans/views.py:60
+#: dcim/views.py:175 floorplans/views.py:58 floorplans/views.py:60
 msgid "Invalid request."
 msgstr "Ungültige Anfrage."
 
-#: dcim/views.py:150
+#: dcim/views.py:179
 msgid "These units are taken or outside the rack."
 msgstr "Diese Höheneinheiten sind belegt oder liegen außerhalb des Racks."
 
@@ -2633,164 +2657,194 @@ msgstr "Leer: %(cols)s."
 msgid "The database refused this row."
 msgstr "Die Datenbank hat diese Zeile abgelehnt."
 
-#: exchange/pdf.py:111
+#: exchange/pdf.py:121
 #, python-format
 msgid "%(name)s · %(user)s · %(time)s"
 msgstr "%(name)s · %(user)s · %(time)s"
 
-#: exchange/pdf.py:122
+#: exchange/pdf.py:132
 #, python-format
 msgid "Page %(n)s"
 msgstr "Seite %(n)s"
 
-#: exchange/pdf.py:162 ipam/pages.py:151 templates/ipam/addresses.html:10
+#: exchange/pdf.py:172 ipam/pages.py:151 templates/ipam/addresses.html:10
 #: templates/ipam/prefixes.html:8 templates/ipam/vrfs.html:8
 #: templates/networks/switching.html:48
 msgid "Description"
 msgstr "Beschreibung"
 
-#: exchange/pdf.py:199
+#: exchange/pdf.py:209
 msgid "Building"
 msgstr "Gebäude"
 
-#: exchange/pdf.py:199
+#: exchange/pdf.py:209
 msgid "Floor"
 msgstr "Etage"
 
-#: exchange/pdf.py:199 exchange/tables.py:696 locations/views.py:67
+#: exchange/pdf.py:209 exchange/tables.py:696 locations/views.py:67
 #: search/services.py:59 templates/core/home.html:19
 #: templates/dcim/room.html:10
 msgid "Racks"
 msgstr "Racks"
 
-#: exchange/pdf.py:199 exchange/tables.py:705 search/services.py:67
+#: exchange/pdf.py:209 exchange/tables.py:705 search/services.py:67
 #: templates/core/home.html:20 templates/dcim/rack.html:79
 #: templates/floorplans/_item_panel.html:11 templates/library/types.html:18
 msgid "Devices"
 msgstr "Geräte"
 
-#: exchange/pdf.py:201
+#: exchange/pdf.py:211
 #, python-format
 msgid "Totals: %(r)s racks, %(d)s devices"
 msgstr "Summen: %(r)s Racks, %(d)s Geräte"
 
-#: exchange/pdf.py:213 exchange/tables.py:725 networks/models.py:202
+#: exchange/pdf.py:223 exchange/tables.py:725 networks/models.py:202
 #: search/services.py:85
 msgid "VLANs"
 msgstr "VLANs"
 
-#: exchange/pdf.py:215
+#: exchange/pdf.py:225
 msgid "VID"
 msgstr "VID"
 
-#: exchange/pdf.py:217
+#: exchange/pdf.py:227
 msgid "tenant"
 msgstr "Mandant"
 
-#: exchange/pdf.py:222
+#: exchange/pdf.py:232
 #, python-format
 msgid "Site report: %(name)s"
 msgstr "Standortbericht: %(name)s"
 
-#: exchange/pdf.py:232 ipam/models.py:46 ipam/models.py:117
+#: exchange/pdf.py:242 ipam/models.py:46 ipam/models.py:117
 #: networks/models.py:18
 msgid "reserved"
 msgstr "reserviert"
 
-#: exchange/pdf.py:241
+#: exchange/pdf.py:251
 msgid "Unit"
 msgstr "Höheneinheit"
 
-#: exchange/pdf.py:241 templates/dcim/rack.html:19 templates/dcim/room.html:16
+#: exchange/pdf.py:251 templates/dcim/rack.html:19 templates/dcim/room.html:16
 msgid "Front"
 msgstr "Vorderseite"
 
-#: exchange/pdf.py:241 templates/dcim/device.html:17
+#: exchange/pdf.py:251 templates/dcim/device.html:17
 #: templates/dcim/rack.html:20 templates/dcim/room.html:17
 msgid "Rear"
 msgstr "Rückseite"
 
-#: exchange/pdf.py:243
+#: exchange/pdf.py:253
 #, python-format
 msgid "%(n)s units used"
 msgstr "%(n)s Höheneinheiten belegt"
 
-#: exchange/pdf.py:244
-#, python-format
-msgid "Rack %(name)s"
-msgstr "Rack %(name)s"
+#: exchange/pdf.py:256 templates/dcim/rack.html:36
+msgid "Front view"
+msgstr "Vorderansicht"
 
-#: exchange/pdf.py:282 templates/dcim/_port_panel.html:7
-#: templates/dcim/device.html:17 templates/library/type_detail.html:16
-msgid "Connector"
-msgstr "Steckverbinder"
+#: exchange/pdf.py:256 templates/dcim/rack.html:36
+msgid "Rear view"
+msgstr "Rückansicht"
 
-#: exchange/pdf.py:283
-msgid "Mbit/s"
-msgstr "Mbit/s"
+#: exchange/pdf.py:262 templates/dcim/_device_panel.html:6
+msgid "Units"
+msgstr "Höheneinheiten"
 
-#: exchange/pdf.py:286 templates/dcim/device.html:48
-#: templates/dcim/port.html:16
-msgid "Connected to"
-msgstr "Verbunden mit"
-
-#: exchange/pdf.py:291
-#, python-format
-msgid "Ports of %(name)s"
-msgstr "Ports von %(name)s"
-
-#: exchange/pdf.py:325 templates/cabling/cable.html:2
+#: exchange/pdf.py:269 exchange/pdf.py:364 templates/cabling/cable.html:2
 #: templates/cabling/cable.html:6 templates/cabling/cables.html:12
 #: templates/dcim/_port_panel.html:9 templates/dcim/device.html:17
 #: templates/dcim/port.html:14 templates/dcim/rack.html:66
 msgid "Cable"
 msgstr "Kabel"
 
-#: exchange/pdf.py:325 templates/cabling/cables.html:8
+#: exchange/pdf.py:269
+msgid "Other end"
+msgstr "Anderes Ende"
+
+#: exchange/pdf.py:269
+msgid "Complete"
+msgstr "Vollständig"
+
+#: exchange/pdf.py:276 templates/dcim/device.html:25
+#: templates/integrations/webhooks.html:11
+msgid "yes"
+msgstr "ja"
+
+#: exchange/pdf.py:276 templates/dcim/device.html:25
+#: templates/integrations/webhooks.html:11
+msgid "no"
+msgstr "nein"
+
+#: exchange/pdf.py:283
+#, python-format
+msgid "Rack %(name)s"
+msgstr "Rack %(name)s"
+
+#: exchange/pdf.py:321 templates/dcim/_port_panel.html:7
+#: templates/dcim/device.html:17 templates/library/type_detail.html:16
+msgid "Connector"
+msgstr "Steckverbinder"
+
+#: exchange/pdf.py:322
+msgid "Mbit/s"
+msgstr "Mbit/s"
+
+#: exchange/pdf.py:325 templates/dcim/device.html:48
+#: templates/dcim/port.html:16
+msgid "Connected to"
+msgstr "Verbunden mit"
+
+#: exchange/pdf.py:330
+#, python-format
+msgid "Ports of %(name)s"
+msgstr "Ports von %(name)s"
+
+#: exchange/pdf.py:364 templates/cabling/cables.html:8
 #: templates/cabling/cables.html:12
 msgid "Media"
 msgstr "Medium"
 
-#: exchange/pdf.py:325
+#: exchange/pdf.py:364
 msgid "Length (m)"
 msgstr "Länge (m)"
 
-#: exchange/pdf.py:325 templates/cabling/cables.html:12
+#: exchange/pdf.py:364 templates/cabling/cables.html:12
 msgid "A"
 msgstr "A"
 
-#: exchange/pdf.py:325 templates/cabling/cables.html:12
+#: exchange/pdf.py:364 templates/cabling/cables.html:12
 msgid "B"
 msgstr "B"
 
-#: exchange/pdf.py:327
+#: exchange/pdf.py:366
 #, python-format
 msgid "Patch list: %(name)s"
 msgstr "Patchliste: %(name)s"
 
-#: exchange/pdf.py:344 library/views.py:46 templates/library/types.html:18
+#: exchange/pdf.py:383 library/views.py:46 templates/library/types.html:18
 msgid "Vendor"
 msgstr "Hersteller"
 
-#: exchange/pdf.py:344 templates/library/catalog.html:16
+#: exchange/pdf.py:383 templates/library/catalog.html:16
 #: templates/library/types.html:18
 msgid "Model"
 msgstr "Modell"
 
-#: exchange/pdf.py:344 templates/library/catalog.html:16
+#: exchange/pdf.py:383 templates/library/catalog.html:16
 msgid "Part number"
 msgstr "Artikelnummer"
 
-#: exchange/pdf.py:344
+#: exchange/pdf.py:383
 msgid "Quantity"
 msgstr "Menge"
 
-#: exchange/pdf.py:346
+#: exchange/pdf.py:385
 #, python-format
 msgid "Bill of materials: %(name)s"
 msgstr "Stückliste: %(name)s"
 
-#: exchange/pdf.py:348
+#: exchange/pdf.py:387
 #, python-format
 msgid "Total: %(n)s devices"
 msgstr "Gesamt: %(n)s Geräte"
@@ -3132,7 +3186,9 @@ msgstr "Unbekannte Sprache."
 #, python-format
 msgid ""
 "The bucket could not be written (%(error)s). Check name, endpoint and key."
-msgstr "In den Bucket konnte nicht geschrieben werden (%(error)s). Prüfen Sie Name, Endpoint und Schlüssel."
+msgstr ""
+"In den Bucket konnte nicht geschrieben werden (%(error)s). Prüfen Sie Name, "
+"Endpoint und Schlüssel."
 
 #: instance/services.py:159
 msgid "Unknown setting."
@@ -3168,7 +3224,9 @@ msgstr "Branding gespeichert."
 
 #: instance/views.py:105
 msgid "Stored encrypted. Leave empty to keep the current value."
-msgstr "Wird verschlüsselt gespeichert. Leer lassen, um den aktuellen Wert zu behalten."
+msgstr ""
+"Wird verschlüsselt gespeichert. Leer lassen, um den aktuellen Wert zu "
+"behalten."
 
 #: instance/views.py:126
 msgid "Require a second factor for everyone"
@@ -3209,7 +3267,8 @@ msgstr "Geben Sie einen Hostnamen ein."
 
 #: instance/views.py:158
 msgid "Empty: mails are not sent (shown in the log in development)."
-msgstr "Leer: Es werden keine Mails versendet (in der Entwicklung im Log ausgegeben)."
+msgstr ""
+"Leer: Es werden keine Mails versendet (in der Entwicklung im Log ausgegeben)."
 
 #: instance/views.py:161
 msgid "Use STARTTLS"
@@ -3233,7 +3292,9 @@ msgstr "Virenscanner (clamd-Host)"
 
 #: instance/views.py:183
 msgid "Empty: no scan. When set, uploads fail while it is unreachable."
-msgstr "Leer: keine Prüfung. Wenn gesetzt, schlagen Uploads fehl, solange er nicht erreichbar ist."
+msgstr ""
+"Leer: keine Prüfung. Wenn gesetzt, schlagen Uploads fehl, solange er nicht "
+"erreichbar ist."
 
 #: instance/views.py:185
 msgid "clamd port"
@@ -3251,7 +3312,9 @@ msgstr "Geben Sie einen gültigen Bucket-Namen ein."
 msgid ""
 "Empty: files stay in the media volume. Files already stored there stay "
 "readable."
-msgstr "Leer: Dateien bleiben im Media-Volume. Dort bereits gespeicherte Dateien bleiben lesbar."
+msgstr ""
+"Leer: Dateien bleiben im Media-Volume. Dort bereits gespeicherte Dateien "
+"bleiben lesbar."
 
 #: instance/views.py:200
 msgid "Endpoint"
@@ -3261,7 +3324,9 @@ msgstr "Endpoint"
 msgid ""
 "Empty for AWS. Backblaze B2 for example https://s3.eu-"
 "central-003.backblazeb2.com."
-msgstr "Leer für AWS. Backblaze B2 zum Beispiel https://s3.eu-central-003.backblazeb2.com."
+msgstr ""
+"Leer für AWS. Backblaze B2 zum Beispiel https://s3.eu-"
+"central-003.backblazeb2.com."
 
 #: instance/views.py:207
 msgid "Region"
@@ -3327,7 +3392,8 @@ msgstr "Private Netze, die Webhooks erreichen dürfen"
 
 #: instance/views.py:267
 msgid "Comma separated, for example 10.0.0.0/8. Empty: public only."
-msgstr "Kommagetrennt, zum Beispiel 10.0.0.0/8. Leer: nur öffentliche Adressen."
+msgstr ""
+"Kommagetrennt, zum Beispiel 10.0.0.0/8. Leer: nur öffentliche Adressen."
 
 #: instance/views.py:270
 msgid "Allow plain http webhook URLs"
@@ -3360,7 +3426,8 @@ msgstr "E-Mail"
 
 #: instance/views.py:296
 msgid "The server for invitations, password resets and notifications."
-msgstr "Der Server für Einladungen, Passwort-Zurücksetzungen und Benachrichtigungen."
+msgstr ""
+"Der Server für Einladungen, Passwort-Zurücksetzungen und Benachrichtigungen."
 
 #: instance/views.py:299
 msgid "Files"
@@ -3371,7 +3438,10 @@ msgid ""
 "Uploads are encrypted before they are stored, in the media volume or in S3 "
 "compatible object storage (AWS S3, Backblaze B2, Wasabi). The bucket is "
 "checked with a test file when you save."
-msgstr "Uploads werden vor dem Speichern verschlüsselt, im Media-Volume oder in S3-kompatiblem Objektspeicher (AWS S3, Backblaze B2, Wasabi). Beim Speichern wird der Bucket mit einer Testdatei geprüft."
+msgstr ""
+"Uploads werden vor dem Speichern verschlüsselt, im Media-Volume oder in S3-"
+"kompatiblem Objektspeicher (AWS S3, Backblaze B2, Wasabi). Beim Speichern "
+"wird der Bucket mit einer Testdatei geprüft."
 
 #: instance/views.py:307
 msgid "Maps"
@@ -3530,7 +3600,9 @@ msgstr "Netzwerkkarte einer virtuellen Maschine"
 
 #: ipam/models.py:172
 msgid "An address is on a port or a virtual machine, not both."
-msgstr "Eine Adresse liegt auf einem Port oder einer virtuellen Maschine, nicht auf beiden."
+msgstr ""
+"Eine Adresse liegt auf einem Port oder einer virtuellen Maschine, nicht auf "
+"beiden."
 
 #: ipam/models.py:212 ipam/pages.py:131
 msgid "DHCP server"
@@ -4356,10 +4428,6 @@ msgstr "durch"
 #: locations/services.py:28 locations/services.py:34
 msgid "An object with this name already exists here."
 msgstr "Hier existiert bereits ein Objekt mit diesem Namen."
-
-#: locations/services.py:36
-msgid "This change conflicts with existing data."
-msgstr "Diese Änderung steht im Konflikt mit vorhandenen Daten."
 
 #: locations/services.py:100
 msgid "Remove everything inside it first."
@@ -5475,7 +5543,9 @@ msgstr "Einschränkungen"
 msgid ""
 "Optional. Without limits the token can do what you can do; each limit "
 "narrows it further."
-msgstr "Optional. Ohne Einschränkungen darf der Token, was Sie dürfen; jede Einschränkung grenzt ihn weiter ein."
+msgstr ""
+"Optional. Ohne Einschränkungen darf der Token, was Sie dürfen; jede "
+"Einschränkung grenzt ihn weiter ein."
 
 #: templates/api/_token_form.html:35 templates/dcim/rack.html:27
 #: templates/dcim/room.html:24 templates/library/types.html:11
@@ -5495,11 +5565,14 @@ msgstr "Gut zu wissen"
 
 #: templates/api/_token_form.html:48
 msgid "The client secret is shown once after creating. Store it right away."
-msgstr "Das Client-Secret wird nach dem Anlegen einmal angezeigt. Speichern Sie es sofort."
+msgstr ""
+"Das Client-Secret wird nach dem Anlegen einmal angezeigt. Speichern Sie es "
+"sofort."
 
 #: templates/api/_token_form.html:48
 msgid "The token is shown once after creating. Store it right away."
-msgstr "Der Token wird nach dem Anlegen einmal angezeigt. Speichern Sie ihn sofort."
+msgstr ""
+"Der Token wird nach dem Anlegen einmal angezeigt. Speichern Sie ihn sofort."
 
 #: templates/api/_token_form.html:49
 msgid "It never has more rights than you, even with write access."
@@ -5816,7 +5889,9 @@ msgstr "(für Sie nicht sichtbar)"
 msgid ""
 "No addresses in IPAM yet. They are linked when the machine is imported or "
 "synchronised."
-msgstr "Noch keine Adressen in IPAM. Sie werden beim Import oder Abgleich der Maschine verknüpft."
+msgstr ""
+"Noch keine Adressen in IPAM. Sie werden beim Import oder Abgleich der "
+"Maschine verknüpft."
 
 #: templates/compute/connection.html:6
 msgid "Change selection"
@@ -6177,10 +6252,6 @@ msgstr "Paket"
 msgid "License"
 msgstr "Lizenz"
 
-#: templates/dcim/_device_panel.html:6
-msgid "Units"
-msgstr "Höheneinheiten"
-
 #: templates/dcim/_device_panel.html:8
 #, python-format
 msgid "%(cabled)s of %(total)s cabled"
@@ -6235,14 +6306,6 @@ msgstr "Portliste (PDF)"
 msgid "Speed"
 msgstr "Geschwindigkeit"
 
-#: templates/dcim/device.html:25 templates/integrations/webhooks.html:11
-msgid "yes"
-msgstr "ja"
-
-#: templates/dcim/device.html:25 templates/integrations/webhooks.html:11
-msgid "no"
-msgstr "nein"
-
 #: templates/dcim/device.html:26 templates/floorplans/_item_panel.html:28
 #: templates/networks/switching.html:23
 msgid "No ports."
@@ -6285,7 +6348,8 @@ msgstr "Platzierung"
 msgid "Leave the rack empty for a floor device."
 msgstr "Rack leer lassen für ein Raumgerät."
 
-#: templates/dcim/device.html:68 templates/floorplans/editor.html:26
+#: templates/dcim/device.html:68 templates/dcim/rack.html:107
+#: templates/floorplans/editor.html:26
 msgid "Move"
 msgstr "Verschieben"
 
@@ -6461,14 +6525,6 @@ msgstr "Höheneinheiten reservieren"
 msgid "Elevation (PDF)"
 msgstr "Rackansicht (PDF)"
 
-#: templates/dcim/rack.html:36
-msgid "Front view"
-msgstr "Vorderansicht"
-
-#: templates/dcim/rack.html:36
-msgid "Rear view"
-msgstr "Rückansicht"
-
 #: templates/dcim/rack.html:37
 msgid "Legend"
 msgstr "Legende"
@@ -6565,11 +6621,22 @@ msgstr "Keine Höheneinheiten reserviert."
 msgid "Rack details"
 msgstr "Rack-Details"
 
-#: templates/dcim/rack.html:103
+#: templates/dcim/rack.html:104
+msgid "Move rack"
+msgstr "Rack verschieben"
+
+#: templates/dcim/rack.html:105
+msgid ""
+"To another room, also on another site. The devices in it move along with "
+"their cables, addresses and configurations; the position on the floor plan "
+"is cleared."
+msgstr "In einen anderen Raum, auch an einem anderen Standort. Die Geräte darin ziehen mit ihren Kabeln, Adressen und Konfigurationen mit; die Position auf dem Grundriss wird entfernt."
+
+#: templates/dcim/rack.html:111
 msgid "Delete this rack and its reservations?"
 msgstr "Dieses Rack und seine Reservierungen löschen?"
 
-#: templates/dcim/rack.html:103
+#: templates/dcim/rack.html:111
 msgid "Delete rack"
 msgstr "Rack löschen"
 
@@ -8612,9 +8679,6 @@ msgstr "Mandant gelöscht."
 
 #~ msgid "No floor devices."
 #~ msgstr "Keine Raumgeräte."
-
-#~ msgid "Whole rack"
-#~ msgstr "Ganzes Rack"
 
 #~ msgid "Whole room"
 #~ msgstr "Ganzer Raum"
