@@ -92,6 +92,7 @@
       </ul>
     </section>
 
+    {% links_panel rack %}
     {% metadata_panel rack %}
     <form method="post" class="card" novalidate>{% csrf_token %}<input type="hidden" name="action" value="edit">
       <h2 class="mb-3">{% translate "Rack details" %}</h2>

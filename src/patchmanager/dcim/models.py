@@ -198,6 +198,20 @@ class Device(HierarchyNode):
     purchase_date = models.DateField(_("purchase date"), null=True, blank=True)
     in_service_date = models.DateField(_("in service since"), null=True, blank=True)
     responsible = models.CharField(_("responsible person"), max_length=150, blank=True)
+    supplier = models.ForeignKey(
+        "directory.Organization",
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="supplied_devices",
+        verbose_name=_("supplier"),
+    )
+    warranty_end = models.DateField(_("warranty until"), null=True, blank=True)
+    support_contract = models.CharField(_("support contract"), max_length=200, blank=True)
+    support_end = models.DateField(_("support until"), null=True, blank=True)
+    end_of_life = models.DateField(
+        _("end of life"), null=True, blank=True, help_text=_("When the vendor stops updates.")
+    )
     notes = models.TextField(_("notes"), blank=True)
     plan_x = models.FloatField(null=True, blank=True)
     plan_y = models.FloatField(null=True, blank=True)

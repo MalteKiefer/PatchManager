@@ -5,6 +5,7 @@
 <div class="mb-6 flex flex-wrap items-center gap-3"><h1 class="mr-auto">VLAN {{ vlan.vid }} · {{ vlan.name }}</h1><a class="btn-secondary" href="{% history_url vlan %}">{% translate "History" %}</a></div>
 <div class="grid gap-6 lg:grid-cols-3">
   <div class="space-y-6 lg:col-span-2">
+    {% links_panel vlan %}
     <section class="card"><h2 class="mb-3">{% translate "Access and native ports" %}</h2>
       <ul class="flex flex-wrap gap-2 text-sm">{% for p in access_ports %}<li><a class="badge-muted no-underline hover:underline" href="{% url 'devices:port' p.pk %}">{{ p.device }} · {{ p.name }}</a></li>{% empty %}<li class="text-slate-500">{% translate "None." %}</li>{% endfor %}</ul></section>
     <section class="card"><h2 class="mb-3">{% translate "Tagged on" %}</h2>

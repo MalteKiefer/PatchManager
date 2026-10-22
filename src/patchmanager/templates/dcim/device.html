@@ -41,6 +41,7 @@
         · <a href="{% url 'cabling:trace' port.pk %}">{% translate "trace" %}</a></li>{% endfor %}</ul>
     </section>
     {% endif %}
+    {% links_panel device %}
     {% metadata_panel device %}
   </div>
   <aside class="space-y-6">

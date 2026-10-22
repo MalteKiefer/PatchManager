@@ -74,6 +74,7 @@
       {% empty %}<p class="text-sm text-slate-500">{% translate "No devices outside the racks yet. Add outlets, access points, printers or cameras of this room." %}</p>{% endfor %}
     </section>
     {% endif %}
+    {% links_panel node %}
     {% metadata_panel node %}
   </div>
   <aside class="space-y-6">

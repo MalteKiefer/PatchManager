@@ -33,6 +33,14 @@ TARGETS = {
     "dcim.device": "dcim.device",
     "dcim.port": "dcim.device",
     "library.devicetype": "library.devicetype",
+    "directory.organization": "directory.organization",
+    "directory.contact": "directory.organization",
+    "directory.system": "directory.system",
+    "ipam.dhcpscope": "ipam.dhcpscope",
+    "ipam.dhcpreservation": "ipam.dhcpscope",
+    "ipam.dnszone": "ipam.dnszone",
+    "ipam.dnsrecord": "ipam.dnszone",
+    "circuits.circuit": "circuits.circuit",
 }
 
 _markdown = MarkdownIt("commonmark", {"html": False, "linkify": False}).enable("table")

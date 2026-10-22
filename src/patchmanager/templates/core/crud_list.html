@@ -1,0 +1,12 @@
+{% extends "base.html" %}{% load i18n %}
+{% block title %}{{ resource.title }}{% endblock %}
+{% block content %}
+<div class="mb-4 flex flex-wrap items-center gap-3"><h1 class="mr-auto">{{ resource.title }}{% if current_tenant %} · {{ current_tenant.name }}{% endif %}</h1>
+  {% if can_add %}<a class="btn-primary" href="{% url 'objects:new' resource.key %}">{{ resource.new }}</a>{% endif %}</div>
+{% if tabs|length > 1 %}<nav class="segmented mb-5" aria-label="{{ resource.title }}">{% for t in tabs %}<a href="{% url 'objects:index' t.key %}" {% if t.key == resource.key %}aria-current="page"{% endif %}>{{ t.title }}</a>{% endfor %}</nav>{% endif %}
+<div class="card overflow-x-auto p-0"><table class="table">
+  <thead><tr>{% for h in headers %}<th>{{ h }}</th>{% endfor %}</tr></thead>
+  <tbody>{% for obj, cells in rows %}<tr>{% for c in cells %}<td>{% if forloop.first %}<a href="{% url 'objects:detail' resource.key obj.pk %}">{{ c }}</a>{% else %}{{ c }}{% endif %}</td>{% endfor %}</tr>
+  {% empty %}<tr><td colspan="{{ headers|length }}" class="text-slate-500">{% translate "Nothing here yet." %}</td></tr>{% endfor %}</tbody>
+</table></div>
+{% endblock %}
