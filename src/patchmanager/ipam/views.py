@@ -103,6 +103,22 @@ def _tree(prefixes: list[Prefix]) -> list[tuple[Prefix, int]]:
     return rows
 
 
+def _with_ports(actor: Any, addresses: Any) -> list[IPAddress]:
+    """Attach ``shown_port``: the port, unless its device is hidden from the viewer."""
+    rows = list(addresses)
+    devices = {a.port.device_id for a in rows if a.port_id}
+    from patchmanager.dcim.models import Device
+
+    visible = set(
+        _visible(actor, "dcim.device.view", Device.objects.filter(pk__in=devices)).values_list(
+            "pk", flat=True
+        )
+    )
+    for row in rows:
+        row.shown_port = row.port if row.port_id and row.port.device_id in visible else None
+    return rows
+
+
 def _usage(prefix: Prefix, prefixes: list[Prefix], hosts: list[tuple[Any, str]]) -> Any:
     # ponytail: scans every prefix and address per row; fine for thousands, push into SQL
     # (inet containment with GROUP BY) if tenants reach hundreds of thousands of addresses.
@@ -225,7 +241,7 @@ def prefix_detail(request: HttpRequest, pk: str) -> HttpResponse:
             "prefix": prefix,
             "form": form,
             "children": kids,
-            "addresses": addresses[:500],
+            "addresses": _with_ports(actor, addresses[:500]),
             "usage": services.usage(prefix, kids, taken),
             "free": [] if container else services.free_ranges(prefix, taken),
             "next_free": None if container else services.next_free(prefix, taken),
@@ -249,6 +265,7 @@ def address_list(request: HttpRequest) -> HttpResponse:
     if query:
         rows = rows.filter(host__icontains=query) | rows.filter(dns_name__icontains=query)
     page = Paginator(rows.order_by("vrf__name", "address"), 100).get_page(request.GET.get("page"))
+    page.object_list = _with_ports(actor, page.object_list)
     return render(
         request,
         "ipam/addresses.html",

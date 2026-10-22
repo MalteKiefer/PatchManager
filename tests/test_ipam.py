@@ -247,3 +247,31 @@ def test_import_and_export(net, system) -> None:
         assert exported[0]["device"] == "sw1" and exported[0]["port"] == "ge4"
         assert run("addresses", addresses) == ["unchanged"]
         assert run("addresses", [{**addresses[0], "port": "ge99"}]) == ["error"]
+
+
+def test_hidden_devices_stay_hidden_next_to_addresses(client, net, make_user, grant, system):
+    from patchmanager.accounts.models import Assignment, Role
+    from patchmanager.search import services as search
+    from tests.conftest import login
+
+    with system():
+        prefix = _prefix(net, "10.50.0.0/24")
+        _address(net, "10.50.0.5/24", port=net["device"].ports.get(name="ge1"))
+    user = make_user()
+    grant(user, "viewer", net["tenant"])
+    hide = Role.objects.create(
+        key="hide-devices", name="Hide devices", permissions=["dcim.device.view"]
+    )
+    Assignment.objects.create(
+        role=hide, user=user, tenant=net["tenant"], scope_path=net["device"].path, effect="deny"
+    )
+    login(client, user)
+    client.post("/tenants/switch/", {"tenant": net["tenant"].pk}, secure=True)
+    for url in ("/ipam/addresses/", f"/ipam/prefixes/{prefix.pk}/"):
+        page = client.get(url, secure=True).content.decode()
+        assert "10.50.0.5/24" in page and "sw1" not in page, url
+        assert "not visible to you" in page
+    with system():
+        results, _counts = search.search(user, net["tenant"], "10.50.0")
+        hits = results["ipaddress"]
+        assert hits and all("sw1" not in h.context for h in hits)

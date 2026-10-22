@@ -10,7 +10,7 @@
   <thead><tr><th>{% translate "Address" %}</th><th>VRF</th><th>{% translate "Status" %}</th><th>{% translate "DNS name" %}</th><th>{% translate "Port" %}</th><th>{% translate "Description" %}</th></tr></thead>
   <tbody>{% for a in page %}<tr>
     <td><a href="{% url 'ipam:address' a.pk %}" class="tabular-nums">{{ a.address }}</a></td><td>{{ a.vrf|default:_("global") }}</td><td>{{ a.get_status_display }}</td><td>{{ a.dns_name }}</td>
-    <td>{% if a.port %}<a href="{% url 'devices:port' a.port.pk %}">{{ a.port.device }} · {{ a.port.name }}</a>{% endif %}</td><td class="text-sm text-slate-500">{{ a.description }}</td>
+    <td>{% if a.shown_port %}<a href="{% url 'devices:port' a.shown_port.pk %}">{{ a.shown_port.device }} · {{ a.shown_port.name }}</a>{% elif a.port_id %}<span class="text-slate-500">{% translate "(not visible to you)" %}</span>{% endif %}</td><td class="text-sm text-slate-500">{{ a.description }}</td>
   </tr>{% empty %}<tr><td colspan="6" class="text-slate-500">{% translate "No addresses found." %}</td></tr>{% endfor %}</tbody>
 </table></div>
 {% include "manage/_pager.html" %}

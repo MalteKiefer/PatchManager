@@ -135,14 +135,17 @@ def _matches(source: Source, query: str, tenant: Any) -> QuerySet[Any]:
     return ranked.order_by("-score", "pk")
 
 
-def _context(source: Source, obj: Any) -> str:
-    """Where the object is, in a few words."""
+def _context(source: Source, obj: Any, user: Any = None) -> str:
+    """Where the object is, in a few words (never naming what the user may not view)."""
     if source.kind == "device":
         return " · ".join(str(x) for x in (obj.device_type, obj.room, obj.rack) if x)
     if source.kind == "port":
         return str(obj.device)
     if source.kind == "ipaddress":
-        return " · ".join(str(x) for x in (obj.dns_name, obj.port and obj.port.device) if x)
+        device = obj.port.device if obj.port_id else None
+        if device is not None and not policy.has_perm(user, "dcim.device.view", device):
+            device = None
+        return " · ".join(str(x) for x in (obj.dns_name, device) if x)
     if source.kind == "prefix":
         return obj.description or (str(obj.vrf) if obj.vrf else "")
     if source.kind in ("building", "floor", "room", "rack", "vlan"):
@@ -180,7 +183,7 @@ def search(
             counts[source.kind] = len(visible)
             if not kind or kind == source.kind:
                 results[source.kind] = [
-                    Hit(source.kind, r, _context(source, r)) for r in visible[:limit]
+                    Hit(source.kind, r, _context(source, r, user)) for r in visible[:limit]
                 ]
     notes = _notes(user, tenant, query)
     if notes:
