@@ -46,6 +46,7 @@ class Resource:
     context: Callable[[HttpRequest, Any], dict[str, Any]] | None = None
     template: str = ""  # extra content of the detail page
     hidden: bool = False  # no own list (child records)
+    actions: tuple[tuple[Any, str], ...] = ()  # (label, URL name) shown next to "New" on the list
     order: tuple[str, ...] = field(default=("name",))
 
 

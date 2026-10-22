@@ -28,6 +28,9 @@ no provider lines, and devices had no warranty or support dates.
   at the documented address with the same host. Scopes export as Kea JSON, zones as
   zone files (RFC 1035). Record values are one line and host targets are validated,
   so exports cannot carry extra records.
+* Zones can be imported from zone files and from the APIs of deSEC, Cloudflare and
+  Hetzner DNS. Only those fixed API hosts are contacted, over verified TLS with time and
+  size limits; the token is used for the one import and neither stored nor logged.
 * New app `circuits`: lines with provider, kind, status, site, handover port,
   bandwidth, public addresses and contract (number, end, notice, cost, hotline).
 * Devices gain supplier, warranty, support contract and end, and end of life.

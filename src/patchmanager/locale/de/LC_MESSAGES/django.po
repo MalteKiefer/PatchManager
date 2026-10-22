@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-22 07:48+0000\n"
+"POT-Creation-Date: 2026-10-22 07:52+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -42,7 +42,7 @@ msgstr "Führen Sie den Befehl setup_token aus, um eines zu erhalten."
 #: accounts/forms.py:49 accounts/forms.py:103 accounts/forms.py:110
 #: api/ui.py:32 api/ui.py:55 directory/pages.py:86 directory/pages.py:105
 #: directory/pages.py:123 exchange/pdf.py:215 integrations/views.py:27
-#: ipam/pages.py:121 ipam/pages.py:161 ipam/pages.py:179 scim/views.py:351
+#: ipam/pages.py:127 ipam/pages.py:167 ipam/pages.py:186 scim/views.py:351
 #: sso/views.py:187 templates/api/clients.html:9 templates/api/tokens.html:9
 #: templates/integrations/webhooks.html:8 templates/ipam/vrfs.html:8
 #: templates/manage/groups.html:6 templates/manage/roles.html:11
@@ -137,8 +137,8 @@ msgstr "JSON- oder YAML-Datei"
 msgid "The file is too large."
 msgstr "Die Datei ist zu groß."
 
-#: accounts/forms.py:187 configs/views.py:48 library/views.py:343
-#: networks/switch_views.py:92
+#: accounts/forms.py:187 configs/views.py:48 ipam/pages.py:336
+#: library/views.py:343 networks/switch_views.py:92
 msgid "The file must be UTF-8 text."
 msgstr "Die Datei muss UTF-8-Text enthalten."
 
@@ -407,9 +407,9 @@ msgstr "Der letzte Super-Admin kann nicht entfernt werden."
 #: directory/links.py:141 directory/links.py:144 directory/links.py:173
 #: exchange/importer.py:54 exchange/importer.py:70 floorplans/services.py:193
 #: floorplans/views.py:249 history/services.py:76 history/services.py:97
-#: instance/services.py:23 integrations/services.py:69 metadata/services.py:107
-#: metadata/services.py:175 networks/services.py:109 networks/services.py:139
-#: networks/services.py:148
+#: instance/services.py:23 integrations/services.py:69 ipam/dns_import.py:320
+#: metadata/services.py:107 metadata/services.py:175 networks/services.py:109
+#: networks/services.py:139 networks/services.py:148
 msgid "You do not have permission to do that."
 msgstr "Sie haben keine Berechtigung dafür."
 
@@ -907,7 +907,7 @@ msgstr "Verbunden."
 msgid "Cable removed."
 msgstr "Kabel entfernt."
 
-#: cabling/views.py:152 core/crud.py:270 core/lists.py:207
+#: cabling/views.py:152 core/crud.py:271 core/lists.py:207
 #: dcim/device_views.py:373 dcim/device_views.py:450 dcim/views.py:64
 #: ipam/views.py:231 ipam/views.py:370 ipam/views.py:454 library/views.py:269
 #: locations/views.py:190 locations/views.py:293 networks/views.py:139
@@ -1110,7 +1110,7 @@ msgstr ""
 msgid "Configuration"
 msgstr "Konfiguration"
 
-#: configs/views.py:35 networks/switch_views.py:50
+#: configs/views.py:35 ipam/pages.py:312 networks/switch_views.py:50
 msgid "or a file"
 msgstr "oder eine Datei"
 
@@ -1146,19 +1146,19 @@ msgstr "Speichern"
 msgid "Version %(n)s deleted."
 msgstr "Version %(n)s gelöscht."
 
-#: core/crud.py:117 core/crud.py:134
+#: core/crud.py:118 core/crud.py:135
 msgid "This entry already exists."
 msgstr "Dieser Eintrag existiert bereits."
 
-#: core/crud.py:149
+#: core/crud.py:150
 msgid "Other records still use this one."
 msgstr "Andere Einträge verwenden diesen noch."
 
-#: core/crud.py:225 locations/views.py:235
+#: core/crud.py:226 locations/views.py:235
 msgid "Created."
 msgstr "Erstellt."
 
-#: core/crud.py:266 core/lists.py:203 dcim/device_views.py:391 dcim/views.py:69
+#: core/crud.py:267 core/lists.py:203 dcim/device_views.py:391 dcim/views.py:69
 #: ipam/views.py:225 ipam/views.py:360 ipam/views.py:448 library/views.py:294
 #: locations/views.py:298 locations/views.py:423 networks/views.py:135
 msgid "Deleted."
@@ -1528,7 +1528,7 @@ msgstr "Geschwindigkeit (Mbit/s)"
 msgid "enabled"
 msgstr "aktiviert"
 
-#: dcim/models.py:252 ipam/models.py:283 ipam/pages.py:143
+#: dcim/models.py:252 ipam/models.py:283 ipam/pages.py:149
 msgid "MAC address"
 msgstr "MAC-Adresse"
 
@@ -1917,13 +1917,13 @@ msgstr "%(name)s · %(user)s · %(time)s"
 msgid "Page %(n)s"
 msgstr "Seite %(n)s"
 
-#: exchange/pdf.py:162 ipam/pages.py:142 templates/accounts/security.html:50
+#: exchange/pdf.py:162 ipam/pages.py:148 templates/accounts/security.html:50
 #: templates/ipam/addresses.html:10 templates/ipam/prefix.html:24
 #: templates/manage/audit.html:18 templates/networks/switching.html:28
 msgid "Address"
 msgstr "Adresse"
 
-#: exchange/pdf.py:162 ipam/pages.py:145 templates/ipam/addresses.html:10
+#: exchange/pdf.py:162 ipam/pages.py:151 templates/ipam/addresses.html:10
 #: templates/ipam/prefixes.html:8 templates/ipam/vrfs.html:8
 #: templates/networks/switching.html:48
 msgid "Description"
@@ -2522,6 +2522,43 @@ msgstr "Webhook gelöscht."
 msgid "Delivery queued again."
 msgstr "Zustellung erneut eingereiht."
 
+#: ipam/dns_import.py:112 ipam/pages.py:332
+msgid "The file is not a zone file of at most 10 MB."
+msgstr "Die Datei ist keine Zonendatei von höchstens 10 MB."
+
+#: ipam/dns_import.py:147
+msgid "The zone has more than 20 000 records."
+msgstr "Die Zone hat mehr als 20 000 Einträge."
+
+#: ipam/dns_import.py:176
+msgid "The provider could not be reached."
+msgstr "Der Provider ist nicht erreichbar."
+
+#: ipam/dns_import.py:178
+msgid "The provider refused the token."
+msgstr "Der Provider hat das Token abgelehnt."
+
+#: ipam/dns_import.py:180 ipam/dns_import.py:225 ipam/dns_import.py:258
+msgid "The provider does not know this zone."
+msgstr "Der Provider kennt diese Zone nicht."
+
+#: ipam/dns_import.py:183
+#, python-format
+msgid "The provider answered with an error (%(status)s)."
+msgstr "Der Provider hat mit einem Fehler geantwortet (%(status)s)."
+
+#: ipam/dns_import.py:188
+msgid "The provider sent an answer that is not JSON."
+msgstr "Die Antwort des Providers ist kein JSON."
+
+#: ipam/dns_import.py:289 ipam/models.py:332
+msgid "Enter a domain name like example.com."
+msgstr "Geben Sie einen Domainnamen wie example.com ein."
+
+#: ipam/dns_import.py:291 ipam/pages.py:340
+msgid "Choose a provider and enter its token."
+msgstr "Wählen Sie einen Provider und geben Sie sein Token ein."
+
 #: ipam/models.py:22
 msgid "route distinguisher"
 msgstr "Route Distinguisher"
@@ -2559,7 +2596,7 @@ msgstr "DNS-Name"
 msgid "port"
 msgstr "Port"
 
-#: ipam/models.py:197 ipam/pages.py:125
+#: ipam/models.py:197 ipam/pages.py:131
 msgid "DHCP server"
 msgstr "DHCP-Server"
 
@@ -2647,10 +2684,6 @@ msgstr "Geben Sie eine gültige Adresse ein."
 msgid "The address must lie inside the prefix of the scope."
 msgstr "Die Adresse muss im Präfix des Bereichs liegen."
 
-#: ipam/models.py:332
-msgid "Enter a domain name like example.com."
-msgstr "Geben Sie einen Domainnamen wie example.com ein."
-
 #: ipam/models.py:336
 msgid "primary name server"
 msgstr "primärer Nameserver"
@@ -2667,7 +2700,7 @@ msgstr "Standard-TTL (Sekunden)"
 msgid "serial"
 msgstr "Seriennummer"
 
-#: ipam/models.py:346 ipam/pages.py:163
+#: ipam/models.py:346 ipam/pages.py:169
 msgid "DNS server"
 msgstr "DNS-Server"
 
@@ -2695,7 +2728,7 @@ msgstr "Typ"
 msgid "value"
 msgstr "Wert"
 
-#: ipam/models.py:402 ipam/pages.py:183
+#: ipam/models.py:402 ipam/pages.py:190
 msgid "TTL (seconds)"
 msgstr "TTL (Sekunden)"
 
@@ -2729,95 +2762,156 @@ msgstr "MX- und SRV-Einträge brauchen eine Priorität."
 msgid "SRV records take weight, port and target."
 msgstr "SRV-Einträge nehmen Gewicht, Port und Ziel."
 
-#: ipam/pages.py:95
+#: ipam/pages.py:101
 msgid "Kea configuration"
 msgstr "Kea-Konfiguration"
 
-#: ipam/pages.py:97 ipam/pages.py:122 templates/ipam/prefixes.html:8
+#: ipam/pages.py:103 ipam/pages.py:128 templates/ipam/prefixes.html:8
 msgid "Prefix"
 msgstr "Präfix"
 
-#: ipam/pages.py:98
+#: ipam/pages.py:104
 msgid "Addresses in the range"
 msgstr "Adressen im Bereich"
 
-#: ipam/pages.py:99 ipam/pages.py:138
+#: ipam/pages.py:105 ipam/pages.py:144
 msgid "Reservations"
 msgstr "Reservierungen"
 
-#: ipam/pages.py:100
+#: ipam/pages.py:106
 msgid "Options"
 msgstr "Optionen"
 
-#: ipam/pages.py:108
+#: ipam/pages.py:114 ipam/pages.py:306
 msgid "Zone file"
 msgstr "Zonendatei"
 
-#: ipam/pages.py:117
+#: ipam/pages.py:123
 msgid "DHCP scopes"
 msgstr "DHCP-Bereiche"
 
-#: ipam/pages.py:118
+#: ipam/pages.py:124
 msgid "New DHCP scope"
 msgstr "Neuer DHCP-Bereich"
 
-#: ipam/pages.py:123
+#: ipam/pages.py:129
 msgid "First address"
 msgstr "Erste Adresse"
 
-#: ipam/pages.py:124
+#: ipam/pages.py:130
 msgid "Last address"
 msgstr "Letzte Adresse"
 
-#: ipam/pages.py:126 sso/views.py:190 templates/dcim/device.html:17
+#: ipam/pages.py:132 sso/views.py:190 templates/dcim/device.html:17
 msgid "Enabled"
 msgstr "Aktiviert"
 
-#: ipam/pages.py:139
+#: ipam/pages.py:145
 msgid "New reservation"
 msgstr "Neue Reservierung"
 
-#: ipam/pages.py:144 templates/networks/switching.html:60
+#: ipam/pages.py:150 templates/networks/switching.html:60
 msgid "Hostname"
 msgstr "Hostname"
 
-#: ipam/pages.py:157
+#: ipam/pages.py:163
 msgid "DNS zones"
 msgstr "DNS-Zonen"
 
-#: ipam/pages.py:158
+#: ipam/pages.py:164
 msgid "New DNS zone"
 msgstr "Neue DNS-Zone"
 
-#: ipam/pages.py:162
+#: ipam/pages.py:168
 msgid "Primary name server"
 msgstr "Primärer Nameserver"
 
-#: ipam/pages.py:164
+#: ipam/pages.py:170
 msgid "Serial"
 msgstr "Seriennummer"
 
-#: ipam/pages.py:175 templates/base.html:55
+#: ipam/pages.py:174
+msgid "Import zone"
+msgstr "Zone importieren"
+
+#: ipam/pages.py:182 templates/base.html:55
 msgid "Records"
 msgstr "Nachweise"
 
-#: ipam/pages.py:176
+#: ipam/pages.py:183
 msgid "New record"
 msgstr "Neuer Eintrag"
 
-#: ipam/pages.py:180 sso/views.py:189 templates/history/activity.html:7
+#: ipam/pages.py:187 sso/views.py:189 templates/history/activity.html:7
 #: templates/manage/roles.html:11 templates/search/results.html:7
 #: templates/sso/providers.html:7
 msgid "Type"
 msgstr "Typ"
 
-#: ipam/pages.py:181
+#: ipam/pages.py:188
 msgid "Value"
 msgstr "Wert"
 
-#: ipam/pages.py:182
+#: ipam/pages.py:189
 msgid "Priority"
 msgstr "Priorität"
+
+#: ipam/pages.py:296
+msgid "Zone"
+msgstr "Zone"
+
+#: ipam/pages.py:298
+msgid "For example example.com."
+msgstr "Zum Beispiel example.com."
+
+#: ipam/pages.py:301 templates/configs/list.html:11
+msgid "Source"
+msgstr "Quelle"
+
+#: ipam/pages.py:302
+msgid "zone file"
+msgstr "Zonendatei"
+
+#: ipam/pages.py:310
+msgid "Paste it here, or choose a file."
+msgstr "Fügen Sie sie hier ein oder wählen Sie eine Datei."
+
+#: ipam/pages.py:314
+msgid "API token"
+msgstr "API-Token"
+
+#: ipam/pages.py:318
+msgid ""
+"Used once to read the zone; it is not stored. A read-only token is enough."
+msgstr "Wird einmal zum Lesen der Zone verwendet und nicht gespeichert. Ein Token mit Leserechten genügt."
+
+#: ipam/pages.py:322
+msgid "Replace the documented records of this zone"
+msgstr "Die dokumentierten Einträge dieser Zone ersetzen"
+
+#: ipam/pages.py:338
+msgid "Paste a zone file or choose one."
+msgstr "Fügen Sie eine Zonendatei ein oder wählen Sie eine."
+
+#: ipam/pages.py:372
+#, python-format
+msgid "%(n)s records imported."
+msgstr "%(n)s Einträge importiert."
+
+#: ipam/pages.py:380
+msgid "Import a DNS zone"
+msgstr "DNS-Zone importieren"
+
+#: ipam/pages.py:382
+msgid ""
+"Read a zone file, or a zone of deSEC, Cloudflare or Hetzner DNS through "
+"their API."
+msgstr "Lesen Sie eine Zonendatei oder eine Zone von deSEC, Cloudflare oder Hetzner DNS über deren API."
+
+#: ipam/pages.py:387 templates/exchange/index.html:7
+#: templates/library/types.html:30 templates/manage/roles.html:21
+msgid "Import"
+msgstr "Importieren"
 
 #: ipam/services.py:37
 msgid "This does not fit the tenant, or the gateway is outside."
@@ -3846,7 +3940,8 @@ msgstr ""
 #: networks/switchconfig.py:443
 #, python-format
 msgid "DHCP pool %(pool)s: a scope of that name belongs to another server."
-msgstr "DHCP-Pool %(pool)s: Ein Bereich dieses Namens gehört zu einem anderen Server."
+msgstr ""
+"DHCP-Pool %(pool)s: Ein Bereich dieses Namens gehört zu einem anderen Server."
 
 #: networks/switchconfig.py:454
 #, python-format
@@ -4809,10 +4904,6 @@ msgid "By"
 msgstr "Von"
 
 #: templates/configs/list.html:11
-msgid "Source"
-msgstr "Quelle"
-
-#: templates/configs/list.html:11
 msgid "Compare from"
 msgstr "Vergleichen von"
 
@@ -5434,11 +5525,6 @@ msgstr ""
 #: templates/directory/_members.html:8
 msgid "Nothing linked yet."
 msgstr "Noch nichts zugeordnet."
-
-#: templates/exchange/index.html:7 templates/library/types.html:30
-#: templates/manage/roles.html:21
-msgid "Import"
-msgstr "Importieren"
 
 #: templates/exchange/index.html:9
 #, python-format
