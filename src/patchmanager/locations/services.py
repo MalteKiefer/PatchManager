@@ -194,6 +194,12 @@ def move_site(request: HttpRequest, actor: User, site: Any, target: Tenant) -> N
                 f"UPDATE cabling_cableend SET tenant_id = %s WHERE port_id IN ({in_site})",  # noqa: S608  # nosec B608
                 [target.pk, new],
             )
+            # Stored configurations follow their devices (scope is the device path).
+            cursor.execute(
+                "UPDATE configs_deviceconfig c SET tenant_id = %s, path = d.path"
+                " FROM dcim_device d WHERE d.id = c.device_id AND d.path <@ %s::ltree",
+                [target.pk, new],
+            )
             cursor.execute(
                 "UPDATE networks_vlan SET tenant_id = %s WHERE site_id = %s", [target.pk, site.pk]
             )

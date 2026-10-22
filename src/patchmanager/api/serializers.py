@@ -5,6 +5,7 @@ from typing import Any
 from rest_framework import serializers
 
 from patchmanager.cabling.models import Cable
+from patchmanager.configs.models import DeviceConfig
 from patchmanager.dcim.models import Device, Port, Rack
 from patchmanager.history.models import Change
 from patchmanager.ipam.models import VRF, IPAddress, Prefix
@@ -322,6 +323,32 @@ class IPAddressSerializer(serializers.ModelSerializer):  # type: ignore[type-arg
         model = IPAddress
         fields = [*BASE, "tenant", "vrf", "address", "status", "dns_name", "description", "port"]
         read_only_fields = BASE
+
+
+class ConfigSerializer(serializers.ModelSerializer):  # type: ignore[type-arg]
+    """A stored configuration version (without its text)."""
+
+    class Meta:
+        model = DeviceConfig
+        fields = ["id", "version", "created_at", "sha256", "size", "lines", "source", "comment"]
+        read_only_fields = fields
+
+
+class ConfigContentSerializer(ConfigSerializer):
+    """A version with its text."""
+
+    content = serializers.CharField()
+
+    class Meta(ConfigSerializer.Meta):
+        fields = [*ConfigSerializer.Meta.fields, "content"]
+        read_only_fields = fields
+
+
+class ConfigWriteSerializer(serializers.Serializer):  # type: ignore[type-arg]
+    """A configuration to store."""
+
+    content = serializers.CharField(trim_whitespace=False)
+    comment = serializers.CharField(max_length=200, required=False, allow_blank=True)
 
 
 class ChangeSerializer(serializers.ModelSerializer):  # type: ignore[type-arg]

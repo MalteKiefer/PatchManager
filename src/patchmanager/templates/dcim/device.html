@@ -26,6 +26,12 @@
       </table></div>
       {% if can_change %}<a class="btn-secondary mt-4" href="{% url 'devices:port-create' device.pk %}">{% translate "Add port" %}</a>{% endif %}
     </section>
+    <section class="card" aria-labelledby="config-h">
+      <div class="mb-2 flex items-center gap-2"><h2 id="config-h" class="mr-auto">{% translate "Configuration" %}</h2>
+        <a class="btn-secondary" href="{% url 'configs:list' device.pk %}">{% translate "Versions" %}</a></div>
+      {% for c in configs %}<p class="text-sm"><a href="{% url 'configs:version' device.pk c.version %}">v{{ c.version }}</a> {% blocktranslate with when=c.created_at|timesince %}stored {{ when }} ago{% endblocktranslate %}{% if c.comment %}, {{ c.comment }}{% endif %}</p>
+      {% empty %}<p class="text-sm text-slate-500">{% translate "No configuration stored yet." %}</p>{% endfor %}
+    </section>
     {% if neighbours %}
     <section class="card" aria-labelledby="deps-h">
       <h2 id="deps-h" class="mb-3">{% translate "Connected to" %}</h2>

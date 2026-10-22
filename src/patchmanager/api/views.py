@@ -11,9 +11,11 @@ from rest_framework.response import Response
 
 from patchmanager.accounts.models import User
 from patchmanager.api import serializers as s
-from patchmanager.api.core import filtered, lookup, tenant_scope, visible
+from patchmanager.api.core import filtered, lookup, not_found, tenant_scope, visible
 from patchmanager.cabling import services as cabling
 from patchmanager.cabling.models import Cable
+from patchmanager.configs import services as configs
+from patchmanager.configs.models import DeviceConfig
 from patchmanager.dcim import devices
 from patchmanager.dcim.models import Device, Port, Rack
 from patchmanager.history import services as history
@@ -327,6 +329,55 @@ class DeviceViewSet(Base):
             face=place.validated_data["face"],
         )
         return self.updated(device)
+
+    @extend_schema(
+        request=s.ConfigWriteSerializer,
+        responses={200: s.ConfigSerializer(many=True), 201: s.ConfigSerializer},
+    )
+    @action(detail=True, methods=["get", "post"])
+    def configs(self, request: Request, pk: str | None = None) -> Response:
+        """Stored configuration versions (newest first); POST stores a new one.
+
+        A POST that repeats the latest version stores nothing and answers 200.
+        """
+        device = self.get_object()
+        if request.method == "POST":
+            body = s.ConfigWriteSerializer(data=request.data)
+            body.is_valid(raise_exception=True)
+            config, created = configs.add(
+                self.http,
+                self.actor,
+                device,
+                body.validated_data["content"],
+                source=DeviceConfig.Source.API,
+                comment=body.validated_data.get("comment", ""),
+            )
+            return Response(
+                s.ConfigSerializer(config).data,
+                status=status.HTTP_201_CREATED if created else status.HTTP_200_OK,
+            )
+        rows = visible(
+            self.request.user, "configs.config.view", device.configs.order_by("-version")
+        )
+        return Response(s.ConfigSerializer(rows[:500], many=True).data)
+
+    @extend_schema(responses=s.ConfigContentSerializer)
+    @action(detail=True, methods=["get"], url_path=r"configs/(?P<version>\d+)")
+    def config_version(
+        self, request: Request, pk: str | None = None, version: str = ""
+    ) -> Response:
+        """One version with its text (the read is audited)."""
+        device = self.get_object()
+        config = (
+            visible(self.request.user, "configs.config.view", device.configs.all())
+            .filter(version=int(version))
+            .first()
+        )
+        if config is None:
+            raise not_found()
+        data = dict(s.ConfigSerializer(config).data)
+        data["content"] = configs.read(self.http, self.actor, config)
+        return Response(data)
 
 
 class PortViewSet(Base):

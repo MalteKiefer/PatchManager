@@ -19,6 +19,7 @@ urlpatterns = [
     path("racks/", include("patchmanager.dcim.urls")),
     path("library/", include("patchmanager.library.urls")),
     path("devices/", include("patchmanager.dcim.device_urls")),
+    path("devices/", include("patchmanager.configs.urls")),
     path("meta/", include("patchmanager.metadata.urls")),
     path("cabling/", include("patchmanager.cabling.urls")),
     path("networks/", include("patchmanager.networks.urls")),

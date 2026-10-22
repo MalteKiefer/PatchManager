@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-22 03:52+0000\n"
+"POT-Creation-Date: 2026-10-22 04:01+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -134,7 +134,7 @@ msgstr "JSON- oder YAML-Datei"
 msgid "The file is too large."
 msgstr "Die Datei ist zu groß."
 
-#: accounts/forms.py:187 library/views.py:313
+#: accounts/forms.py:187 configs/views.py:48 library/views.py:313
 msgid "The file must be UTF-8 text."
 msgstr "Die Datei muss UTF-8-Text enthalten."
 
@@ -888,11 +888,100 @@ msgstr "Verbunden."
 msgid "Cable removed."
 msgstr "Kabel entfernt."
 
-#: cabling/views.py:152 dcim/device_views.py:320 dcim/device_views.py:394
-#: dcim/views.py:64 ipam/views.py:200 ipam/views.py:336 ipam/views.py:420
+#: cabling/views.py:152 dcim/device_views.py:320 dcim/device_views.py:397
+#: dcim/views.py:64 ipam/views.py:216 ipam/views.py:353 ipam/views.py:437
 #: library/views.py:239 locations/views.py:216 networks/views.py:131
 msgid "Saved."
 msgstr "Gespeichert."
+
+#: configs/models.py:14
+msgid "entered by hand"
+msgstr "von Hand eingegeben"
+
+#: configs/models.py:15
+msgid "uploaded file"
+msgstr "hochgeladene Datei"
+
+#: configs/models.py:16
+msgid "API"
+msgstr "API"
+
+#: configs/models.py:19
+msgid "device"
+msgstr "Gerät"
+
+#: configs/models.py:21
+msgid "version"
+msgstr "Version"
+
+#: configs/models.py:23
+msgid "size (bytes)"
+msgstr "Größe (Bytes)"
+
+#: configs/models.py:24
+msgid "lines"
+msgstr "Zeilen"
+
+#: configs/models.py:25
+msgid "source"
+msgstr "Quelle"
+
+#: configs/models.py:26
+msgid "comment"
+msgstr "Kommentar"
+
+#: configs/services.py:31
+msgid "The configuration is empty."
+msgstr "Die Konfiguration ist leer."
+
+#: configs/services.py:33
+msgid "The configuration must be text, not a binary file."
+msgstr "Die Konfiguration muss Text sein, keine Binärdatei."
+
+#: configs/services.py:35 configs/views.py:44
+msgid "The configuration is larger than 2 MB."
+msgstr "Die Konfiguration ist größer als 2 MB."
+
+#: configs/views.py:30 templates/configs/list.html:4
+#: templates/dcim/device.html:30
+msgid "Configuration"
+msgstr "Konfiguration"
+
+#: configs/views.py:35
+msgid "or a file"
+msgstr "oder eine Datei"
+
+#: configs/views.py:36 templates/configs/list.html:11
+msgid "Comment"
+msgstr "Kommentar"
+
+#: configs/views.py:51
+msgid "Paste a configuration or choose a file."
+msgstr "Fügen Sie eine Konfiguration ein oder wählen Sie eine Datei."
+
+#: configs/views.py:123
+#, python-format
+msgid "Version %(n)s stored."
+msgstr "Version %(n)s gespeichert."
+
+#: configs/views.py:125
+#, python-format
+msgid "Unchanged since version %(n)s."
+msgstr "Unverändert seit Version %(n)s."
+
+#: configs/views.py:131
+#, python-format
+msgid "New configuration for %(device)s"
+msgstr "Neue Konfiguration für %(device)s"
+
+#: configs/views.py:134
+msgid "Store"
+msgstr "Speichern"
+
+#: configs/views.py:215
+#, python-format
+msgid "Version %(n)s deleted."
+msgstr "Version %(n)s gelöscht."
 
 #: core/fields.py:85
 msgid "Enter a network such as 10.0.0.0/24 or 2001:db8::/48 (host bits zero)."
@@ -1065,13 +1154,13 @@ msgstr "Neuer Port an %(device)s"
 msgid "Device moved."
 msgstr "Gerät verschoben."
 
-#: dcim/device_views.py:338 dcim/views.py:69 ipam/views.py:194
-#: ipam/views.py:326 ipam/views.py:414 library/views.py:264
+#: dcim/device_views.py:338 dcim/views.py:69 ipam/views.py:210
+#: ipam/views.py:343 ipam/views.py:431 library/views.py:264
 #: locations/views.py:221 networks/views.py:127
 msgid "Deleted."
 msgstr "Gelöscht."
 
-#: dcim/device_views.py:408
+#: dcim/device_views.py:411
 msgid "VLANs saved."
 msgstr "VLANs gespeichert."
 
@@ -1103,11 +1192,11 @@ msgstr "Rackgeräte benötigen einen Typ für den Rackeinbau und eine Position."
 msgid "The rack is not in this room."
 msgstr "Das Rack befindet sich nicht in diesem Raum."
 
-#: dcim/devices.py:225
+#: dcim/devices.py:228
 msgid "The rear port must belong to the same device."
 msgstr "Der Rückport muss zum selben Gerät gehören."
 
-#: dcim/devices.py:247 dcim/devices.py:253
+#: dcim/devices.py:250 dcim/devices.py:256
 msgid "This port name or rear position is already used."
 msgstr "Dieser Portname oder diese Rückposition wird bereits verwendet."
 
@@ -1432,7 +1521,7 @@ msgstr "Mbit/s"
 msgid "VLAN"
 msgstr "VLAN"
 
-#: exchange/pdf.py:286 templates/dcim/device.html:31
+#: exchange/pdf.py:286 templates/dcim/device.html:37
 #: templates/dcim/port.html:16
 msgid "Connected to"
 msgstr "Verbunden mit"
@@ -2006,24 +2095,24 @@ msgstr "Diese Adresse wird in diesem VRF schon verwendet."
 msgid "global"
 msgstr "global"
 
-#: ipam/views.py:177 templates/ipam/prefixes.html:5
+#: ipam/views.py:193 templates/ipam/prefixes.html:5
 msgid "New prefix"
 msgstr "Neues Präfix"
 
-#: ipam/views.py:294
+#: ipam/views.py:311
 #, python-format
 msgid "New address on %(port)s"
 msgstr "Neue Adresse auf %(port)s"
 
-#: ipam/views.py:296 templates/ipam/addresses.html:5
+#: ipam/views.py:313 templates/ipam/addresses.html:5
 msgid "New address"
 msgstr "Neue Adresse"
 
-#: ipam/views.py:330
+#: ipam/views.py:347
 msgid "The address is no longer on a port."
 msgstr "Die Adresse liegt auf keinem Port mehr."
 
-#: ipam/views.py:397 templates/ipam/vrfs.html:5
+#: ipam/views.py:414 templates/ipam/vrfs.html:5
 msgid "New VRF"
 msgstr "Neues VRF"
 
@@ -2897,7 +2986,7 @@ msgid "Profile"
 msgstr "Profil"
 
 #: templates/accounts/profile.html:7 templates/cabling/cable.html:20
-#: templates/dcim/device.html:41 templates/ipam/address.html:19
+#: templates/dcim/device.html:47 templates/ipam/address.html:19
 #: templates/ipam/prefix.html:38 templates/ipam/vrf.html:9
 #: templates/library/type_detail.html:30 templates/locations/node.html:51
 #: templates/manage/audit.html:18 templates/manage/group_detail.html:7
@@ -2906,7 +2995,7 @@ msgid "Details"
 msgstr "Details"
 
 #: templates/accounts/profile.html:9 templates/cabling/cable.html:22
-#: templates/dcim/device.html:43 templates/dcim/port.html:42
+#: templates/dcim/device.html:49 templates/dcim/port.html:42
 #: templates/dcim/rack.html:99 templates/instance/branding.html:9
 #: templates/integrations/webhook.html:34 templates/ipam/address.html:20
 #: templates/ipam/prefix.html:39 templates/ipam/vrf.html:10
@@ -3396,10 +3485,141 @@ msgid "Hops"
 msgstr "Stationen"
 
 #: templates/cabling/trace.html:32 templates/dcim/_port_panel.html:14
-#: templates/dcim/device.html:33 templates/dcim/port.html:16
+#: templates/dcim/device.html:39 templates/dcim/port.html:16
 #: templates/dcim/rack.html:70 templates/ipam/address.html:11
+#: templates/ipam/addresses.html:13 templates/ipam/prefix.html:27
 msgid "(not visible to you)"
 msgstr "(für Sie nicht sichtbar)"
+
+#: templates/configs/diff.html:4 templates/configs/diff.html:11
+msgid "Changes"
+msgstr "Änderungen"
+
+#: templates/configs/diff.html:6
+#, python-format
+msgid "Changes from v%(a)s to v%(b)s"
+msgstr "Änderungen von v%(a)s zu v%(b)s"
+
+#: templates/configs/diff.html:7 templates/configs/version.html:7
+msgid "All versions"
+msgstr "Alle Versionen"
+
+#: templates/configs/diff.html:12
+msgid "added"
+msgstr "hinzugefügt"
+
+#: templates/configs/diff.html:12
+msgid "removed"
+msgstr "entfernt"
+
+#: templates/configs/diff.html:14
+msgid "The two versions are the same."
+msgstr "Die beiden Versionen sind gleich."
+
+#: templates/configs/list.html:2 templates/configs/list.html:5
+#, python-format
+msgid "Configuration of %(d)s"
+msgstr "Konfiguration von %(d)s"
+
+#: templates/configs/list.html:6
+msgid "New version"
+msgstr "Neue Version"
+
+#: templates/configs/list.html:7
+msgid ""
+"Configurations are stored encrypted; each version is kept and every view is "
+"recorded in the audit log. Backup tools can store versions through the API."
+msgstr "Konfigurationen werden verschlüsselt gespeichert; jede Version bleibt erhalten und jedes Ansehen steht im Audit-Log. Backup-Werkzeuge können Versionen über die API speichern."
+
+#: templates/configs/list.html:11 templates/core/licenses.html:11
+msgid "Version"
+msgstr "Version"
+
+#: templates/configs/list.html:11
+msgid "Stored"
+msgstr "Gespeichert"
+
+#: templates/configs/list.html:11 templates/history/_table.html:2
+#: templates/history/activity.html:9
+msgid "By"
+msgstr "Von"
+
+#: templates/configs/list.html:11
+msgid "Source"
+msgstr "Quelle"
+
+#: templates/configs/list.html:11
+msgid "Lines"
+msgstr "Zeilen"
+
+#: templates/configs/list.html:11
+msgid "Compare from"
+msgstr "Vergleichen von"
+
+#: templates/configs/list.html:11 templates/history/activity.html:10
+#: templates/manage/audit.html:13
+msgid "From"
+msgstr "Von"
+
+#: templates/configs/list.html:11
+msgid "To"
+msgstr "Bis"
+
+#: templates/configs/list.html:15 templates/configs/version.html:11
+#: templates/history/_table.html:8 templates/history/change.html:10
+#: templates/manage/roles.html:14
+msgid "system"
+msgstr "System"
+
+#: templates/configs/list.html:17
+#, python-format
+msgid "Compare from version %(n)s"
+msgstr "Vergleichen ab Version %(n)s"
+
+#: templates/configs/list.html:18
+#, python-format
+msgid "Compare to version %(n)s"
+msgstr "Vergleichen mit Version %(n)s"
+
+#: templates/configs/list.html:21
+msgid "Compare"
+msgstr "Vergleichen"
+
+#: templates/configs/list.html:24 templates/dcim/device.html:33
+msgid "No configuration stored yet."
+msgstr "Noch keine Konfiguration gespeichert."
+
+#: templates/configs/list.html:24
+msgid "Store the first version"
+msgstr "Erste Version speichern"
+
+#: templates/configs/version.html:8
+#, python-format
+msgid "Changes since v%(n)s"
+msgstr "Änderungen seit v%(n)s"
+
+#: templates/configs/version.html:9
+msgid "Download"
+msgstr "Herunterladen"
+
+#: templates/configs/version.html:11
+#, python-format
+msgid "%(n)s line"
+msgid_plural "%(n)s lines"
+msgstr[0] "%(n)s Zeile"
+msgstr[1] "%(n)s Zeilen"
+
+#: templates/configs/version.html:12
+msgid "Configuration text"
+msgstr "Konfigurationstext"
+
+#: templates/configs/version.html:13
+msgid "Delete this version for good?"
+msgstr "Diese Version endgültig löschen?"
+
+#: templates/configs/version.html:13
+msgid "Delete version"
+msgstr "Version löschen"
 
 #: templates/core/create.html:9 templates/dcim/device_form.html:9
 #: templates/library/type_form.html:8 templates/locations/site_form.html:9
@@ -3526,10 +3746,6 @@ msgid "Package"
 msgstr "Paket"
 
 #: templates/core/licenses.html:11
-msgid "Version"
-msgstr "Version"
-
-#: templates/core/licenses.html:11
 msgid "License"
 msgstr "Lizenz"
 
@@ -3600,31 +3816,40 @@ msgstr "Keine Ports."
 msgid "Add port"
 msgstr "Port hinzufügen"
 
-#: templates/dcim/device.html:33
+#: templates/dcim/device.html:31 templates/manage/system.html:10
+msgid "Versions"
+msgstr "Versionen"
+
+#: templates/dcim/device.html:32
+#, python-format
+msgid "stored %(when)s ago"
+msgstr "vor %(when)s gespeichert"
+
+#: templates/dcim/device.html:39
 msgid "open end"
 msgstr "offenes Ende"
 
-#: templates/dcim/device.html:34
+#: templates/dcim/device.html:40
 msgid "trace"
 msgstr "verfolgen"
 
-#: templates/dcim/device.html:47
+#: templates/dcim/device.html:53
 msgid "Placement"
 msgstr "Platzierung"
 
-#: templates/dcim/device.html:49
+#: templates/dcim/device.html:55
 msgid "Leave the rack empty for a floor device."
 msgstr "Rack leer lassen für ein Raumgerät."
 
-#: templates/dcim/device.html:50 templates/floorplans/editor.html:21
+#: templates/dcim/device.html:56 templates/floorplans/editor.html:21
 msgid "Move"
 msgstr "Verschieben"
 
-#: templates/dcim/device.html:53
+#: templates/dcim/device.html:59
 msgid "Delete this device with all its ports?"
 msgstr "Dieses Gerät mit allen Ports löschen?"
 
-#: templates/dcim/device.html:53
+#: templates/dcim/device.html:59
 msgid "Delete device"
 msgstr "Gerät löschen"
 
@@ -4146,15 +4371,6 @@ msgstr "Aktion"
 msgid "Fields"
 msgstr "Felder"
 
-#: templates/history/_table.html:2 templates/history/activity.html:9
-msgid "By"
-msgstr "Von"
-
-#: templates/history/_table.html:8 templates/history/change.html:10
-#: templates/manage/roles.html:14
-msgid "system"
-msgstr "System"
-
 #: templates/history/_table.html:9
 msgid "No changes."
 msgstr "Keine Änderungen."
@@ -4162,10 +4378,6 @@ msgstr "Keine Änderungen."
 #: templates/history/activity.html:6
 msgid "Object name"
 msgstr "Objektname"
-
-#: templates/history/activity.html:10 templates/manage/audit.html:13
-msgid "From"
-msgstr "Von"
 
 #: templates/history/activity.html:11 templates/manage/audit.html:14
 msgid "Until"
@@ -4402,7 +4614,9 @@ msgstr "Präfix"
 msgid ""
 "No prefixes yet. Start with the networks of your sites, for example "
 "10.0.0.0/16."
-msgstr "Noch keine Präfixe. Beginnen Sie mit den Netzen Ihrer Standorte, zum Beispiel 10.0.0.0/16."
+msgstr ""
+"Noch keine Präfixe. Beginnen Sie mit den Netzen Ihrer Standorte, zum "
+"Beispiel 10.0.0.0/16."
 
 #: templates/ipam/vrf.html:7
 #, python-format
@@ -4419,7 +4633,8 @@ msgstr "Route Distinguisher"
 
 #: templates/ipam/vrfs.html:10
 msgid "No VRFs. Prefixes and addresses without one are in the global table."
-msgstr "Keine VRFs. Präfixe und Adressen ohne VRF liegen in der globalen Tabelle."
+msgstr ""
+"Keine VRFs. Präfixe und Adressen ohne VRF liegen in der globalen Tabelle."
 
 #: templates/library/catalog.html:2 templates/library/catalog.html:5
 #: templates/library/catalog_entry.html:4
@@ -4912,10 +5127,6 @@ msgstr "OK"
 #: templates/manage/system.html:8
 msgid "problem"
 msgstr "Problem"
-
-#: templates/manage/system.html:10
-msgid "Versions"
-msgstr "Versionen"
 
 #: templates/manage/system.html:12
 msgid "License notices"

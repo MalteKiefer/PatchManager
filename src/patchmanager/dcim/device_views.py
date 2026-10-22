@@ -359,6 +359,9 @@ def device_detail(request: HttpRequest, pk: str) -> HttpResponse:
                 )
             ),
             "neighbours": neighbours(actor, device),
+            "configs": policy.scope_queryset(
+                actor, "configs.config.view", device.configs.order_by("-version")
+            )[:1],
             "can_change": can_change,
             "can_delete": policy.has_perm(actor, "dcim.device.delete", device),
             "breadcrumbs": [(a, node_url(a)) for a in device.ancestors()],

@@ -18,6 +18,8 @@ All notable changes to this project are documented here. The format follows
 * New layout: navigation in a sidebar with the tenant on top, search in the top bar
   (Ctrl+K or /), and an overview start page with the tenant's racks, devices, ports
   and cables, its sites with their load, the fullest racks and recent changes.
+* Device configurations: versions per device, encrypted at rest, every read audited,
+  view with line numbers, compare, download, store by paste, file or API (ADR 0027).
 * IP address management: VRFs, prefixes as a tree with usage and free ranges, the
   next free address, addresses on ports (shown on devices), search, import and
   export, REST API and history (ADR 0026).
@@ -41,6 +43,7 @@ All notable changes to this project are documented here. The format follows
   everyone) and the audit log recorded the proxy. The client address now comes
   from `X-Forwarded-For` of trusted proxies.
 * Pages for signed in users send `Cache-Control: no-store`.
+* Status messages are announced without breaking their list for screen readers.
 * Audit entries written while an administrator acts as another user name the
   administrator; the personal data export leaves out their devices.
 

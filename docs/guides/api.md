@@ -35,6 +35,9 @@ The answer contains an `access_token` valid for one hour.
   `/api/v1/ip-addresses/`. `?within=10.0.0.0/16` lists prefixes or addresses inside
   a network, `?q=` searches the text of the network or address. Addresses take a
   `port` id to sit on a port.
+* Configurations: `GET`/`POST /api/v1/devices/<id>/configs/` lists or stores versions
+  (`{"content": "...", "comment": "..."}`; `201` new, `200` unchanged),
+  `GET /api/v1/devices/<id>/configs/<version>/` returns one with its text.
 
 ## Webhooks
 

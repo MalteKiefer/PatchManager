@@ -96,6 +96,7 @@ INSTALLED_APPS = [
     "patchmanager.dcim",
     "patchmanager.networks",
     "patchmanager.ipam",
+    "patchmanager.configs",
     "patchmanager.cabling",
     "patchmanager.floorplans",
     "patchmanager.history",

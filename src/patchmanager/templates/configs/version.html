@@ -1,0 +1,14 @@
+{% extends "base.html" %}{% load i18n %}
+{% block title %}{{ device.name }} v{{ config.version }}{% endblock %}
+{% block content %}
+{% include "core/_breadcrumbs.html" with current=crumb %}
+<div class="mb-2 flex flex-wrap items-center gap-3">
+  <h1 class="mr-auto">{{ device.name }} · v{{ config.version }}</h1>
+  <a class="btn-secondary" href="{% url 'configs:list' device.pk %}">{% translate "All versions" %}</a>
+  {% if previous %}<a class="btn-secondary" href="{% url 'configs:diff' device.pk %}?a={{ previous.version }}&amp;b={{ config.version }}">{% blocktranslate with n=previous.version %}Changes since v{{ n }}{% endblocktranslate %}</a>{% endif %}
+  <a class="btn-primary" href="{% url 'configs:download' device.pk config.version %}">{% translate "Download" %}</a>
+</div>
+<p class="mb-4 text-sm text-slate-500">{{ config.created_at|date:"DATETIME_FORMAT" }}, {{ config.created_by|default:_("system") }}, {{ config.get_source_display }}, {% blocktranslate count n=config.lines %}{{ n }} line{% plural %}{{ n }} lines{% endblocktranslate %}{% if config.comment %}: {{ config.comment }}{% endif %}</p>
+<div class="config-view" tabindex="0" aria-label="{% translate 'Configuration text' %}"><ol>{% for line in lines %}<li><code>{{ line|default:" " }}</code></li>{% endfor %}</ol></div>
+{% if can_delete %}<form method="post" action="{% url 'configs:delete' device.pk config.version %}" class="mt-6" data-confirm="{% translate 'Delete this version for good?' %}">{% csrf_token %}<button class="btn-danger">{% translate "Delete version" %}</button></form>{% endif %}
+{% endblock %}

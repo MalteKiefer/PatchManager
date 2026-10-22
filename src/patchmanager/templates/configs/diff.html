@@ -1,0 +1,15 @@
+{% extends "base.html" %}{% load i18n %}
+{% block title %}{{ device.name }} v{{ old.version }} → v{{ new.version }}{% endblock %}
+{% block content %}
+{% include "core/_breadcrumbs.html" with current=_("Changes") %}
+<div class="mb-2 flex flex-wrap items-center gap-3">
+  <h1 class="mr-auto">{% blocktranslate with a=old.version b=new.version %}Changes from v{{ a }} to v{{ b }}{% endblocktranslate %}</h1>
+  <a class="btn-secondary" href="{% url 'configs:list' device.pk %}">{% translate "All versions" %}</a>
+</div>
+<p class="mb-4 text-sm"><span class="diff-count is-add">+{{ added }}</span> <span class="diff-count is-remove">−{{ removed }}</span></p>
+{% if lines %}
+<div class="config-view is-diff" tabindex="0" aria-label="{% translate 'Changes' %}"><table>
+  {% for l in lines %}<tr class="is-{{ l.kind }}"><td class="ln">{{ l.old|default_if_none:"" }}</td><td class="ln">{{ l.new|default_if_none:"" }}</td><td><span class="sr-only">{% if l.kind == "add" %}{% translate "added" %}{% elif l.kind == "remove" %}{% translate "removed" %}{% endif %}</span><code>{% if l.kind == "add" %}+ {% elif l.kind == "remove" %}− {% elif l.kind == "context" %}  {% endif %}{{ l.text }}</code></td></tr>{% endfor %}
+</table></div>
+{% else %}<p class="card text-sm text-slate-500">{% translate "The two versions are the same." %}</p>{% endif %}
+{% endblock %}

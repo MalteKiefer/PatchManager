@@ -181,3 +181,18 @@ tr.is-hot { @apply bg-amber-50 dark:bg-slate-800; }
 .prefix-indent[data-depth="3"] { width: 3.75rem; }
 .prefix-indent[data-depth="4"] { width: 5rem; }
 .prefix-indent:not([data-depth="0"])::after { content: "└"; @apply mr-1 float-right text-slate-400; }
+
+/* Configuration text and diffs. */
+.config-view { @apply max-h-[75vh] overflow-auto rounded-xl border border-[#dde2e8] bg-white py-2 text-[13px] leading-6 dark:border-slate-800 dark:bg-slate-900; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+.config-view ol { counter-reset: line; }
+.config-view li { counter-increment: line; @apply flex whitespace-pre pr-4; }
+.config-view li::before { content: counter(line); @apply mr-4 inline-block w-12 shrink-0 select-none pr-2 text-right text-slate-500; }
+.config-view table { @apply w-full border-collapse; }
+.config-view td { @apply whitespace-pre px-2 align-top; }
+.config-view td.ln { @apply w-12 select-none text-right text-slate-500; }
+.config-view tr.is-add { @apply bg-emerald-50 dark:bg-emerald-950; }
+.config-view tr.is-remove { @apply bg-rose-50 dark:bg-rose-950; }
+.config-view tr.is-hunk td { @apply bg-slate-50 py-1 text-slate-500 dark:bg-slate-800; }
+.diff-count { @apply mr-2 rounded px-2 py-0.5 font-semibold tabular-nums; }
+.diff-count.is-add { @apply bg-emerald-100 text-emerald-800 dark:bg-emerald-900 dark:text-emerald-200; }
+.diff-count.is-remove { @apply bg-rose-100 text-rose-800 dark:bg-rose-900 dark:text-rose-200; }

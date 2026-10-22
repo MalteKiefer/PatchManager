@@ -11,6 +11,7 @@ SECTIONS = {
     "locations": "locations",
     "dcim": "locations",
     "devices": "locations",
+    "configs": "locations",
     "floorplans": "locations",
     "library": "library",
     "cabling": "cables",

@@ -66,3 +66,4 @@ nav:
       - adr/0024-personal-data.md
       - adr/0025-device-type-catalog.md
       - adr/0026-ipam.md
+      - adr/0027-configuration-storage.md

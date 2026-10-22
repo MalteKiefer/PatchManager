@@ -176,6 +176,9 @@ def place(
 
         refresh_paths(device)
         ipam.refresh_paths(device)
+        from patchmanager.configs.models import DeviceConfig
+
+        DeviceConfig.objects.filter(device=device).update(path=str(device.path))
     audit.record(
         "dcim.device.moved",
         request=request,

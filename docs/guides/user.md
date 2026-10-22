@@ -114,6 +114,20 @@ their value. Exports use the same columns, so you can export, edit and import
 again. PDF reports: site report, patch list and bill of materials per site, the
 rack elevation on rack pages and the port list on device pages.
 
+## Device configurations
+
+A device page shows its latest stored configuration; *Versions* lists all of them.
+Store a new version by pasting the text or choosing a file; an unchanged paste does
+not create a version. Open a version to read it with line numbers, download it, or
+compare two versions. Configurations are encrypted at rest and every view is
+recorded in the audit log. Backup tools can store versions through the API:
+
+```bash
+curl -H "Authorization: Bearer $TOKEN" -H "Content-Type: application/json" \
+  -d "$(jq -Rs '{content: ., comment: "nightly"}' sw1.cfg)" \
+  https://patchmanager.example.com/api/v1/devices/<device id>/configs/
+```
+
 ## IP addresses
 
 *IP addresses* keeps prefixes and addresses, optionally in VRFs (separate routing
