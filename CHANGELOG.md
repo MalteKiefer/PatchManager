@@ -27,6 +27,7 @@ All notable changes to this project are documented here. The format follows
   networks, configurations and more to a system or customer (ADR 0030).
 * DHCP scopes with reservations (Kea export) and DNS zones with records (zone file
   export).
+* Import DNS zones from zone files and from deSEC, Cloudflare and Hetzner DNS.
 * Lines from providers with bandwidth, handover port and contract; device supplier,
   warranty, support and end of life.
 * Read ArubaOS-Switch configurations and Aruba Central templates into the

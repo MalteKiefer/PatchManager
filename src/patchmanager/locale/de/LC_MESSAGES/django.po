@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-22 08:53+0000\n"
+"POT-Creation-Date: 2026-10-22 08:55+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -43,8 +43,8 @@ msgstr "Führen Sie den Befehl setup_token aus, um eines zu erhalten."
 #: api/ui.py:32 api/ui.py:55 compute/pages.py:113 compute/pages.py:137
 #: compute/pages.py:156 compute/pages.py:172 compute/pages.py:184
 #: directory/pages.py:86 directory/pages.py:105 directory/pages.py:123
-#: exchange/pdf.py:215 integrations/views.py:27 ipam/pages.py:121
-#: ipam/pages.py:161 ipam/pages.py:179 scim/views.py:351 sso/views.py:187
+#: exchange/pdf.py:215 integrations/views.py:27 ipam/pages.py:127
+#: ipam/pages.py:167 ipam/pages.py:186 scim/views.py:351 sso/views.py:187
 #: templates/api/clients.html:9 templates/api/tokens.html:9
 #: templates/compute/connections.html:9 templates/integrations/webhooks.html:8
 #: templates/ipam/vrfs.html:8 templates/manage/groups.html:6
@@ -139,8 +139,8 @@ msgstr "JSON- oder YAML-Datei"
 msgid "The file is too large."
 msgstr "Die Datei ist zu groß."
 
-#: accounts/forms.py:187 configs/views.py:48 library/views.py:343
-#: networks/switch_views.py:92
+#: accounts/forms.py:187 configs/views.py:48 ipam/pages.py:336
+#: library/views.py:343 networks/switch_views.py:92
 msgid "The file must be UTF-8 text."
 msgstr "Die Datei muss UTF-8-Text enthalten."
 
@@ -413,8 +413,8 @@ msgstr "Der letzte Super-Admin kann nicht entfernt werden."
 #: directory/links.py:175 exchange/importer.py:54 exchange/importer.py:70
 #: floorplans/services.py:193 floorplans/views.py:283 history/services.py:76
 #: history/services.py:97 instance/services.py:23 integrations/services.py:69
-#: metadata/services.py:113 metadata/services.py:181 networks/services.py:109
-#: networks/services.py:139 networks/services.py:148
+#: ipam/dns_import.py:322 metadata/services.py:113 metadata/services.py:181
+#: networks/services.py:109 networks/services.py:139 networks/services.py:148
 msgid "You do not have permission to do that."
 msgstr "Sie haben keine Berechtigung dafür."
 
@@ -972,9 +972,7 @@ msgstr "Übergabeport"
 #: circuits/models.py:56
 msgid ""
 "Where the line ends, for example on the provider's router or our firewall."
-msgstr ""
-"Wo die Leitung endet, zum Beispiel am Router des Providers oder an unserer "
-"Firewall."
+msgstr "Wo die Leitung endet, zum Beispiel am Router des Providers oder an unserer Firewall."
 
 #: circuits/models.py:58
 msgid "download (Mbit/s)"
@@ -1072,7 +1070,7 @@ msgstr "%(servers)s neue Server, %(created)s neue und %(updated)s aktualisierte 
 msgid "The person who set up this connection can no longer sign in."
 msgstr "Die Person, die diese Verbindung eingerichtet hat, kann sich nicht mehr anmelden."
 
-#: compute/connections.py:132
+#: compute/connections.py:132 ipam/pages.py:314
 msgid "API token"
 msgstr "API-Token"
 
@@ -1184,7 +1182,7 @@ msgstr "%(vm)s: Netzwerkkarte %(nic)s wurde ausgelassen."
 msgid "Platform"
 msgstr "Plattform"
 
-#: compute/importing.py:261 exchange/pdf.py:162 ipam/pages.py:142
+#: compute/importing.py:261 exchange/pdf.py:162 ipam/pages.py:148
 #: templates/accounts/security.html:50 templates/compute/connection.html:18
 #: templates/ipam/addresses.html:10 templates/ipam/prefix.html:24
 #: templates/manage/audit.html:18 templates/networks/switching.html:28
@@ -1255,7 +1253,7 @@ msgid ""
 "used once and not stored; give an account with read rights only."
 msgstr "Liest Cluster, Hosts, virtuelle Maschinen und Speicher aus Proxmox VE und VMware vCenter, oder Volumes und Freigaben eines Synology-NAS. Zugangsdaten werden einmal verwendet und nicht gespeichert; verwenden Sie ein Konto nur mit Leserechten."
 
-#: compute/importing.py:370 templates/exchange/index.html:7
+#: compute/importing.py:370 ipam/pages.py:387 templates/exchange/index.html:7
 #: templates/library/types.html:30 templates/manage/roles.html:21
 msgid "Import"
 msgstr "Importieren"
@@ -1447,7 +1445,7 @@ msgid "purpose"
 msgstr "Zweck"
 
 #: compute/models.py:221 compute/pages.py:157 dcim/models.py:252
-#: ipam/models.py:283 ipam/pages.py:143
+#: ipam/models.py:283 ipam/pages.py:149
 msgid "MAC address"
 msgstr "MAC-Adresse"
 
@@ -1699,7 +1697,7 @@ msgstr ""
 msgid "Configuration"
 msgstr "Konfiguration"
 
-#: configs/views.py:35 networks/switch_views.py:50
+#: configs/views.py:35 ipam/pages.py:312 networks/switch_views.py:50
 msgid "or a file"
 msgstr "oder eine Datei"
 
@@ -2009,8 +2007,7 @@ msgstr "Der Rückport muss zum selben Gerät gehören."
 
 #: dcim/devices.py:246
 msgid "A port joins only a link aggregation of its own device."
-msgstr ""
-"Ein Port kann nur einer Link-Aggregation seines eigenen Geräts beitreten."
+msgstr "Ein Port kann nur einer Link-Aggregation seines eigenen Geräts beitreten."
 
 #: dcim/devices.py:272 dcim/devices.py:278
 msgid "This port name or rear position is already used."
@@ -2254,9 +2251,7 @@ msgstr "%(object)s zuordnen"
 msgid ""
 "Put it into a system, or assign it to an organization, for example a "
 "customer."
-msgstr ""
-"Ordnen Sie es einem System zu oder weisen Sie es einer Organisation zu, zum "
-"Beispiel einem Kunden."
+msgstr "Ordnen Sie es einem System zu oder weisen Sie es einer Organisation zu, zum Beispiel einem Kunden."
 
 #: directory/links.py:270 templates/directory/_links.html:3
 #: templates/instance/branding.html:14
@@ -2489,7 +2484,7 @@ msgstr "%(name)s · %(user)s · %(time)s"
 msgid "Page %(n)s"
 msgstr "Seite %(n)s"
 
-#: exchange/pdf.py:162 ipam/pages.py:145 templates/ipam/addresses.html:10
+#: exchange/pdf.py:162 ipam/pages.py:151 templates/ipam/addresses.html:10
 #: templates/ipam/prefixes.html:8 templates/ipam/vrfs.html:8
 #: templates/networks/switching.html:48
 msgid "Description"
@@ -3072,6 +3067,43 @@ msgstr "Webhook gelöscht."
 msgid "Delivery queued again."
 msgstr "Zustellung erneut eingereiht."
 
+#: ipam/dns_import.py:112 ipam/pages.py:332
+msgid "The file is not a zone file of at most 10 MB."
+msgstr "Die Datei ist keine Zonendatei von höchstens 10 MB."
+
+#: ipam/dns_import.py:147
+msgid "The zone has more than 20 000 records."
+msgstr "Die Zone hat mehr als 20 000 Einträge."
+
+#: ipam/dns_import.py:176
+msgid "The provider could not be reached."
+msgstr "Der Provider ist nicht erreichbar."
+
+#: ipam/dns_import.py:178
+msgid "The provider refused the token."
+msgstr "Der Provider hat das Token abgelehnt."
+
+#: ipam/dns_import.py:180 ipam/dns_import.py:225 ipam/dns_import.py:258
+msgid "The provider does not know this zone."
+msgstr "Der Provider kennt diese Zone nicht."
+
+#: ipam/dns_import.py:183
+#, python-format
+msgid "The provider answered with an error (%(status)s)."
+msgstr "Der Provider hat mit einem Fehler geantwortet (%(status)s)."
+
+#: ipam/dns_import.py:188
+msgid "The provider sent an answer that is not JSON."
+msgstr "Die Antwort des Providers ist kein JSON."
+
+#: ipam/dns_import.py:289 ipam/models.py:332
+msgid "Enter a domain name like example.com."
+msgstr "Geben Sie einen Domainnamen wie example.com ein."
+
+#: ipam/dns_import.py:291 ipam/pages.py:340
+msgid "Choose a provider and enter its token."
+msgstr "Wählen Sie einen Provider und geben Sie sein Token ein."
+
 #: ipam/models.py:22
 msgid "route distinguisher"
 msgstr "Route Distinguisher"
@@ -3109,7 +3141,7 @@ msgstr "DNS-Name"
 msgid "port"
 msgstr "Port"
 
-#: ipam/models.py:197 ipam/pages.py:125
+#: ipam/models.py:197 ipam/pages.py:131
 msgid "DHCP server"
 msgstr "DHCP-Server"
 
@@ -3152,9 +3184,7 @@ msgstr "Relay-Adressen"
 #: ipam/models.py:218
 msgid ""
 "Where routers forward requests (ip helper-address), separated by commas."
-msgstr ""
-"Wohin Router Anfragen weiterleiten (ip helper-address), durch Kommas "
-"getrennt."
+msgstr "Wohin Router Anfragen weiterleiten (ip helper-address), durch Kommas getrennt."
 
 #: ipam/models.py:249
 msgid "Enter valid addresses."
@@ -3193,10 +3223,6 @@ msgstr "Geben Sie eine gültige Adresse ein."
 msgid "The address must lie inside the prefix of the scope."
 msgstr "Die Adresse muss im Präfix des Bereichs liegen."
 
-#: ipam/models.py:332
-msgid "Enter a domain name like example.com."
-msgstr "Geben Sie einen Domainnamen wie example.com ein."
-
 #: ipam/models.py:336
 msgid "primary name server"
 msgstr "primärer Nameserver"
@@ -3213,7 +3239,7 @@ msgstr "Standard-TTL (Sekunden)"
 msgid "serial"
 msgstr "Seriennummer"
 
-#: ipam/models.py:346 ipam/pages.py:163
+#: ipam/models.py:346 ipam/pages.py:169
 msgid "DNS server"
 msgstr "DNS-Server"
 
@@ -3241,7 +3267,7 @@ msgstr "Typ"
 msgid "value"
 msgstr "Wert"
 
-#: ipam/models.py:402 ipam/pages.py:183
+#: ipam/models.py:402 ipam/pages.py:190
 msgid "TTL (seconds)"
 msgstr "TTL (Sekunden)"
 
@@ -3275,95 +3301,147 @@ msgstr "MX- und SRV-Einträge brauchen eine Priorität."
 msgid "SRV records take weight, port and target."
 msgstr "SRV-Einträge nehmen Gewicht, Port und Ziel."
 
-#: ipam/pages.py:95
+#: ipam/pages.py:101
 msgid "Kea configuration"
 msgstr "Kea-Konfiguration"
 
-#: ipam/pages.py:97 ipam/pages.py:122 templates/ipam/prefixes.html:8
+#: ipam/pages.py:103 ipam/pages.py:128 templates/ipam/prefixes.html:8
 msgid "Prefix"
 msgstr "Präfix"
 
-#: ipam/pages.py:98
+#: ipam/pages.py:104
 msgid "Addresses in the range"
 msgstr "Adressen im Bereich"
 
-#: ipam/pages.py:99 ipam/pages.py:138
+#: ipam/pages.py:105 ipam/pages.py:144
 msgid "Reservations"
 msgstr "Reservierungen"
 
-#: ipam/pages.py:100 templates/compute/connection_select.html:15
+#: ipam/pages.py:106 templates/compute/connection_select.html:15
 msgid "Options"
 msgstr "Optionen"
 
-#: ipam/pages.py:108
+#: ipam/pages.py:114 ipam/pages.py:306
 msgid "Zone file"
 msgstr "Zonendatei"
 
-#: ipam/pages.py:117
+#: ipam/pages.py:123
 msgid "DHCP scopes"
 msgstr "DHCP-Bereiche"
 
-#: ipam/pages.py:118
+#: ipam/pages.py:124
 msgid "New DHCP scope"
 msgstr "Neuer DHCP-Bereich"
 
-#: ipam/pages.py:123
+#: ipam/pages.py:129
 msgid "First address"
 msgstr "Erste Adresse"
 
-#: ipam/pages.py:124
+#: ipam/pages.py:130
 msgid "Last address"
 msgstr "Letzte Adresse"
 
-#: ipam/pages.py:126 sso/views.py:190 templates/dcim/device.html:17
+#: ipam/pages.py:132 sso/views.py:190 templates/dcim/device.html:17
 msgid "Enabled"
 msgstr "Aktiviert"
 
-#: ipam/pages.py:139
+#: ipam/pages.py:145
 msgid "New reservation"
 msgstr "Neue Reservierung"
 
-#: ipam/pages.py:144 templates/networks/switching.html:60
+#: ipam/pages.py:150 templates/networks/switching.html:60
 msgid "Hostname"
 msgstr "Hostname"
 
-#: ipam/pages.py:157
+#: ipam/pages.py:163
 msgid "DNS zones"
 msgstr "DNS-Zonen"
 
-#: ipam/pages.py:158
+#: ipam/pages.py:164
 msgid "New DNS zone"
 msgstr "Neue DNS-Zone"
 
-#: ipam/pages.py:162
+#: ipam/pages.py:168
 msgid "Primary name server"
 msgstr "Primärer Nameserver"
 
-#: ipam/pages.py:164
+#: ipam/pages.py:170
 msgid "Serial"
 msgstr "Seriennummer"
 
-#: ipam/pages.py:175 templates/base.html:56
+#: ipam/pages.py:174
+msgid "Import zone"
+msgstr "Zone importieren"
+
+#: ipam/pages.py:182 templates/base.html:56
 msgid "Records"
 msgstr "Nachweise"
 
-#: ipam/pages.py:176
+#: ipam/pages.py:183
 msgid "New record"
 msgstr "Neuer Eintrag"
 
-#: ipam/pages.py:180 sso/views.py:189 templates/history/activity.html:7
+#: ipam/pages.py:187 sso/views.py:189 templates/history/activity.html:7
 #: templates/manage/roles.html:11 templates/search/results.html:7
 #: templates/sso/providers.html:7
 msgid "Type"
 msgstr "Typ"
 
-#: ipam/pages.py:181
+#: ipam/pages.py:188
 msgid "Value"
 msgstr "Wert"
 
-#: ipam/pages.py:182
+#: ipam/pages.py:189
 msgid "Priority"
 msgstr "Priorität"
+
+#: ipam/pages.py:296
+msgid "Zone"
+msgstr "Zone"
+
+#: ipam/pages.py:298
+msgid "For example example.com."
+msgstr "Zum Beispiel example.com."
+
+#: ipam/pages.py:301 templates/configs/list.html:11
+msgid "Source"
+msgstr "Quelle"
+
+#: ipam/pages.py:302
+msgid "zone file"
+msgstr "Zonendatei"
+
+#: ipam/pages.py:310
+msgid "Paste it here, or choose a file."
+msgstr "Fügen Sie sie hier ein oder wählen Sie eine Datei."
+
+#: ipam/pages.py:318
+msgid ""
+"Used once to read the zone; it is not stored. A read-only token is enough."
+msgstr "Wird einmal zum Lesen der Zone verwendet und nicht gespeichert. Ein Token mit Leserechten genügt."
+
+#: ipam/pages.py:322
+msgid "Replace the documented records of this zone"
+msgstr "Die dokumentierten Einträge dieser Zone ersetzen"
+
+#: ipam/pages.py:338
+msgid "Paste a zone file or choose one."
+msgstr "Fügen Sie eine Zonendatei ein oder wählen Sie eine."
+
+#: ipam/pages.py:372
+#, python-format
+msgid "%(n)s records imported."
+msgstr "%(n)s Einträge importiert."
+
+#: ipam/pages.py:380
+msgid "Import a DNS zone"
+msgstr "DNS-Zone importieren"
+
+#: ipam/pages.py:382
+msgid ""
+"Read a zone file, or a zone of deSEC, Cloudflare or Hetzner DNS through "
+"their API."
+msgstr "Lesen Sie eine Zonendatei oder eine Zone von deSEC, Cloudflare oder Hetzner DNS über deren API."
 
 #: ipam/services.py:37
 msgid "This does not fit the tenant, or the gateway is outside."
@@ -4272,9 +4350,7 @@ msgstr "Die Variablen müssen ein JSON-Objekt sein."
 
 #: networks/switch_views.py:95
 msgid "Paste a configuration, choose a file or a stored version."
-msgstr ""
-"Fügen Sie eine Konfiguration ein, wählen Sie eine Datei oder eine "
-"gespeicherte Version."
+msgstr "Fügen Sie eine Konfiguration ein, wählen Sie eine Datei oder eine gespeicherte Version."
 
 #: networks/switch_views.py:193
 msgid "pasted text"
@@ -4330,9 +4406,7 @@ msgstr "Neues VLAN %(vid)s %(name)s an %(site)s"
 msgid ""
 "VLAN %(vid)s is called %(doc)s here and %(cfg)s in the configuration; the "
 "name stays."
-msgstr ""
-"VLAN %(vid)s heißt hier %(doc)s und in der Konfiguration %(cfg)s; der Name "
-"bleibt."
+msgstr "VLAN %(vid)s heißt hier %(doc)s und in der Konfiguration %(cfg)s; der Name bleibt."
 
 #: networks/switchconfig.py:272
 #, python-format
@@ -4379,15 +4453,12 @@ msgstr "%(what)s: %(n)s"
 #, python-format
 msgid ""
 "DHCP pool %(pool)s: the network %(network)s is not documented in IP networks."
-msgstr ""
-"DHCP-Pool %(pool)s: Das Netz %(network)s ist unter IP-Netze nicht "
-"dokumentiert."
+msgstr "DHCP-Pool %(pool)s: Das Netz %(network)s ist unter IP-Netze nicht dokumentiert."
 
 #: networks/switchconfig.py:443
 #, python-format
 msgid "DHCP pool %(pool)s: a scope of that name belongs to another server."
-msgstr ""
-"DHCP-Pool %(pool)s: Ein Bereich dieses Namens gehört zu einem anderen Server."
+msgstr "DHCP-Pool %(pool)s: Ein Bereich dieses Namens gehört zu einem anderen Server."
 
 #: networks/switchconfig.py:454
 #, python-format
@@ -5438,10 +5509,6 @@ msgid "By"
 msgstr "Von"
 
 #: templates/configs/list.html:11
-msgid "Source"
-msgstr "Quelle"
-
-#: templates/configs/list.html:11
 msgid "Compare from"
 msgstr "Vergleichen von"
 
@@ -6065,9 +6132,7 @@ msgstr "Zugeordnete Objekte"
 msgid ""
 "Link devices, buildings, VLANs, networks, configurations or lines from their "
 "own pages."
-msgstr ""
-"Ordnen Sie Geräte, Gebäude, VLANs, Netze, Konfigurationen oder Leitungen auf "
-"deren eigenen Seiten zu."
+msgstr "Ordnen Sie Geräte, Gebäude, VLANs, Netze, Konfigurationen oder Leitungen auf deren eigenen Seiten zu."
 
 #: templates/directory/_members.html:8
 msgid "Nothing linked yet."
@@ -6306,9 +6371,7 @@ msgstr "Ausgewähltes Element"
 
 #: templates/floorplans/editor.html:58
 msgid "Click a pin to see what is there and where it is patched."
-msgstr ""
-"Klicken Sie auf eine Nadel, um zu sehen, was dort ist und wohin es gepatcht "
-"ist."
+msgstr "Klicken Sie auf eine Nadel, um zu sehen, was dort ist und wohin es gepatcht ist."
 
 #: templates/floorplans/editor.html:60
 msgid "patch cable"
@@ -7620,9 +7683,7 @@ msgstr "Stacks und virtuelle Switches"
 msgid ""
 "Switches that work as one: stacks with stacking cables, VSF, VSX and MLAG "
 "pairs or a virtual chassis."
-msgstr ""
-"Switches, die als einer arbeiten: Stacks mit Stacking-Kabeln, VSF-, VSX- und "
-"MLAG-Paare oder ein virtuelles Chassis."
+msgstr "Switches, die als einer arbeiten: Stacks mit Stacking-Kabeln, VSF-, VSX- und MLAG-Paare oder ein virtuelles Chassis."
 
 #: templates/networks/stacks.html:9
 msgid "Domain"
@@ -7645,13 +7706,7 @@ msgid ""
 "states, spanning tree, static routes, OSPF, BGP, DNS servers and DHCP pools. "
 "Passwords, keys and SNMP communities are never read. You see the changes "
 "before anything is saved."
-msgstr ""
-"Gelesen werden Konfigurationen von Aruba (AOS-S, AOS-CX, Central-Vorlagen), "
-"Cisco (IOS, IOS-XE, NX-OS), Fortinet, Juniper, MikroTik, HPE Comware, H3C, "
-"Huawei und LANCOM: VLANs und ihre Ports, Adressen, Aggregationen, Portnamen "
-"und -zustände, Spanning Tree, statische Routen, OSPF, BGP, DNS-Server und "
-"DHCP-Pools. Passwörter, Schlüssel und SNMP-Communities werden nie gelesen. "
-"Sie sehen die Änderungen, bevor etwas gespeichert wird."
+msgstr "Gelesen werden Konfigurationen von Aruba (AOS-S, AOS-CX, Central-Vorlagen), Cisco (IOS, IOS-XE, NX-OS), Fortinet, Juniper, MikroTik, HPE Comware, H3C, Huawei und LANCOM: VLANs und ihre Ports, Adressen, Aggregationen, Portnamen und -zustände, Spanning Tree, statische Routen, OSPF, BGP, DNS-Server und DHCP-Pools. Passwörter, Schlüssel und SNMP-Communities werden nie gelesen. Sie sehen die Änderungen, bevor etwas gespeichert wird."
 
 #: templates/networks/switch_read.html:11
 msgid "Show changes"
@@ -7689,9 +7744,7 @@ msgstr "Als ArubaOS-Switch-Konfiguration"
 msgid ""
 "Nothing documented yet. Read the running configuration of the switch, or set "
 "VLANs on the ports."
-msgstr ""
-"Noch nichts dokumentiert. Lesen Sie die laufende Konfiguration des Switches "
-"ein oder setzen Sie VLANs an den Ports."
+msgstr "Noch nichts dokumentiert. Lesen Sie die laufende Konfiguration des Switches ein oder setzen Sie VLANs an den Ports."
 
 #: templates/networks/switching.html:15
 msgid "Ports and VLANs"
@@ -7701,9 +7754,7 @@ msgstr "Ports und VLANs"
 msgid ""
 "Fill: untagged VLAN. Marks below: tagged VLANs. Outline: edge port. G: "
 "guard. T: tunnelled."
-msgstr ""
-"Füllung: untagged VLAN. Marken darunter: tagged VLANs. Gestrichelter Rand: "
-"Edge-Port. G: Guard. T: getunnelt."
+msgstr "Füllung: untagged VLAN. Marken darunter: tagged VLANs. Gestrichelter Rand: Edge-Port. G: Guard. T: getunnelt."
 
 #: templates/networks/switching.html:21 templates/networks/switching.html:90
 msgid "tagged"
