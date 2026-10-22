@@ -10,6 +10,8 @@ All notable changes to this project are documented here. The format follows
 
 * API tokens and OAuth clients can be limited to kinds of objects and to one location;
   the limits apply to every check of the request, also for super admins (ADR 0033).
+* "Add device here" on a free rack unit or on the floor plan also offers the room's
+  devices that have no place yet (not in a rack, or not on the plan).
 * Servers, virtual machines and storage: clusters with hosts, virtual machines and
   containers with network cards and disks, storage of NAS, SAN and clusters
   (ADR 0032).
