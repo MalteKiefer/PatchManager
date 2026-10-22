@@ -11,6 +11,13 @@ All notable changes to this project are documented here. The format follows
 * Load test in CI with 500 racks, 50 000 ports and 12 000 cables, with time and
   query budgets per page; `seed_scale` command for demo and load data.
 
+### Security
+
+* Behind the reverse proxy every request had the proxy's address, so the login
+  rate limit per IP was shared by all users (one client could block sign in for
+  everyone) and the audit log recorded the proxy. The client address now comes
+  from `X-Forwarded-For` of trusted proxies.
+
 ### Fixed
 
 * Search loaded the vendor of every device hit separately.

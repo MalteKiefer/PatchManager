@@ -112,6 +112,7 @@ if DJANGO_ADMIN_ENABLED:
     INSTALLED_APPS.insert(0, "django.contrib.admin")
 
 MIDDLEWARE = [
+    "patchmanager.core.middleware.ClientIPMiddleware",
     "patchmanager.core.middleware.RequestIDMiddleware",
     "patchmanager.core.metrics.MetricsMiddleware",
     "django.middleware.security.SecurityMiddleware",
@@ -285,6 +286,8 @@ _MAP_ORIGIN = f"{_tiles.scheme}://{_tiles.netloc.replace('{s}', '*')}" if MAP_TI
 # Security headers. TLS terminates at the reverse proxy, which sets
 # X-Forwarded-Proto; only trust it behind that proxy.
 SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+# Proxies whose X-Forwarded-For names the client (same variable gunicorn reads; "*" = any).
+FORWARDED_ALLOW_IPS = env_list("PATCHMANAGER_FORWARDED_ALLOW_IPS", "127.0.0.1")
 SECURE_SSL_REDIRECT = not DEBUG
 SECURE_REDIRECT_EXEMPT = [r"^health/", r"^metrics$"]
 SECURE_HSTS_SECONDS = 0 if DEBUG else 63072000

@@ -72,6 +72,12 @@ the `media` volume writable. Point in time recovery (WAL archiving) is not built
 use your platform's volume snapshots if you need a smaller recovery point than one
 day.
 
+## Reverse proxy
+
+| Variable | Default | Meaning |
+|---|---|---|
+| `PATCHMANAGER_FORWARDED_ALLOW_IPS` | `127.0.0.1`; `*` in `compose.prod.yaml` | Proxies trusted for `X-Forwarded-Proto` and `X-Forwarded-For`. The client address (rate limits, audit log) is the rightmost `X-Forwarded-For` entry of a trusted proxy. Use `*` only when nothing but the proxy can reach the app |
+
 ## Updating
 
 ```bash

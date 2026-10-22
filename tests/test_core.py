@@ -108,3 +108,26 @@ def test_german_catalog_is_complete() -> None:
         if re.search(r"^#, .*\bfuzzy\b", entry, re.M):
             fuzzy.append(entry[:60])
     assert missing == [] and fuzzy == []
+
+
+@pytest.mark.parametrize(
+    ("allowed", "peer", "header", "seen"),
+    [
+        (["10.0.0.0/8"], "10.1.2.3", "198.51.100.7", "198.51.100.7"),
+        (["10.0.0.0/8"], "10.1.2.3", "1.1.1.1, 203.0.113.9", "203.0.113.9"),  # rightmost
+        (["10.0.0.0/8"], "192.0.2.1", "198.51.100.7", "192.0.2.1"),  # untrusted peer
+        (["*"], "192.0.2.1", "2001:db8::1", "2001:db8::1"),
+        (["*"], "192.0.2.1", "not-an-ip", "192.0.2.1"),
+        (["127.0.0.1"], "127.0.0.1", "", "127.0.0.1"),
+    ],
+)
+def test_client_ip_comes_from_trusted_proxies_only(settings, allowed, peer, header, seen) -> None:
+    from django.http import HttpResponse
+    from django.test import RequestFactory
+
+    from patchmanager.core.middleware import ClientIPMiddleware
+
+    settings.FORWARDED_ALLOW_IPS = allowed
+    request = RequestFactory().get("/", REMOTE_ADDR=peer, HTTP_X_FORWARDED_FOR=header)
+    ClientIPMiddleware(lambda r: HttpResponse())(request)
+    assert request.META["REMOTE_ADDR"] == seen
