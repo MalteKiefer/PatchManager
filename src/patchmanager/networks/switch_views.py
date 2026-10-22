@@ -22,7 +22,7 @@ from patchmanager.configs.models import DeviceConfig
 from patchmanager.dcim.models import Device, Port
 from patchmanager.library.models import PortKind
 from patchmanager.locations.views import node_url
-from patchmanager.networks import aruba, switchconfig
+from patchmanager.networks import aruba, platforms, switchconfig
 from patchmanager.networks.models import StackMember, SwitchSettings
 
 # A fixed palette for VLAN colours in the port matrix (picked by VLAN ID).
@@ -35,6 +35,12 @@ PALETTE = (
 class ReadForm(forms.Form):
     """A configuration as text, file or stored version, with template variables."""
 
+    platform = forms.ChoiceField(
+        label=gettext_lazy("Platform"),
+        required=False,
+        choices=[("", gettext_lazy("recognise automatically"))]
+        + [(p.key, p.name) for p in platforms.PLATFORMS.values()],
+    )
     content = forms.CharField(
         label=gettext_lazy("Configuration"),
         widget=forms.Textarea(attrs={"rows": 16, "spellcheck": "false", "class": "font-mono"}),
@@ -181,6 +187,7 @@ def read(request: HttpRequest, pk: str) -> HttpResponse:
         initial={"version": request.GET.get("version")},
     )
     result = None
+    read_as = ""
     if request.method == "POST" and form.is_valid():
         text = form.cleaned_data.get("content", "")
         source = _("pasted text")
@@ -192,11 +199,14 @@ def read(request: HttpRequest, pk: str) -> HttpResponse:
             source = f"v{version.version}"
         commit = request.POST.get("action") == "apply"
         try:
-            parsed = aruba.parse(text, form.cleaned_data["variables"])
+            parsed = platforms.parse(
+                text, form.cleaned_data.get("platform", ""), form.cleaned_data["variables"]
+            )
+            read_as = platforms.VENDOR_NAMES.get(parsed.vendor, parsed.vendor)
             result = switchconfig.apply(
                 request, actor, device, parsed, commit=commit, source=source
             )
-        except aruba.ParseError as exc:
+        except platforms.ParseError as exc:
             form.add_error(None, str(exc))
         except PermissionDeniedError as exc:
             raise PermissionDenied from exc
@@ -222,6 +232,7 @@ def read(request: HttpRequest, pk: str) -> HttpResponse:
             "device": device,
             "form": form,
             "result": result,
+            "read_as": read_as,
             "breadcrumbs": _crumbs(device),
         },
     )

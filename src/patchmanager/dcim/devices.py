@@ -97,7 +97,7 @@ def _mount(device: Device, rack: Rack, position: int, face: str) -> None:
 
 
 def create(
-    request: HttpRequest,
+    request: HttpRequest | None,
     actor: User,
     *,
     device_type: DeviceType,

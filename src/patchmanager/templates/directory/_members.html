@@ -1,0 +1,9 @@
+{% load i18n %}<section class="card" aria-labelledby="members-h">
+  <h2 id="members-h" class="mb-1">{% translate "Linked objects" %}</h2>
+  <p class="mb-3 text-xs text-slate-500">{% translate "Link devices, buildings, VLANs, networks, configurations or lines from their own pages." %}</p>
+  <ul class="divide-y divide-slate-100 text-sm dark:divide-slate-800">{% for m in members %}
+    <li class="flex items-center gap-3 py-1.5"><span class="w-32 shrink-0 text-xs text-slate-500">{{ m.kind|capfirst }}</span>
+      {% if m.url %}<a href="{{ m.url }}">{{ m.obj }}</a>{% else %}{{ m.obj }}{% endif %}
+      {% if m.link.role != "part" %}<span class="badge-muted">{{ m.link.get_role_display }}</span>{% endif %}</li>
+  {% empty %}<li class="py-1.5 text-slate-500">{% translate "Nothing linked yet." %}</li>{% endfor %}</ul>
+</section>

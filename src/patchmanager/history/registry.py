@@ -43,5 +43,14 @@ TRACKED = {
         Tracked("networks.bgpneighbor", "address", "device", "dcim.device"),
         Tracked("networks.portprofile", "name", "device", "dcim.device"),
         Tracked("networks.stack", "name", "site", "dcim.device"),
+        Tracked("directory.organization", "name", "tenant", "directory.organization"),
+        Tracked("directory.system", "name", "tenant", "directory.system"),
+        Tracked("ipam.dhcpscope", "name", "tenant", "ipam.dhcpscope"),
+        Tracked("ipam.dnszone", "name", "tenant", "ipam.dnszone"),
+        Tracked("ipam.dnsrecord", "name", "tenant", "ipam.dnszone"),
+        Tracked("circuits.circuit", "circuit_id", "tenant", "circuits.circuit"),
+        Tracked("compute.cluster", "name", "tenant", "compute.cluster"),
+        Tracked("compute.virtualmachine", "name", "tenant", "compute.vm"),
+        Tracked("compute.storagevolume", "name", "tenant", "compute.storage"),
     )
 }

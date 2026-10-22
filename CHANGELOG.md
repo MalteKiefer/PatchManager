@@ -10,15 +10,38 @@ All notable changes to this project are documented here. The format follows
 
 * "Add device here" on a free rack unit or on the floor plan also offers the room's
   devices that have no place yet (not in a rack, or not on the plan).
+* Servers, virtual machines and storage: clusters with hosts, virtual machines and
+  containers with network cards and disks, storage of NAS, SAN and clusters
+  (ADR 0032).
+* Proxmox VE connections: choose nodes, machines and storage to take over, create
+  servers for new nodes, update automatically; moved machines stay one record.
+* One-off imports from VMware vCenter and Synology DSM.
 * Switching and routing per device: link aggregations, spanning tree (with MST
   instances), VLAN interfaces with addresses, static routes, OSPF, BGP neighbors,
   tunnelled ports, device profiles, and a port matrix coloured by VLAN (ADR 0029).
 * Stacks and virtual switches (stacking, VSF, VSX, MLAG, virtual chassis).
+* Read configurations of Aruba AOS-CX, Cisco IOS, IOS-XE and NX-OS, Fortinet
+  FortiOS, Juniper Junos, MikroTik RouterOS, HPE Comware, H3C, Huawei VRP and LANCOM
+  LCOS; the platform is recognised automatically. DNS servers, routed ports and DHCP
+  pools (as DHCP scopes with reservations and relays) are taken over too (ADR 0031).
+* Customers and systems: organisations with contacts, systems (telephony, building
+  automation, access control ...), and links that assign devices, buildings, VLANs,
+  networks, configurations and more to a system or customer (ADR 0030).
+* DHCP scopes with reservations (Kea export) and DNS zones with records (zone file
+  export).
+* Import DNS zones from zone files and from deSEC, Cloudflare and Hetzner DNS.
+* Lines from providers with bandwidth, handover port and contract; device supplier,
+  warranty, support and end of life.
 * Read ArubaOS-Switch configurations and Aruba Central templates into the
   documentation with a preview of every change; write the documentation back as an
   ArubaOS-Switch configuration.
 * Floor plan pins: floor devices are drawn as pins at their exact spot; a click shows
   the device with its room, photos, notes and the patch target of every port.
+
+### Fixed
+
+* Webhook pages highlighted "Import and export" in the menu instead of
+  "Administration".
 
 ## [1.0.0] - 2026-10-22
 

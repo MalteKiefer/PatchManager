@@ -1,0 +1,98 @@
+## Last commit: 2026-10-01 10:00:00 UTC by admin
+version 21.4R3;
+system {
+    host-name EX-01;
+    domain-name office.lan;
+    root-authentication {
+        encrypted-password "$6$abc"; ## SECRET-DATA
+    }
+    name-server {
+        10.0.0.53;
+    }
+}
+interfaces {
+    ge-0/0/0 {
+        description "Desk 1";
+        unit 0 {
+            family ethernet-switching {
+                interface-mode access;
+                vlan {
+                    members USERS;
+                }
+            }
+        }
+    }
+    ge-0/0/1 {
+        disable;
+    }
+    ge-0/0/46 {
+        ether-options {
+            802.3ad ae0;
+        }
+    }
+    ge-0/0/47 {
+        ether-options {
+            802.3ad ae0;
+        }
+    }
+    ae0 {
+        aggregated-ether-options {
+            lacp {
+                active;
+            }
+        }
+        unit 0 {
+            family ethernet-switching {
+                interface-mode trunk;
+                vlan {
+                    members [ USERS VOICE ];
+                }
+            }
+        }
+    }
+    irb {
+        unit 10 {
+            family inet {
+                address 10.30.0.1/24;
+            }
+        }
+    }
+}
+vlans {
+    USERS {
+        vlan-id 10;
+        l3-interface irb.10;
+    }
+    VOICE {
+        vlan-id 20;
+    }
+}
+routing-options {
+    static {
+        route 0.0.0.0/0 next-hop 10.30.0.254;
+    }
+    router-id 10.255.0.4;
+    autonomous-system 65030;
+}
+protocols {
+    bgp {
+        group ISP {
+            neighbor 192.0.2.1 {
+                peer-as 65000;
+            }
+        }
+    }
+    ospf {
+        area 0.0.0.0 {
+            interface irb.10 {
+                passive;
+            }
+        }
+    }
+    rstp {
+        bridge-priority 8k;
+        interface ge-0/0/0 {
+            edge;
+        }
+    }
+}

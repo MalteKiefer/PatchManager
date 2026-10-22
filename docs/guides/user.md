@@ -172,8 +172,10 @@ VLAN with marks for tagged VLANs, edge ports, guards and tunnelled ports, then i
 VLANs with addresses, static routes, BGP neighbors, OSPF, spanning tree, link
 aggregations, device profiles and the stack it belongs to.
 
-**Read a configuration** takes an ArubaOS-Switch configuration or an Aruba Central
-template (with its variables as JSON): paste it, choose a file or a stored version.
+**Read a configuration** takes a configuration of ArubaOS-Switch (or an Aruba
+Central template with its variables as JSON), AOS-CX, Cisco IOS, IOS-XE or NX-OS,
+FortiOS, Junos, RouterOS, HPE Comware, H3C, Huawei VRP or LANCOM LCOS (a script in
+English); the platform is recognised or can be chosen: paste it, choose a file or a stored version.
 **Show changes** lists what would change and what is left out; **Apply changes**
 saves it. Passwords, keys and SNMP communities are never read. **As ArubaOS-Switch
 configuration** writes the documentation back as configuration text.
@@ -181,6 +183,36 @@ configuration** writes the documentation back as configuration text.
 Port settings such as link aggregation, MTU, edge port, guards and OSPF can also be
 edited on each port. Under *Networks → Stacks* you group switches into stacks, VSF,
 VSX or MLAG pairs or a virtual chassis, with member number, role and priority.
+
+## Servers, virtual machines and storage
+
+*Servers and storage* lists virtual machines and containers, clusters with their host
+servers, and storage (pools, volumes, LUNs, shares, datastores) of NAS and SAN
+systems. **Connections → Connect Proxmox VE** reads a Proxmox cluster with an API
+token that has read rights: choose which nodes, machines and storage to take over,
+where new servers go (room and device type) and how often to update. A machine that
+moves to another node keeps its record; only its host changes. **Import once** reads
+a VMware vCenter or a Synology NAS without storing the credentials.
+
+## Customers, systems and lines
+
+*Customers and systems* lists organisations (customers, suppliers, providers,
+service partners, departments) with their contacts, systems such as a phone system
+or building automation, and lines from providers with their contracts. On the page
+of a device, building, VLAN, network, address, configuration or stack, **Link** puts
+it into a system or assigns it to an organisation, for example as its customer. A
+system's page lists everything linked to it.
+
+Devices also record their supplier, warranty, support contract and end of life.
+
+## DHCP and DNS
+
+Under *IP networks*, **DHCP** documents scopes (range, gateway, DNS servers, domain,
+lease time, relays and further options) with reservations by MAC address, and
+**DNS** documents zones with their records. A scope downloads as a Kea
+configuration, a zone as a zone file. **Import zone** reads a zone file or fetches a
+zone from deSEC, Cloudflare or Hetzner DNS with an API token that is used once and
+never stored.
 
 ## VLANs and WLANs
 

@@ -36,8 +36,42 @@ DEVICE_FIELDS = [
     "purchase_date",
     "in_service_date",
     "responsible",
+    "supplier",
+    "warranty_end",
+    "support_contract",
+    "support_end",
+    "end_of_life",
     "notes",
 ]
+
+
+def _compute(actor: Any, device: Device) -> dict[str, Any]:
+    """Cluster, virtual machines and storage of a server or storage system."""
+    from patchmanager.compute.models import ClusterHost, StorageVolume, VirtualMachine
+
+    def visible(rows: Any, permission: str) -> list[Any]:
+        return [r for r in rows if policy.has_perm(actor, permission, r)]
+
+    host = ClusterHost.objects.filter(device=device).select_related("cluster").first()
+    return {
+        "cluster": host.cluster
+        if host and policy.has_perm(actor, "compute.cluster.view", host)
+        else None,
+        "guests": visible(VirtualMachine.objects.filter(host=device), "compute.vm.view"),
+        "volumes": visible(StorageVolume.objects.filter(device=device), "compute.storage.view"),
+    }
+
+
+def _suppliers(form: Any, tenant_id: Any, actor: Any) -> None:
+    """Suppliers of the device's tenant that the user may see."""
+    from patchmanager.directory.models import Organization
+    from patchmanager.directory.pages import visible
+
+    form.fields["supplier"].queryset = visible(
+        actor, Organization.objects.filter(tenant_id=tenant_id)
+    )
+
+
 _DATE = forms.DateInput(attrs={"type": "date"}, format="%Y-%m-%d")
 
 
@@ -50,6 +84,9 @@ class DeviceForm(forms.ModelForm):  # type: ignore[type-arg]
         widgets = {
             "purchase_date": _DATE,
             "in_service_date": _DATE,
+            "warranty_end": _DATE,
+            "support_end": _DATE,
+            "end_of_life": _DATE,
             "notes": forms.Textarea(attrs={"rows": 2}),
         }
 
@@ -254,6 +291,7 @@ def device_create(request: HttpRequest) -> HttpResponse:
     form = NewDeviceForm(
         request.POST or None, types=visible_types(request), rack=rack, initial=initial
     )
+    _suppliers(form, parent.tenant_id, request.user)
     if request.method == "POST" and form.is_valid():
         data = {k: form.cleaned_data[k] for k in DEVICE_FIELDS}
         try:
@@ -337,6 +375,7 @@ def device_detail(request: HttpRequest, pk: str) -> HttpResponse:
     action = request.POST.get("action")
     space = RackSpace.objects.filter(device=device).first()
     form = DeviceForm(request.POST if action == "edit" else None, instance=device)
+    _suppliers(form, device.tenant_id, request.user)
     place_form = PlaceForm(
         request.POST if action == "place" else None,
         device=device,
@@ -395,6 +434,7 @@ def device_detail(request: HttpRequest, pk: str) -> HttpResponse:
                 )
             ),
             "neighbours": neighbours(actor, device),
+            **_compute(actor, device),
             "configs": policy.scope_queryset(
                 actor, "configs.config.view", device.configs.order_by("-version")
             )[:1],

@@ -1,0 +1,94 @@
+#config-version=FGT60F-7.2.8-FW-build1639-240313:opmode=0:vdom=0:user=admin
+#conf_file_ver=123
+config system global
+    set alias "FGT60F"
+    set hostname "FW-01"
+    set timezone 28
+end
+config system admin
+    edit "admin"
+        set accprofile "super_admin"
+        set password ENC SH2abc
+    next
+end
+config system interface
+    edit "wan1"
+        set vdom "root"
+        set ip 192.0.2.10 255.255.255.0
+        set allowaccess ping https
+        set type physical
+        set alias "Internet"
+        set role wan
+    next
+    edit "internal1"
+        set vdom "root"
+        set type physical
+    next
+    edit "agg1"
+        set vdom "root"
+        set type aggregate
+        set member "internal3" "internal4"
+        set lacp-mode active
+    next
+    edit "USERS"
+        set vdom "root"
+        set ip 10.20.0.1 255.255.255.0
+        set interface "internal1"
+        set vlanid 20
+    next
+end
+config system dns
+    set primary 1.1.1.1
+    set secondary 9.9.9.9
+    set domain "office.lan"
+end
+config router static
+    edit 1
+        set gateway 192.0.2.1
+        set device "wan1"
+    next
+    edit 2
+        set dst 10.99.0.0 255.255.0.0
+        set gateway 10.20.0.254
+        set device "USERS"
+    next
+end
+config router bgp
+    set as 65020
+    set router-id 10.255.0.3
+    config neighbor
+        edit "192.0.2.1"
+            set remote-as 65000
+            set description "ISP"
+        next
+    end
+end
+config system dhcp server
+    edit 1
+        set dns-service default
+        set default-gateway 10.20.0.1
+        set netmask 255.255.255.0
+        set interface "USERS"
+        config ip-range
+            edit 1
+                set start-ip 10.20.0.100
+                set end-ip 10.20.0.199
+            next
+        end
+        set dns-server1 10.20.0.1
+        set domain "office.lan"
+        set lease-time 28800
+        config reserved-address
+            edit 1
+                set ip 10.20.0.20
+                set mac aa:bb:cc:00:11:22
+                set description "Printer"
+            next
+        end
+    next
+end
+config vpn ipsec phase1-interface
+    edit "branch"
+        set psksecret ENC abc
+    next
+end

@@ -1,0 +1,72 @@
+#
+ version 7.1.070, Release 6635P07
+#
+ sysname CORE-H3C
+#
+ irf member 1 priority 32
+#
+ dns server 10.0.0.53
+ dns domain office.lan
+#
+ stp mode rstp
+ stp priority 4096
+ stp global enable
+#
+vlan 1
+#
+vlan 10
+ name USERS
+#
+vlan 20
+ description VOICE
+#
+dhcp server ip-pool USERS
+ gateway-list 10.50.0.1
+ network 10.50.0.0 mask 255.255.255.0
+ address range 10.50.0.100 10.50.0.199
+ dns-list 10.0.0.53
+ domain-name office.lan
+ expired day 0 hour 8
+ static-bind ip-address 10.50.0.20 mask 255.255.255.0 hardware-address aabb-cc00-1144
+#
+interface Bridge-Aggregation1
+ port link-type trunk
+ port trunk permit vlan 10 20
+ link-aggregation mode dynamic
+#
+interface Vlan-interface10
+ ip address 10.50.0.1 255.255.255.0
+ dhcp relay server-address 10.0.0.5
+#
+interface GigabitEthernet1/0/1
+ port access vlan 10
+ stp edged-port
+ description Desk 1
+#
+interface GigabitEthernet1/0/2
+ shutdown
+#
+interface GigabitEthernet1/0/47
+ port link-type trunk
+ port trunk permit vlan 10 20
+ port link-aggregation group 1
+#
+interface GigabitEthernet1/0/48
+ port link-type trunk
+ port trunk permit vlan 10 20
+ port link-aggregation group 1
+#
+ ip route-static 0.0.0.0 0 192.0.2.1
+#
+ospf 1 router-id 10.255.0.5
+ area 0.0.0.0
+  network 10.50.0.0 0.0.0.255
+#
+bgp 65050
+ router-id 10.255.0.5
+ peer 192.0.2.1 as-number 65000
+#
+local-user admin class manage
+ password hash $h$6$abc
+#
+return

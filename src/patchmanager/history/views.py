@@ -28,6 +28,7 @@ URLS = {
     "cabling.cable": "cabling:cable",
     "networks.vlan": "networks:vlan",
     "networks.wlan": "networks:wlan",
+    "networks.stack": "networks:stack",
     "library.devicetype": "library:type",
     "ipam.vrf": "ipam:vrf",
     "ipam.prefix": "ipam:prefix",
@@ -39,6 +40,13 @@ def object_url(object_type: str, object_id: Any) -> str:
     """Detail page of a tracked object."""
     if object_type in URLS:
         return reverse(URLS[object_type], args=[object_id])
+    from patchmanager.core import crud
+
+    for resource in crud.REGISTRY.values():
+        if resource.model._meta.label_lower == object_type:
+            return reverse("objects:detail", args=[resource.key, object_id])
+    if object_type.startswith("networks."):  # switching records: their device page
+        return ""
     return reverse("locations:node", args=[object_type.split(".")[1], object_id])
 
 
