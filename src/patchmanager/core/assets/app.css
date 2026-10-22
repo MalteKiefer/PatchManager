@@ -175,3 +175,9 @@ tr.is-hot { @apply bg-amber-50 dark:bg-slate-800; }
   .overview-feed span { @apply text-[#5b6673] dark:text-slate-400; }
   .overview-feed time { @apply text-xs text-[#5b6673] dark:text-slate-400; }
 }
+.prefix-indent { display: inline-block; }
+.prefix-indent[data-depth="1"] { width: 1.25rem; }
+.prefix-indent[data-depth="2"] { width: 2.5rem; }
+.prefix-indent[data-depth="3"] { width: 3.75rem; }
+.prefix-indent[data-depth="4"] { width: 5rem; }
+.prefix-indent:not([data-depth="0"])::after { content: "└"; @apply mr-1 float-right text-slate-400; }

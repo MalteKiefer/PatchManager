@@ -15,6 +15,7 @@ SECTIONS = {
     "library": "library",
     "cabling": "cables",
     "networks": "networks",
+    "ipam": "ipam",
     "history": "activity",
     "search": "search",
     "exchange": "exchange",

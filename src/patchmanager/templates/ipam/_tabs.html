@@ -1,0 +1,5 @@
+{% load i18n %}<nav class="segmented mb-5" aria-label="{% translate 'IP address management' %}">
+  <a href="{% url 'ipam:prefixes' %}" {% if tab == "prefixes" %}aria-current="page"{% endif %}>{% translate "Prefixes" %}</a>
+  <a href="{% url 'ipam:addresses' %}" {% if tab == "addresses" %}aria-current="page"{% endif %}>{% translate "Addresses" %}</a>
+  <a href="{% url 'ipam:vrfs' %}" {% if tab == "vrfs" %}aria-current="page"{% endif %}>VRFs</a>
+</nav>

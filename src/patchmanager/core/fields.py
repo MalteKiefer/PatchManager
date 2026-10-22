@@ -70,8 +70,11 @@ class _NetworkField(models.Field):  # type: ignore[type-arg]
         return None if value is None or value == "" else self.to_python(value)
 
     def formfield(self, **kwargs: Any) -> Any:
-        """A plain text input; the model field validates."""
-        return forms.CharField(max_length=50, **kwargs)
+        """A plain text input (``required`` follows ``blank``); the model field validates."""
+        defaults: dict[str, Any] = {"form_class": forms.CharField, "max_length": 50}
+        if self.null:
+            defaults["empty_value"] = None
+        return super().formfield(**{**defaults, **kwargs})
 
 
 class CidrField(_NetworkField):

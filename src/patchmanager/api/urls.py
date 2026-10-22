@@ -19,6 +19,9 @@ for prefix, viewset in (
     ("cables", views.CableViewSet),
     ("vlans", views.VLANViewSet),
     ("wlans", views.WLANViewSet),
+    ("vrfs", views.VRFViewSet),
+    ("prefixes", views.PrefixViewSet),
+    ("ip-addresses", views.IPAddressViewSet),
     ("changes", views.ChangeViewSet),
 ):
     router.register(prefix, viewset, basename=prefix)

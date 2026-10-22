@@ -114,6 +114,20 @@ their value. Exports use the same columns, so you can export, edit and import
 again. PDF reports: site report, patch list and bill of materials per site, the
 rack elevation on rack pages and the port list on device pages.
 
+## IP addresses
+
+*IP addresses* keeps prefixes and addresses, optionally in VRFs (separate routing
+tables; without a VRF everything is in the global table).
+
+* **Prefixes** show as a tree with how much of each is in use. A *container* holds
+  other prefixes and counts the space they take; other prefixes count addresses.
+* A prefix page lists its child prefixes, its addresses and the free ranges, and
+  offers the next free address with one click.
+* Put an address on a port from the port's page (*Add IP address*); it then shows
+  on the device page next to the port and follows the device when it moves.
+* Prefixes and addresses can be imported and exported like VLANs (*Import and
+  export*), and the search finds them by address or DNS name.
+
 ## VLANs and WLANs
 
 **Networks** holds VLANs (for the whole tenant or one site) and WLANs. On a

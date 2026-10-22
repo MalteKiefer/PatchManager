@@ -6,6 +6,7 @@ from django import forms
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
+from django.db.models import Prefetch
 from django.http import Http404, HttpRequest, HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils.translation import gettext as _
@@ -18,6 +19,7 @@ from patchmanager.accounts.services import PermissionDeniedError, ServiceError
 from patchmanager.core.utils import parse_uuid
 from patchmanager.dcim import devices
 from patchmanager.dcim.models import Device, Port, Rack, RackSpace
+from patchmanager.ipam.models import IPAddress
 from patchmanager.library.models import DeviceType
 from patchmanager.library.views import visible_types
 from patchmanager.locations.models import Room
@@ -346,7 +348,16 @@ def device_detail(request: HttpRequest, pk: str) -> HttpResponse:
             "space": space,
             "form": form,
             "place_form": place_form,
-            "ports": device.ports.select_related("rear_port", "untagged_vlan", "cable_end__cable"),
+            "ports": device.ports.select_related(
+                "rear_port", "untagged_vlan", "cable_end__cable"
+            ).prefetch_related(
+                Prefetch(
+                    "ip_addresses",
+                    queryset=policy.scope_queryset(
+                        actor, "ipam.ipaddress.view", IPAddress.objects.all()
+                    ),
+                )
+            ),
             "neighbours": neighbours(actor, device),
             "can_change": can_change,
             "can_delete": policy.has_perm(actor, "dcim.device.delete", device),
@@ -414,6 +425,11 @@ def port_detail(request: HttpRequest, pk: str) -> HttpResponse:
             "vlan_form": vlan_form,
             "peer": _visible_or_hidden(actor, _peer(port)),
             "wlans": port.wlans.all(),
+            "addresses": policy.scope_queryset(
+                actor, "ipam.ipaddress.view", port.ip_addresses.select_related("vrf")
+            ),
+            "can_add_address": policy.has_perm(actor, "ipam.ipaddress.add", device)
+            and policy.has_perm(actor, "dcim.device.change", device),
             "can_cable": policy.has_perm(actor, "cabling.cable.add", device),
             "can_trace": policy.has_perm(actor, "cabling.cable.trace", device),
             "can_change": policy.has_perm(actor, "dcim.device.change", device),

@@ -27,6 +27,11 @@
       </div>
       {% endif %}
     </section>
+    <section class="card" aria-labelledby="ip-h">
+      <div class="mb-3 flex items-center gap-2"><h2 id="ip-h" class="mr-auto">{% translate "IP addresses" %}</h2>
+        {% if can_add_address and current_tenant.pk == device.tenant_id %}<a class="btn-secondary" href="{% url 'ipam:address-create' %}?port={{ port.pk }}">{% translate "Add IP address" %}</a>{% endif %}</div>
+      <ul class="space-y-1 text-sm">{% for a in addresses %}<li><a href="{% url 'ipam:address' a.pk %}" class="tabular-nums">{{ a.address }}</a>{% if a.dns_name %} <span class="text-slate-500">{{ a.dns_name }}</span>{% endif %}{% if a.vrf %} <span class="badge-muted">{{ a.vrf }}</span>{% endif %}</li>{% empty %}<li class="text-slate-500">{% translate "None." %}</li>{% endfor %}</ul>
+    </section>
     {% if wlans %}<section class="card"><h2 class="mb-3">WLANs</h2><ul class="text-sm">{% for w in wlans %}<li><a href="{% url 'networks:wlan' w.pk %}">{{ w.ssid }}</a></li>{% endfor %}</ul></section>{% endif %}
     {% metadata_panel port %}
   </div>

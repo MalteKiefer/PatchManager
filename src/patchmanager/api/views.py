@@ -18,6 +18,8 @@ from patchmanager.dcim import devices
 from patchmanager.dcim.models import Device, Port, Rack
 from patchmanager.history import services as history
 from patchmanager.history.models import Change
+from patchmanager.ipam import services as ipam
+from patchmanager.ipam.models import VRF, IPAddress, Prefix
 from patchmanager.library.models import DeviceType, Vendor
 from patchmanager.locations import services as tree
 from patchmanager.locations.models import Building, Floor, Room, Site
@@ -525,6 +527,170 @@ class WLANViewSet(Base):
 
 
 # ---------------------------------------------------------------- tenants, history, search
+
+
+# ---------------------------------------------------------------- IP address management
+
+
+def _vrf(user: Any, value: Any) -> Any:
+    return lookup(user, VRF, value, "ipam.vrf.view", "vrf") if value else None
+
+
+class VRFViewSet(Base):
+    """VRFs (routing tables) of a tenant."""
+
+    serializer_class = s.VRFSerializer
+    model, object_type, path_field = VRF, "ipam.vrf", "scope"
+    filters: ClassVar[dict[str, str]] = {"tenant": "tenant_id", "name": "name"}
+    fields = ("name", "rd", "description")
+
+    def base_queryset(self) -> QuerySet[VRF]:
+        """Rows before permission scoping."""
+        return tenant_scope(VRF.objects.all())
+
+    def create(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+        """Create one through the domain service."""
+        data = self.validated()
+        tenant = lookup(request.user, Tenant, data.validated_data["tenant_id"], None, "tenant")
+        return self.created(
+            ipam.create_vrf(self.http, self.actor, tenant, **s.values(data, *self.fields))
+        )
+
+    def partial_update(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+        """Change the fields that are sent."""
+        vrf = self.get_object()
+        data = self.validated(partial=True, instance=vrf)
+        return self.updated(
+            ipam.update_vrf(self.http, self.actor, vrf, **s.values(data, *self.fields))
+        )
+
+    def update(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+        """Same as PATCH: only the fields sent change."""
+        return self.partial_update(request, *args, **kwargs)
+
+    def destroy(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+        """Delete it."""
+        ipam.delete_vrf(self.http, self.actor, self.get_object())
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class PrefixViewSet(Base):
+    """Prefixes; ``?within=10.0.0.0/8`` lists those inside a network."""
+
+    serializer_class = s.PrefixSerializer
+    model, object_type = Prefix, "ipam.prefix"
+    filters: ClassVar[dict[str, str]] = {
+        "tenant": "tenant_id",
+        "vrf": "vrf_id",
+        "site": "site_id",
+        "vlan": "vlan_id",
+        "status": "status",
+        "within": "prefix__net_within_or_equal",
+    }
+    search = "text__icontains"
+    fields = ("prefix", "status", "gateway", "description")
+
+    def _refs(self, data: Any) -> dict[str, Any]:
+        user, values = self.request.user, data.validated_data
+        refs: dict[str, Any] = {}
+        if "vrf_id" in values:
+            refs["vrf"] = _vrf(user, values["vrf_id"])
+        if "site_id" in values:
+            site_id = values["site_id"]
+            refs["site"] = (
+                lookup(user, Site, site_id, "locations.site.view", "site") if site_id else None
+            )
+        if "vlan_id" in values:
+            vlan_id = values["vlan_id"]
+            refs["vlan"] = (
+                lookup(user, VLAN, vlan_id, "networks.vlan.view", "vlan") if vlan_id else None
+            )
+        return refs
+
+    def create(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+        """Create one through the domain service."""
+        data = self.validated()
+        tenant = lookup(request.user, Tenant, data.validated_data["tenant_id"], None, "tenant")
+        prefix = ipam.create_prefix(
+            self.http, self.actor, tenant, **self._refs(data), **s.values(data, *self.fields)
+        )
+        return self.created(prefix)
+
+    def partial_update(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+        """Change the fields that are sent."""
+        prefix = self.get_object()
+        data = self.validated(partial=True, instance=prefix)
+        changed = ipam.update_prefix(
+            self.http, self.actor, prefix, **self._refs(data), **s.values(data, *self.fields)
+        )
+        return self.updated(changed)
+
+    def update(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+        """Same as PATCH: only the fields sent change."""
+        return self.partial_update(request, *args, **kwargs)
+
+    def destroy(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+        """Delete it; its addresses stay."""
+        ipam.delete_prefix(self.http, self.actor, self.get_object())
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class IPAddressViewSet(Base):
+    """Addresses; ``?within=10.0.1.0/24`` lists those inside a network."""
+
+    serializer_class = s.IPAddressSerializer
+    model, object_type = IPAddress, "ipam.ipaddress"
+    filters: ClassVar[dict[str, str]] = {
+        "tenant": "tenant_id",
+        "vrf": "vrf_id",
+        "port": "port_id",
+        "status": "status",
+        "dns_name": "dns_name",
+        "within": "address__net_within_or_equal",
+    }
+    search = "host__icontains"
+    fields = ("address", "status", "dns_name", "description")
+
+    def _refs(self, data: Any) -> dict[str, Any]:
+        user, values = self.request.user, data.validated_data
+        refs: dict[str, Any] = {}
+        if "vrf_id" in values:
+            refs["vrf"] = _vrf(user, values["vrf_id"])
+        if "port_id" in values:
+            port_id = values["port_id"]
+            refs["port"] = (
+                lookup(user, Port, port_id, "dcim.device.view", "port", judge=lambda p: p.device)
+                if port_id
+                else None
+            )
+        return refs
+
+    def create(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+        """Create one through the domain service."""
+        data = self.validated()
+        tenant = lookup(request.user, Tenant, data.validated_data["tenant_id"], None, "tenant")
+        address = ipam.create_address(
+            self.http, self.actor, tenant, **self._refs(data), **s.values(data, *self.fields)
+        )
+        return self.created(address)
+
+    def partial_update(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+        """Change the fields that are sent."""
+        address = self.get_object()
+        data = self.validated(partial=True, instance=address)
+        changed = ipam.update_address(
+            self.http, self.actor, address, **self._refs(data), **s.values(data, *self.fields)
+        )
+        return self.updated(changed)
+
+    def update(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+        """Same as PATCH: only the fields sent change."""
+        return self.partial_update(request, *args, **kwargs)
+
+    def destroy(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+        """Delete it."""
+        ipam.delete_address(self.http, self.actor, self.get_object())
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
 
 class TenantViewSet(viewsets.ReadOnlyModelViewSet):  # type: ignore[type-arg]

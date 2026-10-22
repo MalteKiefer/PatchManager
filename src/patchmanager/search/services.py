@@ -12,6 +12,7 @@ from patchmanager.accounts import policy
 from patchmanager.accounts.services import ServiceError
 from patchmanager.cabling.models import Cable
 from patchmanager.dcim.models import Device, Port, Rack
+from patchmanager.ipam.models import IPAddress, Prefix
 from patchmanager.locations.models import Building, Floor, Room, Site
 from patchmanager.metadata import services as metadata
 from patchmanager.metadata.models import Note
@@ -91,6 +92,22 @@ SOURCES = {
         Source(
             "wlan", _("WLANs"), WLAN, "networks.wlan.view", ("ssid", "description"), path_field=None
         ),
+        Source(
+            "prefix",
+            _("Prefixes"),
+            Prefix,
+            "ipam.prefix.view",
+            ("text", "description"),
+            related=("vrf",),
+        ),
+        Source(
+            "ipaddress",
+            _("IP addresses"),
+            IPAddress,
+            "ipam.ipaddress.view",
+            ("host", "dns_name", "description"),
+            related=("vrf", "port__device"),
+        ),
     )
 }
 
@@ -124,6 +141,10 @@ def _context(source: Source, obj: Any) -> str:
         return " · ".join(str(x) for x in (obj.device_type, obj.room, obj.rack) if x)
     if source.kind == "port":
         return str(obj.device)
+    if source.kind == "ipaddress":
+        return " · ".join(str(x) for x in (obj.dns_name, obj.port and obj.port.device) if x)
+    if source.kind == "prefix":
+        return obj.description or (str(obj.vrf) if obj.vrf else "")
     if source.kind in ("building", "floor", "room", "rack", "vlan"):
         parent = getattr(obj, source.related[0])
         return str(parent) if parent else ""

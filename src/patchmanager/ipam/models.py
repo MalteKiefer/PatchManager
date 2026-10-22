@@ -101,8 +101,8 @@ class Prefix(TenantScopedModel):
         return str(self.path)
 
     @property
-    def network(self) -> ipaddress.IPv4Network | ipaddress.IPv6Network:
-        """As a Python network."""
+    def network(self) -> Any:
+        """As a Python network (``IPv4Network`` or ``IPv6Network``)."""
         return ipaddress.ip_network(self.prefix)
 
 

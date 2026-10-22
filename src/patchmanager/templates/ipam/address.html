@@ -1,0 +1,24 @@
+{% extends "base.html" %}{% load i18n pm %}
+{% block title %}{{ address }}{% endblock %}
+{% block content %}
+<nav aria-label="{% translate 'Breadcrumb' %}" class="mb-3 text-sm"><a href="{% url 'ipam:addresses' %}">{% translate "Addresses" %}</a></nav>
+<div class="mb-6 flex flex-wrap items-center gap-3"><h1 class="mr-auto tabular-nums">{{ address.address }}</h1><a class="btn-secondary" href="{% history_url address %}">{% translate "History" %}</a></div>
+<div class="grid gap-6 lg:grid-cols-3">
+  <div class="space-y-6 lg:col-span-2">
+    <section class="card"><h2 class="mb-3">{% translate "Where it is used" %}</h2>
+      {% if port %}<p><a href="{% url 'devices:port' port.pk %}">{{ port.device }} · {{ port.name }}</a></p>
+        {% if can_change %}<form method="post" class="mt-3">{% csrf_token %}<button name="action" value="unassign" class="btn-secondary">{% translate "Take off the port" %}</button></form>{% endif %}
+      {% elif address.port_id %}<p class="text-slate-500">{% translate "(not visible to you)" %}</p>
+      {% else %}<p class="text-sm text-slate-500">{% translate "Not on a port. Assign it from the port's page." %}</p>{% endif %}
+    </section>
+    <section class="card"><h2 class="mb-3">{% translate "In the prefixes" %}</h2>
+      <ul class="space-y-1 text-sm">{% for p in prefixes %}<li><a href="{% url 'ipam:prefix' p.pk %}" class="tabular-nums">{{ p.prefix }}</a> <span class="text-slate-500">{{ p.description }}</span></li>{% empty %}<li class="text-slate-500">{% translate "No prefix contains this address." %}</li>{% endfor %}</ul>
+    </section>
+  </div>
+  <aside class="space-y-6">
+    <form method="post" class="card" novalidate>{% csrf_token %}<h2 class="mb-3">{% translate "Details" %}</h2>
+      <fieldset {% if not can_change %}disabled{% endif %}>{% include "core/_form.html" %}</fieldset>{% if can_change %}<button class="btn-primary">{% translate "Save" %}</button>{% endif %}</form>
+    {% if can_change %}<form method="post" data-confirm="{% translate 'Delete this address?' %}">{% csrf_token %}<button name="action" value="delete" class="btn-danger">{% translate "Delete" %}</button></form>{% endif %}
+  </aside>
+</div>
+{% endblock %}

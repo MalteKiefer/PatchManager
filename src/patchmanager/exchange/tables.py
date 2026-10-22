@@ -9,6 +9,7 @@ from collections.abc import Callable, Iterator
 from dataclasses import dataclass
 from typing import Any
 
+from django.core.exceptions import ValidationError as DjangoValidationError
 from django.db.models import Q
 from django.http import HttpRequest
 from django.utils.translation import gettext as _
@@ -21,6 +22,8 @@ from patchmanager.cabling import services as cabling
 from patchmanager.cabling.models import Cable, CableEnd
 from patchmanager.dcim import devices
 from patchmanager.dcim.models import Device, Port, Rack, RackSpace
+from patchmanager.ipam import services as ipam
+from patchmanager.ipam.models import VRF, IPAddress, Prefix
 from patchmanager.library.models import DeviceType
 from patchmanager.locations import services as tree
 from patchmanager.locations.models import Building, Floor, Room, Site
@@ -522,6 +525,158 @@ def export_ports(user: Any, tenant: Tenant, site: Site | None) -> Iterator[dict[
         }
 
 
+# ---------------------------------------------------------------- IP address management
+
+
+def _vrf(actor: Any, tenant: Tenant, row: Row) -> VRF | None:
+    name = row.get("vrf", "")
+    if not name:
+        return None
+    vrf = _seen(
+        actor, "ipam.vrf.view", VRF.objects.filter(tenant=tenant, name__iexact=name).first(), name
+    )
+    if vrf is None:
+        raise ServiceError(_("VRF %(name)s not found.") % {"name": name})
+    return vrf
+
+
+PREFIX_FIELDS: dict[str, Callable[[Row, str], Any]] = {
+    "status": lambda r, k: _choice(r, k, Prefix.Status.choices),
+    "gateway": _text,
+    "description": _text,
+}
+
+
+def export_prefixes(user: Any, tenant: Tenant, site: Site | None) -> Iterator[dict[str, Any]]:
+    """Prefixes of the tenant (and site)."""
+    rows = Prefix.objects.filter(tenant=tenant).select_related("vrf", "site", "vlan")
+    if site is not None:
+        rows = rows.filter(site=site)
+    for prefix in rows.order_by("vrf__name", "prefix")[:EXPORT_LIMIT]:
+        if policy.has_perm(user, "ipam.prefix.export", prefix):
+            yield {
+                "vrf": prefix.vrf.name if prefix.vrf else "",
+                "prefix": prefix.prefix,
+                "status": prefix.status,
+                "site": prefix.site.name if prefix.site else "",
+                "vlan": prefix.vlan.vid if prefix.vlan else "",
+                "gateway": prefix.gateway or "",
+                "description": prefix.description,
+            }
+
+
+def import_prefix(request: HttpRequest, actor: User, tenant: Tenant, row: Row) -> str:
+    """Create or update a prefix by VRF and network."""
+    vrf = _vrf(actor, tenant, row)
+    values = _fields(row, PREFIX_FIELDS)
+    refs: dict[str, Any] = {}
+    if row.get("site"):
+        refs["site"] = _seen(
+            actor,
+            "locations.site.view",
+            Site.objects.filter(tenant=tenant, name__iexact=row["site"]).first(),
+            f"Site {row['site']}",
+        )
+        if refs["site"] is None:
+            raise ServiceError(_("Site %(name)s not found.") % {"name": row["site"]})
+    if row.get("vlan"):
+        vid = _int(row, "vlan") or 0
+        vlans = VLAN.objects.filter(tenant=tenant, vid=vid)
+        site = refs.get("site")
+        refs["vlan"] = _seen(
+            actor,
+            "networks.vlan.view",
+            (vlans.filter(site=site).first() if site else None) or vlans.filter(site=None).first(),
+            f"VLAN {vid}",
+        )
+        if refs["vlan"] is None:
+            raise ServiceError(_("VLAN %(vid)s not found.") % {"vid": vid})
+    try:
+        network = Prefix._meta.get_field("prefix").to_python(row["prefix"])
+    except DjangoValidationError as exc:
+        raise ServiceError("; ".join(exc.messages)) from exc
+    prefix = _seen(
+        actor,
+        "ipam.prefix.view",
+        Prefix.objects.filter(tenant=tenant, vrf=vrf, prefix=network).first(),
+        network,
+    )
+    if prefix is None:
+        ipam.create_prefix(request, actor, tenant, vrf=vrf, prefix=network, **refs, **values)
+        return "created"
+    changes = _changed(prefix, {**values, **refs})
+    if not changes:
+        return "unchanged"
+    ipam.update_prefix(request, actor, prefix, **changes)
+    return "updated"
+
+
+ADDRESS_FIELDS: dict[str, Callable[[Row, str], Any]] = {
+    "status": lambda r, k: _choice(r, k, IPAddress.Status.choices),
+    "dns_name": _text,
+    "description": _text,
+}
+
+
+def export_addresses(user: Any, tenant: Tenant, site: Site | None) -> Iterator[dict[str, Any]]:
+    """Addresses of the tenant with the port they are on."""
+    rows = IPAddress.objects.filter(tenant=tenant).select_related("vrf", "port__device")
+    if site is not None:
+        rows = rows.filter(path__descendant_of=str(site.path))
+    for address in rows.order_by("vrf__name", "address")[:EXPORT_LIMIT]:
+        if not policy.has_perm(user, "ipam.ipaddress.export", address):
+            continue
+        port = address.port
+        shown = port is not None and policy.has_perm(user, "dcim.device.view", port.device)
+        yield {
+            "vrf": address.vrf.name if address.vrf else "",
+            "address": address.address,
+            "status": address.status,
+            "dns_name": address.dns_name,
+            "description": address.description,
+            "device": port.device.name if shown and port else ("…" if port else ""),
+            "port": port.name if shown and port else "",
+        }
+
+
+def import_address(request: HttpRequest, actor: User, tenant: Tenant, row: Row) -> str:
+    """Create or update an address by VRF and host; device and port assign it."""
+    vrf = _vrf(actor, tenant, row)
+    values = _fields(row, ADDRESS_FIELDS)
+    try:
+        value = IPAddress._meta.get_field("address").to_python(row["address"])
+    except DjangoValidationError as exc:
+        raise ServiceError("; ".join(exc.messages)) from exc
+    if row.get("device"):
+        device = _seen(
+            actor,
+            "dcim.device.view",
+            Device.objects.filter(tenant=tenant, name__iexact=row["device"]).first(),
+            row["device"],
+        )
+        port = device.ports.filter(name__iexact=row.get("port", "")).first() if device else None
+        if port is None:
+            raise ServiceError(
+                _("Port %(port)s of %(device)s not found.")
+                % {"port": row.get("port", ""), "device": row["device"]}
+            )
+        values["port"] = port
+    address = _seen(
+        actor,
+        "ipam.ipaddress.view",
+        IPAddress.objects.filter(tenant=tenant, vrf=vrf, host=value.split("/")[0]).first(),
+        value,
+    )
+    if address is None:
+        ipam.create_address(request, actor, tenant, vrf=vrf, address=value, **values)
+        return "created"
+    changes = _changed(address, {"address": value, **values})
+    if not changes:
+        return "unchanged"
+    ipam.update_address(request, actor, address, **changes)
+    return "updated"
+
+
 TABLES = {
     t.kind: t
     for t in (
@@ -571,6 +726,24 @@ TABLES = {
             ["vid", "name"],
             export_vlans,
             import_vlan,
+        ),
+        Table(
+            "prefixes",
+            gettext_lazy("Prefixes"),
+            "ipam.prefix",
+            ["vrf", "prefix", "status", "site", "vlan", "gateway", "description"],
+            ["prefix"],
+            export_prefixes,
+            import_prefix,
+        ),
+        Table(
+            "addresses",
+            gettext_lazy("IP addresses"),
+            "ipam.ipaddress",
+            ["vrf", "address", "status", "dns_name", "description", "device", "port"],
+            ["address"],
+            export_addresses,
+            import_address,
         ),
         Table(
             "cables",

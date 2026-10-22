@@ -29,6 +29,9 @@ URLS = {
     "networks.vlan": "networks:vlan",
     "networks.wlan": "networks:wlan",
     "library.devicetype": "library:type",
+    "ipam.vrf": "ipam:vrf",
+    "ipam.prefix": "ipam:prefix",
+    "ipam.ipaddress": "ipam:address",
 }
 
 

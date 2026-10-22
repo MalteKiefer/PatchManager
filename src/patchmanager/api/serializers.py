@@ -7,6 +7,7 @@ from rest_framework import serializers
 from patchmanager.cabling.models import Cable
 from patchmanager.dcim.models import Device, Port, Rack
 from patchmanager.history.models import Change
+from patchmanager.ipam.models import VRF, IPAddress, Prefix
 from patchmanager.library.models import DeviceType, Vendor
 from patchmanager.locations.models import Building, Floor, Room, Site
 from patchmanager.networks.models import VLAN, WLAN
@@ -269,6 +270,57 @@ class WLANSerializer(serializers.ModelSerializer):  # type: ignore[type-arg]
     class Meta:
         model = WLAN
         fields = [*BASE, "tenant", "ssid", "vlan", "security", "hidden", "description"]
+        read_only_fields = BASE
+
+
+class VRFSerializer(serializers.ModelSerializer):  # type: ignore[type-arg]
+    """VRF as stored and as accepted on writes."""
+
+    tenant = serializers.UUIDField(source="tenant_id")
+
+    class Meta:
+        model = VRF
+        fields = [*BASE, "tenant", "name", "rd", "description"]
+        read_only_fields = BASE
+
+
+class PrefixSerializer(serializers.ModelSerializer):  # type: ignore[type-arg]
+    """Prefix as stored and as accepted on writes."""
+
+    tenant = serializers.UUIDField(source="tenant_id")
+    vrf = serializers.UUIDField(source="vrf_id", required=False, allow_null=True)
+    site = serializers.UUIDField(source="site_id", required=False, allow_null=True)
+    vlan = serializers.UUIDField(source="vlan_id", required=False, allow_null=True)
+    prefix = serializers.CharField(max_length=50)
+    gateway = serializers.CharField(max_length=50, required=False, allow_null=True)
+
+    class Meta:
+        model = Prefix
+        fields = [
+            *BASE,
+            "tenant",
+            "vrf",
+            "prefix",
+            "status",
+            "site",
+            "vlan",
+            "gateway",
+            "description",
+        ]
+        read_only_fields = BASE
+
+
+class IPAddressSerializer(serializers.ModelSerializer):  # type: ignore[type-arg]
+    """Address as stored and as accepted on writes."""
+
+    tenant = serializers.UUIDField(source="tenant_id")
+    vrf = serializers.UUIDField(source="vrf_id", required=False, allow_null=True)
+    port = serializers.UUIDField(source="port_id", required=False, allow_null=True)
+    address = serializers.CharField(max_length=50)
+
+    class Meta:
+        model = IPAddress
+        fields = [*BASE, "tenant", "vrf", "address", "status", "dns_name", "description", "port"]
         read_only_fields = BASE
 
 

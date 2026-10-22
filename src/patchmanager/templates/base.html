@@ -49,6 +49,7 @@
         <a href="{% url 'locations:index' %}" {% if section == "locations" %}aria-current="page"{% endif %}>{% include "core/_icon.html" with name="locations" %}{% translate "Locations and racks" %}</a>
         <a href="{% url 'cabling:cables' %}" {% if section == "cables" %}aria-current="page"{% endif %}>{% include "core/_icon.html" with name="cables" %}{% translate "Cables" %}</a>
         <a href="{% url 'networks:vlans' %}" {% if section == "networks" %}aria-current="page"{% endif %}>{% include "core/_icon.html" with name="networks" %}{% translate "Networks" %}</a>
+        <a href="{% url 'ipam:prefixes' %}" {% if section == "ipam" %}aria-current="page"{% endif %}>{% include "core/_icon.html" with name="ipam" %}{% translate "IP addresses" %}</a>
         <a href="{% url 'library:types' %}" {% if section == "library" %}aria-current="page"{% endif %}>{% include "core/_icon.html" with name="library" %}{% translate "Device library" %}</a>
         <p class="app-nav-label">{% translate "Records" %}</p>
         <a href="{% url 'history:activity' %}" {% if section == "activity" %}aria-current="page"{% endif %}>{% include "core/_icon.html" with name="activity" %}{% translate "Activity" %}</a>

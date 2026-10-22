@@ -102,3 +102,148 @@ def test_permissions_and_tenant_boundaries(net, make_user, grant, make_tree) -> 
         )
         with pytest.raises(ServiceError, match="does not fit"):
             _address(net, "10.0.0.9/24", port=foreign.ports.get(name="ge1"))
+
+
+def test_pages(admin_client, net, system) -> None:
+    admin_client.post("/tenants/switch/", {"tenant": net["tenant"].pk}, secure=True)
+    for url in ("/ipam/", "/ipam/addresses/", "/ipam/vrfs/", "/ipam/prefixes/new/"):
+        assert admin_client.get(url, secure=True).status_code == 200
+    admin_client.post("/ipam/vrfs/new/", {"name": "Mgmt", "rd": "65000:1"}, secure=True)
+    admin_client.post(
+        "/ipam/prefixes/new/", {"prefix": "10.0.0.0/16", "status": "container"}, secure=True
+    )
+    created = admin_client.post(
+        "/ipam/prefixes/new/", {"prefix": "10.0.5.0/24", "status": "active"}, secure=True
+    )
+    with system():
+        child = Prefix.objects.get(prefix="10.0.5.0/24")
+    assert created.url == f"/ipam/prefixes/{child.pk}/"
+    tree = admin_client.get("/ipam/", secure=True).content.decode()
+    assert 'data-depth="1"' in tree and "10.0.5.0/24" in tree
+    page = admin_client.get(created.url, secure=True).content.decode()
+    assert "Add 10.0.5.1/24" in page and "10.0.5.1" in page
+    with system():
+        port = net["device"].ports.get(name="ge2")
+    form = admin_client.get(f"/ipam/addresses/new/?port={port.pk}&address=10.0.5.1/24", secure=True)
+    assert "New address on sw1 ge2" in form.content.decode()
+    done = admin_client.post(
+        "/ipam/addresses/new/",
+        {"port": port.pk, "address": "10.0.5.1/24", "status": "active", "dns_name": "sw1"},
+        secure=True,
+    )
+    assert done.url == f"/devices/ports/{port.pk}/"
+    assert "10.0.5.1/24" in admin_client.get(done.url, secure=True).content.decode()
+    assert (
+        "10.0.5.1"
+        in admin_client.get(f"/devices/{net['device'].pk}/", secure=True).content.decode()
+    )
+    assert "Add 10.0.5.2/24" in admin_client.get(created.url, secure=True).content.decode()
+    with system():
+        address = IPAddress.objects.get(host="10.0.5.1")
+    url = f"/ipam/addresses/{address.pk}/"
+    assert "10.0.5.0/24" in admin_client.get(url, secure=True).content.decode()
+    admin_client.post(url, {"action": "unassign"}, secure=True)
+    with system():
+        assert IPAddress.objects.get(pk=address.pk).port_id is None
+    found = admin_client.get("/ipam/addresses/?q=sw1", secure=True).content.decode()
+    assert "10.0.5.1/24" in found
+
+
+def test_pages_respect_permissions(client, net, make_user, grant, system) -> None:
+    from tests.conftest import login
+
+    with system():
+        prefix = _prefix(net, "10.7.0.0/24")
+    viewer = make_user()
+    grant(viewer, "viewer", net["tenant"])
+    login(client, viewer)
+    client.post("/tenants/switch/", {"tenant": net["tenant"].pk}, secure=True)
+    assert client.get(f"/ipam/prefixes/{prefix.pk}/", secure=True).status_code == 200
+    assert (
+        client.post(
+            "/ipam/prefixes/new/", {"prefix": "10.8.0.0/24", "status": "active"}, secure=True
+        ).status_code
+        == 403
+    )
+    from django.test import Client
+
+    other = Client()
+    login(other, make_user())
+    assert other.get(f"/ipam/prefixes/{prefix.pk}/", secure=True).status_code == 404
+
+
+def test_api(net, system) -> None:
+    from tests.test_api import _api, _get, _send, _token
+
+    api = _api(_token(net["actor"]))
+    tenant = str(net["tenant"].pk)
+    vrf = _send(api, "post", "/api/v1/vrfs/", {"tenant": tenant, "name": "Core"})
+    assert vrf.status_code == 201, vrf.content
+    prefix = _send(
+        api,
+        "post",
+        "/api/v1/prefixes/",
+        {"tenant": tenant, "vrf": vrf.json()["id"], "prefix": "10.20.0.0/24", "status": "active"},
+    )
+    assert prefix.status_code == 201, prefix.content
+    bad = _send(api, "post", "/api/v1/prefixes/", {"tenant": tenant, "prefix": "10.20.0.1/24"})
+    assert bad.status_code == 400
+    with system():
+        port = net["device"].ports.get(name="ge3")
+    address = _send(
+        api,
+        "post",
+        "/api/v1/ip-addresses/",
+        {
+            "tenant": tenant,
+            "vrf": vrf.json()["id"],
+            "address": "10.20.0.9/24",
+            "port": str(port.pk),
+        },
+    )
+    assert address.status_code == 201, address.content
+    assert address.json()["address"] == "10.20.0.9/24"
+    inside = _get(api, "/api/v1/ip-addresses/", within="10.20.0.0/24").json()["results"]
+    assert [a["address"] for a in inside] == ["10.20.0.9/24"]
+    assert _get(api, "/api/v1/ip-addresses/", within="nonsense").status_code == 400
+    assert _get(api, "/api/v1/prefixes/", q="10.20").json()["count"] == 1
+    moved = _send(api, "patch", f"/api/v1/ip-addresses/{address.json()['id']}/", {"port": None})
+    assert moved.status_code == 200 and moved.json()["port"] is None
+    assert _send(api, "delete", f"/api/v1/vrfs/{vrf.json()['id']}/", {}).status_code == 400
+
+
+def test_search_finds_addresses_and_prefixes(net, system) -> None:
+    from patchmanager.search import services as search
+
+    with system():
+        _prefix(net, "172.16.40.0/24", description="Printers")
+        _address(net, "172.16.40.12/24", dns_name="printer-2.example.test")
+        results, counts = search.search(net["actor"], net["tenant"], "172.16.40")
+        assert counts["prefix"] == 1 and counts["ipaddress"] == 1
+        results, counts = search.search(net["actor"], net["tenant"], "printer-2")
+        assert [str(h.obj) for h in results["ipaddress"]] == ["172.16.40.12/24"]
+
+
+def test_import_and_export(net, system) -> None:
+    from patchmanager.exchange import importer
+    from patchmanager.exchange.tables import TABLES
+
+    def run(kind: str, rows: list[dict[str, str]]) -> list[str]:
+        report = importer.run(net["request"], net["actor"], net["tenant"], kind, rows, apply=True)
+        return [r.outcome for r in report]
+
+    good = {"prefix": "10.30.0.0/24", "status": "active", "site": "HQ", "gateway": "10.30.0.1/24"}
+    with system():
+        assert run("prefixes", [good, {"prefix": "10.30.0.1/24"}])[1] == "error"
+        assert not Prefix.objects.filter(prefix="10.30.0.0/24").exists()  # all or nothing
+        assert run("prefixes", [good]) == ["created"]
+        assert Prefix.objects.filter(prefix="10.30.0.0/24", site__name="HQ").exists()
+        addresses = [
+            {"address": "10.30.0.20/24", "dns_name": "ap1", "device": "sw1", "port": "ge4"}
+        ]
+        assert run("addresses", addresses) == ["created"]
+        assert IPAddress.objects.get(host="10.30.0.20").port.name == "ge4"
+        exported = list(TABLES["addresses"].export(net["actor"], net["tenant"], None))
+        assert exported[0]["device"] == "sw1" and exported[0]["port"] == "ge4"
+        assert run("addresses", addresses) == ["unchanged"]
+        assert run("addresses", [{**addresses[0], "port": "ge99"}]) == ["error"]

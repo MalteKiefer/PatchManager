@@ -31,6 +31,10 @@ The answer contains an `access_token` valid for one hour.
 * Errors: `400` with field messages or `{"detail": ...}`, `401` without a valid
   token, `403` without permission or scope, `404` for objects you cannot see,
   `429` when throttled.
+* IP address management: `/api/v1/vrfs/`, `/api/v1/prefixes/` and
+  `/api/v1/ip-addresses/`. `?within=10.0.0.0/16` lists prefixes or addresses inside
+  a network, `?q=` searches the text of the network or address. Addresses take a
+  `port` id to sit on a port.
 
 ## Webhooks
 
