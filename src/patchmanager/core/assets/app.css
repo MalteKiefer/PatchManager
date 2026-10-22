@@ -106,6 +106,12 @@
 .stack-members { @apply space-y-2; }
 .stack-member { @apply flex flex-wrap items-center gap-3 rounded-lg border border-[#dde2e8] p-3 dark:border-slate-700; }
 .stack-member-id { @apply flex size-9 shrink-0 items-center justify-center rounded-md bg-slate-800 font-mono text-sm font-bold text-white dark:bg-slate-200 dark:text-slate-900; }
+.plan-pin-shadow { @apply fill-slate-900/25; }
+.plan-item.is-selected .plan-pin { stroke: #0f172a; stroke-width: 3; }
+.plan-item.is-selected rect { stroke: #f59e0b; stroke-width: 3; }
+.plan-item:focus { outline: none; }
+.plan-item:focus-visible .plan-pin, .plan-item:focus-visible rect { stroke: #f59e0b; stroke-width: 3; }
+.plan-swatch { @apply inline-block size-3 rounded-sm; }
 .panel-head h2 { @apply mt-0.5 text-xl; }
 .panel-facts { @apply mt-4 grid gap-2 text-sm; }
 .panel-facts > div { @apply grid grid-cols-[7rem_minmax(0,1fr)] gap-2; }

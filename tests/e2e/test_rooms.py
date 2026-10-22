@@ -76,6 +76,11 @@ def test_office_room(page: Page, live_server, super_admin, make_tree, make_type)
     page.goto(f"{live_server.url}/plans/{tree['floor'].pk}/")
     expect(page.locator("#plan[data-ready]")).to_have_count(1)
     expect(page.locator("#layer-links line, #layer-links path")).not_to_have_count(0)
+    page.locator(".plan-item[data-kind=device] .plan-pin").click()
+    expect(page.locator("#plan-panel")).to_contain_text("PP1")
+    expect(page.locator(".plan-item[data-kind=device]")).to_have_class(
+        "plan-item cursor-move is-selected"
+    )
     _shot(page, "floorplan")
 
     page.goto(f"{live_server.url}/locations/room/{room.pk}/surveys/new/")

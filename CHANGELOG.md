@@ -22,6 +22,8 @@ All notable changes to this project are documented here. The format follows
 * Read ArubaOS-Switch configurations and Aruba Central templates into the
   documentation with a preview of every change; write the documentation back as an
   ArubaOS-Switch configuration.
+* Floor plan pins: floor devices are drawn as pins at their exact spot; a click shows
+  the device with its room, photos, notes and the patch target of every port.
 
 ## [1.0.0] - 2026-10-22
 
