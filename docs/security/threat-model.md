@@ -76,8 +76,7 @@ webhook targets (SSRF risk).
 
 * T3: uploaded logos are size limited, re-encoded as PNG and served with a sandbox
   CSP; brand colours are numbers, so branding CSS cannot carry markup.
-* E1: edition, branding and system pages need system settings permissions; limits
-  are checked in the services, not only in the views.
+* E1: branding and system pages need system settings permissions.
 * I3: the job monitor keeps only error classes, not messages; mail secrets stay in
   the environment.
 * D1: health checks are bounded (one second worker ping) and only on the admin page.

@@ -50,10 +50,6 @@ def token(request: HttpRequest) -> JsonResponse:
     """Exchange client credentials for a one hour bearer token."""
     if not ratelimit.hit(f"oauth:{client_ip(request)}", limit=ATTEMPTS_PER_IP, window=600):
         return _error("slow_down", 429)
-    from patchmanager.instance import editions
-
-    if not editions.enabled("api"):
-        return _error("unauthorized_client", 403)
     if request.POST.get("grant_type") != "client_credentials":
         return _error("unsupported_grant_type")
     credentials = _credentials(request)

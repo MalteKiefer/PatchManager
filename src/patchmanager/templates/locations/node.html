@@ -7,7 +7,7 @@
   <h1 class="mr-auto">{{ node.name }}</h1>
   {% if can_move %}<a class="btn-secondary" href="{% url 'locations:site-move' node.pk %}">{% translate "Move to tenant" %}</a>{% endif %}
   {% if level == "site" %}<a class="btn-secondary" href="{% url 'exchange:report' 'site' node.pk %}">{% translate "Site report (PDF)" %}</a>{% endif %}
-  {% if level == "floor" and "floor_plans" in features %}<a class="btn-primary" href="{% url 'floorplans:editor' node.pk %}">{% translate "Floor plan" %}</a>{% endif %}
+  {% if level == "floor" %}<a class="btn-primary" href="{% url 'floorplans:editor' node.pk %}">{% translate "Floor plan" %}</a>{% endif %}
 </div>
 <div class="grid gap-6 lg:grid-cols-3">
   <div class="space-y-6 lg:col-span-2">

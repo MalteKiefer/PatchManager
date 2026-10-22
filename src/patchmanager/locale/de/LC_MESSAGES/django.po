@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-22 01:39+0000\n"
+"POT-Creation-Date: 2026-10-22 02:03+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -40,8 +40,8 @@ msgid "Run the setup_token command to get one."
 msgstr "Führen Sie den Befehl setup_token aus, um eines zu erhalten."
 
 #: accounts/forms.py:49 accounts/forms.py:103 accounts/forms.py:110
-#: api/ui.py:32 api/ui.py:55 exchange/pdf.py:215 integrations/views.py:27
-#: scim/views.py:355 sso/views.py:193 templates/api/clients.html:9
+#: api/ui.py:31 api/ui.py:54 exchange/pdf.py:215 integrations/views.py:26
+#: scim/views.py:350 sso/views.py:187 templates/api/clients.html:9
 #: templates/api/tokens.html:9 templates/integrations/webhooks.html:8
 #: templates/manage/groups.html:6 templates/manage/roles.html:11
 #: templates/manage/tenants.html:6 templates/manage/users.html:10
@@ -73,7 +73,7 @@ msgstr "Authenticator-App"
 msgid "Role"
 msgstr "Rolle"
 
-#: accounts/forms.py:113 api/ui.py:42 templates/api/tokens.html:9
+#: accounts/forms.py:113 api/ui.py:41 templates/api/tokens.html:9
 #: templates/base.html:41
 msgid "Tenant"
 msgstr "Mandant"
@@ -129,7 +129,7 @@ msgstr "Name der Kopie"
 msgid "JSON or YAML file"
 msgstr "JSON- oder YAML-Datei"
 
-#: accounts/forms.py:183 exchange/views.py:131 floorplans/views.py:173
+#: accounts/forms.py:183 exchange/views.py:129 floorplans/views.py:169
 #: metadata/uploads.py:183 metadata/views.py:65
 msgid "The file is too large."
 msgstr "Die Datei ist zu groß."
@@ -175,34 +175,34 @@ msgstr "Ihre Sitzung ist abgelaufen. Bitte melden Sie sich erneut an."
 msgid "Set up a second factor to continue."
 msgstr "Richten Sie einen zweiten Faktor ein, um fortzufahren."
 
-#: accounts/models.py:42
+#: accounts/models.py:41
 msgid "email"
 msgstr "E-Mail"
 
-#: accounts/models.py:43
+#: accounts/models.py:42
 msgid "display name"
 msgstr "Anzeigename"
 
-#: accounts/models.py:45
+#: accounts/models.py:44
 msgid "language"
 msgstr "Sprache"
 
-#: accounts/models.py:47 dcim/models.py:31 dcim/models.py:178
+#: accounts/models.py:46 dcim/models.py:31 dcim/models.py:178
 #: integrations/models.py:22 networks/models.py:15
 #: templates/manage/tenants.html:8 templates/manage/user_detail.html:6
 #: templates/manage/users.html:13
 msgid "active"
 msgstr "aktiv"
 
-#: accounts/models.py:48
+#: accounts/models.py:47
 msgid "locked until"
 msgstr "gesperrt bis"
 
-#: accounts/models.py:54
+#: accounts/models.py:53
 msgid "break glass"
 msgstr "Notfallkonto"
 
-#: accounts/models.py:152 accounts/models.py:183 api/models.py:16
+#: accounts/models.py:151 accounts/models.py:182 api/models.py:16
 #: api/models.py:56 dcim/models.py:35 dcim/models.py:188 dcim/models.py:227
 #: integrations/models.py:16 library/models.py:25 library/models.py:177
 #: locations/models.py:16 locations/models.py:58 locations/models.py:78
@@ -211,21 +211,21 @@ msgstr "Notfallkonto"
 msgid "name"
 msgstr "Name"
 
-#: accounts/models.py:153 accounts/models.py:184 dcim/models.py:237
+#: accounts/models.py:152 accounts/models.py:183 dcim/models.py:237
 #: library/models.py:127 locations/models.py:35 locations/models.py:59
 #: locations/models.py:110 networks/models.py:34 networks/models.py:81
 msgid "description"
 msgstr "Beschreibung"
 
-#: accounts/models.py:187
+#: accounts/models.py:186
 msgid "require MFA"
 msgstr "MFA erforderlich"
 
-#: accounts/models.py:223 templates/manage/_assignments.html:6
+#: accounts/models.py:222 templates/manage/_assignments.html:6
 msgid "allow"
 msgstr "erlauben"
 
-#: accounts/models.py:224 templates/manage/_assignments.html:6
+#: accounts/models.py:223 templates/manage/_assignments.html:6
 msgid "deny"
 msgstr "verweigern"
 
@@ -280,7 +280,7 @@ msgstr "Auditor"
 msgid "Read only access including the audit log."
 msgstr "Nur Lesezugriff, einschließlich Audit-Log."
 
-#: accounts/services/auth.py:64 accounts/services/mfa.py:230 sso/views.py:69
+#: accounts/services/auth.py:64 accounts/services/mfa.py:230 sso/views.py:67
 msgid "Too many attempts. Try again in a few minutes."
 msgstr "Zu viele Versuche. Versuchen Sie es in einigen Minuten erneut."
 
@@ -299,7 +299,7 @@ msgstr ""
 
 #: accounts/services/mfa.py:182 accounts/services/mfa.py:235
 #: accounts/services/mfa.py:255 accounts/views/account.py:136
-#: accounts/views/auth.py:135
+#: accounts/views/auth.py:132
 msgid "The security key could not be verified."
 msgstr "Der Sicherheitsschlüssel konnte nicht überprüft werden."
 
@@ -381,8 +381,8 @@ msgstr "Der letzte Super-Admin kann nicht entfernt werden."
 #: accounts/services/users.py:29 accounts/services/users.py:167 api/core.py:28
 #: api/tokens.py:99 api/tokens.py:130 cabling/services.py:50
 #: exchange/importer.py:54 exchange/importer.py:70 floorplans/services.py:187
-#: floorplans/views.py:200 history/services.py:76 history/services.py:97
-#: instance/services.py:24 integrations/services.py:69 metadata/services.py:98
+#: floorplans/views.py:192 history/services.py:76 history/services.py:97
+#: instance/services.py:23 integrations/services.py:69 metadata/services.py:98
 #: metadata/services.py:166 networks/services.py:109 networks/services.py:139
 #: networks/services.py:148
 msgid "You do not have permission to do that."
@@ -412,29 +412,29 @@ msgstr "API-Clients melden sich nicht an."
 msgid "You cannot deactivate your own account."
 msgstr "Sie können Ihr eigenes Konto nicht deaktivieren."
 
-#: accounts/services/users.py:227
+#: accounts/services/users.py:223
 msgid "Session not found."
 msgstr "Sitzung nicht gefunden."
 
-#: accounts/services/users.py:235
+#: accounts/services/users.py:231
 msgid "The current password is incorrect."
 msgstr "Das aktuelle Passwort ist falsch."
 
-#: accounts/services/users.py:270
+#: accounts/services/users.py:266
 msgid "You cannot act as a user with rights you do not hold."
 msgstr ""
 "Sie können nicht als Benutzer mit Rechten handeln, die Sie selbst nicht "
 "besitzen."
 
-#: accounts/services/users.py:277
+#: accounts/services/users.py:273
 msgid "A reason is required."
 msgstr "Ein Grund ist erforderlich."
 
-#: accounts/services/users.py:279
+#: accounts/services/users.py:275
 msgid "This user cannot be impersonated."
 msgstr "Als dieser Benutzer kann nicht gehandelt werden."
 
-#: accounts/services/users.py:281
+#: accounts/services/users.py:277
 msgid "Inactive or locked users cannot be impersonated."
 msgstr "Als inaktiver oder gesperrter Benutzer kann nicht gehandelt werden."
 
@@ -481,46 +481,46 @@ msgstr "Faktor entfernt."
 msgid "%(count)s other sessions were signed out."
 msgstr "%(count)s andere Sitzungen wurden abgemeldet."
 
-#: accounts/views/auth.py:87
+#: accounts/views/auth.py:84
 msgid "Please sign in again."
 msgstr "Bitte melden Sie sich erneut an."
 
-#: accounts/views/auth.py:94
+#: accounts/views/auth.py:91
 msgid "Too many attempts. Please sign in again."
 msgstr "Zu viele Versuche. Bitte melden Sie sich erneut an."
 
-#: accounts/views/auth.py:108
+#: accounts/views/auth.py:105
 msgid "You used a recovery code. Generate new ones soon."
 msgstr ""
 "Sie haben einen Wiederherstellungscode verwendet. Erzeugen Sie bald neue."
 
-#: accounts/views/auth.py:111
+#: accounts/views/auth.py:108
 msgid "This code is not valid."
 msgstr "Dieser Code ist ungültig."
 
-#: accounts/views/auth.py:137 sso/services.py:135
+#: accounts/views/auth.py:134 sso/services.py:131
 msgid "This account cannot sign in."
 msgstr "Dieses Konto kann sich nicht anmelden."
 
-#: accounts/views/auth.py:142
+#: accounts/views/auth.py:139
 msgid "Sign in with your organisation's identity provider."
 msgstr "Melden Sie sich beim Identitätsanbieter Ihrer Organisation an."
 
-#: accounts/views/auth.py:155 sso/views.py:130
+#: accounts/views/auth.py:152 sso/views.py:124
 msgid "You have been signed out."
 msgstr "Sie wurden abgemeldet."
 
-#: accounts/views/auth.py:179
+#: accounts/views/auth.py:176
 msgid "Setup complete. Now protect your account with a second factor."
 msgstr ""
 "Einrichtung abgeschlossen. Schützen Sie Ihr Konto jetzt mit einem zweiten "
 "Faktor."
 
-#: accounts/views/auth.py:193
+#: accounts/views/auth.py:190
 msgid "Invitation invalid or expired"
 msgstr "Einladung ungültig oder abgelaufen"
 
-#: accounts/views/auth.py:205
+#: accounts/views/auth.py:202
 msgid "Your password is set. Please sign in."
 msgstr "Ihr Passwort wurde festgelegt. Bitte melden Sie sich an."
 
@@ -626,19 +626,15 @@ msgstr "%(count)s Rollen importiert."
 msgid "Invalid or expired token."
 msgstr "Token ungültig oder abgelaufen."
 
-#: api/core.py:44
-msgid "The REST API is not part of this edition."
-msgstr "Die REST-API ist nicht Teil dieser Edition."
-
-#: api/core.py:70
+#: api/core.py:65
 msgid "Not a valid id."
 msgstr "Keine gültige ID."
 
-#: api/core.py:75
+#: api/core.py:70
 msgid "Not a valid value."
 msgstr "Kein gültiger Wert."
 
-#: api/core.py:107
+#: api/core.py:102
 msgid "Not found."
 msgstr "Nicht gefunden."
 
@@ -680,40 +676,40 @@ msgstr "Geben Sie einen Namen ein."
 msgid "Tokens expire after 1 to %(n)s days."
 msgstr "Token laufen nach 1 bis %(n)s Tagen ab."
 
-#: api/ui.py:22
+#: api/ui.py:21
 msgid "7 days"
 msgstr "7 Tage"
 
-#: api/ui.py:23
+#: api/ui.py:22
 msgid "30 days"
 msgstr "30 Tage"
 
-#: api/ui.py:24
+#: api/ui.py:23
 msgid "90 days"
 msgstr "90 Tage"
 
-#: api/ui.py:25
+#: api/ui.py:24
 msgid "1 year"
 msgstr "1 Jahr"
 
-#: api/ui.py:34 api/ui.py:57 templates/api/clients.html:9
+#: api/ui.py:33 api/ui.py:56 templates/api/clients.html:9
 #: templates/api/tokens.html:9
 msgid "Access"
 msgstr "Zugriff"
 
-#: api/ui.py:40
+#: api/ui.py:39
 msgid "Expires after"
 msgstr "Läuft ab nach"
 
-#: api/ui.py:49
+#: api/ui.py:48
 msgid "All my tenants"
 msgstr "Alle meine Mandanten"
 
-#: api/ui.py:114 scim/views.py:412
+#: api/ui.py:111 scim/views.py:405
 msgid "Token revoked."
 msgstr "Token widerrufen."
 
-#: api/ui.py:158
+#: api/ui.py:153
 msgid "Client revoked."
 msgstr "Client widerrufen."
 
@@ -829,15 +825,11 @@ msgstr "Ein Kabel benötigt zwei verschiedene Ports."
 msgid "Ports of different tenants cannot be connected."
 msgstr "Ports verschiedener Mandanten können nicht verbunden werden."
 
-#: cabling/services.py:66
-msgid "This edition only documents connections inside one rack."
-msgstr "Diese Edition dokumentiert nur Verbindungen innerhalb eines Racks."
-
-#: cabling/services.py:83
+#: cabling/services.py:77
 msgid "One of the ports already has a cable."
 msgstr "Einer der Ports hat bereits ein Kabel."
 
-#: cabling/services.py:85
+#: cabling/services.py:79
 msgid "These ports cannot be connected."
 msgstr "Diese Ports können nicht verbunden werden."
 
@@ -1181,7 +1173,7 @@ msgstr "Höhe (HE)"
 msgid "Units reserved."
 msgstr "Höheneinheiten reserviert."
 
-#: dcim/views.py:148 floorplans/views.py:61 floorplans/views.py:63
+#: dcim/views.py:148 floorplans/views.py:59 floorplans/views.py:61
 msgid "Invalid request."
 msgstr "Ungültige Anfrage."
 
@@ -1286,8 +1278,8 @@ msgstr "Etage"
 msgid "Kind"
 msgstr "Art"
 
-#: exchange/pdf.py:199 exchange/tables.py:539 instance/editions.py:29
-#: locations/views.py:52 search/services.py:58
+#: exchange/pdf.py:199 exchange/tables.py:539 locations/views.py:52
+#: search/services.py:58
 msgid "Racks"
 msgstr "Racks"
 
@@ -1506,43 +1498,39 @@ msgstr "Kabel"
 msgid "Ports"
 msgstr "Ports"
 
-#: exchange/views.py:53
+#: exchange/views.py:52
 msgid "Table"
 msgstr "Tabelle"
 
-#: exchange/views.py:55
+#: exchange/views.py:54
 msgid "CSV or XLSX file"
 msgstr "CSV oder XLSX Datei"
 
-#: exchange/views.py:86
+#: exchange/views.py:85
 msgid "Too many imports. Try again in a few minutes."
 msgstr "Zu viele Importe. Versuchen Sie es in einigen Minuten erneut."
 
-#: exchange/views.py:125
+#: exchange/views.py:123
 msgid "Choose a table and a file."
 msgstr "Wählen Sie eine Tabelle und eine Datei."
 
-#: exchange/views.py:168
+#: exchange/views.py:165
 msgid "This import expired. Upload the file again."
 msgstr "Dieser Import ist abgelaufen. Laden Sie die Datei erneut hoch."
 
-#: exchange/views.py:179
+#: exchange/views.py:176
 msgid "Nothing was imported: the data changed since the check."
 msgstr ""
 "Es wurde nichts importiert: Die Daten haben sich seit der Prüfung geändert."
 
-#: exchange/views.py:193
+#: exchange/views.py:190
 #, python-format
 msgid "Imported: %(c)s created, %(u)s updated, %(n)s unchanged."
 msgstr "Importiert: %(c)s angelegt, %(u)s aktualisiert, %(n)s unverändert."
 
-#: exchange/views.py:211 exchange/views.py:269
+#: exchange/views.py:208 exchange/views.py:257
 msgid "Too many exports. Try again in a few minutes."
 msgstr "Zu viele Exporte. Versuchen Sie es in einigen Minuten erneut."
-
-#: exchange/views.py:255
-msgid "This report is not part of this edition."
-msgstr "Dieser Bericht ist nicht Teil dieser Edition."
 
 #: floorplans/models.py:16
 msgid "pixels per metre"
@@ -1607,50 +1595,46 @@ msgstr "Dieses Rack befindet sich auf einer anderen Etage."
 msgid "Only floor devices of this floor can be placed."
 msgstr "Nur Raumgeräte dieser Etage können auf dem Grundriss platziert werden."
 
-#: floorplans/views.py:35
+#: floorplans/views.py:33
 msgid "Plan (JPEG, PNG, WebP, GIF or PDF)"
 msgstr "Grundriss (JPEG, PNG, WebP, GIF oder PDF)"
 
-#: floorplans/views.py:53
+#: floorplans/views.py:51
 msgid "Upload a plan first."
 msgstr "Laden Sie zuerst einen Grundriss hoch."
 
-#: floorplans/views.py:168 metadata/views.py:59
+#: floorplans/views.py:164 metadata/views.py:59
 msgid "Choose a file to upload."
 msgstr "Wählen Sie eine Datei zum Hochladen."
 
-#: floorplans/views.py:182
+#: floorplans/views.py:178
 msgid "Plan uploaded. Set the scale next."
 msgstr "Grundriss hochgeladen. Legen Sie als Nächstes den Maßstab fest."
 
-#: floorplans/views.py:194
-msgid "Floor plans are not part of this edition."
-msgstr "Grundrisse sind nicht Teil dieser Edition."
-
-#: floorplans/views.py:203
+#: floorplans/views.py:195
 msgid "Not possible."
 msgstr "Nicht möglich."
 
-#: floorplans/views.py:213
+#: floorplans/views.py:205
 msgid "Enter the distance in metres."
 msgstr "Geben Sie die Entfernung in Metern ein."
 
-#: floorplans/views.py:224
+#: floorplans/views.py:216
 msgid "Choose a room of this floor."
 msgstr "Wählen Sie einen Raum dieser Etage."
 
-#: floorplans/views.py:240
+#: floorplans/views.py:232
 msgid "Object not found on this floor."
 msgstr "Objekt auf dieser Etage nicht gefunden."
 
-#: floorplans/views.py:249
+#: floorplans/views.py:241
 #, python-format
 msgid "Several rooms overlap here (%(rooms)s). The room was not changed."
 msgstr ""
 "Hier überlappen sich mehrere Räume (%(rooms)s). Der Raum wurde nicht "
 "geändert."
 
-#: floorplans/views.py:252
+#: floorplans/views.py:244
 #, python-format
 msgid "%(item)s lies outside the outline of its room."
 msgstr "%(item)s liegt außerhalb des Raumumrisses seines Raums."
@@ -1706,193 +1690,79 @@ msgstr "Wiederhergestellt: %(fields)s."
 msgid "Not restored (links): %(fields)s."
 msgstr "Nicht wiederhergestellt (Verknüpfungen): %(fields)s."
 
-#: instance/editions.py:20
-msgid "REST API and API tokens"
-msgstr "REST-API und API-Tokens"
-
-#: instance/editions.py:21 templates/integrations/webhooks.html:2
-#: templates/integrations/webhooks.html:4 templates/manage/_base.html:16
-msgid "Webhooks"
-msgstr "Webhooks"
-
-#: instance/editions.py:22
-msgid "Single sign on (OIDC, SAML, LDAP)"
-msgstr "Single Sign-on (OIDC, SAML, LDAP)"
-
-#: instance/editions.py:23 templates/manage/_base.html:15
-#: templates/scim/tokens.html:2 templates/scim/tokens.html:4
-msgid "SCIM provisioning"
-msgstr "SCIM-Bereitstellung"
-
-#: instance/editions.py:24
-msgid "CSV and XLSX import"
-msgstr "CSV- und XLSX-Import"
-
-#: instance/editions.py:25
-msgid "Floor plans"
-msgstr "Grundrisse"
-
-#: instance/editions.py:30 templates/manage/_base.html:9
-#: templates/manage/dashboard.html:7 templates/manage/users.html:2
-#: templates/manage/users.html:5
-msgid "Users"
-msgstr "Benutzer"
-
-#: instance/editions.py:31 templates/manage/_base.html:8
-#: templates/manage/dashboard.html:6 templates/manage/tenants.html:2
-#: templates/manage/tenants.html:4
-msgid "Tenants"
-msgstr "Mandanten"
-
-#: instance/editions.py:52 templates/dcim/rack.html:49
-#: templates/dcim/rack.html:70
-msgid "Free"
-msgstr "Frei"
-
-#: instance/editions.py:60
-msgid "SMB"
-msgstr "KMU"
-
-#: instance/editions.py:68
-msgid "Integrator"
-msgstr "Integrator"
-
-#: instance/editions.py:76
-msgid "Enterprise"
-msgstr "Enterprise"
-
-#: instance/editions.py:116 instance/gates.py:19
-#, python-format
-msgid "%(feature)s is not part of this edition."
-msgstr "%(feature)s ist nicht Teil dieser Edition."
-
-#: instance/editions.py:142
-#, python-format
-msgid "This edition allows at most %(limit)s %(kind)s."
-msgstr "Diese Edition erlaubt höchstens %(limit)s %(kind)s."
-
 #: instance/models.py:12
-msgid "edition"
-msgstr "Edition"
-
-#: instance/models.py:16
 msgid "instance name"
 msgstr "Instanzname"
 
-#: instance/models.py:18
+#: instance/models.py:14
 msgid "brand colour (hue)"
 msgstr "Markenfarbe (Farbton)"
 
-#: instance/models.py:19
+#: instance/models.py:15
 msgid "default language"
 msgstr "Standardsprache"
 
-#: instance/models.py:22
+#: instance/models.py:18
 msgid "instance settings"
 msgstr "Instanzeinstellungen"
 
-#: instance/models.py:32
+#: instance/models.py:28
 msgid "running"
 msgstr "läuft"
 
-#: instance/models.py:33
+#: instance/models.py:29
 msgid "done"
 msgstr "erledigt"
 
-#: instance/models.py:34 integrations/models.py:47
+#: instance/models.py:30 integrations/models.py:47
 msgid "failed"
 msgstr "fehlgeschlagen"
 
-#: instance/services.py:41
-msgid "The edition is set by PATCHMANAGER_EDITION."
-msgstr "Die Edition wird durch PATCHMANAGER_EDITION festgelegt."
-
-#: instance/services.py:43
-msgid "Unknown edition."
-msgstr "Unbekannte Edition."
-
-#: instance/services.py:45
-msgid "Limits are numbers of at least 0."
-msgstr "Grenzen sind Zahlen ab 0."
-
-#: instance/services.py:47
-msgid "Unknown feature."
-msgstr "Unbekannte Funktion."
-
-#: instance/services.py:60
+#: instance/services.py:31
 msgid "The logo may be at most 512 KB."
 msgstr "Das Logo darf höchstens 512 KB groß sein."
 
-#: instance/services.py:62
+#: instance/services.py:33
 msgid "The logo must be a PNG or JPEG file."
 msgstr "Das Logo muss eine PNG- oder JPEG-Datei sein."
 
-#: instance/services.py:69
+#: instance/services.py:40
 msgid "The logo could not be read."
 msgstr "Das Logo konnte nicht gelesen werden."
 
-#: instance/services.py:86
+#: instance/services.py:57
 msgid "The colour hue is a number from 0 to 359."
 msgstr "Der Farbton ist eine Zahl von 0 bis 359."
 
-#: instance/services.py:88
+#: instance/services.py:59
 msgid "Unknown language."
 msgstr "Unbekannte Sprache."
 
-#: instance/views.py:20
-msgid "as the edition"
-msgstr "wie die Edition"
-
-#: instance/views.py:21 templates/instance/edition.html:13
-msgid "on"
-msgstr "an"
-
-#: instance/views.py:22 templates/instance/edition.html:13
-msgid "off"
-msgstr "aus"
-
-#: instance/views.py:30
-msgid "Edition"
-msgstr "Edition"
-
-#: instance/views.py:37
-#, python-format
-msgid "Limit: %(what)s"
-msgstr "Grenze: %(what)s"
-
-#: instance/views.py:40
-msgid "Empty: as the edition."
-msgstr "Leer: wie die Edition."
-
-#: instance/views.py:52
+#: instance/views.py:22
 msgid "Instance name"
 msgstr "Instanzname"
 
-#: instance/views.py:55
+#: instance/views.py:25
 msgid "Empty: PATCHMANAGER_INSTANCE_NAME."
 msgstr "Leer: PATCHMANAGER_INSTANCE_NAME."
 
-#: instance/views.py:58
+#: instance/views.py:28
 msgid "Brand colour (hue, 0 to 359)"
 msgstr "Markenfarbe (Farbton, 0 bis 359)"
 
-#: instance/views.py:61
+#: instance/views.py:31
 msgid "Default language for new accounts"
 msgstr "Standardsprache für neue Konten"
 
-#: instance/views.py:63
+#: instance/views.py:33
 msgid "Logo (PNG or JPEG, up to 512 KB)"
 msgstr "Logo (PNG oder JPEG, bis 512 KB)"
 
-#: instance/views.py:64
+#: instance/views.py:34
 msgid "Remove the logo"
 msgstr "Logo entfernen"
 
-#: instance/views.py:107
-msgid "Edition saved."
-msgstr "Edition gespeichert."
-
-#: instance/views.py:149
+#: instance/views.py:70
 msgid "Branding saved."
 msgstr "Branding gespeichert."
 
@@ -1916,7 +1786,7 @@ msgstr "Der Host kann nicht aufgelöst werden."
 msgid "This address is not allowed for webhooks."
 msgstr "Diese Adresse ist für Webhooks nicht erlaubt."
 
-#: integrations/models.py:17 integrations/views.py:28
+#: integrations/models.py:17 integrations/views.py:27
 #: templates/integrations/webhooks.html:8
 msgid "URL"
 msgstr "URL"
@@ -1933,31 +1803,31 @@ msgstr "gesendet"
 msgid "Events are patterns like dcim.device.*, cabling.cable.insert or *."
 msgstr "Ereignisse sind Muster wie dcim.device.*, cabling.cable.insert oder *."
 
-#: integrations/views.py:30 templates/integrations/webhooks.html:8
+#: integrations/views.py:29 templates/integrations/webhooks.html:8
 msgid "Events"
 msgstr "Ereignisse"
 
-#: integrations/views.py:33
+#: integrations/views.py:32
 msgid "Comma separated, for example dcim.device.*, cabling.cable.insert or *"
 msgstr "Kommagetrennt, zum Beispiel dcim.device.*, cabling.cable.insert oder *"
 
-#: integrations/views.py:36 templates/integrations/webhooks.html:8
+#: integrations/views.py:35 templates/integrations/webhooks.html:8
 msgid "Active"
 msgstr "Aktiv"
 
-#: integrations/views.py:129
+#: integrations/views.py:126
 msgid "Webhook saved."
 msgstr "Webhook gespeichert."
 
-#: integrations/views.py:153
+#: integrations/views.py:149
 msgid "Test event queued."
 msgstr "Testereignis eingereiht."
 
-#: integrations/views.py:158
+#: integrations/views.py:154
 msgid "Webhook deleted."
 msgstr "Webhook gelöscht."
 
-#: integrations/views.py:177
+#: integrations/views.py:172
 msgid "Delivery queued again."
 msgstr "Zustellung erneut eingereiht."
 
@@ -2241,18 +2111,18 @@ msgstr "Hier existiert bereits ein Objekt mit diesem Namen."
 msgid "This change conflicts with existing data."
 msgstr "Diese Änderung steht im Konflikt mit vorhandenen Daten."
 
-#: locations/services.py:94
+#: locations/services.py:90
 msgid "Remove everything inside it first."
 msgstr "Entfernen Sie zuerst alles darin."
 
-#: locations/services.py:121
+#: locations/services.py:117
 msgid ""
 "Cables connect this site to other sites of the tenant. Remove them first."
 msgstr ""
 "Kabel verbinden diesen Standort mit anderen Standorten des Mandanten. "
 "Entfernen Sie diese zuerst."
 
-#: locations/services.py:130
+#: locations/services.py:126
 msgid ""
 "Ports in this site use tenant wide VLANs or WLANs. Remove those assignments "
 "first."
@@ -2260,11 +2130,11 @@ msgstr ""
 "Ports in diesem Standort verwenden mandantenweite VLANs oder WLANs. "
 "Entfernen Sie diese Zuweisungen zuerst."
 
-#: locations/services.py:144
+#: locations/services.py:140
 msgid "The site already belongs to this tenant."
 msgstr "Der Standort gehört bereits zu diesem Mandanten."
 
-#: locations/services.py:151
+#: locations/services.py:147
 msgid "Devices in this site use device types private to the current tenant."
 msgstr ""
 "Geräte an diesem Standort verwenden Gerätetypen, die nur für den aktuellen "
@@ -2452,15 +2322,15 @@ msgstr "Funk-Port"
 msgid "VLAN created."
 msgstr "VLAN erstellt."
 
-#: scim/views.py:357 sso/views.py:198
+#: scim/views.py:352 sso/views.py:192
 msgid "Email domains"
 msgstr "E-Mail-Domains"
 
-#: scim/views.py:359
+#: scim/views.py:354
 msgid "Comma separated. Empty: all domains."
 msgstr "Durch Kommas getrennt. Leer: alle Domains."
 
-#: scim/views.py:368 sso/views.py:263
+#: scim/views.py:363 sso/views.py:257
 msgid "Enter domains like example.com."
 msgstr "Geben Sie Domains wie example.com ein."
 
@@ -2558,128 +2428,128 @@ msgstr "Die SAML-Konfiguration dieses Anbieters ist ungültig."
 msgid "The IdP metadata must describe exactly one identity provider."
 msgstr "Die IdP-Metadaten müssen genau einen Identitätsanbieter beschreiben."
 
-#: sso/services.py:72
+#: sso/services.py:68
 msgid "The identity provider sent no email address."
 msgstr "Der Identitätsanbieter hat keine E-Mail-Adresse gesendet."
 
-#: sso/services.py:74
+#: sso/services.py:70
 msgid "The identity provider did not confirm the email address."
 msgstr "Der Identitätsanbieter hat die E-Mail-Adresse nicht bestätigt."
 
-#: sso/services.py:77
+#: sso/services.py:73
 msgid "This identity provider may not sign in addresses of this domain."
 msgstr "Dieser Identitätsanbieter darf Adressen dieser Domain nicht anmelden."
 
-#: sso/services.py:81
+#: sso/services.py:77
 msgid "There is no account for this email. Ask an administrator for access."
 msgstr ""
 "Für diese E-Mail-Adresse gibt es kein Konto. Bitten Sie eine Administratorin "
 "oder einen Administrator um Zugang."
 
-#: sso/services.py:123
+#: sso/services.py:119
 msgid "This sign in method is disabled."
 msgstr "Diese Anmeldemethode ist deaktiviert."
 
-#: sso/views.py:194 templates/manage/tenants.html:6
+#: sso/views.py:188 templates/manage/tenants.html:6
 msgid "Identifier"
 msgstr "Kennung"
 
-#: sso/views.py:195 templates/history/activity.html:7
+#: sso/views.py:189 templates/history/activity.html:7
 #: templates/manage/roles.html:11 templates/search/results.html:7
 #: templates/sso/providers.html:7
 msgid "Type"
 msgstr "Typ"
 
-#: sso/views.py:196 templates/dcim/device.html:16
+#: sso/views.py:190 templates/dcim/device.html:16
 msgid "Enabled"
 msgstr "Aktiviert"
 
-#: sso/views.py:201
+#: sso/views.py:195
 msgid ""
 "Comma separated. The provider may link existing accounts of these domains."
 msgstr ""
 "Durch Kommas getrennt. Der Anbieter darf vorhandene Konten dieser Domains "
 "verknüpfen."
 
-#: sso/views.py:205
+#: sso/views.py:199
 msgid "Enforce for these domains (except break glass accounts)"
 msgstr "Für diese Domains erzwingen (außer Notfallkonten)"
 
-#: sso/views.py:209
+#: sso/views.py:203
 msgid "Create accounts on first sign in"
 msgstr "Konten bei der ersten Anmeldung anlegen"
 
-#: sso/views.py:212
+#: sso/views.py:206
 msgid "The provider enforces MFA"
 msgstr "Der Anbieter erzwingt MFA"
 
-#: sso/views.py:215
+#: sso/views.py:209
 msgid "Single logout"
 msgstr "Single Logout"
 
-#: sso/views.py:218
+#: sso/views.py:212
 msgid "Client secret or bind password"
 msgstr "Client-Secret oder Bind-Passwort"
 
-#: sso/views.py:221
+#: sso/views.py:215
 msgid "Leave empty to keep the stored one."
 msgstr "Leer lassen, um den gespeicherten Wert zu behalten."
 
-#: sso/views.py:224
+#: sso/views.py:218
 msgid "Group mapping"
 msgstr "Gruppenzuordnung"
 
-#: sso/views.py:227
+#: sso/views.py:221
 msgid "One per line: external group = group name"
 msgstr "Eine pro Zeile: externe Gruppe = Gruppenname"
 
-#: sso/views.py:236
+#: sso/views.py:230
 msgid "Trust unverified email addresses"
 msgstr "Unbestätigten E-Mail-Adressen vertrauen"
 
-#: sso/views.py:242
+#: sso/views.py:236
 msgid "Email attribute"
 msgstr "E-Mail-Attribut"
 
-#: sso/views.py:243
+#: sso/views.py:237
 msgid "Name attribute"
 msgstr "Namensattribut"
 
-#: sso/views.py:244
+#: sso/views.py:238
 msgid "Groups attribute"
 msgstr "Gruppenattribut"
 
-#: sso/views.py:249
+#: sso/views.py:243
 msgid "CA file (path in the container)"
 msgstr "CA-Datei (Pfad im Container)"
 
-#: sso/views.py:276
+#: sso/views.py:270
 #, python-format
 msgid "Unknown group in: %(line)s"
 msgstr "Unbekannte Gruppe in: %(line)s"
 
-#: sso/views.py:288
+#: sso/views.py:282
 msgid "Use ldaps:// or ldap:// with StartTLS."
 msgstr "Verwenden Sie ldaps:// oder ldap:// mit StartTLS."
 
-#: sso/views.py:294
+#: sso/views.py:288
 msgid "Plain LDAP needs StartTLS."
 msgstr "Unverschlüsseltes LDAP braucht StartTLS."
 
-#: sso/views.py:300
+#: sso/views.py:294
 #, python-brace-format
 msgid "The filter must contain {email}."
 msgstr "Der Filter muss {email} enthalten."
 
-#: sso/views.py:376
+#: sso/views.py:368
 msgid "This identifier is taken."
 msgstr "Diese Kennung ist vergeben."
 
-#: sso/views.py:383
+#: sso/views.py:375
 msgid "Identity provider saved."
 msgstr "Identitätsanbieter gespeichert."
 
-#: sso/views.py:403
+#: sso/views.py:394
 msgid "Identity provider deleted."
 msgstr "Identitätsanbieter gelöscht."
 
@@ -2788,12 +2658,11 @@ msgstr "Details"
 #: templates/accounts/profile.html:9 templates/cabling/cable.html:22
 #: templates/dcim/device.html:47 templates/dcim/port.html:37
 #: templates/dcim/rack.html:85 templates/instance/branding.html:9
-#: templates/instance/edition.html:18 templates/integrations/webhook.html:34
-#: templates/library/type_detail.html:37 templates/locations/node.html:57
-#: templates/manage/group_detail.html:9 templates/manage/role_detail.html:15
-#: templates/manage/tenant_detail.html:7 templates/networks/vlan.html:16
-#: templates/networks/wlan.html:17 templates/search/results.html:37
-#: templates/sso/provider.html:12
+#: templates/integrations/webhook.html:34 templates/library/type_detail.html:37
+#: templates/locations/node.html:57 templates/manage/group_detail.html:9
+#: templates/manage/role_detail.html:15 templates/manage/tenant_detail.html:7
+#: templates/networks/vlan.html:16 templates/networks/wlan.html:17
+#: templates/search/results.html:37 templates/sso/provider.html:12
 msgid "Save"
 msgstr "Speichern"
 
@@ -3290,7 +3159,10 @@ msgstr ""
 msgid ""
 "PatchManager is free software under the GNU Affero General Public License, "
 "version 3. You may get, study, change and share its source code."
-msgstr "PatchManager ist freie Software unter der GNU Affero General Public License, Version 3. Sie dürfen den Quellcode beziehen, untersuchen, ändern und weitergeben."
+msgstr ""
+"PatchManager ist freie Software unter der GNU Affero General Public License, "
+"Version 3. Sie dürfen den Quellcode beziehen, untersuchen, ändern und "
+"weitergeben."
 
 #: templates/core/licenses.html:7
 msgid "Source code"
@@ -3471,10 +3343,13 @@ msgid "Utilisation"
 msgstr "Auslastung"
 
 #: templates/dcim/rack.html:48 templates/dcim/rack.html:53
-#: templates/instance/edition.html:8 templates/locations/node.html:21
-#: templates/locations/node.html:24
+#: templates/locations/node.html:21 templates/locations/node.html:24
 msgid "Used"
 msgstr "Belegt"
+
+#: templates/dcim/rack.html:49 templates/dcim/rack.html:70
+msgid "Free"
+msgstr "Frei"
 
 #: templates/dcim/rack.html:58
 msgid "Mount device"
@@ -3524,8 +3399,8 @@ msgstr "Rack löschen"
 msgid "Import and export"
 msgstr "Import und Export"
 
-#: templates/exchange/index.html:7 templates/exchange/index.html:12
-#: templates/library/types.html:29 templates/manage/roles.html:21
+#: templates/exchange/index.html:7 templates/library/types.html:29
+#: templates/manage/roles.html:21
 msgid "Import"
 msgstr "Importieren"
 
@@ -3544,51 +3419,47 @@ msgstr ""
 msgid "Check file"
 msgstr "Datei prüfen"
 
-#: templates/exchange/index.html:12
-msgid "Imports are not part of this edition."
-msgstr "Importe sind nicht Teil dieser Edition."
-
-#: templates/exchange/index.html:14
+#: templates/exchange/index.html:13
 msgid "Export"
 msgstr "Export"
 
-#: templates/exchange/index.html:16 templates/networks/vlans.html:7
+#: templates/exchange/index.html:15 templates/networks/vlans.html:7
 msgid "Site"
 msgstr "Standort"
 
-#: templates/exchange/index.html:17
+#: templates/exchange/index.html:16
 msgid "All sites"
 msgstr "Alle Standorte"
 
-#: templates/exchange/index.html:18
+#: templates/exchange/index.html:17
 msgid "Apply"
 msgstr "Übernehmen"
 
-#: templates/exchange/index.html:26
+#: templates/exchange/index.html:25
 msgid "Template"
 msgstr "Vorlage"
 
-#: templates/exchange/index.html:28
+#: templates/exchange/index.html:27
 msgid "PDF reports per site"
 msgstr "PDF Berichte pro Standort"
 
-#: templates/exchange/index.html:30
+#: templates/exchange/index.html:29
 msgid "Site report"
 msgstr "Standortbericht"
 
-#: templates/exchange/index.html:31
+#: templates/exchange/index.html:30
 msgid "Patch list"
 msgstr "Patchliste"
 
-#: templates/exchange/index.html:32
+#: templates/exchange/index.html:31
 msgid "Bill of materials"
 msgstr "Stückliste"
 
-#: templates/exchange/index.html:33
+#: templates/exchange/index.html:32
 msgid "No sites."
 msgstr "Keine Standorte."
 
-#: templates/exchange/index.html:34
+#: templates/exchange/index.html:33
 msgid "Rack elevations and port lists are on the rack and device pages."
 msgstr "Rackansichten und Portlisten finden Sie auf den Rack und Geräteseiten."
 
@@ -3794,7 +3665,7 @@ msgstr "Von"
 msgid "Until"
 msgstr "Bis"
 
-#: templates/history/change.html:2 templates/instance/edition.html:16
+#: templates/history/change.html:2
 msgid "Change"
 msgstr "Änderung"
 
@@ -3823,7 +3694,7 @@ msgid "After"
 msgstr "Nachher"
 
 #: templates/instance/branding.html:2 templates/instance/branding.html:4
-#: templates/manage/_base.html:20
+#: templates/manage/_base.html:19
 msgid "Branding"
 msgstr "Branding"
 
@@ -3831,7 +3702,9 @@ msgstr "Branding"
 msgid ""
 "The name and logo appear in the header, in emails and on PDF reports; the "
 "colour is used for buttons and links."
-msgstr "Name und Logo erscheinen in der Kopfzeile, in E-Mails und auf PDF-Berichten. Die Farbe wird für Schaltflächen und Links verwendet."
+msgstr ""
+"Name und Logo erscheinen in der Kopfzeile, in E-Mails und auf PDF-Berichten. "
+"Die Farbe wird für Schaltflächen und Links verwendet."
 
 #: templates/instance/branding.html:11
 msgid "Preview"
@@ -3848,60 +3721,6 @@ msgstr "Schaltfläche"
 #: templates/instance/branding.html:14
 msgid "Link"
 msgstr "Link"
-
-#: templates/instance/edition.html:2 templates/instance/edition.html:4
-#: templates/manage/_base.html:19
-msgid "Edition and limits"
-msgstr "Edition und Grenzen"
-
-#: templates/instance/edition.html:5
-#, python-format
-msgid "This instance runs the %(name)s edition."
-msgstr "Diese Instanz läuft mit der Edition %(name)s."
-
-#: templates/instance/edition.html:5
-msgid "It is set by PATCHMANAGER_EDITION and cannot be changed here."
-msgstr "Sie ist durch PATCHMANAGER_EDITION festgelegt und kann hier nicht geändert werden."
-
-#: templates/instance/edition.html:7
-msgid "Usage"
-msgstr "Nutzung"
-
-#: templates/instance/edition.html:8
-msgid "Limit"
-msgstr "Grenze"
-
-#: templates/instance/edition.html:8
-msgid "Allowed"
-msgstr "Erlaubt"
-
-#: templates/instance/edition.html:9
-msgid "unlimited"
-msgstr "unbegrenzt"
-
-#: templates/instance/edition.html:9
-msgid "reached"
-msgstr "erreicht"
-
-#: templates/instance/edition.html:10
-msgid "Connections"
-msgstr "Verbindungen"
-
-#: templates/instance/edition.html:10
-msgid "everywhere"
-msgstr "überall"
-
-#: templates/instance/edition.html:10
-msgid "inside one rack"
-msgstr "innerhalb eines Racks"
-
-#: templates/instance/edition.html:11
-msgid "PDF reports"
-msgstr "PDF-Berichte"
-
-#: templates/instance/edition.html:12
-msgid "Features"
-msgstr "Funktionen"
 
 #: templates/integrations/webhook.html:6
 msgid "All webhooks"
@@ -3963,6 +3782,11 @@ msgstr "Noch nichts gesendet."
 #: templates/integrations/webhook.html:32
 msgid "Settings"
 msgstr "Einstellungen"
+
+#: templates/integrations/webhooks.html:2
+#: templates/integrations/webhooks.html:4 templates/manage/_base.html:16
+msgid "Webhooks"
+msgstr "Webhooks"
 
 #: templates/integrations/webhooks.html:5
 msgid ""
@@ -4176,6 +4000,16 @@ msgstr "Zuweisung hinzufügen"
 msgid "Overview"
 msgstr "Übersicht"
 
+#: templates/manage/_base.html:8 templates/manage/dashboard.html:6
+#: templates/manage/tenants.html:2 templates/manage/tenants.html:4
+msgid "Tenants"
+msgstr "Mandanten"
+
+#: templates/manage/_base.html:9 templates/manage/dashboard.html:7
+#: templates/manage/users.html:2 templates/manage/users.html:5
+msgid "Users"
+msgstr "Benutzer"
+
 #: templates/manage/_base.html:10 templates/manage/dashboard.html:8
 #: templates/manage/groups.html:2 templates/manage/groups.html:4
 #: templates/manage/user_detail.html:12
@@ -4202,12 +4036,17 @@ msgstr "Zugriff erklären"
 msgid "Single sign on"
 msgstr "Single Sign-on"
 
+#: templates/manage/_base.html:15 templates/scim/tokens.html:2
+#: templates/scim/tokens.html:4
+msgid "SCIM provisioning"
+msgstr "SCIM-Bereitstellung"
+
 #: templates/manage/_base.html:18 templates/manage/audit.html:2
 #: templates/manage/audit.html:5
 msgid "Audit log"
 msgstr "Audit-Log"
 
-#: templates/manage/_base.html:21 templates/manage/system.html:2
+#: templates/manage/_base.html:20 templates/manage/system.html:2
 #: templates/manage/system.html:4
 msgid "System"
 msgstr "System"
@@ -4458,7 +4297,9 @@ msgstr "Sicherungen"
 msgid ""
 "Mount the backup volume read only and set PATCHMANAGER_BACKUP_DIR to see "
 "restore points here."
-msgstr "Binden Sie das Sicherungsvolume schreibgeschützt ein und setzen Sie PATCHMANAGER_BACKUP_DIR, um hier Wiederherstellungspunkte zu sehen."
+msgstr ""
+"Binden Sie das Sicherungsvolume schreibgeschützt ein und setzen Sie "
+"PATCHMANAGER_BACKUP_DIR, um hier Wiederherstellungspunkte zu sehen."
 
 #: templates/manage/system.html:26
 msgid "The backup folder cannot be read."
@@ -4846,15 +4687,15 @@ msgstr "MFA für Mitglieder erforderlich"
 msgid "archived at"
 msgstr "archiviert am"
 
-#: tenancy/services.py:29 tenancy/services.py:46
+#: tenancy/services.py:26 tenancy/services.py:43
 msgid "A tenant with this identifier already exists."
 msgstr "Ein Mandant mit dieser Kennung existiert bereits."
 
-#: tenancy/services.py:76
+#: tenancy/services.py:73
 msgid "Archive the tenant before deleting it."
 msgstr "Archivieren Sie den Mandanten, bevor Sie ihn löschen."
 
-#: tenancy/services.py:78
+#: tenancy/services.py:75
 msgid "The identifier does not match."
 msgstr "Die Kennung stimmt nicht überein."
 
@@ -4873,7 +4714,3 @@ msgstr "Mandant gespeichert."
 #: tenancy/views.py:105
 msgid "Tenant deleted."
 msgstr "Mandant gelöscht."
-
-#, python-format
-#~ msgid "%(level)s %(name)s not found."
-#~ msgstr "%(level)s %(name)s nicht gefunden."

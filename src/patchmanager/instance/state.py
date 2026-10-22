@@ -1,8 +1,7 @@
 """Cached snapshot of the instance settings (read on many requests, changed rarely)."""
 
 import logging
-from dataclasses import dataclass, field
-from typing import Any
+from dataclasses import dataclass
 
 from django.conf import settings
 from django.core.cache import cache
@@ -17,8 +16,6 @@ CACHE_SECONDS = 60
 class Snapshot:
     """What pages and checks need, without the logo bytes."""
 
-    edition: str = "enterprise"
-    overrides: dict[str, Any] = field(default_factory=dict)
     name: str = ""
     brand_hue: int = 190
     has_logo: bool = False
@@ -39,8 +36,6 @@ def get() -> Snapshot:
             return Snapshot(default_language=settings.LANGUAGE_CODE[:2])  # error pages still render
         snapshot = (
             Snapshot(
-                edition=row.edition,
-                overrides=row.overrides,
                 name=row.name,
                 brand_hue=row.brand_hue,
                 has_logo=InstanceSettings.objects.filter(pk=row.pk, logo__isnull=False).exists(),

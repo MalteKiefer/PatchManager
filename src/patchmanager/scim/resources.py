@@ -18,7 +18,6 @@ from django.utils import timezone
 
 from patchmanager.accounts import policy
 from patchmanager.accounts.models import Group, User
-from patchmanager.accounts.services import ServiceError
 from patchmanager.accounts.services.users import _revoke
 from patchmanager.audit import services as audit
 from patchmanager.scim.filters import Attribute
@@ -179,13 +178,6 @@ def _set_active(user: User, active: bool) -> None:
         )
     if user.is_locked and active:
         raise ScimError(403, "This account is locked by an administrator.")
-    if active and not user.is_active:
-        from patchmanager.instance import editions
-
-        try:
-            editions.check_limit("users")
-        except ServiceError as exc:
-            raise ScimError(403, str(exc)) from exc
     if active:
         user.is_active, user.deactivated_at, user.scim_deactivated = True, None, False
     elif user.is_active:

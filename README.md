@@ -4,11 +4,11 @@ Self-hosted documentation for network infrastructure: sites, buildings, floors, 
 racks, devices, ports, patch panels, cabling, VLANs and WLANs. Multi-tenant, with fine
 grained permissions, SSO and an API.
 
-> Status: Phase 8 (editions and polish). Tenants, users, MFA, roles, the audit log,
+> Status: Phase 9 (hardening for 1.0). Tenants, users, MFA, roles, the audit log,
 > locations, racks, devices, ports, cabling with path tracing, VLANs, WLANs, floor
 > plans, change history, search, imports and exports, the REST API, webhooks, single
-> sign on (OIDC, SAML, LDAP), SCIM provisioning, editions and the admin area work;
-> hardening for 1.0 follows. See the [phase backlog](docs/plan/backlog.md).
+> sign on (OIDC, SAML, LDAP), SCIM provisioning and the admin area work.
+> Every feature is free and available on every installation. See the [phase backlog](docs/plan/backlog.md).
 
 ## Quick start (development)
 

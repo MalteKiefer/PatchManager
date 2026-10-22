@@ -9,13 +9,12 @@ from django.utils.functional import SimpleLazyObject
 
 def ui(request: HttpRequest) -> dict[str, Any]:
     """Instance name, theme and current tenant for the layout."""
-    from patchmanager.instance import editions, state
+    from patchmanager.instance import state
 
     return {
         "instance_name": SimpleLazyObject(state.instance_name),
         "branding": SimpleLazyObject(state.get),
         "source_url": settings.SOURCE_URL,
-        "features": SimpleLazyObject(lambda: editions.current().features),  # only read where shown
         "theme": request.COOKIES.get("pm_theme", "system"),
         "current_tenant": getattr(request, "tenant", None),
         "available_tenants": getattr(request, "available_tenants", []),

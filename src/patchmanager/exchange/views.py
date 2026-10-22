@@ -25,7 +25,6 @@ from patchmanager.core.utils import parse_uuid
 from patchmanager.dcim.models import Device, Rack
 from patchmanager.exchange import formats, importer, pdf
 from patchmanager.exchange.tables import TABLES
-from patchmanager.instance.gates import feature_required
 from patchmanager.locations.models import Site
 
 PENDING_SECONDS = 1800
@@ -112,7 +111,6 @@ def index(request: HttpRequest) -> HttpResponse:
     )
 
 
-@feature_required("import")
 @login_required
 @require_POST
 def upload(request: HttpRequest) -> HttpResponse:
@@ -154,7 +152,6 @@ def upload(request: HttpRequest) -> HttpResponse:
     )
 
 
-@feature_required("import")
 @login_required
 @require_POST
 def apply(request: HttpRequest) -> HttpResponse:
@@ -246,15 +243,6 @@ def report(request: HttpRequest, kind: str, pk: str) -> HttpResponse:
     """A PDF report about one site, rack or device."""
     if kind not in REPORTS:
         raise Http404
-    from patchmanager.instance import editions
-
-    if kind not in editions.current().reports:
-        return render(
-            request,
-            "core/error.html",
-            {"title": _("This report is not part of this edition."), "code": 403},
-            status=403,
-        )
     model, permission, build = REPORTS[kind]
     obj = get_object_or_404(model, pk=pk)  # RLS hides other tenants
     same_type = permission.startswith(obj.policy_object_type + ".")

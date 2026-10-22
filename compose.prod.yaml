@@ -32,7 +32,6 @@ x-app: &app
     PATCHMANAGER_EMAIL_PASSWORD_FILE: /run/secrets/email_password
     PATCHMANAGER_EMAIL_FROM: ${PATCHMANAGER_EMAIL_FROM:-patchmanager@localhost}
     PATCHMANAGER_BACKUP_DIR: /backups
-    PATCHMANAGER_EDITION: ${PATCHMANAGER_EDITION:-}
 
 services:
   migrate:

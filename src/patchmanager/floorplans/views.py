@@ -21,8 +21,6 @@ from patchmanager.core.utils import parse_uuid
 from patchmanager.dcim.models import Device, Rack
 from patchmanager.floorplans import services
 from patchmanager.floorplans.models import FloorPlan
-from patchmanager.instance import editions
-from patchmanager.instance.gates import feature_required
 from patchmanager.locations.models import Floor, Room
 from patchmanager.locations.views import node_url
 
@@ -132,7 +130,6 @@ def _scene(request: HttpRequest, floor: Floor, plan: FloorPlan | None) -> dict[s
     }
 
 
-@feature_required("floor_plans")
 @login_required
 def editor(request: HttpRequest, floor_pk: str) -> HttpResponse:
     """The plan of a floor with rooms, racks and floor devices."""
@@ -157,7 +154,6 @@ def editor(request: HttpRequest, floor_pk: str) -> HttpResponse:
     )
 
 
-@feature_required("floor_plans")
 @login_required
 @require_POST
 def upload(request: HttpRequest, floor_pk: str) -> HttpResponse:
@@ -189,10 +185,6 @@ def _api(handler: Any) -> Any:
     @login_required
     @require_POST
     def view(request: HttpRequest, floor_pk: str) -> JsonResponse:
-        if not editions.enabled("floor_plans"):
-            return JsonResponse(
-                {"error": _("Floor plans are not part of this edition.")}, status=403
-            )
         floor = _floor(request, floor_pk)
         try:
             return JsonResponse(handler(request, floor, _json(request)))

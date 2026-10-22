@@ -90,14 +90,11 @@ Deprovisioned users are deactivated and keep their history. Provisioned groups
 start without rights: assign roles to them under *Groups*. SCIM never touches
 super admins, break glass accounts, API clients or groups created here.
 
-## Edition and branding
+## Branding
 
-*Administration → Edition and limits* shows the edition, how much of each limit is
-used and which features are on. Super admins choose the edition and override
-single limits or features (unless `PATCHMANAGER_EDITION` pins it). Shrinking an
-edition never deletes data; only new racks, users or tenants beyond a limit are
-refused. *Branding* sets the instance name, logo, brand colour and the default
-language of new accounts.
+*Administration → Branding* sets the instance name, logo, brand colour and the
+default language of new accounts. Every feature is available on every
+installation; there are no editions, limits or licence keys.
 
 ## System
 

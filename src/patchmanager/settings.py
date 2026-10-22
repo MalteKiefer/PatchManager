@@ -72,9 +72,6 @@ BASE_URL = env(
 ).rstrip("/")
 INSTANCE_NAME = env("PATCHMANAGER_INSTANCE_NAME", "PatchManager")
 BRAND_LOGO = env("PATCHMANAGER_BRAND_LOGO", "")  # PNG or JPEG file shown on exported PDFs
-EDITION = env(
-    "PATCHMANAGER_EDITION", ""
-)  # free, smb, integrator, enterprise; empty: chosen in the admin area
 BACKUP_DIR = env(
     "PATCHMANAGER_BACKUP_DIR", ""
 )  # read only mount of the backup volume, for the status page

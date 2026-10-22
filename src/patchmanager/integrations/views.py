@@ -13,7 +13,6 @@ from django.views.decorators.http import require_POST
 from patchmanager.accounts import policy
 from patchmanager.accounts.models import User
 from patchmanager.accounts.services import PermissionDeniedError, ServiceError
-from patchmanager.instance.gates import feature_required
 from patchmanager.integrations import services
 from patchmanager.integrations.models import Delivery, Webhook
 from patchmanager.tenancy.models import Tenant
@@ -61,7 +60,6 @@ def _events(value: str) -> list[str]:
     return [e.strip() for e in value.split(",")]
 
 
-@feature_required("webhooks")
 @login_required
 def webhook_list(request: HttpRequest) -> HttpResponse:
     """Webhooks of the tenant; create one."""
@@ -96,7 +94,6 @@ def webhook_list(request: HttpRequest) -> HttpResponse:
     )
 
 
-@feature_required("webhooks")
 @login_required
 def webhook_detail(request: HttpRequest, pk: str) -> HttpResponse:
     """Settings, secret (once) and recent deliveries."""
@@ -141,7 +138,6 @@ def webhook_detail(request: HttpRequest, pk: str) -> HttpResponse:
     )
 
 
-@feature_required("webhooks")
 @login_required
 @require_POST
 def webhook_action(request: HttpRequest, pk: str, action: str) -> HttpResponse:
@@ -164,7 +160,6 @@ def webhook_action(request: HttpRequest, pk: str, action: str) -> HttpResponse:
     return redirect("integrations:webhook", hook.pk)
 
 
-@feature_required("webhooks")
 @login_required
 @require_POST
 def redeliver(request: HttpRequest, pk: str) -> HttpResponse:

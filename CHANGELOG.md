@@ -4,6 +4,13 @@ All notable changes to this project are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the project uses
 [Semantic Versioning](https://semver.org/).
 
+## [Unreleased]
+
+### Removed
+
+* Editions, their limits and feature switches, `PATCHMANAGER_EDITION` and the edition
+  admin page. Every feature is free and available on every installation (ADR 0023).
+
 ## [0.9.0] - 2026-10-22
 
 ### Added

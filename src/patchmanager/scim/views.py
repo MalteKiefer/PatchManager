@@ -23,7 +23,6 @@ from patchmanager.accounts.models import User
 from patchmanager.api.tokens import _matches, digest
 from patchmanager.audit import services as audit
 from patchmanager.core import ratelimit
-from patchmanager.instance.gates import feature_required
 from patchmanager.scim import filters, resources
 from patchmanager.scim.models import ScimToken
 from patchmanager.scim.resources import ScimError
@@ -58,10 +57,6 @@ def _authenticated(view: Handler) -> Handler:
     @csrf_exempt  # token authenticated, no cookies
     @wraps(view)
     def wrapped(request: HttpRequest, *args: Any, **kwargs: Any) -> HttpResponse:
-        from patchmanager.instance import editions
-
-        if not editions.enabled("scim"):
-            return _error(404, "SCIM is not part of this edition.")
         header = request.headers.get("Authorization", "")
         parts = header.removeprefix("Bearer ").strip().split("_", 2)
         token = None
@@ -369,7 +364,6 @@ class TokenForm(forms.Form):
         return values
 
 
-@feature_required("scim")
 @permission_required("system.scim.manage")
 def token_list(request: HttpRequest) -> HttpResponse:
     """SCIM tokens; create one (shown once)."""
@@ -401,7 +395,6 @@ def token_list(request: HttpRequest) -> HttpResponse:
     )
 
 
-@feature_required("scim")
 @permission_required("system.scim.manage")
 @require_POST
 def token_revoke(request: HttpRequest, pk: str) -> HttpResponse:

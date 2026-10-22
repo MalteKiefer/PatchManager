@@ -15,7 +15,6 @@ from patchmanager.accounts.models import User
 from patchmanager.accounts.services import ServiceError
 from patchmanager.api import tokens
 from patchmanager.api.models import SCOPES, ApiClient, ApiToken
-from patchmanager.instance.gates import feature_required
 
 SHOW_ONCE = "_pm_api_secret"
 DAYS = [
@@ -66,7 +65,6 @@ def _user(request: HttpRequest) -> User:
     return request.user
 
 
-@feature_required("api")
 @login_required
 def token_list(request: HttpRequest) -> HttpResponse:
     """The user's personal tokens; create one."""
@@ -104,7 +102,6 @@ def token_list(request: HttpRequest) -> HttpResponse:
     )
 
 
-@feature_required("api")
 @login_required
 @require_POST
 def token_revoke(request: HttpRequest, pk: str) -> HttpResponse:
@@ -115,7 +112,6 @@ def token_revoke(request: HttpRequest, pk: str) -> HttpResponse:
     return redirect("api-ui:tokens")
 
 
-@feature_required("api")
 @permission_required("accounts.apiclient.manage")
 def client_list(request: HttpRequest) -> HttpResponse:
     """OAuth clients; create one."""
@@ -144,7 +140,6 @@ def client_list(request: HttpRequest) -> HttpResponse:
     )
 
 
-@feature_required("api")
 @permission_required("accounts.apiclient.manage")
 @require_POST
 def client_action(request: HttpRequest, pk: str, action: str) -> HttpResponse:

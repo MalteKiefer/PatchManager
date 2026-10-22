@@ -59,3 +59,4 @@ nav:
       - adr/0020-single-sign-on.md
       - adr/0021-scim-provisioning.md
       - adr/0022-editions-and-admin-polish.md
+      - adr/0023-no-editions.md

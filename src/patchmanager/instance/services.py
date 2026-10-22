@@ -1,7 +1,6 @@
 """Changing the instance settings (super admins)."""
 
 import io
-from typing import Any
 
 from django.conf import settings
 from django.http import HttpRequest
@@ -12,7 +11,7 @@ from patchmanager.accounts import policy
 from patchmanager.accounts.models import User
 from patchmanager.accounts.services import PermissionDeniedError, ServiceError
 from patchmanager.audit import services as audit
-from patchmanager.instance import editions, state
+from patchmanager.instance import state
 from patchmanager.instance.models import InstanceSettings
 
 LOGO_MAX_BYTES = 512 * 1024
@@ -24,34 +23,6 @@ def _require(actor: User) -> InstanceSettings:
         raise PermissionDeniedError(_("You do not have permission to do that."))
     row = InstanceSettings.objects.first()
     return row or InstanceSettings()
-
-
-def save_edition(
-    request: HttpRequest,
-    actor: User,
-    *,
-    edition: str,
-    limits: dict[str, int | None],
-    enable: list[str],
-    disable: list[str],
-) -> None:
-    """Choose an edition and override single limits or features."""
-    row = _require(actor)
-    if editions.pinned():
-        raise ServiceError(_("The edition is set by PATCHMANAGER_EDITION."))
-    if edition not in editions.EDITIONS:
-        raise ServiceError(_("Unknown edition."))
-    if any(k not in editions.LIMITS or (v is not None and v < 0) for k, v in limits.items()):
-        raise ServiceError(_("Limits are numbers of at least 0."))
-    if not set(enable) | set(disable) <= set(editions.FEATURES) or set(enable) & set(disable):
-        raise ServiceError(_("Unknown feature."))
-    row.edition = edition
-    row.overrides = {"limits": limits, "enable": sorted(enable), "disable": sorted(disable)}
-    row.save()
-    state.forget()
-    audit.record(
-        "instance.edition.changed", request=request, data={"edition": edition, **row.overrides}
-    )
 
 
 def _logo(data: bytes) -> bytes:
@@ -127,17 +98,3 @@ def logo_bytes() -> bytes | None:
         return None
     row = InstanceSettings.objects.only("logo").first()
     return bytes(row.logo) if row and row.logo else None
-
-
-def summary() -> dict[str, Any]:
-    """Edition, usage and limits for the admin page."""
-    edition = editions.current()
-    used = editions.usage()
-    return {
-        "edition": edition,
-        "pinned": editions.pinned(),
-        "used": used,
-        "limits": [
-            (k, label, used[k], edition.limits.get(k)) for k, label in editions.LIMITS.items()
-        ],
-    }

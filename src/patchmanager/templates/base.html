@@ -69,7 +69,7 @@
         <div x-show="open" x-cloak class="absolute right-0 z-20 mt-2 w-56 rounded-md border border-slate-200 bg-white p-1 shadow-lg dark:border-slate-700 dark:bg-slate-900">
           <a class="nav-link" href="{% url 'accounts:profile' %}">{% translate "Profile" %}</a>
           <a class="nav-link" href="{% url 'accounts:security' %}">{% translate "Security" %}</a>
-          {% if "api" in features %}<a class="nav-link" href="{% url 'api-ui:tokens' %}">{% translate "API tokens" %}</a>{% endif %}
+          <a class="nav-link" href="{% url 'api-ui:tokens' %}">{% translate "API tokens" %}</a>
           <form method="post" action="{% url 'accounts:logout' %}">{% csrf_token %}
             <button class="nav-link w-full text-left">{% translate "Sign out" %}</button>
           </form>
