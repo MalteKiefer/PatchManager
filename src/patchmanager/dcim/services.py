@@ -1,6 +1,6 @@
 """Rack space: reserve, move and free units."""
 
-from django.db import DatabaseError, transaction
+from django.db import DatabaseError, IntegrityError, transaction
 from django.http import HttpRequest
 from django.utils.translation import gettext as _
 
@@ -8,7 +8,8 @@ from patchmanager.accounts.models import User
 from patchmanager.accounts.services import ServiceError
 from patchmanager.accounts.services.users import require
 from patchmanager.audit import services as audit
-from patchmanager.dcim.models import Rack, RackSpace
+from patchmanager.dcim.models import Device, Rack, RackSpace
+from patchmanager.locations.models import Room
 
 
 def _store(space: RackSpace) -> None:
@@ -79,3 +80,41 @@ def release(request: HttpRequest, actor: User, space: RackSpace) -> None:
         "dcim.rackspace.deleted", request=request, obj=space.rack, data={"label": space.label}
     )
     space.delete()
+
+
+def relocate(request: HttpRequest, actor: User, rack: Rack, room: Room) -> Rack:
+    """Move a rack with everything mounted in it to another room (also on another site)."""
+    from patchmanager.dcim import devices as device_services
+
+    stored = Rack.objects.select_related("room").get(pk=rack.pk)
+    require(actor, "dcim.rack.change", stored)
+    require(actor, "dcim.rack.add", room)
+    if room.pk == stored.room_id:
+        return stored
+    if room.tenant_id != stored.tenant_id:
+        raise ServiceError(_("The room belongs to another tenant."))
+    mounted = list(Device.objects.filter(rack=stored))
+    for device in mounted:
+        require(actor, "dcim.device.change", device)
+    before = str(stored.room)
+    try:
+        with transaction.atomic():
+            stored.room = room
+            stored.plan_x = stored.plan_y = None  # the position was on the old floor plan
+            stored.save()
+            for device in mounted:
+                device.room, device.rack = room, stored
+                device.plan_x = device.plan_y = None
+                device.save()
+                device_services.follow(device)
+    except IntegrityError as exc:
+        raise ServiceError(_("A rack with this name already exists in that room.")) from exc
+    except DatabaseError as exc:  # integrity triggers, for example site bound VLANs
+        raise ServiceError(_("This change conflicts with existing data.")) from exc
+    audit.record(
+        "dcim.rack.moved",
+        request=request,
+        obj=stored,
+        data={"from": before, "to": str(room), "devices": len(mounted)},
+    )
+    return stored

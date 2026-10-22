@@ -8,6 +8,11 @@ All notable changes to this project are documented here. The format follows
 
 ### Added
 
+* The rack PDF shows the elevation like the rack page: front and rear with every
+  device, every port with its connection state and the cables in the rack, followed
+  by the units and a list of connections.
+* Racks can be moved to another room, also on another site; the devices in them move
+  along with their cables, addresses and configurations.
 * Settings → File storage has its own page with *Test connection*; upload limit
   and virus scanner moved to Settings → Uploads. A changed bucket endpoint or
   off-site repository needs its secret entered again.

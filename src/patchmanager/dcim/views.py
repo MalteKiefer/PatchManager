@@ -25,6 +25,29 @@ from patchmanager.locations.models import Room
 from patchmanager.locations.views import node_url
 
 
+class RoomChoice(forms.ModelChoiceField):  # type: ignore[type-arg]
+    """Rooms labelled with site, building and floor."""
+
+    def label_from_instance(self, obj: Any) -> str:
+        """Site / building / floor / room."""
+        return " / ".join([*(a.name for a in obj.ancestors()), obj.name])
+
+
+class MoveRackForm(forms.Form):
+    """Another room for the rack and everything in it."""
+
+    room = RoomChoice(label=gettext_lazy("Room"), queryset=Room.objects.none())
+
+    def __init__(self, *args: Any, actor: Any, rack: Rack, **kwargs: Any) -> None:
+        """Rooms of the rack's tenant where the user may place racks."""
+        super().__init__(*args, **kwargs)
+        rooms = policy.scope_queryset(
+            actor, "dcim.rack.add", Room.objects.filter(tenant_id=rack.tenant_id)
+        ).exclude(pk=rack.room_id)
+        field: Any = self.fields["room"]
+        field.queryset = rooms.select_related("floor__building__site").order_by("path")
+
+
 class ReserveForm(forms.Form):
     """Reserve a block of units."""
 
@@ -57,8 +80,13 @@ def rack_detail(request: HttpRequest, pk: str) -> HttpResponse:
     can_change = policy.has_perm(actor, "dcim.rack.change", rack)
     action = request.POST.get("action")
     form = RackForm(request.POST if action == "edit" else None, instance=rack)
+    move_form = MoveRackForm(request.POST if action == "move" else None, actor=actor, rack=rack)
     if request.method == "POST":
         try:
+            if action == "move" and move_form.is_valid():
+                services.relocate(request, actor, rack, move_form.cleaned_data["room"])
+                messages.success(request, _("The rack and its devices were moved."))
+                return redirect(node_url(rack))
             if action == "edit" and form.is_valid():
                 tree.update(request, actor, rack, **form.cleaned_data)
                 messages.success(request, _("Saved."))
@@ -93,6 +121,7 @@ def rack_detail(request: HttpRequest, pk: str) -> HttpResponse:
         ).select_related("device__device_type__vendor"),
         "can_add_device": policy.has_perm(actor, "dcim.device.add", rack),
         "form": form,
+        "move_form": move_form,
         "can_change": can_change,
         "can_delete": policy.has_perm(actor, "dcim.rack.delete", rack),
         "breadcrumbs": [(a, node_url(a)) for a in rack.ancestors()],
