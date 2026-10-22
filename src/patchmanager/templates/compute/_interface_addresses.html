@@ -1,0 +1,3 @@
+{% load i18n %}<section class="card" aria-labelledby="ip-h"><h2 id="ip-h" class="mb-3">{% translate "IP addresses" %}</h2>
+  <ul class="space-y-1 text-sm">{% for a in linked_addresses %}<li><a class="tabular-nums" href="{% url 'ipam:address' a.pk %}">{{ a.address }}</a>{% if a.dns_name %} <span class="text-slate-500">{{ a.dns_name }}</span>{% endif %}</li>{% empty %}<li class="text-slate-500">{% translate "No addresses in IPAM yet. They are linked when the machine is imported or synchronised." %}</li>{% endfor %}</ul>
+</section>

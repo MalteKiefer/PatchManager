@@ -116,23 +116,29 @@ def delete_prefix(request: HttpRequest, actor: User, prefix: Prefix) -> None:
 # --- Addresses ------------------------------------------------------------
 
 
-def create_address(request: HttpRequest, actor: User, tenant: Tenant, **fields: Any) -> IPAddress:
+def create_address(
+    request: HttpRequest | None, actor: User, tenant: Tenant, **fields: Any
+) -> IPAddress:
     """Create an address, optionally on a port of the tenant."""
     address = IPAddress(tenant=tenant, created_by=actor, **fields)
     address.path = _address_path(address)
     require(actor, "ipam.ipaddress.add", scope_path=address.path)
     if address.port is not None:
         require(actor, "dcim.device.change", address.port.device)
+    if address.vm_interface is not None:
+        require(actor, "compute.vm.change", address.vm_interface.vm)
     _save(address, _("This address is already used in this VRF."))
     audit.record("ipam.ipaddress.created", request=request, obj=address)
     return address
 
 
 def update_address(
-    request: HttpRequest, actor: User, address: IPAddress, **fields: Any
+    request: HttpRequest | None, actor: User, address: IPAddress, **fields: Any
 ) -> IPAddress:
     """Change an address or move it to another port."""
     stored = IPAddress.objects.select_related("port__device").get(pk=address.pk)
+    if "vm_interface" in fields and fields["vm_interface"] is not None:
+        require(actor, "compute.vm.change", fields["vm_interface"].vm)
     require(actor, "ipam.ipaddress.change", stored)
     for key, value in fields.items():
         setattr(stored, key, value)

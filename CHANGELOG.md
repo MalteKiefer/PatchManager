@@ -8,6 +8,9 @@ All notable changes to this project are documented here. The format follows
 
 ### Added
 
+* Addresses of virtual machines are linked in IPAM: importing or synchronising a
+  machine creates missing addresses or takes over free ones and keeps them on its
+  network card; addresses used elsewhere are reported, not moved.
 * Administration → Settings: sign in rules, mail server, upload limit and virus
   scanner, S3/B2 file storage, map tiles and webhook and API limits are set in the
   web interface and apply without a restart; environment variables are only initial

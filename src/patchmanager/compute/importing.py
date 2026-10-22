@@ -1,5 +1,7 @@
 """Take a platform's inventory into the documentation, and the page that starts it."""
 
+import contextlib
+import ipaddress
 from dataclasses import dataclass, field
 from typing import Any
 
@@ -30,6 +32,8 @@ from patchmanager.compute.models import (
 )
 from patchmanager.core.fields import path_label
 from patchmanager.dcim.models import Device
+from patchmanager.ipam import services as ipam
+from patchmanager.ipam.models import IPAddress
 from patchmanager.networks.models import VLAN
 
 
@@ -92,7 +96,7 @@ def save(
                 _storage(actor, tenant, cluster, nas, item, result)
         if cluster is not None:
             _hosts(request, actor, tenant, cluster, data, result, pick)
-            _guests(actor, tenant, cluster, data, result, pick)
+            _guests(request, actor, tenant, cluster, data, result, pick)
         result.cluster = cluster
     audit.record(
         "compute.inventory.imported",
@@ -154,7 +158,13 @@ def _hosts(
 
 
 def _guests(
-    actor: User, tenant: Any, cluster: Cluster, data: sources.Inventory, result: Result, pick: Pick
+    request: HttpRequest | None,
+    actor: User,
+    tenant: Any,
+    cluster: Cluster,
+    data: sources.Inventory,
+    result: Result,
+    pick: Pick,
 ) -> None:
     hosts = {
         d.name.lower(): d
@@ -191,18 +201,16 @@ def _guests(
             result.notes.append(f"{guest.name}: {'; '.join(exc.messages)}")
             continue
         vm.save()
-        VMInterface.objects.filter(vm=vm).delete()
+        # Cards are updated in place (by name), so addresses linked to them stay linked.
+        kept = []
         for nic in guest.nics:
             vid = int(nic["vlan"]) if nic.get("vlan", "").isdigit() else None
-            interface = VMInterface(
-                tenant=tenant,
-                vm=vm,
-                name=nic["name"],
-                mac_address=nic["mac"],
-                bridge=nic["bridge"],
-                addresses=nic["addresses"][:300],
-                vlan=vlans.get(vid) if vid else None,
+            interface = VMInterface.objects.filter(vm=vm, name=nic["name"]).first() or VMInterface(
+                tenant=tenant, vm=vm, name=nic["name"]
             )
+            interface.mac_address, interface.bridge = nic["mac"], nic["bridge"]
+            interface.addresses = nic["addresses"][:300]
+            interface.vlan = vlans.get(vid) if vid else None
             try:
                 interface.full_clean(exclude=["tenant"])
                 interface.save()
@@ -211,6 +219,10 @@ def _guests(
                     _("%(vm)s: network card %(nic)s was left out.")
                     % {"vm": vm.name, "nic": nic["name"]}
                 )
+                continue
+            kept.append(interface.pk)
+            _link_addresses(request, actor, tenant, interface, result)
+        VMInterface.objects.filter(vm=vm).exclude(pk__in=kept).delete()
         VirtualDisk.objects.filter(vm=vm).delete()
         for name, size, storage in guest.disks:
             volume = StorageVolume.objects.filter(
@@ -225,6 +237,61 @@ def _guests(
                 )
                 continue
             disk.save()
+
+
+def _reported(text: str) -> dict[str, str]:
+    """Host address -> address with prefix length, from the card's address list."""
+    found: dict[str, str] = {}
+    for token in text.replace(";", ",").replace(" ", ",").split(","):
+        try:
+            iface = ipaddress.ip_interface(token.strip())
+        except ValueError:
+            continue
+        if not (iface.ip.is_loopback or iface.ip.is_link_local or iface.ip.is_unspecified):
+            found[str(iface.ip)] = str(iface)
+    return found
+
+
+def _link_addresses(
+    request: HttpRequest | None, actor: User, tenant: Any, interface: VMInterface, result: Result
+) -> None:
+    """Link the card's addresses to IPAM (global VRF): create missing ones, never take one away.
+
+    An address already on a port or another machine stays there and is reported.
+    """
+    reported = _reported(interface.addresses)
+    for gone in IPAddress.objects.filter(vm_interface=interface).exclude(host__in=reported):
+        # Without the right to change it, the address stays linked until someone removes it.
+        with contextlib.suppress(ServiceError, PermissionDeniedError):
+            ipam.update_address(request, actor, gone, vm_interface=None)
+    if not reported:
+        return
+    existing = {
+        a.host: a for a in IPAddress.objects.filter(tenant=tenant, vrf=None, host__in=reported)
+    }
+    for host, with_length in reported.items():
+        address = existing.get(host)
+        try:
+            if address is None:
+                ipam.create_address(
+                    request,
+                    actor,
+                    tenant,
+                    address=with_length,
+                    vm_interface=interface,
+                    description=str(interface.vm)[:200],
+                )
+            elif address.vm_interface_id == interface.pk:
+                continue
+            elif address.port_id or address.vm_interface_id:
+                result.notes.append(
+                    _("%(address)s of %(vm)s is already used elsewhere and was not linked.")
+                    % {"address": host, "vm": interface.vm.name}
+                )
+            else:
+                ipam.update_address(request, actor, address, vm_interface=interface)
+        except (ServiceError, PermissionDeniedError) as exc:
+            result.notes.append(f"{interface.vm.name} {host}: {exc}")
 
 
 def _storage(
