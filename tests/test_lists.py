@@ -17,6 +17,11 @@ def test_builtin_entries_exist_and_translate() -> None:
     assert office.needs.get(category_id="outlet").count == 4
     with translation.override("de"):
         assert office.label == "Büro"
+        outlet = DeviceCategory.objects.get(key="outlet")
+        assert outlet.label == "Netzwerkdose"
+        assert DeviceCategory.objects.get(key="switch").label == "Switch"  # not "Wechseln"
+        labels = [c.label for c in DeviceCategory.by_label(DeviceCategory.objects.all())]
+        assert labels[-1] == "Sonstiges" and labels[:-1] == sorted(labels[:-1], key=str.casefold)
 
 
 def test_admins_shape_the_lists(admin_client: Client) -> None:

@@ -25,6 +25,9 @@ KEEP = (
     "part_number",
     "u_height",
     "is_full_depth",
+    "airflow",
+    "weight",
+    "weight_unit",
     "subdevice_role",
     "interfaces",
     "console-ports",
@@ -34,7 +37,15 @@ KEEP = (
     "front-ports",
     "rear-ports",
 )
-PORT_KEYS = ("name", "type", "rear_port", "rear_port_position", "positions", "mgmt_only")
+PORT_KEYS = (
+    "name",
+    "type",
+    "rear_port",
+    "rear_port_position",
+    "positions",
+    "mgmt_only",
+    "maximum_draw",
+)
 
 
 def _git(*args: str, cwd: Path) -> str:

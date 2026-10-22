@@ -21,7 +21,12 @@ All notable changes to this project are documented here. The format follows
   documentation (ADR 0028).
 * Floor plans draw lines between placed floor devices and the racks they are
   patched to, and "Add device here" creates a device at the clicked point.
-* Device categories and room types are lists administrators can extend and rename.
+* Device categories and room types are lists administrators can extend and rename,
+  sorted by name and translated; forms link to them.
+* Draw a new room on the floor plan: the outline becomes the room.
+* Device types: mounting, airflow, power supplies, maximum power and weight, filled
+  from the device type library; the height only for rack mounted types. USB, video
+  and audio ports with USB-C, HDMI, DisplayPort, DVI, VGA and audio jack connectors.
 * New layout: navigation in a sidebar with the tenant on top, search in the top bar
   (Ctrl+K or /), and an overview start page with the tenant's racks, devices, ports
   and cables, its sites with their load, the fullest racks and recent changes.

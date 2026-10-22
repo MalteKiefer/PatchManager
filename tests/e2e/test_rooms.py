@@ -85,3 +85,31 @@ def test_office_room(page: Page, live_server, super_admin, make_tree, make_type)
     expect(page.get_by_text("differs")).to_be_visible()
     _shot(page, "survey")
     assert not [e for e in errors if "Content-Security-Policy" in e]
+
+
+def test_draw_a_new_room(page: Page, live_server, super_admin, make_tree) -> None:
+    from patchmanager.locations.models import Room
+
+    tree = make_tree()
+    buffer = io.BytesIO()
+    Image.new("RGB", (600, 400), "white").save(buffer, "PNG")
+    with rls.system_context():
+        plans.upload(
+            tree["request"], super_admin, tree["floor"], name="p.png", data=buffer.getvalue()
+        )
+    _sign_in(page, live_server, super_admin)
+    page.goto(f"{live_server.url}/plans/{tree['floor'].pk}/")
+    expect(page.locator("#plan[data-ready]")).to_have_count(1)
+    page.get_by_role("button", name="Draw new room").click()
+    box = page.locator("#plan").bounding_box()
+    assert box is not None
+    for x, y in ((50, 50), (250, 50), (250, 200), (50, 200)):
+        page.mouse.click(box["x"] + x, box["y"] + y)
+    page.get_by_role("button", name="Finish outline").click()
+    page.get_by_label("Name").fill("Lab")
+    page.get_by_role("button", name="Create").click()
+    expect(page.locator("#plan[data-ready]")).to_have_count(1)
+    with rls.system_context():
+        room = Room.objects.get(name="Lab")
+    assert room.outline[1] == pytest.approx([250, 50], abs=2)
+    _shot(page, "drawn-room")

@@ -16,7 +16,7 @@ def test_prefix_next_free_address(page: Page, live_server, super_admin) -> None:
     seed(super_admin, racks=1, slug="ipam")
     page.set_viewport_size({"width": 1440, "height": 900})
     _sign_in(page, live_server, super_admin)
-    page.get_by_role("link", name="IP addresses").click()
+    page.get_by_role("link", name="IP networks").click()
     page.get_by_role("link", name="New prefix").click()
     page.get_by_label("Prefix").fill("10.40.0.0/16")
     page.get_by_label("Status").select_option("container")

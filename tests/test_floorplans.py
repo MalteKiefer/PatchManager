@@ -362,3 +362,28 @@ def test_plan_links_and_add_device_from_plan(admin_client, kit, make_type, super
         )
     bad = admin_client.get(f"/devices/new/?room={kit['room'].pk}&plan_x=nan&plan_y=1", secure=True)
     assert 'name="plan_x"' not in bad.content.decode()
+
+
+@pytest.mark.django_db
+def test_new_room_from_drawn_outline(admin_client: Client, kit, super_admin) -> None:
+    from patchmanager.locations.models import Room
+
+    _upload(kit, super_admin)
+    floor = kit["floor"]
+    url = f"/locations/floor/{floor.pk}/new/"
+    outline = json.dumps([[10, 10], [200, 10], [200, 150], [10, 150]])
+    page = admin_client.get(url, {"outline": outline}, secure=True).content.decode()
+    assert 'name="outline"' in page and "outline you drew" in page
+    created = admin_client.post(
+        url, {"name": "Lab", "kind": "office", "description": "", "outline": outline}, secure=True
+    )
+    assert created.url == f"/plans/{floor.pk}/"
+    with rls.system_context():
+        assert Room.objects.get(name="Lab").outline[2] == [200.0, 150.0]
+    for bad in ("[[1, 1], [2, 2]]", "[[0, 0], [9000, 0], [0, 10]]", "nope"):
+        response = admin_client.post(
+            url, {"name": "X", "kind": "office", "description": "", "outline": bad}, secure=True
+        )
+        assert response.status_code == 200
+    with rls.system_context():
+        assert not Room.objects.filter(name="X").exists()

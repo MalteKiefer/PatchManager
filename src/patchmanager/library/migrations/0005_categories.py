@@ -7,20 +7,20 @@ from django.db import migrations, models
 
 # The former fixed choices become the built in rows (names are translated at runtime).
 BUILTIN = [
-    ("switch", "switch", "SW", "#2563eb"),
-    ("router", "router", "RT", "#7c3aed"),
-    ("firewall", "firewall", "FW", "#dc2626"),
-    ("server", "server", "SV", "#0f766e"),
-    ("storage", "storage", "ST", "#0e7490"),
-    ("patch_panel", "patch panel", "PP", "#475569"),
-    ("pdu", "power distribution", "PD", "#ca8a04"),
+    ("switch", "Switch", "SW", "#2563eb"),
+    ("router", "Router", "RT", "#7c3aed"),
+    ("firewall", "Firewall", "FW", "#dc2626"),
+    ("server", "Server", "SV", "#0f766e"),
+    ("storage", "Storage", "ST", "#0e7490"),
+    ("patch_panel", "Patch panel", "PP", "#475569"),
+    ("pdu", "Power distribution", "PD", "#ca8a04"),
     ("ups", "UPS", "UP", "#a16207"),
-    ("access_point", "access point", "AP", "#16a34a"),
-    ("camera", "camera", "CA", "#9333ea"),
-    ("printer", "printer", "PR", "#0891b2"),
-    ("outlet", "network outlet", "NO", "#ea580c"),
-    ("phone", "phone", "PH", "#db2777"),
-    ("other", "other", "", "#64748b"),
+    ("access_point", "Access point", "AP", "#16a34a"),
+    ("camera", "Camera", "CA", "#9333ea"),
+    ("printer", "Printer", "PR", "#0891b2"),
+    ("outlet", "Network outlet", "NO", "#ea580c"),
+    ("phone", "Phone", "PH", "#db2777"),
+    ("other", "Other", "", "#64748b"),
 ]
 
 

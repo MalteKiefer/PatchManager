@@ -74,3 +74,17 @@ for (const region of document.querySelectorAll(".overflow-x-auto, .overflow-auto
     if (!region.hasAttribute("tabindex")) region.tabIndex = 0;
   }
 }
+
+// Form fields that only apply for one value of another field, for example
+// data-show-if="form=rack": hidden (with their label) while it has another value.
+function showIf() {
+  for (const input of document.querySelectorAll("[data-show-if]")) {
+    const [name, value] = input.dataset.showIf.split("=");
+    const source = input.form?.elements.namedItem(name);
+    if (!source) continue;
+    const update = () => { input.closest(".field").hidden = source.value !== value; };
+    source.addEventListener("change", update);
+    update();
+  }
+}
+showIf();

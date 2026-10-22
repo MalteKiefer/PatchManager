@@ -5,6 +5,7 @@ from typing import Any
 from django import forms
 from django.utils.translation import gettext_lazy as _
 
+from patchmanager.core.utils import label_choices
 from patchmanager.dcim.models import Rack
 from patchmanager.locations.models import Building, Floor, Room, Site
 from patchmanager.tenancy.models import Tenant
@@ -46,6 +47,11 @@ class RoomForm(forms.ModelForm):  # type: ignore[type-arg]
         model = Room
         fields = ["name", "kind", "description"]
         widgets = {"description": forms.Textarea(attrs={"rows": 2})}
+
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
+        """Room types sorted by name."""
+        super().__init__(*args, **kwargs)
+        label_choices(self.fields["kind"])
 
 
 class RackForm(forms.ModelForm):  # type: ignore[type-arg]

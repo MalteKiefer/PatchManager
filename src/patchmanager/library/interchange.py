@@ -8,6 +8,7 @@ bundled catalog (``library.catalog``) both go through ``import_type``.
 
 import re
 from collections.abc import Iterable
+from decimal import Decimal
 from typing import Any
 
 import yaml
@@ -18,7 +19,15 @@ from django.utils.translation import gettext as _
 from patchmanager.accounts.models import User
 from patchmanager.accounts.services import ServiceError
 from patchmanager.library import services
-from patchmanager.library.models import Connector, DeviceType, PortKind, PortTemplate, expand
+from patchmanager.library.models import (
+    Airflow,
+    Connector,
+    DeviceType,
+    Mounting,
+    PortKind,
+    PortTemplate,
+    expand,
+)
 from patchmanager.tenancy.models import Tenant
 
 # interface type -> (connector, speed in Mbit/s)
@@ -42,7 +51,13 @@ _CONNECTORS = [
     (r"^st", Connector.ST),
     (r"^mpo|^mtp", Connector.MPO),
     (r"^e2000", Connector.E2000),
+    (r"usb-?c", Connector.USB_C),
     (r"usb", Connector.USB),
+    (r"hdmi", Connector.HDMI),
+    (r"mini-?(dp|displayport)", Connector.MINI_DP),
+    (r"^dp$|displayport", Connector.DISPLAYPORT),
+    (r"dvi", Connector.DVI),
+    (r"vga|de-?15", Connector.VGA),
     (r"db-?9|de-?9", Connector.SERIAL),
     (r"c13$", Connector.C13),
     (r"c14$", Connector.C14),
@@ -156,6 +171,7 @@ def import_type(
             u_height=0 if is_floor else int(u_height),
             full_depth=bool(data.get("is_full_depth", True)),
             part_number=str(data.get("part_number", ""))[:100],
+            **_details(data, is_floor),
             description=str(data.get("comments", ""))[:2000],
         )
         _rename_rears(data)
@@ -192,6 +208,26 @@ def import_type(
                         for name in template.names():
                             rear_by_name[name] = template
     return device_type
+
+
+_WEIGHT_UNITS = {"kg": 1.0, "g": 0.001, "lb": 0.45359237, "oz": 0.028349523}
+
+
+def _details(data: dict[str, Any], is_floor: bool) -> dict[str, Any]:
+    """Mounting, airflow, power supplies, power and weight, where the file has them."""
+    details: dict[str, Any] = {"mounting": "" if is_floor else Mounting.RACK_19}
+    if data.get("airflow") in Airflow.values:
+        details["airflow"] = data["airflow"]
+    supplies = [p for p in data.get("power-ports") or [] if isinstance(p, dict)]
+    if supplies:
+        details["power_supplies"] = min(len(supplies), 16)
+        draws = [p["maximum_draw"] for p in supplies if isinstance(p.get("maximum_draw"), int)]
+        if draws and 0 < max(draws) <= 100_000:
+            details["max_power_w"] = max(draws)  # redundant supplies: one carries the load
+    weight, unit = data.get("weight"), _WEIGHT_UNITS.get(str(data.get("weight_unit", "kg")))
+    if isinstance(weight, int | float) and unit and 0 < weight * unit < 100_000:
+        details["weight_kg"] = Decimal(str(round(weight * unit, 2)))
+    return details
 
 
 def _rename_rears(data: dict[str, Any]) -> None:
@@ -246,6 +282,10 @@ def export_type(device_type: DeviceType, *, fmt: str = "yaml") -> str:
         "u_height": device_type.u_height,
         "is_full_depth": device_type.full_depth,
     }
+    if device_type.airflow:
+        data["airflow"] = device_type.airflow
+    if device_type.weight_kg is not None:
+        data["weight"], data["weight_unit"] = float(device_type.weight_kg), "kg"
     sections: dict[str, list[dict[str, Any]]] = {}
     rear_names: dict[Any, list[str]] = {}
     for template in device_type.port_templates.all():

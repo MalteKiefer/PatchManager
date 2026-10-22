@@ -93,6 +93,8 @@ to open it.
 Lines join each placed floor device with the rack or device its cables lead to;
 dashed lines are permanent links, the number says how many paths. Choose **Add
 device here** and click inside a room outline to create a device at that point.
+**Draw new room** works like drawing an outline: click the corners, choose **Finish
+outline**, then name the new room on the next page.
 
 ## Rooms
 

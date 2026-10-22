@@ -52,11 +52,11 @@ def plan(user: Any, room: Room) -> list[PlanRow]:
         for row in devices.values("device_type__category").annotate(n=Count("pk"))
     }
     keys = {k for k, v in planned.items() if v} | set(installed)
-    categories = DeviceCategory.objects.filter(key__in=keys)
+    categories = DeviceCategory.by_label(DeviceCategory.objects.filter(key__in=keys))
     rows = [
         PlanRow(c, planned.get(c.key), installed.get(c.key, 0), c.key in own) for c in categories
     ]
-    return sorted(rows, key=lambda r: (r.status == "unplanned", r.category.order))
+    return sorted(rows, key=lambda r: r.status == "unplanned")  # stable: by name
 
 
 def set_needs(request: HttpRequest, actor: User, room: Room, counts: dict[str, int | None]) -> None:
@@ -164,7 +164,7 @@ def survey_rows(user: Any, survey: RoomSurvey) -> list[SurveyRow]:
     """Planned, documented and found per category, for one survey."""
     current = {r.category.key: r for r in plan(user, survey.room)}
     keys = set(current) | set(survey.counts)
-    categories = DeviceCategory.objects.filter(key__in=keys)
+    categories = DeviceCategory.by_label(DeviceCategory.objects.filter(key__in=keys))
     return [
         SurveyRow(
             c,

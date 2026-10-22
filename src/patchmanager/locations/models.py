@@ -1,6 +1,7 @@
 """Sites, buildings, floors and rooms."""
 
 from decimal import Decimal
+from typing import Any
 
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
@@ -128,6 +129,11 @@ class RoomType(models.Model):
     def label(self) -> str:
         """Built in names are translated; names given by administrators are shown as they are."""
         return gettext(self.name) if self.builtin else self.name
+
+    @staticmethod
+    def by_label(rows: Any) -> list[RoomType]:
+        """Alphabetical by shown name, "other" last."""
+        return sorted(rows, key=lambda t: (t.key == "other", t.label.casefold()))
 
 
 class RoomTypeNeed(models.Model):

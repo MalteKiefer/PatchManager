@@ -1,7 +1,7 @@
 {% extends "base.html" %}{% load i18n %}
 {% block title %}{% translate "Prefixes" %}{% endblock %}
 {% block content %}
-<div class="mb-4 flex flex-wrap items-center gap-3"><h1 class="mr-auto">{% translate "IP addresses" %}{% if current_tenant %} · {{ current_tenant.name }}{% endif %}</h1>
+<div class="mb-4 flex flex-wrap items-center gap-3"><h1 class="mr-auto">{% translate "IP networks" %}{% if current_tenant %} · {{ current_tenant.name }}{% endif %}</h1>
   {% if can_add %}<a class="btn-primary" href="{% url 'ipam:prefix-create' %}">{% translate "New prefix" %}</a>{% endif %}</div>
 {% include "ipam/_tabs.html" with tab="prefixes" %}
 <div class="card overflow-x-auto p-0"><table class="table">

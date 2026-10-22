@@ -12,6 +12,7 @@ from django.db.models import ProtectedError
 from django.http import Http404, HttpRequest, HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
+from django.utils.html import format_html
 from django.utils.translation import gettext as _
 from django.utils.translation import gettext_lazy
 from django.views.decorators.http import require_http_methods, require_POST
@@ -21,6 +22,7 @@ from patchmanager.accounts.models import User
 from patchmanager.accounts.services import ServiceError
 from patchmanager.accounts.services.users import require
 from patchmanager.audit import services as audit
+from patchmanager.core.utils import label_choices
 from patchmanager.library.models import DeviceCategory
 from patchmanager.locations.models import RoomType, RoomTypeNeed
 
@@ -49,6 +51,11 @@ class NeedForm(forms.ModelForm):  # type: ignore[type-arg]
     class Meta:
         model = RoomTypeNeed
         fields = ["category", "count"]
+
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
+        """Categories sorted by name."""
+        super().__init__(*args, **kwargs)
+        label_choices(self.fields["category"])
 
 
 @dataclass(frozen=True)
@@ -84,6 +91,17 @@ KINDS = {
         ),
     )
 }
+
+
+def link_field(form: Any, field: str, user: Any, slug: str) -> None:
+    """Point administrators from a choice field to the page that edits its list."""
+    if field in form.fields and policy.has_perm(user, f"{KINDS[slug].permission}.add"):
+        form.fields[field].help_text = format_html(
+            '{} <a href="{}">{}</a>',
+            _("Missing an entry?"),
+            reverse("manage:lists"),
+            _("Add or rename entries"),
+        )
 
 
 def _actor(request: HttpRequest) -> User:
@@ -133,7 +151,7 @@ def index(request: HttpRequest) -> HttpResponse:
     sections = [
         {
             "kind": kind,
-            "items": kind.model.objects.all(),
+            "items": kind.model.by_label(kind.model.objects.all()),
             "can_add": policy.has_perm(actor, f"{kind.permission}.add"),
         }
         for kind in KINDS.values()

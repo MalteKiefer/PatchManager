@@ -119,7 +119,7 @@ function drawDraft() {
   const layer = document.getElementById("layer-draft");
   layer.replaceChildren();
   if (!draft.length) return;
-  const shape = mode === "outline" ? "polygon" : "polyline";
+  const shape = mode === "outline" || mode === "room" ? "polygon" : "polyline";
   layer.append(el(shape, { points: draft.map((p) => p.join(",")).join(" "), class: "fill-amber-400/20 stroke-amber-500", "stroke-width": 2, "stroke-dasharray": "6 4" }));
   for (const [x, y] of draft) layer.append(el("circle", { cx: x, cy: y, r: 5, class: "fill-amber-500" }));
 }
@@ -145,8 +145,10 @@ function setMode(next) {
   for (const button of document.querySelectorAll("[data-mode]")) button.setAttribute("aria-pressed", String(button.dataset.mode === mode));
   document.getElementById("scale-form")?.classList.toggle("hidden", mode !== "scale");
   document.getElementById("scale-form")?.classList.toggle("flex", mode === "scale");
-  document.getElementById("outline-bar")?.classList.toggle("hidden", mode !== "outline");
-  document.getElementById("outline-bar")?.classList.toggle("flex", mode === "outline");
+  const outlining = mode === "outline" || mode === "room";
+  document.getElementById("outline-bar")?.classList.toggle("hidden", !outlining);
+  document.getElementById("outline-bar")?.classList.toggle("flex", outlining);
+  if (mode === "room") document.getElementById("outline-label").textContent = text.newRoomLabel;
   hint.textContent = text[mode];
   drawDraft();
 }
@@ -192,7 +194,7 @@ if (svg) {
       draft = draft.length >= 2 ? [point] : [...draft, point];
       drawDraft();
       if (draft.length === 2) document.getElementById("scale-metres").focus();
-    } else if (mode === "outline") {
+    } else if (mode === "outline" || mode === "room") {
       draft.push(point);
       drawDraft();
     }
@@ -226,6 +228,11 @@ if (svg) {
     });
   }
   document.getElementById("outline-save")?.addEventListener("click", async () => {
+    if (mode === "room") {
+      // The room is created on its own page; the outline travels along and is checked there.
+      location.assign(`${text.newRoom}?${new URLSearchParams({ outline: JSON.stringify(draft) })}`);
+      return;
+    }
     try { await post("outline", { room: outlineRoom, points: draft }); location.reload(); } catch (e) { say(e.message); }
   });
   document.getElementById("outline-cancel")?.addEventListener("click", () => setMode("move"));

@@ -15,13 +15,16 @@
      data-failed="{% translate 'The change could not be saved.' %}"
      data-add="{% translate 'Click inside a room where the new device goes.' %}"
      data-outside="{% translate 'Click inside a drawn room outline.' %}"
-     data-new-device="{% url 'devices:device-create' %}"></div>
+     data-new-device="{% url 'devices:device-create' %}"
+     data-room="{% translate 'Click the corners of the new room, then finish.' %}"
+     data-new-room="{% url 'locations:node-create' 'floor' floor.pk %}" data-new-room-label="{% translate 'New room' %}"></div>
 <div class="grid gap-6 xl:grid-cols-[1fr_20rem]">
   <section class="card overflow-hidden p-0" aria-labelledby="plan-h">
     <h2 id="plan-h" class="sr-only">{% translate "Plan" %}</h2>
     {% if plan %}
     <div class="flex flex-wrap items-center gap-2 border-b border-slate-200 p-3 text-sm dark:border-slate-800" role="toolbar" aria-label="{% translate 'Plan tools' %}">
       <button type="button" class="btn-secondary py-1" data-mode="move" aria-pressed="true">{% translate "Move" %}</button>
+      {% if can_add_room %}<button type="button" class="btn-secondary py-1" data-mode="room" aria-pressed="false">{% translate "Draw new room" %}</button>{% endif %}
       {% if can_add_device %}<button type="button" class="btn-secondary py-1" data-mode="add" aria-pressed="false">{% translate "Add device here" %}</button>{% endif %}
       {% if can_change %}<button type="button" class="btn-secondary py-1" data-mode="scale" aria-pressed="false">{% translate "Set scale" %}</button>{% endif %}
       <span id="plan-hint" class="ml-2 text-slate-500" aria-live="polite">{% translate "Drag racks and devices. Focus one and use the arrow keys for fine moves." %}</span>

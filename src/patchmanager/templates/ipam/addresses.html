@@ -1,7 +1,7 @@
 {% extends "base.html" %}{% load i18n %}
 {% block title %}{% translate "Addresses" %}{% endblock %}
 {% block content %}
-<div class="mb-4 flex flex-wrap items-center gap-3"><h1 class="mr-auto">{% translate "IP addresses" %}{% if current_tenant %} · {{ current_tenant.name }}{% endif %}</h1>
+<div class="mb-4 flex flex-wrap items-center gap-3"><h1 class="mr-auto">{% translate "IP networks" %}{% if current_tenant %} · {{ current_tenant.name }}{% endif %}</h1>
   {% if can_add %}<a class="btn-primary" href="{% url 'ipam:address-create' %}">{% translate "New address" %}</a>{% endif %}</div>
 {% include "ipam/_tabs.html" with tab="addresses" %}
 <form method="get" role="search" class="mb-4 flex max-w-md gap-2"><label for="ip-q" class="sr-only">{% translate "Search addresses" %}</label>

@@ -17,7 +17,8 @@ from django.views.decorators.http import require_http_methods, require_POST
 from patchmanager.accounts import policy
 from patchmanager.accounts.models import User
 from patchmanager.accounts.services import ServiceError
-from patchmanager.core.utils import parse_uuid
+from patchmanager.core import lists
+from patchmanager.core.utils import label_choices, parse_uuid
 from patchmanager.library import catalog, interchange, services
 from patchmanager.library.models import CatalogType, DeviceType, PortTemplate
 from patchmanager.metadata.models import Attachment
@@ -28,6 +29,11 @@ TYPE_FIELDS = [
     "category",
     "u_height",
     "full_depth",
+    "mounting",
+    "airflow",
+    "power_supplies",
+    "max_power_w",
+    "weight_kg",
     "name_pattern",
     "part_number",
     "description",
@@ -43,7 +49,29 @@ class DeviceTypeForm(forms.ModelForm):  # type: ignore[type-arg]
     class Meta:
         model = DeviceType
         fields = TYPE_FIELDS
-        widgets = {"description": forms.Textarea(attrs={"rows": 2})}
+        widgets = {
+            "description": forms.Textarea(attrs={"rows": 2}),
+            # Height and depth only matter in a rack (app.js hides them otherwise).
+            "u_height": forms.NumberInput(attrs={"data-show-if": "form=rack"}),
+            "full_depth": forms.CheckboxInput(attrs={"data-show-if": "form=rack"}),
+        }
+
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
+        """Categories sorted by name; the height is optional for devices outside racks."""
+        super().__init__(*args, **kwargs)
+        label_choices(self.fields["category"])
+        self.fields["u_height"].required = False
+
+    def clean(self) -> dict[str, Any]:
+        """Devices outside racks take no rack units; rack devices need at least one."""
+        data = super().clean() or {}
+        if data.get("form") == DeviceType.Form.RACK:
+            if not data.get("u_height"):
+                self.add_error("u_height", gettext_lazy("Rack mounted devices need a height."))
+        else:
+            data["u_height"] = 0
+            data["full_depth"] = False
+        return data
 
 
 class PortTemplateForm(forms.ModelForm):  # type: ignore[type-arg]
@@ -152,6 +180,7 @@ def type_list(request: HttpRequest) -> HttpResponse:
 def type_create(request: HttpRequest) -> HttpResponse:
     """New (custom) device type."""
     form = DeviceTypeForm(request.POST or None, initial={"form": request.GET.get("form", "rack")})
+    lists.link_field(form, "category", request.user, "categories")
     if request.method == "POST" and form.is_valid():
         data = {k: form.cleaned_data[k] for k in TYPE_FIELDS}
         try:
@@ -218,6 +247,7 @@ def type_detail(request: HttpRequest, pk: str) -> HttpResponse:
         initial={"vendor_name": device_type.vendor.name, "shared": device_type.tenant_id is None},
     )
     del form.fields["shared"]  # scope is fixed after creation
+    lists.link_field(form, "category", request.user, "categories")
     images_form = ImagesForm(
         request.POST if action == "images" else None,
         images=images,

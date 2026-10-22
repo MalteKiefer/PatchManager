@@ -1,5 +1,6 @@
 """Map, site list and one generic detail page per level of the location tree."""
 
+import json
 from dataclasses import dataclass
 from typing import Any
 
@@ -20,6 +21,7 @@ from django.views.decorators.http import require_http_methods
 from patchmanager.accounts import policy
 from patchmanager.accounts.models import User
 from patchmanager.accounts.services import ServiceError
+from patchmanager.core import lists
 from patchmanager.core.hierarchy import HierarchyNode
 from patchmanager.dcim.models import Rack
 from patchmanager.locations import services
@@ -171,7 +173,7 @@ def room_plan(request: HttpRequest, pk: str) -> HttpResponse:
         raise PermissionDenied
     defaults = {n.category_id: n.count for n in room.kind.needs.all()}
     own = {n.category_id: n.count for n in room.needs.all()}
-    categories = list(DeviceCategory.objects.all())
+    categories = DeviceCategory.by_label(DeviceCategory.objects.all())
     errors = []
     if request.method == "POST":
         counts: dict[str, int | None] = {}
@@ -213,15 +215,26 @@ def node_create(request: HttpRequest, level: str, pk: str) -> HttpResponse:
     if not policy.has_perm(actor, f"{config.child_model.policy_object_type}.add", node):
         raise PermissionDenied
     form = config.child_form(request.POST or None)
+    lists.link_field(form, "kind", actor, "room-types")
+    outline, outline_error = _drawn_outline(node, request.POST or request.GET)
+    if outline_error:
+        form.add_error(None, outline_error)
     if request.method == "POST" and form.is_valid():
         try:
             child = services.create(
-                request, actor, config.child_model, parent=node, **form.cleaned_data
+                request,
+                actor,
+                config.child_model,
+                parent=node,
+                **form.cleaned_data,
+                **({"outline": outline} if outline else {}),
             )
         except ServiceError as exc:
             form.add_error(None, str(exc))
         else:
             messages.success(request, _("Created."))
+            if outline:
+                return redirect("floorplans:editor", node.pk)
             return redirect(node_url(child))
     return render(
         request,
@@ -231,8 +244,27 @@ def node_create(request: HttpRequest, level: str, pk: str) -> HttpResponse:
             "form": form,
             "back_url": node_url(node),
             "breadcrumbs": [(a, node_url(a)) for a in [*node.ancestors(), node]],
+            "hidden": {"outline": json.dumps(outline)} if outline else {},
+            "intro": _("The room gets the outline you drew on the floor plan.") if outline else "",
         },
     )
+
+
+def _drawn_outline(node: Any, params: Any) -> tuple[list[list[float]] | None, str]:
+    """Outline of a new room drawn on the floor plan (``outline`` as JSON), checked."""
+    raw = params.get("outline")
+    if not raw or not isinstance(node, Floor):
+        return None, ""
+    from patchmanager.floorplans.models import FloorPlan
+    from patchmanager.floorplans.services import clean_outline
+
+    plan = FloorPlan.objects.filter(floor=node).first()
+    try:
+        if plan is None or len(raw) > 20_000:
+            raise ServiceError(_("Invalid coordinates."))
+        return clean_outline(plan, json.loads(raw)), ""
+    except (ValueError, ServiceError) as exc:
+        return None, str(exc) if isinstance(exc, ServiceError) else _("Invalid coordinates.")
 
 
 @login_required
@@ -252,6 +284,7 @@ def node_detail(request: HttpRequest, level: str, pk: str) -> HttpResponse:
     can_add = bool(child_type) and policy.has_perm(actor, f"{child_type}.add", node)
     action = request.POST.get("action")
     form = config.form(request.POST if action == "edit" else None, instance=node)
+    lists.link_field(form, "kind", actor, "room-types")
 
     if request.method == "POST":
         try:
@@ -380,7 +413,7 @@ def _survey_page(
     actor = _actor(request)
     can_change = policy.has_perm(actor, "locations.room.change", room)
     form = SurveyForm(request.POST or None, instance=survey)
-    categories = list(DeviceCategory.objects.all())
+    categories = DeviceCategory.by_label(DeviceCategory.objects.all())
     errors: list[str] = []
     if request.method == "POST":
         if not can_change:
@@ -404,7 +437,7 @@ def _survey_page(
         }
         for c in categories
     ]
-    rows.sort(key=lambda r: (r["planned"] is None and not r["documented"], r["category"].order))
+    rows.sort(key=lambda r: r["planned"] is None and not r["documented"])  # stable: by name
     return render(
         request,
         "locations/survey.html",

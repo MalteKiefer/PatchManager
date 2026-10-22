@@ -201,6 +201,7 @@ def editor(request: HttpRequest, floor_pk: str) -> HttpResponse:
             "scene": scene,
             "can_change": can_change,
             "can_add_device": policy.has_perm(request.user, "dcim.device.add", floor),
+            "can_add_room": policy.has_perm(request.user, "locations.room.add", floor),
             "upload_form": PlanUploadForm(),
             "breadcrumbs": [(a, node_url(a)) for a in [*floor.ancestors(), floor]],
             "unplaced_racks": [r for r in scene["racks"] if r["x"] is None],

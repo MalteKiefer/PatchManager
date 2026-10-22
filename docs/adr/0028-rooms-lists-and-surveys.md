@@ -32,6 +32,15 @@ and room kinds were fixed lists in code, so nobody could add a kind their site u
   notes, the count found per category, photos and notes through the attachment
   system. The survey page shows planned, documented and found side by side and marks
   differences. Changing surveys and plans needs `locations.room.change`.
+* "Draw new room" on the floor plan sends the drawn outline to the room creation
+  page, which checks it against the plan again before the room is created.
+* Device types record mounting, airflow, number of power supplies, maximum power and
+  weight; the height applies to rack mounted types only. Imports from the device type
+  library fill these where the file has them. Ports can be USB, video or audio, with
+  USB-C, HDMI, DisplayPort, DVI, VGA and audio jack connectors.
+* Built in category names are capitalised and translated in their own context;
+  choices are sorted by their shown name with "Other" last. Choice fields link to the
+  list page for administrators.
 * Deleting any object with attachments or notes now deletes them in the same
   transaction and removes the files after commit. Surveys and room plans move with
   their site to another tenant.
