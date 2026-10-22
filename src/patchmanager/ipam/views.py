@@ -17,6 +17,7 @@ from django.views.decorators.http import require_http_methods
 from patchmanager.accounts import policy
 from patchmanager.accounts.models import User
 from patchmanager.accounts.services import PermissionDeniedError, ServiceError
+from patchmanager.api.core import tenant_scope
 from patchmanager.core.fields import path_label
 from patchmanager.core.utils import parse_uuid
 from patchmanager.dcim.models import Port
@@ -47,17 +48,29 @@ def _visible(user: Any, permission: str, queryset: Any) -> Any:
 
 
 class _TenantForm(forms.ModelForm):  # type: ignore[type-arg]
-    """Choices limited to the tenant."""
+    """Choices limited to what the user may see in the tenant."""
 
-    def __init__(self, *args: Any, tenant: Any, **kwargs: Any) -> None:
+    def __init__(self, *args: Any, tenant: Any, actor: Any, **kwargs: Any) -> None:
         super().__init__(*args, **kwargs)
         if "vrf" in self.fields:
-            self.fields["vrf"].queryset = VRF.objects.filter(tenant=tenant)  # type: ignore[attr-defined]
+            self.fields["vrf"].queryset = policy.scope_queryset(  # type: ignore[attr-defined]
+                actor,
+                "ipam.vrf.view",
+                tenant_scope(VRF.objects.filter(tenant=tenant)),
+                path_field="scope",
+            )
             self.fields["vrf"].empty_label = _("global")  # type: ignore[attr-defined]
         if "site" in self.fields:
-            self.fields["site"].queryset = Site.objects.filter(tenant=tenant)  # type: ignore[attr-defined]
+            self.fields["site"].queryset = _visible(  # type: ignore[attr-defined]
+                actor, "locations.site.view", Site.objects.filter(tenant=tenant)
+            )
         if "vlan" in self.fields:
-            self.fields["vlan"].queryset = VLAN.objects.filter(tenant=tenant)  # type: ignore[attr-defined]
+            self.fields["vlan"].queryset = policy.scope_queryset(  # type: ignore[attr-defined]
+                actor,
+                "networks.vlan.view",
+                tenant_scope(VLAN.objects.filter(tenant=tenant), "site"),
+                path_field="scope",
+            )
 
 
 class PrefixForm(_TenantForm):
@@ -177,7 +190,7 @@ def prefix_create(request: HttpRequest) -> HttpResponse:
     """Page that creates a prefix."""
     tenant = _tenant(request)
     initial = {"prefix": request.GET.get("prefix", ""), "vrf": parse_uuid(request.GET.get("vrf"))}
-    form = PrefixForm(request.POST or None, tenant=tenant, initial=initial)
+    form = PrefixForm(request.POST or None, tenant=tenant, actor=request.user, initial=initial)
     if request.method == "POST" and form.is_valid():
         try:
             prefix = services.create_prefix(request, _actor(request), tenant, **form.cleaned_data)
@@ -202,7 +215,9 @@ def prefix_detail(request: HttpRequest, pk: str) -> HttpResponse:
     actor = _actor(request)
     if not policy.has_perm(actor, "ipam.prefix.view", prefix):
         raise Http404
-    form = PrefixForm(request.POST or None, instance=prefix, tenant=prefix.tenant)
+    form = PrefixForm(
+        request.POST or None, instance=prefix, tenant=prefix.tenant, actor=request.user
+    )
     if request.method == "POST":
         try:
             if request.POST.get("action") == "delete":
@@ -293,7 +308,7 @@ def address_create(request: HttpRequest) -> HttpResponse:
         if not policy.has_perm(request.user, "dcim.device.view", port.device):
             raise Http404
     initial = {"address": request.GET.get("address", ""), "vrf": parse_uuid(request.GET.get("vrf"))}
-    form = AddressForm(request.POST or None, tenant=tenant, initial=initial)
+    form = AddressForm(request.POST or None, tenant=tenant, actor=request.user, initial=initial)
     if request.method == "POST" and form.is_valid():
         try:
             address = services.create_address(
@@ -334,7 +349,9 @@ def address_detail(request: HttpRequest, pk: str) -> HttpResponse:
     actor = _actor(request)
     if not policy.has_perm(actor, "ipam.ipaddress.view", address):
         raise Http404
-    form = AddressForm(request.POST or None, instance=address, tenant=address.tenant)
+    form = AddressForm(
+        request.POST or None, instance=address, tenant=address.tenant, actor=request.user
+    )
     if request.method == "POST":
         action = request.POST.get("action")
         try:

@@ -23,6 +23,7 @@ from patchmanager.core import crypto
 
 MAX_BYTES = 2 * 1024 * 1024
 DIFF_CONTEXT = 3
+MAX_DIFF_LINES = 10_000  # the matcher is quadratic in the worst case; keep a request bounded
 
 
 def _check(content: str) -> str:
@@ -118,6 +119,13 @@ class DiffLine:
 def diff(old: str, new: str) -> tuple[list[DiffLine], int, int]:
     """Unified diff with line numbers, and the counts of added and removed lines."""
     a, b = old.splitlines(), new.splitlines()
+    if max(len(a), len(b)) > MAX_DIFF_LINES:
+        raise ServiceError(
+            _(
+                "These versions are too long to compare here; "
+                "download both and compare them locally."
+            )
+        )
     lines: list[DiffLine] = []
     added = removed = 0
     matcher = difflib.SequenceMatcher(a=a, b=b, autojunk=False)

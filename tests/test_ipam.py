@@ -275,3 +275,26 @@ def test_hidden_devices_stay_hidden_next_to_addresses(client, net, make_user, gr
         results, _counts = search.search(user, net["tenant"], "10.50.0")
         hits = results["ipaddress"]
         assert hits and all("sw1" not in h.context for h in hits)
+
+
+def test_choices_only_show_what_the_user_may_see(client, net, make_user, grant, make_tree):
+    from patchmanager.accounts.models import Assignment, Role
+    from patchmanager.locations import services as tree
+    from patchmanager.locations.models import Site
+    from tests.conftest import login
+
+    with rls.system_context():
+        secret = tree.create(
+            net["request"], net["actor"], Site, parent=net["tenant"], name="Secret site"
+        )
+    user = make_user()
+    grant(user, "editor", net["tenant"])
+    hide = Role.objects.create(key="hide-sites", name="Hide", permissions=["locations.site.view"])
+    Assignment.objects.create(
+        role=hide, user=user, tenant=net["tenant"], scope_path=secret.path, effect="deny"
+    )
+    login(client, user)
+    client.post("/tenants/switch/", {"tenant": net["tenant"].pk}, secure=True)
+    for url in ("/ipam/prefixes/new/", "/networks/vlans/new/"):
+        page = client.get(url, secure=True).content.decode()
+        assert "Secret site" not in page and "HQ" in page, url

@@ -17,6 +17,7 @@ from django.views.decorators.http import require_http_methods
 from patchmanager.accounts import policy
 from patchmanager.accounts.models import User
 from patchmanager.accounts.services import PermissionDeniedError, ServiceError
+from patchmanager.api.core import tenant_scope
 from patchmanager.core.utils import parse_uuid
 from patchmanager.dcim.models import Port
 from patchmanager.locations.models import Site
@@ -35,10 +36,12 @@ class VLANForm(forms.ModelForm):  # type: ignore[type-arg]
         fields = VLAN_FIELDS
         widgets = {"description": forms.Textarea(attrs={"rows": 2})}
 
-    def __init__(self, *args: Any, tenant: Any, **kwargs: Any) -> None:
-        """Sites of the tenant."""
+    def __init__(self, *args: Any, tenant: Any, actor: Any, **kwargs: Any) -> None:
+        """Sites of the tenant the user may see."""
         super().__init__(*args, **kwargs)
-        self.fields["site"].queryset = Site.objects.filter(tenant=tenant)  # type: ignore[attr-defined]
+        self.fields["site"].queryset = policy.scope_queryset(  # type: ignore[attr-defined]
+            actor, "locations.site.view", Site.objects.filter(tenant=tenant)
+        )
         self.fields["site"].empty_label = _("All sites of the tenant")  # type: ignore[attr-defined]
 
 
@@ -50,10 +53,15 @@ class WLANForm(forms.ModelForm):  # type: ignore[type-arg]
         fields = WLAN_FIELDS
         widgets = {"description": forms.Textarea(attrs={"rows": 2})}
 
-    def __init__(self, *args: Any, tenant: Any, **kwargs: Any) -> None:
-        """VLANs of the tenant."""
+    def __init__(self, *args: Any, tenant: Any, actor: Any, **kwargs: Any) -> None:
+        """VLANs of the tenant the user may see."""
         super().__init__(*args, **kwargs)
-        self.fields["vlan"].queryset = VLAN.objects.filter(tenant=tenant)  # type: ignore[attr-defined]
+        self.fields["vlan"].queryset = policy.scope_queryset(  # type: ignore[attr-defined]
+            actor,
+            "networks.vlan.view",
+            tenant_scope(VLAN.objects.filter(tenant=tenant), "site"),
+            path_field="scope",
+        )
 
 
 def _visible_ports(user: Any, ports: Any, perm: str = "dcim.device.view") -> list[Port]:
@@ -119,7 +127,7 @@ def vlan_detail(request: HttpRequest, pk: str) -> HttpResponse:
     actor = _actor(request)
     if not policy.has_perm(actor, "networks.vlan.view", vlan):
         raise Http404
-    form = VLANForm(request.POST or None, instance=vlan, tenant=vlan.tenant)
+    form = VLANForm(request.POST or None, instance=vlan, tenant=vlan.tenant, actor=request.user)
     if request.method == "POST":
         try:
             if request.POST.get("action") == "delete":
@@ -188,7 +196,12 @@ def wlan_detail(request: HttpRequest, pk: str) -> HttpResponse:
     if not policy.has_perm(actor, "networks.wlan.view", wlan):
         raise Http404
     action = request.POST.get("action")
-    form = WLANForm(request.POST if action == "edit" else None, instance=wlan, tenant=wlan.tenant)
+    form = WLANForm(
+        request.POST if action == "edit" else None,
+        instance=wlan,
+        tenant=wlan.tenant,
+        actor=request.user,
+    )
     radio_form = BroadcastForm(
         request.POST if action == "radio" else None, tenant=wlan.tenant, user=actor
     )
@@ -233,7 +246,7 @@ def vlan_create(request: HttpRequest) -> HttpResponse:
     tenant = _tenant(request)
     if not policy.has_perm(request.user, "networks.vlan.add", tenant):
         raise PermissionDenied
-    form = VLANForm(request.POST or None, tenant=tenant)
+    form = VLANForm(request.POST or None, tenant=tenant, actor=request.user)
     if request.method == "POST" and form.is_valid():
         try:
             vlan = services.create_vlan(request, _actor(request), tenant, **form.cleaned_data)
@@ -258,7 +271,7 @@ def wlan_create(request: HttpRequest) -> HttpResponse:
     tenant = _tenant(request)
     if not policy.has_perm(request.user, "networks.wlan.add", tenant):
         raise PermissionDenied
-    form = WLANForm(request.POST or None, tenant=tenant)
+    form = WLANForm(request.POST or None, tenant=tenant, actor=request.user)
     if request.method == "POST" and form.is_valid():
         try:
             wlan = services.create_wlan(request, _actor(request), tenant, **form.cleaned_data)

@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-22 04:01+0000\n"
+"POT-Creation-Date: 2026-10-22 04:05+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -930,17 +930,23 @@ msgstr "Quelle"
 msgid "comment"
 msgstr "Kommentar"
 
-#: configs/services.py:31
+#: configs/services.py:32
 msgid "The configuration is empty."
 msgstr "Die Konfiguration ist leer."
 
-#: configs/services.py:33
+#: configs/services.py:34
 msgid "The configuration must be text, not a binary file."
 msgstr "Die Konfiguration muss Text sein, keine Binärdatei."
 
-#: configs/services.py:35 configs/views.py:44
+#: configs/services.py:36 configs/views.py:44
 msgid "The configuration is larger than 2 MB."
 msgstr "Die Konfiguration ist größer als 2 MB."
+
+#: configs/services.py:125
+msgid ""
+"These versions are too long to compare here; download both and compare them "
+"locally."
+msgstr "Diese Versionen sind zu lang für einen Vergleich hier; laden Sie beide herunter und vergleichen Sie sie lokal."
 
 #: configs/views.py:30 templates/configs/list.html:4
 #: templates/dcim/device.html:30
@@ -978,7 +984,7 @@ msgstr "Neue Konfiguration für %(device)s"
 msgid "Store"
 msgstr "Speichern"
 
-#: configs/views.py:215
+#: configs/views.py:219
 #, python-format
 msgid "Version %(n)s deleted."
 msgstr "Version %(n)s gelöscht."
@@ -3529,7 +3535,10 @@ msgstr "Neue Version"
 msgid ""
 "Configurations are stored encrypted; each version is kept and every view is "
 "recorded in the audit log. Backup tools can store versions through the API."
-msgstr "Konfigurationen werden verschlüsselt gespeichert; jede Version bleibt erhalten und jedes Ansehen steht im Audit-Log. Backup-Werkzeuge können Versionen über die API speichern."
+msgstr ""
+"Konfigurationen werden verschlüsselt gespeichert; jede Version bleibt "
+"erhalten und jedes Ansehen steht im Audit-Log. Backup-Werkzeuge können "
+"Versionen über die API speichern."
 
 #: templates/configs/list.html:11 templates/core/licenses.html:11
 msgid "Version"

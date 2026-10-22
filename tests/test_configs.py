@@ -45,6 +45,9 @@ def test_versions_are_deduplicated_encrypted_and_audited(dev) -> None:
             services.add(request, actor, device, "  \n")
         with pytest.raises(ServiceError):
             services.add(request, actor, device, "a\x00b")
+        long = "\n".join(str(i) for i in range(services.MAX_DIFF_LINES + 1))
+        with pytest.raises(ServiceError, match="too long to compare"):
+            services.diff(long, long + "\nx")
 
 
 def test_permissions(dev, make_user, grant) -> None:

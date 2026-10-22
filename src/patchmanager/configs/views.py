@@ -184,9 +184,13 @@ def config_diff(request: HttpRequest, pk: str) -> HttpResponse:
         raise Http404 from exc
     old, new = _config(request, device, a), _config(request, device, b)
     actor = _actor(request)
-    lines, added, removed = services.diff(
-        services.read(request, actor, old), services.read(request, actor, new)
-    )
+    try:
+        lines, added, removed = services.diff(
+            services.read(request, actor, old), services.read(request, actor, new)
+        )
+    except ServiceError as exc:
+        messages.error(request, str(exc))
+        return redirect("configs:list", device.pk)
     return render(
         request,
         "configs/diff.html",
