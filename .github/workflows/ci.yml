@@ -153,6 +153,8 @@ jobs:
             -e REDIS_URL=redis://localhost:6379/0 \
             -e DATABASE_URL=postgresql://smoke@localhost/smoke \
             patchmanager:scan -m django check --deploy --fail-level WARNING
+      - name: Backup and restore drill (production stack)
+        run: PATCHMANAGER_IMAGE=patchmanager:scan sh scripts/drill.sh
       - if: github.event_name != 'pull_request'
         uses: docker/login-action@dbcb813823bdd20940b903addbd779551569679f # v4.6.0
         with:

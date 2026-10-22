@@ -61,7 +61,16 @@ docker compose -f compose.prod.yaml exec backup sh -c \
   'pg_restore --clean --if-exists --dbname=patchmanager /backups/<file>.dump'
 ```
 
-Point in time recovery (WAL archiving) and a CI tested restore drill follow in Phase 9.
+Every CI run tests this procedure on the production stack (`scripts/drill.sh`): it
+writes data, takes a backup, deletes the database volume, restores the dump and
+checks row counts, Row Level Security, migrations and the audit hash chain. To
+restore after losing the database volume, start `postgres` (the init script creates
+the role and the empty database again), restore the dump as above, then start the
+rest of the stack. Restore uploads with
+`tar -C /app/media -xf /backups/<file>.dump.media.tar` in a container that mounts
+the `media` volume writable. Point in time recovery (WAL archiving) is not built in;
+use your platform's volume snapshots if you need a smaller recovery point than one
+day.
 
 ## Updating
 
