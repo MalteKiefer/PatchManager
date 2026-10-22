@@ -72,6 +72,15 @@ BASE_URL = env(
 ).rstrip("/")
 INSTANCE_NAME = env("PATCHMANAGER_INSTANCE_NAME", "PatchManager")
 BRAND_LOGO = env("PATCHMANAGER_BRAND_LOGO", "")  # PNG or JPEG file shown on exported PDFs
+EDITION = env(
+    "PATCHMANAGER_EDITION", ""
+)  # free, smb, integrator, enterprise; empty: chosen in the admin area
+BACKUP_DIR = env(
+    "PATCHMANAGER_BACKUP_DIR", ""
+)  # read only mount of the backup volume, for the status page
+SOURCE_URL = env(
+    "PATCHMANAGER_SOURCE_URL", "https://github.com/MalteKiefer/PatchManager"
+)  # AGPL section 13
 DJANGO_ADMIN_ENABLED = env_bool("PATCHMANAGER_DJANGO_ADMIN", DEBUG)
 
 INSTALLED_APPS = [
@@ -100,6 +109,7 @@ INSTALLED_APPS = [
     "patchmanager.integrations",
     "patchmanager.sso",
     "patchmanager.scim",
+    "patchmanager.instance",
 ]
 if DJANGO_ADMIN_ENABLED:
     INSTALLED_APPS.insert(0, "django.contrib.admin")
@@ -183,6 +193,7 @@ CELERY_BEAT_SCHEDULE = {
         "task": "patchmanager.integrations.tasks.prune",
         "schedule": 86400,
     },
+    "prune-job-runs": {"task": "patchmanager.instance.tasks.prune_job_runs", "schedule": 86400},
 }
 
 # Webhooks: only public addresses unless listed here (CIDRs, e.g. "10.0.0.0/8")

@@ -176,6 +176,10 @@ def set_active(request: HttpRequest, actor: User, user: User, *, active: bool) -
     require(actor, "accounts.user.change", user)
     if user.pk == actor.pk:
         raise ServiceError(_("You cannot deactivate your own account."))
+    if active and (not user.is_active or user.deactivated_at):
+        from patchmanager.instance import editions
+
+        editions.check_limit("users")
     user.is_active = active
     user.deactivated_at = None if active else timezone.now()
     user.scim_deactivated = False  # an administrator decided: SCIM may not undo it

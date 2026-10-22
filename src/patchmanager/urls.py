@@ -2,7 +2,7 @@ from django.conf import settings
 from django.urls import include, path
 from django.views.i18n import set_language
 
-from patchmanager.core import metrics, views
+from patchmanager.core import metrics, system, views
 from patchmanager.tenancy.views import switch
 
 core_patterns = ([path("", views.home, name="home")], "core")
@@ -12,6 +12,7 @@ urlpatterns = [
     path("health/ready", views.ready, name="health-ready"),
     path("metrics", metrics.metrics_view, name="metrics"),
     path("i18n/setlang/", set_language, name="set_language"),
+    path("licenses/", system.licenses, name="licenses"),
     path("tenants/switch/", switch, name="tenant-switch"),
     path("manage/", include("patchmanager.manage_urls")),
     path("locations/", include("patchmanager.locations.urls")),
@@ -30,6 +31,7 @@ urlpatterns = [
     path("integrations/", include("patchmanager.integrations.urls")),
     path("", include("patchmanager.sso.urls")),
     path("", include("patchmanager.scim.urls")),
+    path("", include("patchmanager.instance.urls")),
     path("", include("patchmanager.accounts.urls")),
     path("", include(core_patterns)),
 ]

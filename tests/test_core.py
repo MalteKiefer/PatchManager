@@ -6,6 +6,7 @@ from patchmanager.core import ratelimit
 from patchmanager.tenancy.rls import EnableRowLevelSecurity
 
 
+@pytest.mark.django_db  # the 404 page shows the instance name
 def test_metrics_requires_token(client: Client, monkeypatch) -> None:
     assert client.get("/metrics", secure=True).status_code == 404
     monkeypatch.setenv("PATCHMANAGER_METRICS_TOKEN", "s3cret")
@@ -85,3 +86,25 @@ def test_collectstatic_with_manifest_storage(tmp_path, settings) -> None:
     }
     call_command("collectstatic", interactive=False, verbosity=0)
     assert (tmp_path / "staticfiles.json").exists()
+
+
+def test_german_catalog_is_complete() -> None:
+    """Every message has a German translation and none is left fuzzy."""
+    import re
+    from pathlib import Path
+
+    import patchmanager
+
+    po = Path(patchmanager.__file__).parent / "locale" / "de" / "LC_MESSAGES" / "django.po"
+    entries = po.read_text(encoding="utf-8").split("\n\n")[1:]  # the first block is the header
+    missing, fuzzy = [], []
+    for entry in entries:
+        if entry.lstrip().startswith("#~"):
+            continue  # obsolete
+        msgid = next((line for line in entry.splitlines() if line.startswith("msgid")), "")
+        values = re.findall(r'^msgstr(?:\[\d\])? ((?:".*"\n?)+)', entry, re.M)
+        if values and any(not "".join(re.findall(r'"(.*)"', v)) for v in values):
+            missing.append(msgid)
+        if re.search(r"^#, .*\bfuzzy\b", entry, re.M):
+            fuzzy.append(entry[:60])
+    assert missing == [] and fuzzy == []

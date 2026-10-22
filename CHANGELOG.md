@@ -4,6 +4,25 @@ All notable changes to this project are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the project uses
 [Semantic Versioning](https://semver.org/).
 
+## [0.9.0] - 2026-10-22
+
+### Added
+
+* Editions (Free, SMB, Integrator, Enterprise) as feature flags and limits for racks,
+  users, tenants, cross rack cabling, PDF reports, API, webhooks, SSO, SCIM, import
+  and floor plans; chosen and overridden by super admins or pinned by
+  `PATCHMANAGER_EDITION`. Self hosted instances default to Enterprise.
+* Branding: instance name, logo (also on PDF reports), brand colour and default
+  language for new accounts, changed at runtime.
+* System page with health checks, a background job monitor, backup restore points,
+  mail settings with a test mail and license notices; every page links the source.
+* Mobile menu for the header navigation.
+
+### Changed
+
+* Dark mode contrast and link presentation meet WCAG 2.2 AA (checked with axe-core
+  on 24 pages in both themes); script texts are translated.
+
 ## [0.8.0] - 2026-10-21
 
 ### Added

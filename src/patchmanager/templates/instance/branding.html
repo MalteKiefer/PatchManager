@@ -1,0 +1,17 @@
+{% extends "manage/_base.html" %}{% load i18n %}
+{% block title %}{% translate "Branding" %}{% endblock %}
+{% block manage %}
+<h1 class="mb-2">{% translate "Branding" %}</h1>
+<p class="mb-6 text-sm text-slate-500">{% translate "The name and logo appear in the header, in emails and on PDF reports; the colour is used for buttons and links." %}</p>
+<div class="grid gap-6 lg:grid-cols-[1fr_16rem]">
+  <form method="post" enctype="multipart/form-data" class="card">{% csrf_token %}
+    {% include "core/_form.html" with form=form %}
+    <button class="btn-primary">{% translate "Save" %}</button>
+  </form>
+  <section class="card" aria-labelledby="preview-h"><h2 id="preview-h" class="mb-3">{% translate "Preview" %}</h2>
+    {% if has_logo %}<img src="{% url 'instance:logo' %}?v={{ branding.version }}" alt="{% translate 'Logo' %}" class="mb-3 max-h-16">{% endif %}
+    <p class="mb-2 font-semibold">{{ instance_name }}</p>
+    <button type="button" class="btn-primary">{% translate "Button" %}</button> <a href="#">{% translate "Link" %}</a>
+  </section>
+</div>
+{% endblock %}

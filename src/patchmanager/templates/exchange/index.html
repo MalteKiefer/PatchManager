@@ -3,12 +3,13 @@
 {% block content %}
 <h1 class="mb-4">{% translate "Import and export" %}{% if current_tenant %} · {{ current_tenant.name }}{% endif %}</h1>
 <div class="grid gap-6 lg:grid-cols-2">
-  <form method="post" action="{% url 'exchange:upload' %}" enctype="multipart/form-data" class="card">{% csrf_token %}
+  {% if "import" in features %}  <form method="post" action="{% url 'exchange:upload' %}" enctype="multipart/form-data" class="card">{% csrf_token %}
     <h2 class="mb-3">{% translate "Import" %}</h2>
     {% include "core/_form.html" with form=form %}
     <p class="mb-3 text-xs text-slate-500">{% blocktranslate with n=max_rows %}The file is checked first; nothing changes until you confirm. Up to {{ n }} rows. Existing objects with the same name are updated, empty cells keep their value.{% endblocktranslate %}</p>
     <button class="btn-primary">{% translate "Check file" %}</button>
-  </form>
+  </form>{% else %}
+  <section class="card"><h2 class="mb-2">{% translate "Import" %}</h2><p class="text-sm text-slate-500">{% translate "Imports are not part of this edition." %}</p></section>{% endif %}
   <section class="card" aria-labelledby="export-h">
     <h2 id="export-h" class="mb-3">{% translate "Export" %}</h2>
     <form method="get" class="mb-3 flex items-end gap-2" id="export-scope">

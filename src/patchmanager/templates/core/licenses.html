@@ -1,0 +1,13 @@
+{% extends "base.html" %}{% load i18n %}
+{% block title %}{% translate "Licenses" %}{% endblock %}
+{% block content %}
+<h1 class="mb-4">{% translate "Licenses" %}</h1>
+<section class="card mb-6" aria-labelledby="app-h"><h2 id="app-h" class="mb-2">PatchManager {{ version }}</h2>
+  <p class="text-sm">{% blocktranslate %}PatchManager is free software under the GNU Affero General Public License, version 3. You may get, study, change and share its source code.{% endblocktranslate %}</p>
+  <p class="mt-2 text-sm"><a href="{{ source_url }}" rel="noopener">{% translate "Source code" %}</a> · <a href="https://www.gnu.org/licenses/agpl-3.0.html" rel="noopener">{% translate "License text" %}</a></p></section>
+<section class="card mb-6" aria-labelledby="ui-h"><h2 id="ui-h" class="mb-3">{% translate "Browser components" %}</h2>
+  <table class="table"><tbody>{% for name, version, license in vendored %}<tr><td>{{ name }}</td><td class="font-mono text-xs">{{ version }}</td><td>{{ license }}</td></tr>{% endfor %}</tbody></table></section>
+<section class="card overflow-x-auto p-0" aria-labelledby="py-h"><h2 id="py-h" class="p-4">{% translate "Python packages" %}</h2>
+  <table class="table"><thead><tr><th>{% translate "Package" %}</th><th>{% translate "Version" %}</th><th>{% translate "License" %}</th></tr></thead>
+  <tbody>{% for name, version, license in packages %}<tr><td>{{ name }}</td><td class="font-mono text-xs">{{ version }}</td><td class="text-xs">{{ license|default:"-" }}</td></tr>{% endfor %}</tbody></table></section>
+{% endblock %}

@@ -13,7 +13,7 @@ x-app: &app
   security_opt: ["no-new-privileges:true"]
   restart: unless-stopped
   networks: [backend]
-  volumes: ["media:/app/media"]
+  volumes: ["media:/app/media", "backups:/backups:ro"]
   secrets: [postgres_password, django_secret_key, encryption_keys, email_password]
   environment:
     PATCHMANAGER_BASE_URL: https://${PATCHMANAGER_DOMAIN:?set PATCHMANAGER_DOMAIN}
@@ -31,6 +31,8 @@ x-app: &app
     PATCHMANAGER_EMAIL_USER: ${PATCHMANAGER_EMAIL_USER:-}
     PATCHMANAGER_EMAIL_PASSWORD_FILE: /run/secrets/email_password
     PATCHMANAGER_EMAIL_FROM: ${PATCHMANAGER_EMAIL_FROM:-patchmanager@localhost}
+    PATCHMANAGER_BACKUP_DIR: /backups
+    PATCHMANAGER_EDITION: ${PATCHMANAGER_EDITION:-}
 
 services:
   migrate:

@@ -24,6 +24,7 @@ from reportlab.platypus import Image, Paragraph, SimpleDocTemplate, Spacer, Tabl
 from patchmanager.accounts import policy
 from patchmanager.cabling.models import Cable
 from patchmanager.dcim.models import Device, Port, Rack, RackSpace
+from patchmanager.instance import state
 from patchmanager.locations.models import Building, Floor, Room, Site
 from patchmanager.networks.models import VLAN
 
@@ -40,6 +41,16 @@ def _fonts() -> None:
     pdfmetrics.registerFontFamily(
         FONT, normal=FONT, bold=FONT + "-Bold", italic=FONT, boldItalic=FONT + "-Bold"
     )
+
+
+def _stored_logo() -> bytes | None:
+    """The logo uploaded in the admin area (preferred over PATCHMANAGER_BRAND_LOGO)."""
+    if not state.get().has_logo:
+        return None
+    from patchmanager.instance.models import InstanceSettings
+
+    row = InstanceSettings.objects.only("logo").first()
+    return bytes(row.logo) if row and row.logo else None
 
 
 def logo_problem() -> str | None:
@@ -98,7 +109,7 @@ def _render(title: str, subtitle: str, story: list[Any], user: Any, *, wide: boo
     out = io.BytesIO()
     size = landscape(A4) if wide else A4
     stamp = _("%(name)s · %(user)s · %(time)s") % {
-        "name": settings.INSTANCE_NAME,
+        "name": state.instance_name(),
         "user": str(user),
         "time": date_format(timezone.localtime(), "DATETIME_FORMAT"),
     }
@@ -119,11 +130,12 @@ def _render(title: str, subtitle: str, story: list[Any], user: Any, *, wide: boo
         topMargin=15 * mm,
         bottomMargin=18 * mm,
         title=title,
-        author=settings.INSTANCE_NAME,
+        author=state.instance_name(),
     )
     head: list[Any] = []
-    if settings.BRAND_LOGO and logo_problem() is None:
-        logo = Image(settings.BRAND_LOGO)
+    stored = _stored_logo()
+    if stored is not None or (settings.BRAND_LOGO and logo_problem() is None):
+        logo = Image(io.BytesIO(stored) if stored is not None else settings.BRAND_LOGO)
         ratio = 12 * mm / logo.imageHeight
         logo.drawHeight, logo.drawWidth = 12 * mm, logo.imageWidth * ratio
         logo.hAlign = "LEFT"

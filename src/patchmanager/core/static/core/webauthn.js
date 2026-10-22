@@ -1,6 +1,9 @@
 // WebAuthn ceremonies. Buttons declare data-webauthn="register|login" plus
 // data-options-url and data-verify-url. The CSRF token comes from the page.
 
+// Translated texts from <div id="js-text" data-...> in the base layout.
+const text = (key, fallback = "") => document.getElementById("js-text")?.dataset[key] || fallback;
+
 const b64 = {
   decode(value) {
     const s = value.replace(/-/g, "+").replace(/_/g, "/");
@@ -23,7 +26,7 @@ async function post(url, body) {
     credentials: "same-origin",
   });
   const data = await response.json();
-  if (!response.ok) throw new Error(data.error || "Request failed");
+  if (!response.ok) throw new Error(data.error || text("failed", "Request failed"));
   return data;
 }
 
@@ -70,7 +73,7 @@ async function run(button) {
     const result = await post(url, serialise(credential));
     location.assign(result.redirect || "/");
   } catch (error) {
-    say(error.name === "NotAllowedError" ? "The request was cancelled or timed out." : error.message);
+    say(error.name === "NotAllowedError" ? text("keyCancelled", "The request was cancelled or timed out.") : error.message);
   }
 }
 
@@ -79,7 +82,7 @@ document.addEventListener("click", (event) => {
   if (!button) return;
   event.preventDefault();
   if (!window.PublicKeyCredential) {
-    document.getElementById(button.dataset.status || "webauthn-status").textContent = "This browser does not support security keys.";
+    document.getElementById(button.dataset.status || "webauthn-status").textContent = text("keyUnsupported", "This browser does not support security keys.");
     return;
   }
   run(button);

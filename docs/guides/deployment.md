@@ -80,6 +80,14 @@ included in the daily backup archive. Limits and scanning:
 | `PATCHMANAGER_UPLOAD_MAX_MB` | `20` | Maximum upload size (Caddy limits request bodies to 25 MB) |
 | `PATCHMANAGER_CLAMD_HOST` / `PATCHMANAGER_CLAMD_PORT` | unset / `3310` | Scan uploads with clamd; uploads fail while it is unreachable |
 
+## Edition, backups and source
+
+| Variable | Default | Meaning |
+|---|---|---|
+| `PATCHMANAGER_EDITION` | empty | Pin the edition (`free`, `smb`, `integrator`, `enterprise`); empty: chosen in the admin area, Enterprise by default |
+| `PATCHMANAGER_BACKUP_DIR` | `/backups` in `compose.prod.yaml` | Read only backup volume shown on the system page |
+| `PATCHMANAGER_SOURCE_URL` | the GitHub repository | Source code link required by the AGPL for network use; point it at your fork if you change the code |
+
 ## API and webhooks
 
 | Variable | Default | Meaning |

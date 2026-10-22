@@ -7,6 +7,7 @@ from django.template.loader import render_to_string
 from django.utils import translation
 
 from patchmanager.accounts.models import User
+from patchmanager.instance import state
 
 
 @shared_task(autoretry_for=(OSError,), retry_backoff=True, max_retries=5)  # type: ignore[untyped-decorator]
@@ -17,7 +18,7 @@ def send_invitation(user_id: str, link: str) -> None:
         context = {
             "user": user,
             "link": link,
-            "instance_name": settings.INSTANCE_NAME,
+            "instance_name": state.instance_name(),
             "hours": settings.INVITATION_TTL_HOURS,
         }
         send_mail(

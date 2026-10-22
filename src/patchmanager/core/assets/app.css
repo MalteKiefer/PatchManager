@@ -52,8 +52,11 @@
   .badge-bad { @apply badge bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200; }
   .badge-muted { @apply badge bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300; }
   .nav-link { @apply block rounded-md px-3 py-2 text-sm text-slate-700 no-underline hover:bg-slate-100 hover:no-underline dark:text-slate-300 dark:hover:bg-slate-800; }
-  .nav-link[aria-current=page] { @apply bg-brand-50 font-medium text-brand-700 dark:bg-slate-800 dark:text-brand-500; }
+  .nav-link[aria-current=page] { @apply bg-brand-50 font-medium text-brand-700 dark:bg-slate-800 dark:text-white; }
   .htmx-request { @apply opacity-60; }
 }
 
 [x-cloak] { display: none !important; }
+
+/* Secondary text: slate-500 on the dark backgrounds misses WCAG AA contrast (4.5:1). */
+.dark .text-slate-500 { color: var(--color-slate-400); }

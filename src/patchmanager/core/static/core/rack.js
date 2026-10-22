@@ -1,6 +1,9 @@
 // Rack elevation: drag blocks to other units, or move them with the arrow keys.
 // Moves are POSTed as JSON; the server validates (overlap, bounds, permission).
 
+// Translated texts from <div id="js-text" data-...> in the base layout.
+const text = (key, fallback = "") => document.getElementById("js-text")?.dataset[key] || fallback;
+
 const svg = document.getElementById("rack-elevation");
 const status = document.getElementById("rack-status");
 
@@ -20,7 +23,7 @@ async function move(block, start) {
     return;
   }
   const data = await response.json().catch(() => ({}));
-  status.textContent = data.error || "The block could not be moved.";
+  status.textContent = data.error || text("moveFailed", "The block could not be moved.");
   block.removeAttribute("transform");
 }
 

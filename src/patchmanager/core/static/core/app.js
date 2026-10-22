@@ -2,6 +2,8 @@
 // are registered on alpine:init. No inline scripts anywhere (strict CSP).
 
 const THEMES = ["system", "light", "dark"];
+// Translated texts from <div id="js-text" data-...> in the base layout.
+const text = (key, fallback = "") => document.getElementById("js-text")?.dataset[key] || fallback;
 
 function applyTheme(theme) {
   const dark = theme === "dark" || (theme === "system" && matchMedia("(prefers-color-scheme: dark)").matches);
@@ -22,7 +24,15 @@ document.addEventListener("alpine:init", () => {
       document.cookie = `pm_theme=${this.theme}; path=/; max-age=31536000; samesite=lax${location.protocol === "https:" ? "; secure" : ""}`;
       applyTheme(this.theme);
     },
-    get label() { return { system: "Theme: system", light: "Theme: light", dark: "Theme: dark" }[this.theme]; },
+    get label() {
+      const key = `theme${this.theme[0].toUpperCase()}${this.theme.slice(1)}`;
+      return text(key, `Theme: ${this.theme}`);
+    },
+  }));
+  window.Alpine.data("menu", () => ({
+    open: false,
+    toggle() { this.open = !this.open; },
+    get label() { return text(this.open ? "menuClose" : "menuOpen", "Menu"); },
   }));
 });
 

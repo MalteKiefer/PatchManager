@@ -20,7 +20,12 @@ class UserManager(BaseUserManager["User"]):
     """Email based user creation."""
 
     def create_user(self, email: str, password: str | None = None, **extra: Any) -> User:
-        """Create a user with a normalised email and hashed password."""
+        """Create a user (normalised email, hashed password) within the edition's limit."""
+        if not extra.get("is_service"):
+            from patchmanager.instance import editions
+
+            editions.check_limit("users")
+            extra.setdefault("language", editions.default_language())
         user = self.model(email=self.normalize_email(email).lower(), **extra)
         user.set_password(password)  # None stores an unusable password
         user.save(using=self._db)

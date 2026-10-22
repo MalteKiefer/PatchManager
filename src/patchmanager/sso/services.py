@@ -37,6 +37,10 @@ def domain(email: str) -> str:
 
 def provider_for(email: str, *kinds: str) -> IdentityProvider | None:
     """The enabled provider responsible for the email's domain."""
+    from patchmanager.instance import editions
+
+    if not editions.enabled("sso"):
+        return None
     providers = IdentityProvider.objects.filter(enabled=True, domains__contains=[domain(email)])
     if kinds:
         providers = providers.filter(kind__in=kinds)
