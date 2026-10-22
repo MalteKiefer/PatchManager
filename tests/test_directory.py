@@ -282,3 +282,37 @@ def test_links_inside_a_site_block_its_move(make_tree, make_tenant, super_admin,
         links.add(request, super_admin, t["room"], role="part", system=doors)
         with pytest.raises(ServiceError, match="refer to this site"):
             tree.move_site(t["request"], super_admin, t["site"], make_tenant())
+
+
+def test_device_supplier_choices_are_visible_only(
+    admin_client: Client, setup, make_type, monkeypatch, system
+) -> None:
+    from patchmanager.accounts import policy
+    from patchmanager.dcim import devices
+
+    with system():
+        Organization.objects.create(tenant=setup["tenant"], name="Seen Supplier", kind="supplier")
+        Organization.objects.create(tenant=setup["tenant"], name="Hidden Supplier", kind="supplier")
+        model = make_type("Box")
+        device = devices.create(
+            setup["request"],
+            setup["request"].user,
+            device_type=model,
+            room=setup["room"],
+            rack=setup["rack"],
+            position=1,
+            name="BOX-1",
+        )
+    real = policy.has_perm
+
+    def hide(user, permission, obj=None, **kwargs):
+        if (
+            permission == "directory.organization.view"
+            and getattr(obj, "name", "") == "Hidden Supplier"
+        ):
+            return False
+        return real(user, permission, obj, **kwargs)
+
+    monkeypatch.setattr(policy, "has_perm", hide)
+    page = admin_client.get(f"/devices/{device.pk}/", secure=True).content.decode()
+    assert "Seen Supplier" in page and "Hidden Supplier" not in page
