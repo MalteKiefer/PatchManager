@@ -1,0 +1,53 @@
+{% load i18n %}<nav aria-label="{% translate 'Breadcrumb' %}" class="mb-3 text-sm"><a href="{{ back_url }}">{% if is_client %}{% translate "API clients" %}{% else %}{% translate "API tokens" %}{% endif %}</a></nav>
+<h1 class="mb-6">{{ title }}</h1>
+<div class="grid gap-6 xl:grid-cols-[minmax(0,1fr)_16rem]">
+  <form method="post" class="card space-y-8" novalidate>{% csrf_token %}
+    {% if form.non_field_errors %}<div class="rounded-md border border-red-200 bg-red-50 px-4 py-2 text-sm text-red-800 dark:border-red-900 dark:bg-red-950 dark:text-red-200" role="alert">{{ form.non_field_errors }}</div>{% endif %}
+
+    <section aria-labelledby="basics-h">
+      <h2 id="basics-h" class="mb-4">{% if is_client %}{% translate "Client" %}{% else %}{% translate "Token" %}{% endif %}</h2>
+      <div class="field">{{ form.name.label_tag }}{{ form.name }}{{ form.name.errors }}</div>
+      <fieldset class="field">
+        <legend class="mb-2 text-sm font-medium text-slate-700 dark:text-slate-300">{{ form.access.label }}</legend>
+        <div class="grid gap-3 sm:grid-cols-2">
+          {% for choice in form.access %}<label class="choice" for="{{ choice.id_for_label }}">{{ choice.tag }}
+            <span><span class="block font-medium">{{ choice.choice_label }}</span>
+              <span class="text-slate-500">{% if choice.data.value == "write" %}{% translate "Create, change and delete, within your own rights." %}{% else %}{% translate "Look up records, change nothing." %}{% endif %}</span></span></label>{% endfor %}
+        </div>
+        {{ form.access.errors }}
+      </fieldset>
+      {% if form.days %}<div class="grid gap-4 sm:grid-cols-2">
+        <div class="field">{{ form.days.label_tag }}{{ form.days }}{{ form.days.errors }}</div>
+        <div class="field">{{ form.tenant.label_tag }}{{ form.tenant }}{{ form.tenant.errors }}</div>
+      </div>{% endif %}
+    </section>
+
+    <section aria-labelledby="limits-h">
+      <h2 id="limits-h" class="mb-1">{% translate "Limits" %}</h2>
+      <p class="mb-4 text-sm text-slate-500">{% translate "Optional. Without limits the token can do what you can do; each limit narrows it further." %}</p>
+      <div class="field">{{ form.scope.label_tag }}{{ form.scope }}<p class="help">{{ form.scope.help_text }}</p>{{ form.scope.errors }}</div>
+      <fieldset>
+        <legend class="mb-1 text-sm font-medium text-slate-700 dark:text-slate-300">{{ form.object_types.label }}</legend>
+        <p class="help mb-3 text-xs text-slate-500">{{ form.object_types.help_text }}</p>
+        <div class="gap-3 sm:columns-2 2xl:columns-3">
+          {% for key, heading, boxes in form.type_groups %}<fieldset class="check-group mb-3 break-inside-avoid">
+            <legend>{{ heading }}</legend>
+            <label class="mb-1 border-b border-slate-100 pb-1 text-slate-500 dark:border-slate-800"><input type="checkbox" data-check-group="{{ key }}"> {% translate "All" %}</label>
+            {% for box in boxes %}<label for="{{ box.id_for_label }}"><input type="checkbox" name="{{ box.data.name }}" value="{{ box.data.value }}" id="{{ box.id_for_label }}" data-group="{{ key }}"{% if box.data.selected %} checked{% endif %}> {{ box.choice_label }}</label>{% endfor %}
+          </fieldset>{% endfor %}
+        </div>
+        {{ form.object_types.errors }}
+      </fieldset>
+    </section>
+
+    <div class="flex flex-wrap gap-2"><button class="btn-primary">{% translate "Create" %}</button><a class="btn-secondary" href="{{ back_url }}">{% translate "Cancel" %}</a></div>
+  </form>
+  <aside class="card h-fit text-sm" aria-labelledby="note-h">
+    <h2 id="note-h" class="mb-3">{% translate "Good to know" %}</h2>
+    <ul class="list-disc space-y-2 pl-5 text-slate-600 dark:text-slate-300">
+      <li>{% if is_client %}{% translate "The client secret is shown once after creating. Store it right away." %}{% else %}{% translate "The token is shown once after creating. Store it right away." %}{% endif %}</li>
+      <li>{% translate "It never has more rights than you, even with write access." %}</li>
+      <li>{% translate "Changes made with it are recorded in the audit log under your name." %}</li>
+    </ul>
+  </aside>
+</div>

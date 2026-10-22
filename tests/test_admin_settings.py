@@ -162,3 +162,17 @@ def test_uploads_save_apart_from_storage_and_bucket_test(admin_client: Client, m
     assert "The bucket can be written and read" in page and 'value="pm-files"' in page
     assert config.get().s3_bucket == ""  # testing saves nothing
     assert "Enter a bucket to test" in _post(admin_client, "storage", {**STORAGE, "action": "test"})
+def test_unreadable_settings_do_not_abort_the_request(db, monkeypatch) -> None:
+    """A failed read (for example before migrating) falls back without breaking the transaction."""
+    from django.db import transaction
+    from django.db.models.expressions import RawSQL
+
+    from patchmanager.instance import state
+
+    broken = InstanceSettings.objects.annotate(x=RawSQL("no_such_column", []))
+    monkeypatch.setattr(InstanceSettings.objects, "only", lambda *a: broken)
+    monkeypatch.setattr(InstanceSettings.objects, "defer", lambda *a: broken)
+    with transaction.atomic():
+        assert config.get() == config.defaults()
+        assert state.get().name == ""
+        assert InstanceSettings.objects.count() >= 0  # the transaction is still usable

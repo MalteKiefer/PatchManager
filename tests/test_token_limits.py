@@ -83,7 +83,7 @@ def test_token_page_offers_limits(admin_client: Client, two_sites, system) -> No
         "/account/tokens/new/",
         {
             "name": "branch",
-            "scopes": ["read"],
+            "access": "read",
             "days": 30,
             "tenant": "",
             "object_types": ["dcim.device"],
@@ -99,3 +99,14 @@ def test_token_page_offers_limits(admin_client: Client, two_sites, system) -> No
         assert token.tenant_id == two_sites["tenant"].pk
     listing = admin_client.get("/account/tokens/", secure=True).content.decode()
     assert "one location only" in listing
+
+
+def test_token_form_groups_types_and_write_includes_read(admin_client) -> None:
+    page = admin_client.get("/account/tokens/new/", secure=True).content.decode()
+    assert "Racks and devices" in page and 'data-group="dcim"' in page
+    client_page = admin_client.get("/manage/api-clients/new/", secure=True).content.decode()
+    assert 'aria-label="Administration"' in client_page  # admin side menu
+    admin_client.post("/manage/api-clients/new/", {"name": "CMDB", "access": "write"}, secure=True)
+    from patchmanager.api.models import ApiClient
+
+    assert sorted(ApiClient.objects.get(name="CMDB").scopes) == ["read", "write"]

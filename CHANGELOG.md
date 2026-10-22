@@ -15,6 +15,9 @@ All notable changes to this project are documented here. The format follows
   worker copies the backup volume encrypted with restic to S3 or B2 after every new
   dump, with retention, a check, *Copy now* and the last result on the system page
   (ADR 0036). The compose `offsite` profile is removed.
+* Addresses of virtual machines are linked in IPAM: importing or synchronising a
+  machine creates missing addresses or takes over free ones and keeps them on its
+  network card; addresses used elsewhere are reported, not moved.
 * Administration → Settings: sign in rules, mail server, upload limit and virus
   scanner, S3/B2 file storage, map tiles and webhook and API limits are set in the
   web interface and apply without a restart; environment variables are only initial
@@ -57,8 +60,18 @@ All notable changes to this project are documented here. The format follows
 * Floor plan pins: floor devices are drawn as pins at their exact spot; a click shows
   the device with its room, photos, notes and the patch target of every port.
 
+### Changed
+
+* The API token and client forms group the kinds of objects by area with an
+  "All" box per group and offer read or read and write as one choice; the client
+  form keeps the administration menu. The system page links mail and sign in
+  rules to the settings.
+
 ### Fixed
 
+* Pages failed with "current transaction is aborted" when the instance settings
+  could not be read (for example before running the latest migration); the read now
+  falls back to the defaults without breaking the request.
 * Webhook pages now show the administration side menu like the other admin pages.
 * The production stack let the application containers reach nothing outside the
   host (the backend network is internal), so mail, SSO, webhooks, DNS provider

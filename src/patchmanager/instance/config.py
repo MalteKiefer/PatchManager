@@ -13,7 +13,7 @@ from typing import Any
 
 from django.conf import settings
 from django.core.cache import cache
-from django.db import DatabaseError
+from django.db import DatabaseError, transaction
 
 from patchmanager.core import crypto
 
@@ -175,7 +175,9 @@ def get() -> Config:
         from patchmanager.instance.models import InstanceSettings
 
         try:
-            row = InstanceSettings.objects.only("config").first()
+            # Savepoint: a failed read must not abort the request's transaction.
+            with transaction.atomic():
+                row = InstanceSettings.objects.only("config").first()
         except DatabaseError:
             logger.exception("instance settings unreadable, using the environment")
             return defaults()
