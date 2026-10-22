@@ -100,10 +100,10 @@ def test_unknown_or_broken_files_rejected(payload) -> None:
         uploads.clean(payload)
 
 
-@override_settings(UPLOAD_MAX_BYTES=100)
+@override_settings(UPLOAD_MAX_BYTES=1024 * 1024)
 def test_size_limit() -> None:
     with pytest.raises(ServiceError, match="too large"):
-        uploads.clean(image_bytes(size=(300, 300)))
+        uploads.clean(b"\x89PNG\r\n\x1a\n" + bytes(2 * 1024 * 1024))
 
 
 def test_decompression_bomb_rejected(monkeypatch) -> None:

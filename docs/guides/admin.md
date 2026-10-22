@@ -110,6 +110,28 @@ their key, entries in use cannot be deleted.
 default language of new accounts. Every feature is available on every
 installation; there are no editions, limits or licence keys.
 
+## Settings
+
+*Administration → Settings* holds what used to need the environment, in five parts:
+
+* **Sign in**: minimum password length, a second factor for everyone, session
+  lifetime and idle timeout, lockout after failed sign ins, attempts per address and
+  how long invitation links stay valid.
+* **Mail**: SMTP server, port, STARTTLS, user, password and sender, with a test mail.
+* **Files**: largest upload (up to 25 MB), the clamd virus scanner and S3 compatible
+  object storage (AWS S3, Backblaze B2, Wasabi). Saving a bucket writes and deletes a
+  test file first, so a wrong name or key is reported right away. Files stored before
+  stay readable from the media volume.
+* **Maps**: tile server and attribution, or none.
+* **Integrations**: private networks webhooks may reach, plain http webhooks and the
+  API rate per user.
+
+Changes apply to all processes within a request and are recorded in the audit log
+(setting names only). Passwords and keys are stored encrypted with the instance keys
+and never shown again; leave the field empty to keep them. The off-site copy of
+backups keeps its own credentials on the server (see the deployment guide), so a
+compromised web process cannot delete backups.
+
 ## System
 
 *Administration → System* checks the database, migrations, cache, file storage

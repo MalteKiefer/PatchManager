@@ -30,6 +30,16 @@ def _isolation() -> Iterator[None]:
     cache.clear()
 
 
+@pytest.fixture(autouse=True)
+def _config_without_db(request: pytest.FixtureRequest, monkeypatch: pytest.MonkeyPatch) -> None:
+    """Tests without a database read the admin settings from the environment defaults."""
+    from patchmanager.instance import config
+
+    uses_db = {"db", "transactional_db"} & set(request.fixturenames)
+    if not uses_db and request.node.get_closest_marker("django_db") is None:
+        monkeypatch.setattr(config, "get", config.defaults)
+
+
 @pytest.fixture
 def system() -> Callable[[], Any]:
     """Context manager with visibility of every tenant, for test setup and assertions."""

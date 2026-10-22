@@ -14,11 +14,11 @@ from dataclasses import dataclass
 from xml.etree.ElementTree import Element, SubElement, tostring  # nosec B405: only used to serialise our own tree
 
 from defusedxml import ElementTree as SafeET
-from django.conf import settings
 from django.utils.translation import gettext as _
 from PIL import Image, ImageOps, UnidentifiedImageError
 
 from patchmanager.accounts.services import ServiceError
+from patchmanager.instance import config as instance_config
 
 Image.MAX_IMAGE_PIXELS = 40_000_000  # decompression bomb guard
 
@@ -179,7 +179,7 @@ def is_raster(data: bytes) -> bool:
 
 def clean(data: bytes) -> CleanFile:
     """Validate by content and return safe bytes, or raise :class:`ServiceError`."""
-    if len(data) > settings.UPLOAD_MAX_BYTES:
+    if len(data) > instance_config.get().upload_max_bytes:
         raise ServiceError(_("The file is too large."))
     if is_raster(data):
         result = _reencode(data)
@@ -194,12 +194,12 @@ def clean(data: bytes) -> CleanFile:
 
 
 def scan(data: bytes) -> None:
-    """Ask clamd (INSTREAM) when ``PATCHMANAGER_CLAMD_HOST`` is set. Fails closed."""
-    host = settings.CLAMD_HOST
-    if not host:
+    """Ask clamd (INSTREAM) when a scanner is configured. Fails closed."""
+    scanner = instance_config.get()
+    if not scanner.clamd_host:
         return
     try:
-        with socket.create_connection((host, settings.CLAMD_PORT), timeout=30) as sock:
+        with socket.create_connection((scanner.clamd_host, scanner.clamd_port), timeout=30) as sock:
             sock.sendall(b"zINSTREAM\0")
             for offset in range(0, len(data), 65536):
                 chunk = data[offset : offset + 65536]

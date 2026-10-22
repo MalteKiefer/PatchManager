@@ -40,16 +40,13 @@ def test_env_missing_required_value(monkeypatch) -> None:
 def _settings_in_subprocess(extra: dict[str, str]) -> subprocess.CompletedProcess[str]:
     """Import the settings fresh: they are evaluated once per process."""
     environment = {**os.environ, **extra, "DJANGO_SETTINGS_MODULE": "patchmanager.settings"}
-    code = (
-        "import json, patchmanager.settings as s;"
-        "print(json.dumps(s.STORAGES['attachments'], default=str))"
-    )
+    code = "import json, patchmanager.settings as s;print(json.dumps(s.S3_DEFAULTS))"
     return subprocess.run(  # noqa: S603 - fixed interpreter and code, no outside input
         [sys.executable, "-c", code], env=environment, capture_output=True, text=True, check=False
     )
 
 
-def test_s3_bucket_switches_attachment_storage(tmp_path) -> None:
+def test_s3_environment_gives_initial_values(tmp_path) -> None:
     secret = tmp_path / "s3_secret"
     secret.write_text("secret-value\n", encoding="utf-8")
     result = _settings_in_subprocess(
@@ -61,11 +58,8 @@ def test_s3_bucket_switches_attachment_storage(tmp_path) -> None:
         }
     )
     assert result.returncode == 0, result.stderr
-    storage = json.loads(result.stdout)
-    assert storage["BACKEND"] == "storages.backends.s3.S3Storage"
-    assert storage["OPTIONS"]["bucket_name"] == "pm-files"
-    assert storage["OPTIONS"]["secret_key"] == "secret-value"
-    assert storage["OPTIONS"]["default_acl"] is None
+    s3 = json.loads(result.stdout)
+    assert (s3["bucket"], s3["secret_access_key"]) == ("pm-files", "secret-value")
 
 
 def test_s3_endpoint_must_use_https() -> None:

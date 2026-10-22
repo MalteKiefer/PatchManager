@@ -13,6 +13,8 @@ class InstanceSettings(TimestampedModel):
     logo = models.BinaryField(null=True, blank=True)  # PNG, re-encoded on upload
     brand_hue = models.PositiveSmallIntegerField(_("brand colour (hue)"), default=190)
     default_language = models.CharField(_("default language"), max_length=8, default="en")
+    # Operational settings (instance.config); secrets inside are encrypted.
+    config = models.JSONField(default=dict, blank=True)
 
     class Meta:
         verbose_name = _("instance settings")

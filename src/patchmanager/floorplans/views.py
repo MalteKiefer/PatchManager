@@ -4,7 +4,6 @@ import json
 from typing import Any
 
 from django import forms
-from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
@@ -22,6 +21,7 @@ from patchmanager.core.utils import parse_uuid
 from patchmanager.dcim.models import Device, Rack
 from patchmanager.floorplans import services
 from patchmanager.floorplans.models import FloorPlan
+from patchmanager.instance import config as instance_config
 from patchmanager.locations.models import Floor, Room
 from patchmanager.locations.views import node_url
 
@@ -209,7 +209,7 @@ def editor(request: HttpRequest, floor_pk: str) -> HttpResponse:
             "breadcrumbs": [(a, node_url(a)) for a in [*floor.ancestors(), floor]],
             "unplaced_racks": [r for r in scene["racks"] if r["x"] is None],
             "unplaced_devices": [d for d in scene["devices"] if d["x"] is None],
-            "max_upload_mb": settings.UPLOAD_MAX_BYTES // (1024 * 1024),
+            "max_upload_mb": instance_config.get().upload_max_mb,
         },
     )
 
@@ -256,7 +256,7 @@ def upload(request: HttpRequest, floor_pk: str) -> HttpResponse:
         return redirect("floorplans:editor", floor.pk)
     upload_file = form.cleaned_data["file"]
     try:
-        if upload_file.size > settings.UPLOAD_MAX_BYTES:
+        if upload_file.size > instance_config.get().upload_max_bytes:
             raise ServiceError(_("The file is too large."))
         services.upload(
             request, _actor(request), floor, name=upload_file.name, data=upload_file.read()

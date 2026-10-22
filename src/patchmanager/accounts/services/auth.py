@@ -6,7 +6,6 @@ from datetime import datetime, timedelta
 from enum import StrEnum
 from typing import TYPE_CHECKING
 
-from django.conf import settings
 from django.contrib.auth import authenticate, login, logout
 from django.db.models import F
 from django.http import HttpRequest
@@ -19,6 +18,7 @@ from patchmanager.accounts.models import Role, User
 from patchmanager.accounts.roles import SYSTEM_ROLES
 from patchmanager.audit import services as audit
 from patchmanager.core import metrics, ratelimit
+from patchmanager.instance import config as instance_config
 from patchmanager.tenancy.models import Tenant
 from patchmanager.tenancy.rls import system_context
 
@@ -58,7 +58,8 @@ def _ip(request: HttpRequest) -> str:
 
 def password_step(request: HttpRequest, email: str, password: str) -> LoginResult:
     """Check credentials. On success either log in or hand over to the MFA step."""
-    if not ratelimit.hit(f"login-ip:{_ip(request)}", limit=settings.LOGIN_RATE_PER_IP, window=600):
+    per_ip = instance_config.get().login_rate_per_ip
+    if not ratelimit.hit(f"login-ip:{_ip(request)}", limit=per_ip, window=600):
         audit.record("auth.login.throttled", request=request, data={"email": email[:254]})
         metrics.LOGINS.labels("throttled").inc()
         return LoginResult(Outcome.THROTTLED, _("Too many attempts. Try again in a few minutes."))
@@ -144,8 +145,9 @@ def begin_second_factor(request: HttpRequest, user: User) -> None:
 def _register_failure(user: User) -> None:
     User.objects.filter(pk=user.pk).update(failed_login_count=F("failed_login_count") + 1)
     user.refresh_from_db(fields=["failed_login_count"])
-    if user.failed_login_count >= settings.LOGIN_MAX_FAILURES:
-        until = timezone.now() + timedelta(seconds=settings.LOGIN_LOCKOUT_SECONDS)
+    limits = instance_config.get()
+    if user.failed_login_count >= limits.login_max_failures:
+        until = timezone.now() + timedelta(seconds=limits.login_lockout_seconds)
         User.objects.filter(pk=user.pk).update(locked_until=until, failed_login_count=0)
         audit.record(
             "auth.account.locked", obj=user, data={"until": until.isoformat(), "reason": "failures"}
@@ -212,7 +214,7 @@ def has_mfa(user: User) -> bool:
 
 def mfa_required(user: User) -> bool:
     """MFA is required globally, by any assigned role, or by any tenant the user belongs to."""
-    if settings.MFA_REQUIRED_FOR_ALL:
+    if instance_config.get().mfa_required:
         return True
     from patchmanager.accounts import policy
 

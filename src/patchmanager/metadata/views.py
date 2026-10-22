@@ -1,7 +1,6 @@
 """Upload, download and remove attachments; add and remove notes."""
 
 from django import forms
-from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
@@ -14,6 +13,7 @@ from django.views.decorators.http import require_GET, require_POST
 
 from patchmanager.accounts.models import User
 from patchmanager.accounts.services import PermissionDeniedError, ServiceError
+from patchmanager.instance import config as instance_config
 from patchmanager.metadata import services
 from patchmanager.metadata.models import Attachment, Note
 
@@ -61,7 +61,7 @@ def upload(request: HttpRequest, label: str, object_id: str) -> HttpResponse:
     upload_file = form.cleaned_data["file"]
     try:
         target = services.resolve(label, object_id)
-        if upload_file.size > settings.UPLOAD_MAX_BYTES:
+        if upload_file.size > instance_config.get().upload_max_bytes:
             raise ServiceError(_("The file is too large."))
         services.attach(
             request,

@@ -5,7 +5,6 @@ from dataclasses import dataclass
 from typing import Any
 
 from django import forms
-from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
@@ -24,6 +23,7 @@ from patchmanager.accounts.services import ServiceError
 from patchmanager.core import lists
 from patchmanager.core.hierarchy import HierarchyNode
 from patchmanager.dcim.models import Rack
+from patchmanager.instance import config as instance_config
 from patchmanager.locations import services
 from patchmanager.locations.forms import (
     BuildingForm,
@@ -111,8 +111,8 @@ def index(request: HttpRequest) -> HttpResponse:
             "sites": sites,
             "markers": markers,
             "can_add": can_add,
-            "map_tiles": settings.MAP_TILE_URL,
-            "map_attribution": settings.MAP_ATTRIBUTION,
+            "map_tiles": instance_config.get().map_tile_url,
+            "map_attribution": instance_config.get().map_attribution,
         },
     )
 
@@ -140,8 +140,8 @@ def site_create(request: HttpRequest) -> HttpResponse:
         "locations/site_form.html",
         {
             "form": form,
-            "map_tiles": settings.MAP_TILE_URL,
-            "map_attribution": settings.MAP_ATTRIBUTION,
+            "map_tiles": instance_config.get().map_tile_url,
+            "map_attribution": instance_config.get().map_attribution,
         },
     )
 
@@ -321,8 +321,8 @@ def node_detail(request: HttpRequest, level: str, pk: str) -> HttpResponse:
         "breadcrumbs": [(a, node_url(a)) for a in node.ancestors()],
         "tree": _tree(request, node) if level == "site" else None,
         "can_move": level == "site" and policy.has_perm(actor, "locations.site.move_tenant", node),
-        "map_tiles": settings.MAP_TILE_URL,
-        "map_attribution": settings.MAP_ATTRIBUTION,
+        "map_tiles": instance_config.get().map_tile_url,
+        "map_attribution": instance_config.get().map_attribution,
         "site_marker": [
             {
                 "name": node.name,

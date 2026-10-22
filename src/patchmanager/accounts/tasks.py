@@ -1,12 +1,12 @@
 """Background jobs for accounts."""
 
 from celery import shared_task
-from django.conf import settings
 from django.core.mail import send_mail
 from django.template.loader import render_to_string
 from django.utils import translation
 
 from patchmanager.accounts.models import User
+from patchmanager.instance import config as instance_config
 from patchmanager.instance import state
 
 
@@ -19,7 +19,7 @@ def send_invitation(user_id: str, link: str) -> None:
             "user": user,
             "link": link,
             "instance_name": state.instance_name(),
-            "hours": settings.INVITATION_TTL_HOURS,
+            "hours": instance_config.get().invitation_ttl_hours,
         }
         send_mail(
             subject=render_to_string("accounts/email/invitation_subject.txt", context).strip(),

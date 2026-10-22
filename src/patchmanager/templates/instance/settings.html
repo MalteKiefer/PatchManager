@@ -1,0 +1,20 @@
+{% extends "manage/_base.html" %}{% load i18n %}
+{% block title %}{% translate "Settings" %} · {{ title }}{% endblock %}
+{% block manage %}
+<h1 class="mb-4">{% translate "Settings" %}</h1>
+<nav class="mb-4" aria-label="{% translate 'Settings sections' %}">
+  <ul class="flex flex-wrap gap-1">{% for key, label in sections %}<li><a class="nav-link" href="{% url 'instance:settings' key %}" {% if key == section %}aria-current="page"{% endif %}>{{ label }}</a></li>{% endfor %}</ul>
+</nav>
+<form method="post" class="card max-w-2xl" novalidate>{% csrf_token %}
+  <h2 class="mb-1">{{ title }}</h2>
+  <p class="mb-4 text-sm text-slate-500">{{ intro }}</p>
+  {% if secret_stored %}<p class="mb-4 text-sm"><span class="badge-ok">{% translate "A secret is stored" %}</span></p>{% endif %}
+  {% include "core/_form.html" %}
+  <button class="btn-primary">{% translate "Save" %}</button>
+</form>
+{% if section == "mail" %}
+<form method="post" action="{% url 'manage:test-mail' %}" class="mt-4">{% csrf_token %}<input type="hidden" name="back" value="settings">
+  <button class="btn-secondary">{% translate "Send a test mail to me" %}</button>
+</form>
+{% endif %}
+{% endblock %}

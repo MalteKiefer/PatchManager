@@ -165,15 +165,24 @@ docker compose -f compose.prod.yaml pull
 docker compose -f compose.prod.yaml up -d
 ```
 
+## Settings in the admin area
+
+Sign in rules, mail, uploads and file storage, maps and webhook and API limits are
+set by administrators under *Administration → Settings* and take effect without a
+restart; see the [administration guide](admin.md#settings). The `PATCHMANAGER_*`
+variables in the following sections are only their initial values until someone
+saves the page. What stays in the environment: database, secret key, encryption
+keys, domain and proxy, backup volume and log level.
+
 ## Uploads
 
 Photos and files are stored encrypted in the `media` volume (`/app/media`) and are
-included in the daily backup archive. Set `PATCHMANAGER_S3_BUCKET` to keep them in
-S3 compatible object storage instead (AWS S3, Backblaze B2, Wasabi, Ceph, Garage).
-The application encrypts every file before it leaves the process, so the provider
-only sees ciphertext. Keep the bucket private and turn on object versioning or a
-retention lock there: the database backup does not contain the files. Limits and
-scanning:
+included in the daily backup archive. A bucket in S3 compatible object storage (AWS
+S3, Backblaze B2, Wasabi, Ceph, Garage) can be used instead, set under *Settings →
+Files*. The application encrypts every file before it leaves the process, so the
+provider only sees ciphertext. Keep the bucket private and turn on object versioning
+or a retention lock there: the database backup does not contain the files. Initial
+values:
 
 | Variable | Default | Meaning |
 |---|---|---|
@@ -186,9 +195,9 @@ scanning:
 | `PATCHMANAGER_S3_PREFIX` | `attachments` | Folder inside the bucket |
 | `PATCHMANAGER_S3_ADDRESSING_STYLE` | provider default | `path` for servers without virtual host buckets |
 
-Switching an existing installation to a bucket: copy the files first, for example
-`rclone copy` of the `media` volume's `attachments` folder into the bucket prefix,
-then set the variables and restart `app` and `worker`.
+Switching to a bucket: new files go to the bucket, files stored before stay readable
+from the `media` volume. To move them as well, copy the volume's `attachments` folder
+into the bucket prefix (for example with `rclone copy`).
 
 ## Backups and source
 
@@ -198,6 +207,8 @@ then set the variables and restart `app` and `worker`.
 | `PATCHMANAGER_SOURCE_URL` | the GitHub repository | Source code link required by the AGPL for network use; point it at your fork if you change the code |
 
 ## API and webhooks
+
+Initial values of *Settings → Integrations*:
 
 | Variable | Default | Meaning |
 |---|---|---|
@@ -216,10 +227,10 @@ cannot be used.
 
 ## Maps
 
-Site maps load tiles from OpenStreetMap in the user's browser. Set
-`PATCHMANAGER_MAP_TILE_URL` to your own tile server (and
-`PATCHMANAGER_MAP_ATTRIBUTION`), or to an empty value to disable maps. The tile
-origin is added to the Content Security Policy automatically.
+Site maps load tiles from OpenStreetMap in the user's browser. Choose another tile
+server, or none, under *Settings → Maps* (initial values `PATCHMANAGER_MAP_TILE_URL`
+and `PATCHMANAGER_MAP_ATTRIBUTION`). The tile origin is added to the Content Security
+Policy automatically.
 
 ## Health
 

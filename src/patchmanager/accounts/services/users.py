@@ -18,6 +18,7 @@ from patchmanager.accounts.models import Assignment, Invitation, Role, SetupToke
 from patchmanager.accounts.roles import SUPER_ADMIN
 from patchmanager.accounts.services import PermissionDeniedError, ServiceError
 from patchmanager.audit import services as audit
+from patchmanager.instance import config as instance_config
 from patchmanager.tenancy.models import Tenant
 
 SETUP_TOKEN_TTL = timedelta(hours=1)
@@ -102,7 +103,8 @@ def invite(
                 user=user,
                 token_hash=_hash(token),
                 invited_by=actor,
-                expires_at=timezone.now() + timedelta(hours=settings.INVITATION_TTL_HOURS),
+                expires_at=timezone.now()
+                + timedelta(hours=instance_config.get().invitation_ttl_hours),
             )
     except IntegrityError as exc:
         raise ServiceError(_("A user with this email already exists.")) from exc

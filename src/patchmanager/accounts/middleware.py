@@ -14,6 +14,7 @@ from django.utils.dateparse import parse_datetime
 from django.utils.translation import gettext as _
 
 from patchmanager.accounts import sessions
+from patchmanager.instance import config as instance_config
 
 ALWAYS_OPEN = ("/static/", "/health/", "/metrics", "/i18n/")
 MFA_SETUP_REQUIRED = "_pm_mfa_setup"
@@ -38,8 +39,8 @@ class SessionPolicyMiddleware:
             created = parse_datetime(request.session.get(sessions.CREATED, "")) or now
             last = parse_datetime(request.session.get(sessions.LAST_ACTIVITY, "")) or now
             if now - created > timedelta(
-                seconds=settings.SESSION_MAX_AGE
-            ) or now - last > timedelta(seconds=settings.SESSION_IDLE_TIMEOUT):
+                seconds=instance_config.get().session_max_age
+            ) or now - last > timedelta(seconds=instance_config.get().session_idle_timeout):
                 logout(request)
                 messages.info(request, _("Your session expired. Please sign in again."))
                 return redirect(settings.LOGIN_URL)

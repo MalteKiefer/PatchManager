@@ -74,3 +74,4 @@ nav:
       - adr/0032-servers-virtualisation-storage.md
       - adr/0033-api-token-limits.md
       - adr/0034-object-storage-and-offsite-backups.md
+      - adr/0035-settings-in-the-admin-area.md
