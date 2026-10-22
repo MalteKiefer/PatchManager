@@ -10,6 +10,7 @@ from a variables file first.
 
 import ipaddress
 import re
+import unicodedata
 from dataclasses import dataclass, field
 from typing import Any
 
@@ -59,7 +60,6 @@ _IGNORED = frozenset(
 _TEMPLATE = re.compile(r"%([A-Za-z0-9_.-]+)%")
 _RANGE_END = re.compile(r"^(.*?)(\d+)$")
 OSPF_AREA = re.compile(r"^(\d{1,10}|\d{1,3}(\.\d{1,3}){3}|backbone)$")
-_UNSAFE = re.compile(r'[\x00-\x1f\x7f"]')
 
 
 @dataclass
@@ -200,7 +200,11 @@ def fill_template(text: str, variables: dict[str, Any], warnings: list[str]) -> 
     variables = {
         k: v for k, v in variables.items() if len(str(v)) <= MAX_VARIABLE and "\n" not in str(v)
     }
-    for number, raw in enumerate(text.splitlines(), 1):
+    # Lines end at "\n" only, as on the switch; other breaks are not new lines here.
+    for number, raw in enumerate(text.split("\n"), 1):
+        raw = raw.removesuffix("\r")
+        if len(raw) > MAX_LINE:  # before variables can make it longer
+            raise ParseError(f"line {number} is longer than {MAX_LINE} characters")
         stripped = raw.strip()
         if match := re.fullmatch(r"%if\s+([A-Za-z0-9_.-]+)\s*(?:(!?=)\s*(.*?))?\s*%", stripped):
             name, op, expected = match.groups()
@@ -220,9 +224,16 @@ def fill_template(text: str, variables: dict[str, Any], warnings: list[str]) -> 
         if not active[-1]:
             continue
 
-        def put(match: re.Match[str]) -> str:
+        grown = len(raw)
+
+        def put(match: re.Match[str], number: int = number) -> str:
+            nonlocal grown
             value = variables.get(match.group(1))
-            return match.group(0) if value is None else str(value)
+            text = match.group(0) if value is None else str(value)
+            grown += len(text) - len(match.group(0))
+            if grown > MAX_LINE:
+                raise ParseError(f"line {number} is longer than {MAX_LINE} characters")
+            return text
 
         line = _TEMPLATE.sub(put, raw)
         if missing := _TEMPLATE.findall(line):
@@ -399,8 +410,11 @@ def _command(config: Config, head: str, body: list[str]) -> None:
     elif key == "vlan" and len(words) == 2 and words[1].isdigit():
         _vlan(config, int(words[1]), body)
     elif key == "interface" and len(words) == 2:
+        settings = _interface_settings(body)
         for name in config.expand(words[1]):
-            _interface(config, name, body)
+            port = config.interface(name)
+            for key, value in settings.items():
+                setattr(port, key, value)
     elif key == "trunk" and len(words) >= 3:
         protocol = "lacp" if len(words) > 3 and words[3].lower() == "lacp" else "static"
         name = words[2][0].upper() + words[2][1:].lower()  # trk1 -> Trk1
@@ -481,20 +495,22 @@ def _vlan(config: Config, vid: int, body: list[str]) -> None:
             vlan.dhcp = False
 
 
-def _interface(config: Config, name: str, body: list[str]) -> None:
-    port = config.interface(name)
+def _interface_settings(body: list[str]) -> dict[str, Any]:
+    """What an ``interface`` block sets (read once, applied to every port of its range)."""
+    probe = Interface("")
+    settings: dict[str, Any] = {}
     for line in body:
         parts = line.split()
         if parts[0] == "name" and len(parts) > 1:
-            port.label = _unquote(line.split(None, 1)[1])[:100]
-        elif parts[0] == "disable":
-            port.enabled = False
-        elif parts[0] == "enable":
-            port.enabled = True
+            settings["label"] = _unquote(line.split(None, 1)[1])[:100]
+        elif parts[0] in ("disable", "enable"):
+            settings["enabled"] = parts[0] == "enable"
         elif parts[0] == "tunneled-node-server":
-            port.tunneled = True
+            settings["tunneled"] = True
         elif parts[0] == "spanning-tree":
-            _port_stp(port, parts[1:])
+            _port_stp(probe, parts[1:])
+    settings.update({k: True for k in ("edge", "bpdu_guard", "root_guard") if getattr(probe, k)})
+    return settings
 
 
 def _port_stp(port: Interface, options: list[str]) -> None:
@@ -620,8 +636,14 @@ def _stack(config: Config, key: str, words: list[str], body: list[str]) -> None:
 
 
 def _text(value: str) -> str:
-    """A value inside double quotes: no quotes or control characters (no new lines)."""
-    return _UNSAFE.sub("", str(value))
+    """A value inside double quotes: no quotes, no control, format or line separator characters."""
+    return "".join(
+        c
+        for c in str(value)
+        if c != '"'
+        and not unicodedata.category(c).startswith("C")
+        and unicodedata.category(c) not in ("Zl", "Zp")
+    )
 
 
 def _token(value: str) -> str:

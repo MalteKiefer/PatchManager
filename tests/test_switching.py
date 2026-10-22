@@ -410,3 +410,18 @@ def test_rendered_values_cannot_inject_lines() -> None:
     assert not again.ip_routing and list(again.vlans) == [5] and again.interfaces["1"].enabled
     with pytest.raises(aruba.ParseError):
         aruba._vlan(aruba.Config(), 7, ["ip ospf area 1;reload"])
+
+
+def test_other_line_breaks_stay_inside_a_value() -> None:
+    config = aruba.Config(hostname="SW\N{LINE SEPARATOR}ip routing\x85vlan 9\x1cdisable")
+    text = aruba.render(config)
+    assert text.count("\n") == 1  # only the end of the hostname line
+    again = aruba.parse(text)
+    assert not again.ip_routing and not again.vlans
+    with pytest.raises(aruba.ParseError):  # a variable cannot stretch a line past the limit
+        aruba.parse("hostname %a%%a%%a%\n", {"a": "x" * 999})
+
+
+def test_interface_block_applies_to_its_whole_range() -> None:
+    config = aruba.parse('interface 1-3\n   name "Desk"\n   disable\n   exit\n')
+    assert [(p.label, p.enabled) for p in config.interfaces.values()] == [("Desk", False)] * 3
