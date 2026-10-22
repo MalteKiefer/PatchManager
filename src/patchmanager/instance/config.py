@@ -20,7 +20,9 @@ from patchmanager.core import crypto
 logger = logging.getLogger(__name__)
 CACHE_KEY = "instance:config"
 CACHE_SECONDS = 60
-SECRETS = frozenset({"mail_password", "s3_secret_access_key"})
+SECRETS = frozenset(
+    {"mail_password", "s3_secret_access_key", "offsite_secret_access_key", "offsite_password"}
+)
 
 
 @dataclass(frozen=True)
@@ -61,6 +63,15 @@ class Config:
     webhook_allowed_networks: str = ""  # comma separated CIDRs
     webhook_allow_http: bool = False
     api_rate: str = "1200/minute"
+    # Off-site copy of the backup volume (restic, run by the worker)
+    offsite_enabled: bool = False
+    offsite_repository: str = ""  # s3:https://host/bucket/path
+    offsite_access_key_id: str = ""
+    offsite_secret_access_key: str = ""
+    offsite_password: str = ""  # restic repository password
+    offsite_keep_daily: int = 14
+    offsite_keep_weekly: int = 8
+    offsite_keep_monthly: int = 12
 
     @property
     def upload_max_bytes(self) -> int:

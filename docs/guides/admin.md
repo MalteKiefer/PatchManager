@@ -112,25 +112,31 @@ installation; there are no editions, limits or licence keys.
 
 ## Settings
 
-*Administration → Settings* holds what used to need the environment, in five parts:
+*Administration → Settings* holds what used to need the environment, in seven parts:
 
 * **Sign in**: minimum password length, a second factor for everyone, session
   lifetime and idle timeout, lockout after failed sign ins, attempts per address and
   how long invitation links stay valid.
 * **Mail**: SMTP server, port, STARTTLS, user, password and sender, with a test mail.
-* **Files**: largest upload (up to 25 MB), the clamd virus scanner and S3 compatible
-  object storage (AWS S3, Backblaze B2, Wasabi). Saving a bucket writes and deletes a
-  test file first, so a wrong name or key is reported right away. Files stored before
-  stay readable from the media volume.
+* **Uploads**: largest upload (up to 25 MB) and the clamd virus scanner.
+* **File storage**: S3 compatible object storage (AWS S3, Backblaze B2, Wasabi) instead
+  of the media volume. *Test connection* writes and deletes a test file without saving;
+  saving checks the bucket again. Files stored before stay readable from the media
+  volume. Changing the endpoint or bucket needs the secret key entered again, so a
+  stored key is never sent to a new destination (the same holds for the off-site
+  repository).
 * **Maps**: tile server and attribution, or none.
 * **Integrations**: private networks webhooks may reach, plain http webhooks and the
   API rate per user.
+* **Backups**: the encrypted off-site copy of the daily database dumps with restic to
+  S3 compatible storage: repository, key, repository password and how many daily,
+  weekly and monthly copies to keep, with *Copy now* and the last result.
 
 Changes apply to all processes within a request and are recorded in the audit log
 (setting names only). Passwords and keys are stored encrypted with the instance keys
-and never shown again; leave the field empty to keep them. The off-site copy of
-backups keeps its own credentials on the server (see the deployment guide), so a
-compromised web process cannot delete backups.
+and never shown again; leave the field empty to keep them. Use a key for the
+off-site copy that may write to its bucket but not delete old versions (object lock or
+a lifecycle rule), so stolen settings cannot erase the backups.
 
 ## System
 

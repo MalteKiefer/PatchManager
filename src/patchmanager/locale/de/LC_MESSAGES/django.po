@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-22 14:03+0200\n"
+"POT-Creation-Date: 2026-10-22 14:16+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -778,7 +778,7 @@ msgstr "Zeilen"
 msgid "Customers and systems"
 msgstr "Kunden und Systeme"
 
-#: api/ui.py:39 instance/views.py:309
+#: api/ui.py:39 instance/views.py:357
 msgid "Integrations"
 msgstr "Integrationen"
 
@@ -1072,9 +1072,7 @@ msgstr "Übergabeport"
 #: circuits/models.py:56
 msgid ""
 "Where the line ends, for example on the provider's router or our firewall."
-msgstr ""
-"Wo die Leitung endet, zum Beispiel am Router des Providers oder an unserer "
-"Firewall."
+msgstr "Wo die Leitung endet, zum Beispiel am Router des Providers oder an unserer Firewall."
 
 #: circuits/models.py:58
 msgid "download (Mbit/s)"
@@ -1162,15 +1160,11 @@ msgstr "%(name)s ist nicht mehr auf der Plattform."
 msgid ""
 "%(servers)s new servers, %(created)s new and %(updated)s updated machines, "
 "%(storage)s storage."
-msgstr ""
-"%(servers)s neue Server, %(created)s neue und %(updated)s aktualisierte "
-"Maschinen, %(storage)s Speicher."
+msgstr "%(servers)s neue Server, %(created)s neue und %(updated)s aktualisierte Maschinen, %(storage)s Speicher."
 
 #: compute/connections.py:135
 msgid "The person who set up this connection can no longer sign in."
-msgstr ""
-"Die Person, die diese Verbindung eingerichtet hat, kann sich nicht mehr "
-"anmelden."
+msgstr "Die Person, die diese Verbindung eingerichtet hat, kann sich nicht mehr anmelden."
 
 #: compute/connections.py:142
 #, python-format
@@ -1185,9 +1179,7 @@ msgstr "API-Token"
 msgid ""
 "user@realm!tokenid=secret of a token with read rights (role PVEAuditor). It "
 "is stored encrypted and never shown again."
-msgstr ""
-"user@realm!tokenid=secret eines Tokens mit Leserechten (Rolle PVEAuditor). "
-"Es wird verschlüsselt gespeichert und nie wieder angezeigt."
+msgstr "user@realm!tokenid=secret eines Tokens mit Leserechten (Rolle PVEAuditor). Es wird verschlüsselt gespeichert und nie wieder angezeigt."
 
 #: compute/connections.py:173
 msgid "For example https://pve1.example.lan:8006."
@@ -1251,9 +1243,7 @@ msgstr "Proxmox VE verbinden"
 msgid ""
 "PatchManager reads nodes, virtual machines, containers and storage of the "
 "cluster through its API. It never changes anything there."
-msgstr ""
-"PatchManager liest Nodes, virtuelle Maschinen, Container und Speicher des "
-"Clusters über seine API. Dort wird nie etwas geändert."
+msgstr "PatchManager liest Nodes, virtuelle Maschinen, Container und Speicher des Clusters über seine API. Dort wird nie etwas geändert."
 
 #: compute/connections.py:352 templates/cabling/connect.html:2
 #: templates/cabling/connect.html:5 templates/cabling/connect.html:18
@@ -1313,8 +1303,7 @@ msgstr "Adresse"
 #: compute/importing.py:337
 msgid ""
 "For example https://pve.example.lan:8006 or https://vcenter.example.lan."
-msgstr ""
-"Zum Beispiel https://pve.example.lan:8006 oder https://vcenter.example.lan."
+msgstr "Zum Beispiel https://pve.example.lan:8006 oder https://vcenter.example.lan."
 
 #: compute/importing.py:341
 msgid "API token (Proxmox)"
@@ -1339,8 +1328,7 @@ msgstr "Zertifikats-Fingerabdruck (SHA-256)"
 #: compute/importing.py:359
 msgid ""
 "Only for self signed certificates; otherwise the certificate is verified."
-msgstr ""
-"Nur für selbstsignierte Zertifikate; sonst wird das Zertifikat geprüft."
+msgstr "Nur für selbstsignierte Zertifikate; sonst wird das Zertifikat geprüft."
 
 #: compute/importing.py:363
 msgid "NAS device (Synology, QNAP)"
@@ -1363,9 +1351,7 @@ msgstr "Wählen Sie das NAS-Gerät, zu dem der Speicher gehört."
 msgid ""
 "%(created)s new and %(updated)s updated machines, %(storage)s storage "
 "entries."
-msgstr ""
-"%(created)s neue und %(updated)s aktualisierte Maschinen, %(storage)s "
-"Speichereinträge."
+msgstr "%(created)s neue und %(updated)s aktualisierte Maschinen, %(storage)s Speichereinträge."
 
 #: compute/importing.py:437
 msgid "Import from a platform"
@@ -1410,15 +1396,11 @@ msgstr "Der Host hat nicht mit JSON geantwortet."
 
 #: compute/inventory.py:152
 msgid "The platform is too large or too slow to read in one go."
-msgstr ""
-"Die Plattform ist zu groß oder zu langsam, um sie in einem Durchgang zu "
-"lesen."
+msgstr "Die Plattform ist zu groß oder zu langsam, um sie in einem Durchgang zu lesen."
 
 #: compute/inventory.py:167
 msgid "The certificate could not be verified; enter its fingerprint."
-msgstr ""
-"Das Zertifikat konnte nicht geprüft werden; geben Sie seinen Fingerabdruck "
-"ein."
+msgstr "Das Zertifikat konnte nicht geprüft werden; geben Sie seinen Fingerabdruck ein."
 
 #: compute/inventory.py:170
 msgid "The host could not be reached."
@@ -1528,7 +1510,7 @@ msgstr "Pfad oder Ziel"
 msgid "For example an export path, share name or iSCSI IQN."
 msgstr "Zum Beispiel ein Exportpfad, Freigabename oder eine iSCSI-IQN."
 
-#: compute/models.py:148 instance/models.py:30
+#: compute/models.py:148 instance/models.py:32
 msgid "running"
 msgstr "läuft"
 
@@ -1653,9 +1635,7 @@ msgstr "neue Maschinen automatisch übernehmen"
 #: compute/models.py:322
 msgid ""
 "Machines created on the platform later are documented by the next update."
-msgstr ""
-"Maschinen, die später auf der Plattform entstehen, werden bei der nächsten "
-"Aktualisierung dokumentiert."
+msgstr "Maschinen, die später auf der Plattform entstehen, werden bei der nächsten Aktualisierung dokumentiert."
 
 #: compute/models.py:330
 msgid "room for new servers"
@@ -1693,7 +1673,7 @@ msgstr "Hosts"
 msgid "Add host"
 msgstr "Host hinzufügen"
 
-#: compute/pages.py:135 templates/manage/system.html:37
+#: compute/pages.py:135 templates/manage/system.html:38
 msgid "Server"
 msgstr "Server"
 
@@ -1984,7 +1964,7 @@ msgstr "Migrationen"
 msgid "Cache and rate limits"
 msgstr "Cache und Ratenbegrenzung"
 
-#: core/system.py:102
+#: core/system.py:102 instance/views.py:347
 msgid "File storage"
 msgstr "Dateispeicher"
 
@@ -1992,57 +1972,53 @@ msgstr "Dateispeicher"
 msgid "Background workers"
 msgstr "Hintergrund-Worker"
 
-#: core/system.py:148
-msgid "The off-site status file cannot be read."
-msgstr "Die Statusdatei der externen Sicherung kann nicht gelesen werden."
-
-#: core/system.py:202
+#: core/system.py:189
 msgid "MFA required for everyone"
 msgstr "MFA für alle erforderlich"
 
-#: core/system.py:203 instance/views.py:123
+#: core/system.py:190 instance/views.py:123
 msgid "Minimum password length"
 msgstr "Mindestlänge des Passworts"
 
-#: core/system.py:204
+#: core/system.py:191
 msgid "Session lifetime (s)"
 msgstr "Sitzungsdauer (s)"
 
-#: core/system.py:205
+#: core/system.py:192
 msgid "Session idle timeout (s)"
 msgstr "Leerlauf-Timeout der Sitzung (s)"
 
-#: core/system.py:206
+#: core/system.py:193
 msgid "Lockout after failures"
 msgstr "Sperre nach Fehlversuchen"
 
-#: core/system.py:207
+#: core/system.py:194
 msgid "Lockout duration (s)"
 msgstr "Sperrdauer (s)"
 
-#: core/system.py:208
+#: core/system.py:195
 msgid "Login attempts per IP in 10 minutes"
 msgstr "Anmeldeversuche pro IP in 10 Minuten"
 
-#: core/system.py:209
+#: core/system.py:196
 msgid "WebAuthn relying party"
 msgstr "WebAuthn Relying Party"
 
-#: core/system.py:223
+#: core/system.py:210
 #, python-format
 msgid "Test mail from %(name)s"
 msgstr "Testmail von %(name)s"
 
-#: core/system.py:224
+#: core/system.py:211
 msgid "Mail delivery works."
 msgstr "Der Mailversand funktioniert."
 
-#: core/system.py:230
+#: core/system.py:217
 #, python-format
 msgid "The mail could not be sent: %(error)s"
 msgstr "Die E-Mail konnte nicht gesendet werden: %(error)s"
 
-#: core/system.py:233
+#: core/system.py:220
 #, python-format
 msgid "A test mail was sent to %(email)s."
 msgstr "Eine Testmail wurde an %(email)s gesendet."
@@ -2168,8 +2144,7 @@ msgstr "Der Rückport muss zum selben Gerät gehören."
 
 #: dcim/devices.py:246
 msgid "A port joins only a link aggregation of its own device."
-msgstr ""
-"Ein Port kann nur einer Link-Aggregation seines eigenen Geräts beitreten."
+msgstr "Ein Port kann nur einer Link-Aggregation seines eigenen Geräts beitreten."
 
 #: dcim/devices.py:272 dcim/devices.py:278
 msgid "This port name or rear position is already used."
@@ -2408,9 +2383,7 @@ msgstr "%(object)s zuordnen"
 msgid ""
 "Put it into a system, or assign it to an organization, for example a "
 "customer."
-msgstr ""
-"Ordnen Sie es einem System zu oder weisen Sie es einer Organisation zu, zum "
-"Beispiel einem Kunden."
+msgstr "Ordnen Sie es einem System zu oder weisen Sie es einer Organisation zu, zum Beispiel einem Kunden."
 
 #: directory/links.py:270 templates/directory/_links.html:3
 #: templates/instance/branding.html:14
@@ -3096,17 +3069,47 @@ msgstr "Markenfarbe (Farbton)"
 msgid "default language"
 msgstr "Standardsprache"
 
-#: instance/models.py:20
+#: instance/models.py:22
 msgid "instance settings"
 msgstr "Instanzeinstellungen"
 
-#: instance/models.py:31 locations/models.py:222
+#: instance/models.py:33 locations/models.py:222
 msgid "done"
 msgstr "erledigt"
 
-#: instance/models.py:32 integrations/models.py:47
+#: instance/models.py:34 integrations/models.py:47
 msgid "failed"
 msgstr "fehlgeschlagen"
+
+#: instance/offsite.py:35 instance/offsite.py:38
+msgid "Enter the repository as s3:https://host/bucket/path."
+msgstr "Geben Sie das Repository als s3:https://host/bucket/pfad ein."
+
+#: instance/offsite.py:45
+msgid "restic is not installed in this image."
+msgstr "restic ist in diesem Image nicht installiert."
+
+#: instance/offsite.py:85
+msgid "Enter the key and the repository password."
+msgstr "Geben Sie den Schlüssel und das Repository-Passwort ein."
+
+#: instance/offsite.py:88
+msgid "The backup volume is not mounted (PATCHMANAGER_BACKUP_DIR)."
+msgstr "Das Sicherungsvolume ist nicht eingebunden (PATCHMANAGER_BACKUP_DIR)."
+
+#: instance/offsite.py:92
+msgid "restic init failed."
+msgstr "restic init ist fehlgeschlagen."
+
+#: instance/offsite.py:123
+#, python-format
+msgid "copied %(name)s"
+msgstr "%(name)s kopiert"
+
+#: instance/offsite.py:129
+#, python-format
+msgid "Not a PatchManager dump: %(name)s"
+msgstr "Kein PatchManager-Dump: %(name)s"
 
 #: instance/services.py:41
 msgid "The logo may be at most 512 KB."
@@ -3134,9 +3137,17 @@ msgid ""
 "The bucket could not be written (%(error)s). Check name, endpoint and key."
 msgstr "In den Bucket konnte nicht geschrieben werden (%(error)s). Prüfen Sie Name, Endpoint und Schlüssel."
 
-#: instance/services.py:159
+#: instance/services.py:176
+msgid "A new destination needs its secret key and password entered again."
+msgstr "Ein neues Ziel braucht den geheimen Schlüssel und das Passwort erneut."
+
+#: instance/services.py:180
 msgid "Unknown setting."
 msgstr "Unbekannte Einstellung."
+
+#: instance/services.py:197
+msgid "Enter a bucket to test."
+msgstr "Geben Sie einen Bucket zum Testen ein."
 
 #: instance/views.py:28
 msgid "Instance name"
@@ -3239,155 +3250,213 @@ msgstr "Leer: keine Prüfung. Wenn gesetzt, schlagen Uploads fehl, solange er ni
 msgid "clamd port"
 msgstr "clamd-Port"
 
-#: instance/views.py:187
+#: instance/views.py:192
 msgid "S3 bucket"
 msgstr "S3-Bucket"
 
-#: instance/views.py:192
+#: instance/views.py:197
 msgid "Enter a valid bucket name."
 msgstr "Geben Sie einen gültigen Bucket-Namen ein."
 
-#: instance/views.py:196
+#: instance/views.py:201
 msgid ""
 "Empty: files stay in the media volume. Files already stored there stay "
 "readable."
 msgstr "Leer: Dateien bleiben im Media-Volume. Dort bereits gespeicherte Dateien bleiben lesbar."
 
-#: instance/views.py:200
+#: instance/views.py:205
 msgid "Endpoint"
 msgstr "Endpoint"
 
-#: instance/views.py:204
+#: instance/views.py:209
 msgid ""
 "Empty for AWS. Backblaze B2 for example https://s3.eu-"
 "central-003.backblazeb2.com."
 msgstr "Leer für AWS. Backblaze B2 zum Beispiel https://s3.eu-central-003.backblazeb2.com."
 
-#: instance/views.py:207
+#: instance/views.py:212
 msgid "Region"
 msgstr "Region"
 
-#: instance/views.py:209
+#: instance/views.py:214 instance/views.py:308
 msgid "Access key ID"
 msgstr "Access-Key-ID"
 
-#: instance/views.py:211
+#: instance/views.py:216 instance/views.py:310
 msgid "Secret access key"
 msgstr "Secret Access Key"
 
-#: instance/views.py:213
+#: instance/views.py:218
 msgid "Folder in the bucket"
 msgstr "Ordner im Bucket"
 
-#: instance/views.py:216
+#: instance/views.py:221
 msgid "Letters, digits, . _ - /"
 msgstr "Buchstaben, Ziffern, . _ - /"
 
-#: instance/views.py:220
+#: instance/views.py:225
 msgid "Addressing"
 msgstr "Adressierung"
 
-#: instance/views.py:223
+#: instance/views.py:228
 msgid "Provider default"
 msgstr "Standard des Anbieters"
 
-#: instance/views.py:224
+#: instance/views.py:229
 msgid "Virtual host (bucket.host)"
 msgstr "Virtueller Host (bucket.host)"
 
-#: instance/views.py:225
+#: instance/views.py:230
 msgid "Path (host/bucket)"
 msgstr "Pfad (host/bucket)"
 
-#: instance/views.py:233
+#: instance/views.py:238
 msgid "The endpoint must use https."
 msgstr "Der Endpoint muss https verwenden."
 
-#: instance/views.py:241
+#: instance/views.py:246
 msgid "Tile server"
 msgstr "Kachelserver"
 
-#: instance/views.py:244
+#: instance/views.py:249
 #, python-brace-format
 msgid "https with {z}, {x} and {y}. Empty: no map."
 msgstr "https mit {z}, {x} und {y}. Leer: keine Karte."
 
-#: instance/views.py:247
+#: instance/views.py:252
 msgid "Attribution"
 msgstr "Quellenangabe"
 
-#: instance/views.py:256
+#: instance/views.py:261
 #, python-brace-format
 msgid "Enter an https address with {z}, {x} and {y}."
 msgstr "Geben Sie eine https-Adresse mit {z}, {x} und {y} ein."
 
-#: instance/views.py:264
+#: instance/views.py:269
 msgid "Private networks webhooks may reach"
 msgstr "Private Netze, die Webhooks erreichen dürfen"
 
-#: instance/views.py:267
+#: instance/views.py:272
 msgid "Comma separated, for example 10.0.0.0/8. Empty: public only."
 msgstr "Kommagetrennt, zum Beispiel 10.0.0.0/8. Leer: nur öffentliche Adressen."
 
-#: instance/views.py:270
+#: instance/views.py:275
 msgid "Allow plain http webhook URLs"
 msgstr "Unverschlüsselte http-Webhook-URLs erlauben"
 
-#: instance/views.py:273
+#: instance/views.py:278
 msgid "API requests per user"
 msgstr "API-Anfragen pro Benutzer"
 
-#: instance/views.py:275
+#: instance/views.py:280
 msgid "For example 1200/minute."
 msgstr "Zum Beispiel 1200/minute."
 
-#: instance/views.py:284
+#: instance/views.py:289
 msgid "Enter networks such as 10.0.0.0/8."
 msgstr "Geben Sie Netze wie 10.0.0.0/8 ein."
 
-#: instance/views.py:289 templates/accounts/login.html:2
+#: instance/views.py:296
+msgid "Copy backups off-site after every new dump"
+msgstr "Sicherungen nach jedem neuen Dump extern kopieren"
+
+#: instance/views.py:299
+msgid "Repository"
+msgstr "Repository"
+
+#: instance/views.py:303
+msgid ""
+"s3:https://host/bucket/folder, for Backblaze B2 for example s3:https://s3.eu-"
+"central-003.backblazeb2.com/my-bucket/patchmanager."
+msgstr "s3:https://host/bucket/ordner, für Backblaze B2 zum Beispiel s3:https://s3.eu-central-003.backblazeb2.com/mein-bucket/patchmanager."
+
+#: instance/views.py:311
+msgid "Repository password"
+msgstr "Repository-Passwort"
+
+#: instance/views.py:313
+msgid "Keep daily copies"
+msgstr "Tägliche Kopien behalten"
+
+#: instance/views.py:316
+msgid "Keep weekly copies"
+msgstr "Wöchentliche Kopien behalten"
+
+#: instance/views.py:319
+msgid "Keep monthly copies"
+msgstr "Monatliche Kopien behalten"
+
+#: instance/views.py:326
+msgid "Enter the repository."
+msgstr "Geben Sie das Repository ein."
+
+#: instance/views.py:332 templates/accounts/login.html:2
 #: templates/accounts/login.html:5 templates/accounts/login.html:8
 msgid "Sign in"
 msgstr "Anmelden"
 
-#: instance/views.py:291
+#: instance/views.py:334
 msgid "Passwords, second factors, sessions and lockouts."
 msgstr "Passwörter, zweite Faktoren, Sitzungen und Sperren."
 
-#: instance/views.py:294 templates/manage/system.html:36
+#: instance/views.py:337 templates/manage/system.html:37
 msgid "Mail"
 msgstr "E-Mail"
 
-#: instance/views.py:296
+#: instance/views.py:339
 msgid "The server for invitations, password resets and notifications."
 msgstr "Der Server für Einladungen, Passwort-Zurücksetzungen und Benachrichtigungen."
 
-#: instance/views.py:299
-msgid "Files"
-msgstr "Dateien"
+#: instance/views.py:342
+msgid "Uploads"
+msgstr "Uploads"
 
-#: instance/views.py:302
+#: instance/views.py:344
+msgid "How large uploads may be and whether a virus scanner checks them."
+msgstr "Wie groß Uploads sein dürfen und ob ein Virenscanner sie prüft."
+
+#: instance/views.py:350
 msgid ""
 "Uploads are encrypted before they are stored, in the media volume or in S3 "
-"compatible object storage (AWS S3, Backblaze B2, Wasabi). The bucket is "
-"checked with a test file when you save."
-msgstr "Uploads werden vor dem Speichern verschlüsselt, im Media-Volume oder in S3-kompatiblem Objektspeicher (AWS S3, Backblaze B2, Wasabi). Beim Speichern wird der Bucket mit einer Testdatei geprüft."
+"compatible object storage (AWS S3, Backblaze B2, Wasabi). Test the "
+"connection first; saving checks the bucket with a test file as well."
+msgstr "Uploads werden vor dem Speichern verschlüsselt, im Media-Volume oder in S3-kompatiblem Objektspeicher (AWS S3, Backblaze B2, Wasabi). Testen Sie zuerst die Verbindung; auch beim Speichern wird der Bucket mit einer Testdatei geprüft."
 
-#: instance/views.py:307
+#: instance/views.py:355
 msgid "Maps"
 msgstr "Karten"
 
-#: instance/views.py:307
+#: instance/views.py:355
 msgid "Tiles shown behind the site map."
 msgstr "Kacheln, die hinter der Standortkarte angezeigt werden."
 
-#: instance/views.py:311
+#: instance/views.py:359
 msgid "Limits for webhooks and the API."
 msgstr "Grenzen für Webhooks und die API."
 
-#: instance/views.py:336
+#: instance/views.py:362 templates/manage/system.html:24
+msgid "Backups"
+msgstr "Sicherungen"
+
+#: instance/views.py:365
+msgid ""
+"The backup service writes a database dump every day. Here the worker copies "
+"them encrypted with restic to S3 compatible storage (AWS S3, Backblaze B2, "
+"Wasabi). Keep the repository password outside this installation too: without "
+"it the copies cannot be opened. Use a key that may only write to this bucket."
+msgstr "Der Sicherungsdienst schreibt jeden Tag einen Datenbank-Dump. Hier kopiert der Worker sie verschlüsselt mit restic in S3-kompatiblen Speicher (AWS S3, Backblaze B2, Wasabi). Bewahren Sie das Repository-Passwort auch außerhalb dieser Installation auf: Ohne es lassen sich die Kopien nicht öffnen. Verwenden Sie einen Schlüssel, der nur in diesen Bucket schreiben darf."
+
+#: instance/views.py:386
+msgid "The off-site copy was started; see the system page."
+msgstr "Die externe Sicherung wurde gestartet; siehe Systemseite."
+
+#: instance/views.py:406
 msgid "Settings saved."
 msgstr "Einstellungen gespeichert."
+
+#: instance/views.py:409
+msgid "The bucket can be written and read. Save to use it."
+msgstr "Der Bucket kann beschrieben und gelesen werden. Speichern Sie, um ihn zu verwenden."
 
 #: integrations/http.py:61
 msgid "Webhook URLs must use https."
@@ -3575,9 +3644,7 @@ msgstr "Relay-Adressen"
 #: ipam/models.py:233
 msgid ""
 "Where routers forward requests (ip helper-address), separated by commas."
-msgstr ""
-"Wohin Router Anfragen weiterleiten (ip helper-address), durch Kommas "
-"getrennt."
+msgstr "Wohin Router Anfragen weiterleiten (ip helper-address), durch Kommas getrennt."
 
 #: ipam/models.py:264
 msgid "Enter valid addresses."
@@ -3807,9 +3874,7 @@ msgstr "Fügen Sie sie hier ein oder wählen Sie eine Datei."
 #: ipam/pages.py:318
 msgid ""
 "Used once to read the zone; it is not stored. A read-only token is enough."
-msgstr ""
-"Wird einmal zum Lesen der Zone verwendet und nicht gespeichert. Ein Token "
-"mit Leserechten genügt."
+msgstr "Wird einmal zum Lesen der Zone verwendet und nicht gespeichert. Ein Token mit Leserechten genügt."
 
 #: ipam/pages.py:322
 msgid "Replace the documented records of this zone"
@@ -3832,9 +3897,7 @@ msgstr "DNS-Zone importieren"
 msgid ""
 "Read a zone file, or a zone of deSEC, Cloudflare or Hetzner DNS through "
 "their API."
-msgstr ""
-"Lesen Sie eine Zonendatei oder eine Zone von deSEC, Cloudflare oder Hetzner "
-"DNS über deren API."
+msgstr "Lesen Sie eine Zonendatei oder eine Zone von deSEC, Cloudflare oder Hetzner DNS über deren API."
 
 #: ipam/services.py:37
 msgid "This does not fit the tenant, or the gateway is outside."
@@ -4391,10 +4454,7 @@ msgstr ""
 msgid ""
 "Systems, lines, suppliers, customers, clusters, virtual machines, storage or "
 "DHCP and DNS servers refer to this site. Remove those references first."
-msgstr ""
-"Systeme, Leitungen, Lieferanten, Kunden, Cluster, virtuelle Maschinen, "
-"Speicher oder DHCP- und DNS-Server verweisen auf diesen Standort. Entfernen "
-"Sie diese Bezüge zuerst."
+msgstr "Systeme, Leitungen, Lieferanten, Kunden, Cluster, virtuelle Maschinen, Speicher oder DHCP- und DNS-Server verweisen auf diesen Standort. Entfernen Sie diese Bezüge zuerst."
 
 #: locations/services.py:210
 msgid "The site already belongs to this tenant."
@@ -4746,9 +4806,7 @@ msgstr "Die Variablen müssen ein JSON-Objekt sein."
 
 #: networks/switch_views.py:95
 msgid "Paste a configuration, choose a file or a stored version."
-msgstr ""
-"Fügen Sie eine Konfiguration ein, wählen Sie eine Datei oder eine "
-"gespeicherte Version."
+msgstr "Fügen Sie eine Konfiguration ein, wählen Sie eine Datei oder eine gespeicherte Version."
 
 #: networks/switch_views.py:193
 msgid "pasted text"
@@ -4804,9 +4862,7 @@ msgstr "Neues VLAN %(vid)s %(name)s an %(site)s"
 msgid ""
 "VLAN %(vid)s is called %(doc)s here and %(cfg)s in the configuration; the "
 "name stays."
-msgstr ""
-"VLAN %(vid)s heißt hier %(doc)s und in der Konfiguration %(cfg)s; der Name "
-"bleibt."
+msgstr "VLAN %(vid)s heißt hier %(doc)s und in der Konfiguration %(cfg)s; der Name bleibt."
 
 #: networks/switchconfig.py:272
 #, python-format
@@ -4853,9 +4909,7 @@ msgstr "%(what)s: %(n)s"
 #, python-format
 msgid ""
 "DHCP pool %(pool)s: the network %(network)s is not documented in IP networks."
-msgstr ""
-"DHCP-Pool %(pool)s: Das Netz %(network)s ist unter IP-Netze nicht "
-"dokumentiert."
+msgstr "DHCP-Pool %(pool)s: Das Netz %(network)s ist unter IP-Netze nicht dokumentiert."
 
 #: networks/switchconfig.py:443
 #, python-format
@@ -5836,7 +5890,8 @@ msgstr "Noch nicht aktualisiert."
 
 #: templates/compute/connection.html:16 templates/instance/settings.html:2
 #: templates/instance/settings.html:4 templates/integrations/webhook.html:32
-#: templates/manage/_base.html:20 templates/manage/system.html:42
+#: templates/manage/_base.html:20 templates/manage/system.html:35
+#: templates/manage/system.html:43
 msgid "Settings"
 msgstr "Einstellungen"
 
@@ -5864,9 +5919,7 @@ msgstr "werden ausgelassen"
 #: templates/compute/connection.html:24
 msgid ""
 "Remove this connection and its stored token? The documented machines stay."
-msgstr ""
-"Diese Verbindung und ihr gespeichertes Token entfernen? Die dokumentierten "
-"Maschinen bleiben."
+msgstr "Diese Verbindung und ihr gespeichertes Token entfernen? Die dokumentierten Maschinen bleiben."
 
 #: templates/compute/connection.html:24
 msgid "Remove connection"
@@ -5884,11 +5937,7 @@ msgid ""
 "documented yet become servers in the room and with the device type below. "
 "Machines are recognised by their ID, so moving one to another node only "
 "changes its host."
-msgstr ""
-"Cluster %(c)s meldet diese Nodes, Maschinen und Speicher. Noch nicht "
-"dokumentierte Nodes werden zu Servern im Raum und mit dem Gerätetyp unten. "
-"Maschinen werden an ihrer ID erkannt; wird eine auf einen anderen Node "
-"verschoben, ändert sich nur ihr Host."
+msgstr "Cluster %(c)s meldet diese Nodes, Maschinen und Speicher. Noch nicht dokumentierte Nodes werden zu Servern im Raum und mit dem Gerätetyp unten. Maschinen werden an ihrer ID erkannt; wird eine auf einen anderen Node verschoben, ändert sich nur ihr Host."
 
 #: templates/compute/connection_select.html:17
 msgid "Save and update now"
@@ -5899,10 +5948,7 @@ msgid ""
 "Platforms PatchManager reads regularly. Nodes become servers, virtual "
 "machines and containers are kept up to date, and a machine that moves to "
 "another node keeps its documentation."
-msgstr ""
-"Plattformen, die PatchManager regelmäßig liest. Nodes werden zu Servern, "
-"virtuelle Maschinen und Container bleiben aktuell, und eine Maschine, die "
-"auf einen anderen Node wechselt, behält ihre Dokumentation."
+msgstr "Plattformen, die PatchManager regelmäßig liest. Nodes werden zu Servern, virtuelle Maschinen und Container bleiben aktuell, und eine Maschine, die auf einen anderen Node wechselt, behält ihre Dokumentation."
 
 #: templates/compute/connections.html:13 templates/exchange/preview.html:20
 msgid "error"
@@ -6345,17 +6391,13 @@ msgstr "Neues Gerät anlegen"
 msgid ""
 "These devices of the room are not mounted in a rack yet. Choose one to mount "
 "it here, or create a new device."
-msgstr ""
-"Diese Geräte des Raums sind noch in keinem Rack eingebaut. Wählen Sie eines, "
-"um es hier einzubauen, oder legen Sie ein neues Gerät an."
+msgstr "Diese Geräte des Raums sind noch in keinem Rack eingebaut. Wählen Sie eines, um es hier einzubauen, oder legen Sie ein neues Gerät an."
 
 #: templates/dcim/place_here.html:9
 msgid ""
 "These devices of the room are not on the floor plan yet. Choose one to put "
 "it where you clicked, or create a new device."
-msgstr ""
-"Diese Geräte des Raums sind noch nicht im Grundriss. Wählen Sie eines, um es "
-"an die geklickte Stelle zu setzen, oder legen Sie ein neues Gerät an."
+msgstr "Diese Geräte des Raums sind noch nicht im Grundriss. Wählen Sie eines, um es an die geklickte Stelle zu setzen, oder legen Sie ein neues Gerät an."
 
 #: templates/dcim/place_here.html:21
 msgid "Mount here"
@@ -6623,9 +6665,7 @@ msgstr "Zugeordnete Objekte"
 msgid ""
 "Link devices, buildings, VLANs, networks, configurations or lines from their "
 "own pages."
-msgstr ""
-"Ordnen Sie Geräte, Gebäude, VLANs, Netze, Konfigurationen oder Leitungen auf "
-"deren eigenen Seiten zu."
+msgstr "Ordnen Sie Geräte, Gebäude, VLANs, Netze, Konfigurationen oder Leitungen auf deren eigenen Seiten zu."
 
 #: templates/directory/_members.html:8
 msgid "Nothing linked yet."
@@ -6864,9 +6904,7 @@ msgstr "Ausgewähltes Element"
 
 #: templates/floorplans/editor.html:58
 msgid "Click a pin to see what is there and where it is patched."
-msgstr ""
-"Klicken Sie auf eine Nadel, um zu sehen, was dort ist und wohin es gepatcht "
-"ist."
+msgstr "Klicken Sie auf eine Nadel, um zu sehen, was dort ist und wohin es gepatcht ist."
 
 #: templates/floorplans/editor.html:60
 msgid "patch cable"
@@ -6879,9 +6917,7 @@ msgstr "Festverkabelung (Installationsstrecke)"
 #: templates/floorplans/editor.html:62
 msgid ""
 "Each line ends where the paths of a device end; the number says how many."
-msgstr ""
-"Jede Linie endet dort, wo die Pfade eines Geräts enden; die Zahl nennt, wie "
-"viele."
+msgstr "Jede Linie endet dort, wo die Pfade eines Geräts enden; die Zahl nennt, wie viele."
 
 #: templates/floorplans/editor.html:65
 msgid "Not on the plan"
@@ -6966,8 +7002,8 @@ msgstr "Objektname"
 msgid "Until"
 msgstr "Bis"
 
-#: templates/history/change.html:2 templates/manage/system.html:35
-#: templates/manage/system.html:39
+#: templates/history/change.html:2 templates/manage/system.html:36
+#: templates/manage/system.html:40
 msgid "Change"
 msgstr "Änderung"
 
@@ -7028,7 +7064,31 @@ msgstr "Bereiche der Einstellungen"
 msgid "A secret is stored"
 msgstr "Ein Geheimnis ist gespeichert"
 
-#: templates/instance/settings.html:17 templates/manage/system.html:40
+#: templates/instance/settings.html:14
+msgid "Test connection"
+msgstr "Verbindung testen"
+
+#: templates/instance/settings.html:17
+msgid "Last off-site copy"
+msgstr "Letzte externe Sicherung"
+
+#: templates/instance/settings.html:18
+msgid "Not run yet."
+msgstr "Noch nicht gelaufen."
+
+#: templates/instance/settings.html:18
+msgid "Copied"
+msgstr "Kopiert"
+
+#: templates/instance/settings.html:18
+msgid "Failed"
+msgstr "Fehlgeschlagen"
+
+#: templates/instance/settings.html:19
+msgid "Copy now"
+msgstr "Jetzt kopieren"
+
+#: templates/instance/settings.html:24 templates/manage/system.html:41
 msgid "Send a test mail to me"
 msgstr "Testmail an mich senden"
 
@@ -7468,9 +7528,7 @@ msgstr "Gerät hinzufügen"
 msgid ""
 "No devices outside the racks yet. Add outlets, access points, printers or "
 "cameras of this room."
-msgstr ""
-"Noch keine Geräte außerhalb der Racks. Fügen Sie Dosen, Access Points, "
-"Drucker oder Kameras dieses Raums hinzu."
+msgstr "Noch keine Geräte außerhalb der Racks. Fügen Sie Dosen, Access Points, Drucker oder Kameras dieses Raums hinzu."
 
 #: templates/locations/node.html:88
 msgid "Delete this object? It must be empty."
@@ -7486,9 +7544,7 @@ msgstr "Planung für %(r)s"
 msgid ""
 "Leave a field empty to use the number of the room type (%(t)s). Enter 0 to "
 "plan none of that kind here."
-msgstr ""
-"Lassen Sie ein Feld leer, um die Zahl des Raumtyps (%(t)s) zu verwenden. "
-"Geben Sie 0 ein, um hier keines dieser Art zu planen."
+msgstr "Lassen Sie ein Feld leer, um die Zahl des Raumtyps (%(t)s) zu verwenden. Geben Sie 0 ein, um hier keines dieser Art zu planen."
 
 #: templates/locations/room_plan.html:7
 msgid "Enter whole numbers from 0 to 999 for:"
@@ -7541,9 +7597,7 @@ msgstr "Begehung von %(r)s am %(d)s"
 msgid ""
 "Count what you find on site. Fields left empty were not counted. Differences "
 "to the documentation are marked."
-msgstr ""
-"Zählen Sie, was Sie vor Ort finden. Leere Felder gelten als nicht gezählt. "
-"Abweichungen zur Dokumentation werden markiert."
+msgstr "Zählen Sie, was Sie vor Ort finden. Leere Felder gelten als nicht gezählt. Abweichungen zur Dokumentation werden markiert."
 
 #: templates/locations/survey.html:7
 msgid "Enter whole numbers from 0 to 999."
@@ -7756,8 +7810,7 @@ msgstr "Noch keine Gruppen."
 
 #: templates/manage/list_item.html:9
 msgid "Built in entry: the key stays, the name can change."
-msgstr ""
-"Mitgelieferter Eintrag: Der Schlüssel bleibt, der Name kann sich ändern."
+msgstr "Mitgelieferter Eintrag: Der Schlüssel bleibt, der Name kann sich ändern."
 
 #: templates/manage/list_item.html:14
 msgid "Planned devices"
@@ -7771,9 +7824,7 @@ msgstr "Kategorie hinzufügen"
 msgid ""
 "Every room of this type should have these devices. A room can change the "
 "numbers for itself."
-msgstr ""
-"Jeder Raum dieses Typs sollte diese Geräte haben. Ein Raum kann die Zahlen "
-"für sich ändern."
+msgstr "Jeder Raum dieses Typs sollte diese Geräte haben. Ein Raum kann die Zahlen für sich ändern."
 
 #: templates/manage/list_item.html:20
 msgid "Nothing planned for this room type."
@@ -7784,10 +7835,7 @@ msgid ""
 "Shape the lists everyone chooses from. Device categories sort the library "
 "and mark devices on floor plans; room types say which devices a room of that "
 "type should have."
-msgstr ""
-"Gestalten Sie die Listen, aus denen alle wählen. Gerätekategorien ordnen die "
-"Bibliothek und markieren Geräte im Grundriss; Raumtypen legen fest, welche "
-"Geräte ein Raum dieses Typs haben sollte."
+msgstr "Gestalten Sie die Listen, aus denen alle wählen. Gerätekategorien ordnen die Bibliothek und markieren Geräte im Grundriss; Raumtypen legen fest, welche Geräte ein Raum dieses Typs haben sollte."
 
 #: templates/manage/lists.html:14
 msgid "built in"
@@ -7912,17 +7960,11 @@ msgstr "Zeitplan"
 msgid "Every (s)"
 msgstr "Alle (s)"
 
-#: templates/manage/system.html:24
-msgid "Backups"
-msgstr "Sicherungen"
-
 #: templates/manage/system.html:25
 msgid ""
-"Mount the backup volume read only and set PATCHMANAGER_BACKUP_DIR to see "
-"restore points here."
-msgstr ""
-"Binden Sie das Sicherungsvolume schreibgeschützt ein und setzen Sie "
-"PATCHMANAGER_BACKUP_DIR, um hier Wiederherstellungspunkte zu sehen."
+"No backup volume in this installation. In the production stack the backup "
+"service writes a database dump every day."
+msgstr "Diese Installation hat kein Sicherungsvolume. Im Produktions-Stack schreibt der Sicherungsdienst jeden Tag einen Datenbank-Dump."
 
 #: templates/manage/system.html:26
 msgid "The backup folder cannot be read."
@@ -7937,46 +7979,40 @@ msgid "No restore points yet."
 msgstr "Noch keine Wiederherstellungspunkte."
 
 #: templates/manage/system.html:29
-msgid "No off-site copy configured."
-msgstr "Keine externe Sicherung eingerichtet."
+msgid "Restore on the server after stopping app, worker, scheduler and caddy:"
+msgstr "Wiederherstellen auf dem Server, nachdem app, worker, scheduler und caddy gestoppt wurden:"
 
-#: templates/manage/system.html:30
+#: templates/manage/system.html:32
+msgid "No off-site copy yet."
+msgstr "Noch keine externe Sicherung."
+
+#: templates/manage/system.html:33
 msgid "Off-site copy"
 msgstr "Externe Sicherung"
 
-#: templates/manage/system.html:31
+#: templates/manage/system.html:34
 msgid "Off-site copy failed"
 msgstr "Externe Sicherung fehlgeschlagen"
 
-#: templates/manage/system.html:32
-msgid "Restore on the server after stopping app, worker, scheduler and caddy:"
-msgstr ""
-"Wiederherstellen auf dem Server, nachdem app, worker, scheduler und caddy "
-"gestoppt wurden:"
-
-#: templates/manage/system.html:35
+#: templates/manage/system.html:36
 #, python-format
 msgid ""
 "Uploads are stored in the S3 bucket %(s3_bucket)s; enable versioning there."
-msgstr ""
-"Hochgeladene Dateien liegen im S3-Bucket %(s3_bucket)s; aktivieren Sie dort "
-"die Versionierung."
+msgstr "Hochgeladene Dateien liegen im S3-Bucket %(s3_bucket)s; aktivieren Sie dort die Versionierung."
 
-#: templates/manage/system.html:35
+#: templates/manage/system.html:36
 msgid "Uploads are stored in the media volume and archived with every backup."
-msgstr ""
-"Hochgeladene Dateien liegen im Media-Volume und werden mit jeder Sicherung "
-"archiviert."
+msgstr "Hochgeladene Dateien liegen im Media-Volume und werden mit jeder Sicherung archiviert."
 
-#: templates/manage/system.html:38
+#: templates/manage/system.html:39
 msgid "Sender"
 msgstr "Absender"
 
-#: templates/manage/system.html:41
+#: templates/manage/system.html:42
 msgid "Security configuration"
 msgstr "Sicherheitskonfiguration"
 
-#: templates/manage/system.html:42
+#: templates/manage/system.html:43
 msgid "Sign in rules are changed under"
 msgstr "Anmelderegeln ändern Sie unter"
 
@@ -8206,9 +8242,7 @@ msgstr "Stacks und virtuelle Switches"
 msgid ""
 "Switches that work as one: stacks with stacking cables, VSF, VSX and MLAG "
 "pairs or a virtual chassis."
-msgstr ""
-"Switches, die als einer arbeiten: Stacks mit Stacking-Kabeln, VSF-, VSX- und "
-"MLAG-Paare oder ein virtuelles Chassis."
+msgstr "Switches, die als einer arbeiten: Stacks mit Stacking-Kabeln, VSF-, VSX- und MLAG-Paare oder ein virtuelles Chassis."
 
 #: templates/networks/stacks.html:9
 msgid "Domain"
@@ -8231,13 +8265,7 @@ msgid ""
 "states, spanning tree, static routes, OSPF, BGP, DNS servers and DHCP pools. "
 "Passwords, keys and SNMP communities are never read. You see the changes "
 "before anything is saved."
-msgstr ""
-"Gelesen werden Konfigurationen von Aruba (AOS-S, AOS-CX, Central-Vorlagen), "
-"Cisco (IOS, IOS-XE, NX-OS), Fortinet, Juniper, MikroTik, HPE Comware, H3C, "
-"Huawei und LANCOM: VLANs und ihre Ports, Adressen, Aggregationen, Portnamen "
-"und -zustände, Spanning Tree, statische Routen, OSPF, BGP, DNS-Server und "
-"DHCP-Pools. Passwörter, Schlüssel und SNMP-Communities werden nie gelesen. "
-"Sie sehen die Änderungen, bevor etwas gespeichert wird."
+msgstr "Gelesen werden Konfigurationen von Aruba (AOS-S, AOS-CX, Central-Vorlagen), Cisco (IOS, IOS-XE, NX-OS), Fortinet, Juniper, MikroTik, HPE Comware, H3C, Huawei und LANCOM: VLANs und ihre Ports, Adressen, Aggregationen, Portnamen und -zustände, Spanning Tree, statische Routen, OSPF, BGP, DNS-Server und DHCP-Pools. Passwörter, Schlüssel und SNMP-Communities werden nie gelesen. Sie sehen die Änderungen, bevor etwas gespeichert wird."
 
 #: templates/networks/switch_read.html:11
 msgid "Show changes"
@@ -8275,9 +8303,7 @@ msgstr "Als ArubaOS-Switch-Konfiguration"
 msgid ""
 "Nothing documented yet. Read the running configuration of the switch, or set "
 "VLANs on the ports."
-msgstr ""
-"Noch nichts dokumentiert. Lesen Sie die laufende Konfiguration des Switches "
-"ein oder setzen Sie VLANs an den Ports."
+msgstr "Noch nichts dokumentiert. Lesen Sie die laufende Konfiguration des Switches ein oder setzen Sie VLANs an den Ports."
 
 #: templates/networks/switching.html:15
 msgid "Ports and VLANs"
@@ -8287,9 +8313,7 @@ msgstr "Ports und VLANs"
 msgid ""
 "Fill: untagged VLAN. Marks below: tagged VLANs. Outline: edge port. G: "
 "guard. T: tunnelled."
-msgstr ""
-"Füllung: untagged VLAN. Marken darunter: tagged VLANs. Gestrichelter Rand: "
-"Edge-Port. G: Guard. T: getunnelt."
+msgstr "Füllung: untagged VLAN. Marken darunter: tagged VLANs. Gestrichelter Rand: Edge-Port. G: Guard. T: getunnelt."
 
 #: templates/networks/switching.html:21 templates/networks/switching.html:90
 msgid "tagged"
@@ -8606,35 +8630,5 @@ msgstr "Mandant gelöscht."
 #~ msgstr ""
 #~ "Wird über Umgebungsvariablen gesetzt, siehe Bereitstellungshandbuch."
 
-#~ msgid "Restoring is done on the server, see the deployment guide."
-#~ msgstr ""
-#~ "Die Wiederherstellung erfolgt auf dem Server, siehe Betriebshandbuch."
-
-#~ msgid "No floor devices."
-#~ msgstr "Keine Raumgeräte."
-
-#~ msgid "Whole rack"
-#~ msgstr "Ganzes Rack"
-
-#~ msgid "Whole room"
-#~ msgstr "Ganzer Raum"
-
-#~ msgid "Library"
-#~ msgstr "Bibliothek"
-
-#~ msgid "Import/Export"
-#~ msgstr "Import/Export"
-
-#~ msgid "Start"
-#~ msgstr "Start"
-
-#, python-format
-#~ msgid "Current tenant: %(tenant)s"
-#~ msgstr "Aktueller Mandant: %(tenant)s"
-
-#~ msgid ""
-#~ "Sites, racks and devices arrive in the next release. Until then, set up "
-#~ "tenants, users and roles in the administration area."
-#~ msgstr ""
-#~ "Standorte, Racks und Geräte folgen im nächsten Release. Richten Sie bis "
-#~ "dahin Mandanten, Benutzer und Rollen im Administrationsbereich ein."
+#~ msgid "Files"
+#~ msgstr "Dateien"
