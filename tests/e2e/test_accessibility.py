@@ -44,6 +44,9 @@ def _pages(live_server, tree) -> list[str]:
         "/locations/",
         f"/locations/site/{tree['site'].pk}/",
         f"/locations/floor/{tree['floor'].pk}/",
+        f"/locations/room/{tree['room'].pk}/",
+        f"/locations/room/{tree['room'].pk}/plan/",
+        f"/locations/room/{tree['room'].pk}/surveys/new/",
         f"/racks/{tree['rack'].pk}/",
         "/library/",
         "/library/catalog/?q=cisco 9300",
@@ -65,6 +68,8 @@ def _pages(live_server, tree) -> list[str]:
         "/manage/system/",
         "/manage/branding/",
         "/manage/sso/",
+        "/manage/lists/",
+        "/manage/lists/room-types/new/",
         f"/plans/{tree['floor'].pk}/",
         "/licenses/",
         "/no-such-page/",  # error page

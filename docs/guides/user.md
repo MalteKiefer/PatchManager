@@ -90,6 +90,23 @@ focus one and use the arrow keys (Shift for bigger steps). Dropping a floor
 device into another room's outline moves it to that room. Double click a symbol
 to open it.
 
+Lines join each placed floor device with the rack or device its cables lead to;
+dashed lines are permanent links, the number says how many paths. Choose **Add
+device here** and click inside a room outline to create a device at that point.
+
+## Rooms
+
+A room page shows its racks, a comparison of **planned and installed** devices per
+category, the surveys of the room and every device outside the racks with each port
+and where it is patched (device, port and rack). The planned numbers come from the
+room type; **Change plan** sets numbers for this room alone (leave a field empty to
+use the room type's number, enter 0 to plan none).
+
+**New survey** records a walk through the room: date, who, status, notes and how
+many devices of each category were found. The survey page lists planned,
+documented and found side by side and marks differences. Add photos and notes to a
+survey like to any other object.
+
 ## Search
 
 Use the search field in the header. Search finds names, codes, serial numbers,

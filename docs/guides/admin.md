@@ -96,6 +96,14 @@ Deprovisioned users are deactivated and keep their history. Provisioned groups
 start without rights: assign roles to them under *Groups*. SCIM never touches
 super admins, break glass accounts, API clients or groups created here.
 
+## Lists
+
+*Administration → Lists* holds the device categories and room types everyone
+chooses from. Add your own entries or rename existing ones. A category has a short
+sign and a colour for floor plan pins. A room type lists the devices a room of that
+type should have; rooms can change the numbers for themselves. Built in entries keep
+their key, entries in use cannot be deleted.
+
 ## Branding
 
 *Administration → Branding* sets the instance name, logo, brand colour and the

@@ -14,6 +14,7 @@ class LibraryConfig(AppConfig):
         permissions.register("library.vendor", "Vendor")
         permissions.register("library.devicetype", "Device type")
         post_migrate.connect(_load_catalog, sender=self)
+        post_migrate.connect(seed_categories, sender=self)
 
 
 def _load_catalog(**kwargs: object) -> None:
@@ -21,3 +22,12 @@ def _load_catalog(**kwargs: object) -> None:
     from patchmanager.library import catalog
 
     catalog.load()
+
+
+def seed_categories(**kwargs: object) -> None:
+    """Restore the built in categories (a database flush removes the migration's rows)."""
+    from importlib import import_module
+
+    from django.apps import apps
+
+    import_module("patchmanager.library.migrations.0005_categories").seed(apps, None)

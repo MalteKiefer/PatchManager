@@ -67,3 +67,4 @@ nav:
       - adr/0025-device-type-catalog.md
       - adr/0026-ipam.md
       - adr/0027-configuration-storage.md
+      - adr/0028-rooms-lists-and-surveys.md

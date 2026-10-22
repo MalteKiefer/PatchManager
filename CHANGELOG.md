@@ -15,6 +15,13 @@ All notable changes to this project are documented here. The format follows
 * Room cabling: all racks of a room side by side with the cables inside them and
   between them over the cable tray.
 * Every object is created on its own page.
+* Rooms: planned against installed devices per category, from the room type or set
+  per room; every device outside the racks with each port and where it is patched;
+  surveys with date, who, counts found on site, photos and notes, compared with the
+  documentation (ADR 0028).
+* Floor plans draw lines between placed floor devices and the racks they are
+  patched to, and "Add device here" creates a device at the clicked point.
+* Device categories and room types are lists administrators can extend and rename.
 * New layout: navigation in a sidebar with the tenant on top, search in the top bar
   (Ctrl+K or /), and an overview start page with the tenant's racks, devices, ports
   and cables, its sites with their load, the fullest racks and recent changes.
@@ -36,6 +43,8 @@ All notable changes to this project are documented here. The format follows
 
 ### Security
 
+* Deleting an object also deletes its attachments and notes; before, they stayed
+  behind.
 * A session that signed in with the password alone is ended when a second factor
   is enrolled elsewhere, instead of staying on the enrolment page.
 * Behind the reverse proxy every request had the proxy's address, so the login
