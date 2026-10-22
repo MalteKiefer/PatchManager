@@ -50,6 +50,8 @@ class ScopeForm(TenantForm):
 class ReservationForm(TenantForm):
     """A DHCP reservation."""
 
+    tenant_fields = ("scope",)
+
     class Meta:
         model = DHCPReservation
         fields = ["scope", "mac_address", "address", "hostname", "description"]
@@ -76,6 +78,8 @@ class ZoneForm(TenantForm):
 
 class RecordForm(TenantForm):
     """A DNS record."""
+
+    tenant_fields = ("zone",)
 
     class Meta:
         model = DNSRecord
@@ -193,11 +197,17 @@ def _quote(value: str) -> str:
     return '"' + value.replace("\\", "\\\\").replace('"', '\\"') + '"'
 
 
+def _word(value: str) -> str:
+    """One token of a zone file: no white space, control characters or comment marks."""
+    return "".join(c for c in value if c.isprintable() and not c.isspace() and c not in ';"()')
+
+
 def zone_file(zone: DNSZone) -> str:
     """The zone in the master file format (RFC 1035)."""
-    origin = zone.name.rstrip(".") + "."
-    mail = (zone.admin_email or f"hostmaster@{zone.name}").replace("@", ".").rstrip(".") + "."
-    primary = (zone.primary_server or f"ns1.{zone.name}").rstrip(".") + "."
+    origin = _word(zone.name).rstrip(".") + "."
+    mail = _word(zone.admin_email or f"hostmaster@{zone.name}").replace("@", ".", 1)
+    mail = mail.rstrip(".") + "."
+    primary = _word(zone.primary_server or f"ns1.{zone.name}").rstrip(".") + "."
     lines = [
         f"$ORIGIN {origin}",
         f"$TTL {zone.default_ttl}",
@@ -211,7 +221,9 @@ def zone_file(zone: DNSZone) -> str:
         )
         priority = f"{record.priority} " if record.priority is not None else ""
         ttl = f"{record.ttl} " if record.ttl else ""
-        lines.append(f"{record.name} {ttl}IN {record.type} {priority}{value}")
+        if record.type not in ("TXT", "CAA", "SRV"):
+            value = _word(value)
+        lines.append(f"{_word(record.name)} {ttl}IN {record.type} {priority}{value}")
     return "\n".join(lines) + "\n"
 
 

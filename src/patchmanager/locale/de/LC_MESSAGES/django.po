@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-22 07:16+0000\n"
+"POT-Creation-Date: 2026-10-22 07:22+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -18,7 +18,7 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
 #: accounts/forms.py:20 accounts/forms.py:48 accounts/forms.py:109
-#: directory/pages.py:94 templates/manage/users.html:10
+#: directory/pages.py:107 templates/manage/users.html:10
 msgid "Email"
 msgstr "E-Mail"
 
@@ -40,9 +40,9 @@ msgid "Run the setup_token command to get one."
 msgstr "Führen Sie den Befehl setup_token aus, um eines zu erhalten."
 
 #: accounts/forms.py:49 accounts/forms.py:103 accounts/forms.py:110
-#: api/ui.py:32 api/ui.py:55 directory/pages.py:73 directory/pages.py:92
-#: directory/pages.py:110 exchange/pdf.py:215 integrations/views.py:27
-#: ipam/pages.py:117 ipam/pages.py:157 ipam/pages.py:175 scim/views.py:351
+#: api/ui.py:32 api/ui.py:55 directory/pages.py:86 directory/pages.py:105
+#: directory/pages.py:123 exchange/pdf.py:215 integrations/views.py:27
+#: ipam/pages.py:121 ipam/pages.py:161 ipam/pages.py:179 scim/views.py:351
 #: sso/views.py:187 templates/api/clients.html:9 templates/api/tokens.html:9
 #: templates/integrations/webhooks.html:8 templates/ipam/vrfs.html:8
 #: templates/manage/groups.html:6 templates/manage/roles.html:11
@@ -72,7 +72,7 @@ msgid "Authenticator app"
 msgstr "Authenticator-App"
 
 #: accounts/forms.py:111 accounts/forms.py:128 directory/links.py:195
-#: directory/pages.py:93 templates/manage/_assignments.html:3
+#: directory/pages.py:106 templates/manage/_assignments.html:3
 msgid "Role"
 msgstr "Rolle"
 
@@ -214,7 +214,7 @@ msgstr "Notfallkonto"
 #: api/models.py:56 dcim/models.py:35 dcim/models.py:188 dcim/models.py:241
 #: directory/models.py:27 directory/models.py:62 directory/models.py:102
 #: integrations/models.py:16 ipam/models.py:21 ipam/models.py:187
-#: ipam/models.py:327 ipam/models.py:383 library/models.py:26
+#: ipam/models.py:327 ipam/models.py:391 library/models.py:26
 #: library/models.py:144 library/models.py:292 locations/models.py:19
 #: locations/models.py:61 locations/models.py:81 locations/models.py:115
 #: locations/models.py:164 networks/models.py:32 networks/models.py:263
@@ -967,7 +967,9 @@ msgstr "Übergabeport"
 #: circuits/models.py:56
 msgid ""
 "Where the line ends, for example on the provider's router or our firewall."
-msgstr "Wo die Leitung endet, zum Beispiel am Router des Providers oder an unserer Firewall."
+msgstr ""
+"Wo die Leitung endet, zum Beispiel am Router des Providers oder an unserer "
+"Firewall."
 
 #: circuits/models.py:58
 msgid "download (Mbit/s)"
@@ -1018,7 +1020,7 @@ msgstr "Leitungs-ID"
 msgid "Provider"
 msgstr "Provider"
 
-#: circuits/pages.py:70 directory/pages.py:74 directory/pages.py:111
+#: circuits/pages.py:70 directory/pages.py:87 directory/pages.py:124
 #: exchange/pdf.py:199 exchange/pdf.py:281 exchange/pdf.py:325
 #: templates/cabling/cables.html:7 templates/cabling/cables.html:12
 #: templates/dcim/_port_panel.html:6 templates/dcim/device.html:17
@@ -1026,7 +1028,7 @@ msgstr "Provider"
 msgid "Kind"
 msgstr "Art"
 
-#: circuits/pages.py:71 directory/pages.py:113 templates/exchange/index.html:15
+#: circuits/pages.py:71 directory/pages.py:126 templates/exchange/index.html:15
 #: templates/ipam/prefixes.html:8 templates/networks/stacks.html:9
 #: templates/networks/vlans.html:7
 msgid "Site"
@@ -1526,7 +1528,7 @@ msgstr "Geschwindigkeit (Mbit/s)"
 msgid "enabled"
 msgstr "aktiviert"
 
-#: dcim/models.py:252 ipam/models.py:283 ipam/pages.py:139
+#: dcim/models.py:252 ipam/models.py:283 ipam/pages.py:143
 msgid "MAC address"
 msgstr "MAC-Adresse"
 
@@ -1671,7 +1673,9 @@ msgstr "%(object)s zuordnen"
 msgid ""
 "Put it into a system, or assign it to an organization, for example a "
 "customer."
-msgstr "Ordnen Sie es einem System zu oder weisen Sie es einer Organisation zu, zum Beispiel einem Kunden."
+msgstr ""
+"Ordnen Sie es einem System zu oder weisen Sie es einer Organisation zu, zum "
+"Beispiel einem Kunden."
 
 #: directory/links.py:268 templates/directory/_links.html:3
 #: templates/instance/branding.html:14
@@ -1805,43 +1809,43 @@ msgstr "Nutzer"
 msgid "system"
 msgstr "System"
 
-#: directory/pages.py:69
+#: directory/pages.py:82
 msgid "Organizations"
 msgstr "Organisationen"
 
-#: directory/pages.py:70
+#: directory/pages.py:83
 msgid "New organization"
 msgstr "Neue Organisation"
 
-#: directory/pages.py:75
+#: directory/pages.py:88
 msgid "Number"
 msgstr "Nummer"
 
-#: directory/pages.py:76 directory/pages.py:95
+#: directory/pages.py:89 directory/pages.py:108
 msgid "Phone"
 msgstr "Telefon"
 
-#: directory/pages.py:88
+#: directory/pages.py:101
 msgid "Contacts"
 msgstr "Kontakte"
 
-#: directory/pages.py:89
+#: directory/pages.py:102
 msgid "New contact"
 msgstr "Neuer Kontakt"
 
-#: directory/pages.py:106
+#: directory/pages.py:119
 msgid "Systems"
 msgstr "Systeme"
 
-#: directory/pages.py:107
+#: directory/pages.py:120
 msgid "New system"
 msgstr "Neues System"
 
-#: directory/pages.py:112
+#: directory/pages.py:125
 msgid "Customer"
 msgstr "Kunde"
 
-#: directory/pages.py:114
+#: directory/pages.py:127
 msgid "Criticality"
 msgstr "Kritikalität"
 
@@ -1913,13 +1917,13 @@ msgstr "%(name)s · %(user)s · %(time)s"
 msgid "Page %(n)s"
 msgstr "Seite %(n)s"
 
-#: exchange/pdf.py:162 ipam/pages.py:138 templates/accounts/security.html:50
+#: exchange/pdf.py:162 ipam/pages.py:142 templates/accounts/security.html:50
 #: templates/ipam/addresses.html:10 templates/ipam/prefix.html:24
 #: templates/manage/audit.html:18 templates/networks/switching.html:28
 msgid "Address"
 msgstr "Adresse"
 
-#: exchange/pdf.py:162 ipam/pages.py:141 templates/ipam/addresses.html:10
+#: exchange/pdf.py:162 ipam/pages.py:145 templates/ipam/addresses.html:10
 #: templates/ipam/prefixes.html:8 templates/ipam/vrfs.html:8
 #: templates/networks/switching.html:48
 msgid "Description"
@@ -2555,7 +2559,7 @@ msgstr "DNS-Name"
 msgid "port"
 msgstr "Port"
 
-#: ipam/models.py:197 ipam/pages.py:121
+#: ipam/models.py:197 ipam/pages.py:125
 msgid "DHCP server"
 msgstr "DHCP-Server"
 
@@ -2598,7 +2602,9 @@ msgstr "Relay-Adressen"
 #: ipam/models.py:218
 msgid ""
 "Where routers forward requests (ip helper-address), separated by commas."
-msgstr "Wohin Router Anfragen weiterleiten (ip helper-address), durch Kommas getrennt."
+msgstr ""
+"Wohin Router Anfragen weiterleiten (ip helper-address), durch Kommas "
+"getrennt."
 
 #: ipam/models.py:249
 msgid "Enter valid addresses."
@@ -2661,151 +2667,155 @@ msgstr "Standard-TTL (Sekunden)"
 msgid "serial"
 msgstr "Seriennummer"
 
-#: ipam/models.py:346 ipam/pages.py:159
+#: ipam/models.py:346 ipam/pages.py:163
 msgid "DNS server"
 msgstr "DNS-Server"
 
-#: ipam/models.py:380
-msgid "zone"
-msgstr "Zone"
-
-#: ipam/models.py:385
-msgid "Relative to the zone; @ for the zone itself."
-msgstr "Relativ zur Zone; @ für die Zone selbst."
-
-#: ipam/models.py:388 ipam/models.py:442
+#: ipam/models.py:356 ipam/models.py:396 ipam/models.py:450
 msgid "Enter a host name."
 msgstr "Geben Sie einen Hostnamen ein."
 
-#: ipam/models.py:392 sso/models.py:21
+#: ipam/models.py:358
+msgid "Enter an email address or host name."
+msgstr "Geben Sie eine E-Mail-Adresse oder einen Hostnamen ein."
+
+#: ipam/models.py:388
+msgid "zone"
+msgstr "Zone"
+
+#: ipam/models.py:393
+msgid "Relative to the zone; @ for the zone itself."
+msgstr "Relativ zur Zone; @ für die Zone selbst."
+
+#: ipam/models.py:400 sso/models.py:21
 msgid "type"
 msgstr "Typ"
 
-#: ipam/models.py:393
+#: ipam/models.py:401
 msgid "value"
 msgstr "Wert"
 
-#: ipam/models.py:394 ipam/pages.py:179
+#: ipam/models.py:402 ipam/pages.py:183
 msgid "TTL (seconds)"
 msgstr "TTL (Sekunden)"
 
-#: ipam/models.py:396 networks/models.py:202 networks/models.py:326
+#: ipam/models.py:404 networks/models.py:202 networks/models.py:326
 #: templates/networks/stack.html:14 templates/networks/switching.html:73
 #: templates/networks/switching.html:83
 msgid "priority"
 msgstr "Priorität"
 
-#: ipam/models.py:404
+#: ipam/models.py:412
 msgid "documented address"
 msgstr "dokumentierte Adresse"
 
-#: ipam/models.py:424
+#: ipam/models.py:432
 msgid "The value must be one line."
 msgstr "Der Wert muss einzeilig sein."
 
-#: ipam/models.py:429
+#: ipam/models.py:437
 msgid "Enter an address."
 msgstr "Geben Sie eine Adresse ein."
 
-#: ipam/models.py:431
+#: ipam/models.py:439
 msgid "A records take IPv4, AAAA records IPv6."
 msgstr "A-Einträge nehmen IPv4, AAAA-Einträge IPv6."
 
-#: ipam/models.py:433
+#: ipam/models.py:441
 msgid "MX and SRV records need a priority."
 msgstr "MX- und SRV-Einträge brauchen eine Priorität."
 
-#: ipam/models.py:444
+#: ipam/models.py:452
 msgid "SRV records take weight, port and target."
 msgstr "SRV-Einträge nehmen Gewicht, Port und Ziel."
 
-#: ipam/pages.py:91
+#: ipam/pages.py:95
 msgid "Kea configuration"
 msgstr "Kea-Konfiguration"
 
-#: ipam/pages.py:93 ipam/pages.py:118 templates/ipam/prefixes.html:8
+#: ipam/pages.py:97 ipam/pages.py:122 templates/ipam/prefixes.html:8
 msgid "Prefix"
 msgstr "Präfix"
 
-#: ipam/pages.py:94
+#: ipam/pages.py:98
 msgid "Addresses in the range"
 msgstr "Adressen im Bereich"
 
-#: ipam/pages.py:95 ipam/pages.py:134
+#: ipam/pages.py:99 ipam/pages.py:138
 msgid "Reservations"
 msgstr "Reservierungen"
 
-#: ipam/pages.py:96
+#: ipam/pages.py:100
 msgid "Options"
 msgstr "Optionen"
 
-#: ipam/pages.py:104
+#: ipam/pages.py:108
 msgid "Zone file"
 msgstr "Zonendatei"
 
-#: ipam/pages.py:113
+#: ipam/pages.py:117
 msgid "DHCP scopes"
 msgstr "DHCP-Bereiche"
 
-#: ipam/pages.py:114
+#: ipam/pages.py:118
 msgid "New DHCP scope"
 msgstr "Neuer DHCP-Bereich"
 
-#: ipam/pages.py:119
+#: ipam/pages.py:123
 msgid "First address"
 msgstr "Erste Adresse"
 
-#: ipam/pages.py:120
+#: ipam/pages.py:124
 msgid "Last address"
 msgstr "Letzte Adresse"
 
-#: ipam/pages.py:122 sso/views.py:190 templates/dcim/device.html:17
+#: ipam/pages.py:126 sso/views.py:190 templates/dcim/device.html:17
 msgid "Enabled"
 msgstr "Aktiviert"
 
-#: ipam/pages.py:135
+#: ipam/pages.py:139
 msgid "New reservation"
 msgstr "Neue Reservierung"
 
-#: ipam/pages.py:140 templates/networks/switching.html:60
+#: ipam/pages.py:144 templates/networks/switching.html:60
 msgid "Hostname"
 msgstr "Hostname"
 
-#: ipam/pages.py:153
+#: ipam/pages.py:157
 msgid "DNS zones"
 msgstr "DNS-Zonen"
 
-#: ipam/pages.py:154
+#: ipam/pages.py:158
 msgid "New DNS zone"
 msgstr "Neue DNS-Zone"
 
-#: ipam/pages.py:158
+#: ipam/pages.py:162
 msgid "Primary name server"
 msgstr "Primärer Nameserver"
 
-#: ipam/pages.py:160
+#: ipam/pages.py:164
 msgid "Serial"
 msgstr "Seriennummer"
 
-#: ipam/pages.py:171 templates/base.html:55
+#: ipam/pages.py:175 templates/base.html:55
 msgid "Records"
 msgstr "Nachweise"
 
-#: ipam/pages.py:172
+#: ipam/pages.py:176
 msgid "New record"
 msgstr "Neuer Eintrag"
 
-#: ipam/pages.py:176 sso/views.py:189 templates/history/activity.html:7
+#: ipam/pages.py:180 sso/views.py:189 templates/history/activity.html:7
 #: templates/manage/roles.html:11 templates/search/results.html:7
 #: templates/sso/providers.html:7
 msgid "Type"
 msgstr "Typ"
 
-#: ipam/pages.py:177
+#: ipam/pages.py:181
 msgid "Value"
 msgstr "Wert"
 
-#: ipam/pages.py:178
+#: ipam/pages.py:182
 msgid "Priority"
 msgstr "Priorität"
 
@@ -3338,21 +3348,21 @@ msgstr "Diese Änderung steht im Konflikt mit vorhandenen Daten."
 msgid "Remove everything inside it first."
 msgstr "Entfernen Sie zuerst alles darin."
 
-#: locations/services.py:127
+#: locations/services.py:145
 msgid ""
 "Cables connect this site to other sites of the tenant. Remove them first."
 msgstr ""
 "Kabel verbinden diesen Standort mit anderen Standorten des Mandanten. "
 "Entfernen Sie diese zuerst."
 
-#: locations/services.py:136
+#: locations/services.py:154
 msgid ""
 "Prefixes or IP addresses belong to this site. Move or remove them first."
 msgstr ""
 "Präfixe oder IP-Adressen gehören zu diesem Standort. Verschieben oder "
 "entfernen Sie sie zuerst."
 
-#: locations/services.py:145
+#: locations/services.py:163
 msgid ""
 "Ports in this site use tenant wide VLANs or WLANs. Remove those assignments "
 "first."
@@ -3360,17 +3370,19 @@ msgstr ""
 "Ports in diesem Standort verwenden mandantenweite VLANs oder WLANs. "
 "Entfernen Sie diese Zuweisungen zuerst."
 
-#: locations/services.py:165
+#: locations/services.py:181
 msgid ""
 "Systems, lines, suppliers, customers or DHCP and DNS servers refer to this "
 "site. Remove those references first."
-msgstr "Systeme, Leitungen, Lieferanten, Kunden oder DHCP- und DNS-Server verweisen auf diesen Standort. Entfernen Sie diese Bezüge zuerst."
+msgstr ""
+"Systeme, Leitungen, Lieferanten, Kunden oder DHCP- und DNS-Server verweisen "
+"auf diesen Standort. Entfernen Sie diese Bezüge zuerst."
 
-#: locations/services.py:181
+#: locations/services.py:197
 msgid "The site already belongs to this tenant."
 msgstr "Der Standort gehört bereits zu diesem Mandanten."
 
-#: locations/services.py:188
+#: locations/services.py:204
 msgid "Devices in this site use device types private to the current tenant."
 msgstr ""
 "Geräte an diesem Standort verwenden Gerätetypen, die nur für den aktuellen "
@@ -5370,7 +5382,9 @@ msgstr "Zugeordnete Objekte"
 msgid ""
 "Link devices, buildings, VLANs, networks, configurations or lines from their "
 "own pages."
-msgstr "Ordnen Sie Geräte, Gebäude, VLANs, Netze, Konfigurationen oder Leitungen auf deren eigenen Seiten zu."
+msgstr ""
+"Ordnen Sie Geräte, Gebäude, VLANs, Netze, Konfigurationen oder Leitungen auf "
+"deren eigenen Seiten zu."
 
 #: templates/directory/_members.html:8
 msgid "Nothing linked yet."

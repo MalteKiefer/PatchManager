@@ -349,6 +349,14 @@ class DNSZone(TenantScopedModel):
 
     policy_object_type = "ipam.dnszone"
 
+    def clean(self) -> None:
+        """Server and mailbox are host names (a mailbox may be written as an email address)."""
+        super().clean()
+        if self.primary_server and not _HOST.match(self.primary_server):
+            raise ValidationError({"primary_server": _("Enter a host name.")})
+        if self.admin_email and not _HOST.match(self.admin_email.replace("@", ".", 1)):
+            raise ValidationError({"admin_email": _("Enter an email address or host name.")})
+
     class Meta:
         ordering = ["name"]
         constraints = [models.UniqueConstraint("tenant", Lower("name"), name="dnszone_name_unique")]

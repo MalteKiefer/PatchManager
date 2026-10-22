@@ -243,3 +243,42 @@ def test_site_with_references_does_not_move(make_tree, make_tenant, super_admin,
         System.objects.create(tenant=t["tenant"], name="Doors", site=t["site"])
         with pytest.raises(ServiceError, match="refer to this site"):
             tree.move_site(t["request"], super_admin, t["site"], make_tenant())
+
+
+def test_zone_fields_and_choices_are_safe(admin_client: Client, setup, make_tree, system) -> None:
+    from patchmanager.ipam.pages import zone_file
+
+    bad = _post(
+        admin_client,
+        "/items/dns/new/",
+        {"name": "safe.lan", "primary_server": "ns1 IN A 1.2.3.4", "default_ttl": 60, "serial": 1},
+    )
+    assert "Enter a host name." in bad.content.decode()
+    with system():
+        zone = DNSZone.objects.create(
+            tenant=setup["tenant"],
+            name="safe.lan",
+            primary_server="ns1.safe.lan\nevil IN A 6.6.6.6",
+        )
+        assert "\nevil" not in zone_file(zone)
+        other = make_tree(name="Elsewhere")
+        Organization.objects.create(tenant=other["tenant"], name="Hidden Org")
+    page = admin_client.get("/items/systems/new/", secure=True).content.decode()
+    assert "Hidden Org" not in page
+
+
+def test_links_inside_a_site_block_its_move(make_tree, make_tenant, super_admin, system) -> None:
+    from django.test import RequestFactory
+
+    from patchmanager.accounts.services import ServiceError
+    from patchmanager.directory import links
+    from patchmanager.locations import services as tree
+
+    t = make_tree()
+    request = RequestFactory().post("/")
+    request.user = super_admin
+    with system():
+        doors = System.objects.create(tenant=t["tenant"], name="Doors")
+        links.add(request, super_admin, t["room"], role="part", system=doors)
+        with pytest.raises(ServiceError, match="refer to this site"):
+            tree.move_site(t["request"], super_admin, t["site"], make_tenant())

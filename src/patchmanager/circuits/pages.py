@@ -7,8 +7,8 @@ from django.utils.translation import gettext_lazy as _
 
 from patchmanager.circuits.models import Circuit
 from patchmanager.core import crud
-from patchmanager.dcim.models import Port
-from patchmanager.directory.pages import TenantForm
+from patchmanager.dcim.models import Device, Port
+from patchmanager.directory.pages import TenantForm, visible
 
 
 class CircuitForm(TenantForm):
@@ -46,7 +46,7 @@ class CircuitForm(TenantForm):
         field: Any = self.fields["port"]
         field.queryset = (
             Port.objects.filter(
-                tenant=tenant,
+                device__in=visible(actor, Device.objects.filter(tenant=tenant)),
                 kind="interface",
                 device__device_type__category__in=["router", "firewall", "other"],
             )

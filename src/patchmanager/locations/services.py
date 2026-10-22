@@ -115,6 +115,24 @@ _TREE_TABLES = (
 )
 
 
+def _moving_ids(site: Any, devices: Any) -> list[Any]:
+    """Every object that moves with a site and could be linked to a system or customer."""
+    from django.apps import apps
+
+    from patchmanager.configs.models import DeviceConfig
+    from patchmanager.networks.models import VLAN, Stack
+
+    ids: list[Any] = []
+    for table in _TREE_TABLES:
+        app_label, model_name = table.split("_", 1)
+        model = apps.get_model(app_label, model_name)
+        ids += model.objects.filter(path__descendant_of=site.path).values_list("pk", flat=True)
+    ids += DeviceConfig.objects.filter(device__in=devices).values_list("pk", flat=True)
+    ids += VLAN.objects.filter(site=site).values_list("pk", flat=True)
+    ids += Stack.objects.filter(site=site).values_list("pk", flat=True)
+    return ids
+
+
 def _check_site_is_self_contained(site: Any, device_model: Any) -> None:
     """Cables and tenant wide networks would otherwise end up spanning two tenants."""
     from patchmanager.cabling.models import CableEnd
@@ -156,9 +174,7 @@ def _check_site_is_self_contained(site: Any, device_model: Any) -> None:
         or DHCPScope.objects.filter(server__in=inside).exists()
         or DNSZone.objects.filter(server__in=inside).exists()
         or inside.filter(supplier__isnull=False).exists()
-        or Link.objects.filter(
-            object_id__in=[site.pk, *inside.values_list("pk", flat=True)]
-        ).exists()
+        or Link.objects.filter(object_id__in=_moving_ids(site, inside)).exists()
     ):
         raise ServiceError(
             _(
