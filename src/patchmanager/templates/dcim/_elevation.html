@@ -13,16 +13,16 @@
   </a>
   {% endfor %}{% endif %}
   {% for b in e.bands %}
-  <g class="rack-block{% if not b.space.device_id %} is-reserved{% endif %}{% if can_change %} cursor-grab{% endif %}" {% if can_change %}tabindex="0" role="{% if b.ports %}group{% else %}button{% endif %}"{% elif b.ports %}role="group"{% endif %}
-     aria-label="{{ b.space.label }}, {% blocktranslate with start=b.space.start end=b.space.end %}units {{ start }} to {{ end }}{% endblocktranslate %}"
+  <g class="rack-block{% if not b.space.device_id %} is-reserved{% endif %}{% if can_change %} cursor-grab{% endif %}" {% if can_change and not b.hidden %}tabindex="0" role="{% if b.ports %}group{% else %}button{% endif %}"{% elif b.ports %}role="group"{% endif %}
+     aria-label="{{ b.label }}, {% blocktranslate with start=b.space.start end=b.space.end %}units {{ start }} to {{ end }}{% endblocktranslate %}"
      data-start="{{ b.space.start }}" data-size="{{ b.space.size }}" data-y="{{ b.y }}"
-     {% if b.space.device_id %}data-href="{% url 'devices:device' b.space.device_id %}"{% endif %}
-     {% if can_change %}data-move-url="{% url 'dcim:space-move' e.rack.pk b.space.pk %}"{% endif %}>
+     {% if b.space.device_id and not b.hidden %}data-href="{% url 'devices:device' b.space.device_id %}"{% endif %}
+     {% if can_change and not b.hidden %}data-move-url="{% url 'dcim:space-move' e.rack.pk b.space.pk %}"{% endif %}>
     <rect x="{{ e.area_x|add:2 }}" y="{{ b.y|add:3 }}" width="{{ e.area_w|add:-4 }}" height="{{ b.height|add:-6 }}" rx="8" class="{% if b.space.device_id %}rack-device{% if b.passive %} is-passive{% endif %}{% else %}rack-reserved{% endif %}"/>
-    {% if b.image and not b.ports %}<image href="{% url 'metadata:download' b.image %}" x="{{ e.area_x|add:36 }}" y="{{ b.y|add:6 }}" width="{{ e.area_w|add:-64 }}" height="{{ b.height|add:-12 }}" preserveAspectRatio="xMidYMid meet"/>{% endif %}
+    {% if b.image and not b.ports and not b.hidden %}<image href="{% url 'metadata:download' b.image %}" x="{{ e.area_x|add:36 }}" y="{{ b.y|add:6 }}" width="{{ e.area_w|add:-64 }}" height="{{ b.height|add:-12 }}" preserveAspectRatio="xMidYMid meet"/>{% endif %}
     <rect x="{{ e.area_x|add:2 }}" y="{{ b.y|add:3 }}" width="32" height="{{ b.height|add:-6 }}" rx="8" class="rack-strip"/>
-    <text transform="translate({{ e.area_x|add:23 }} {{ b.y|add:b.half }}) rotate(-90)" text-anchor="middle" font-size="{{ b.name_font }}" class="rack-device-name">{{ b.space.label }}</text>
-    {% if can_change %}<g class="rack-grip" aria-hidden="true">{% for dot in b.grip %}<circle cx="{{ dot.0 }}" cy="{{ dot.1 }}" r="2"/>{% endfor %}</g>{% endif %}
+    <text transform="translate({{ e.area_x|add:23 }} {{ b.y|add:b.half }}) rotate(-90)" text-anchor="middle" font-size="{{ b.name_font }}" class="rack-device-name">{{ b.label }}</text>
+    {% if can_change and not b.hidden %}<g class="rack-grip" aria-hidden="true">{% for dot in b.grip %}<circle cx="{{ dot.0 }}" cy="{{ dot.1 }}" r="2"/>{% endfor %}</g>{% endif %}
     {% for g in b.ports %}
     <a href="{% url 'devices:port' g.port.pk %}" class="rack-port is-{{ g.state }}{% if g.passive %} on-passive{% endif %}" data-path="{{ g.path_id }}">
       <title>{{ g.title }}</title>

@@ -12,10 +12,12 @@ from collections.abc import Iterable
 from dataclasses import dataclass, field
 from typing import Any
 
+from django.utils.translation import gettext as _
+
 from patchmanager.accounts import policy
 from patchmanager.cabling.models import CableEnd
 from patchmanager.cabling.trace import Path, trace_many
-from patchmanager.dcim.models import Port, Rack, RackSpace
+from patchmanager.dcim.models import Device, Port, Rack, RackSpace
 
 UNIT = 76  # height of one rack unit: 44.45 mm against 450 mm of mounting width
 GUTTER = 56  # cable channel beside the rack, each side
@@ -107,6 +109,12 @@ class Band:
     image: Any = None
     passive: bool = False  # patch panel or cassette: only front and rear ports
     grip: list[tuple[int, int]] = field(default_factory=list)  # drag handle dots
+    hidden: bool = False  # a device the viewer may not see: drawn without name or ports
+
+    @property
+    def label(self) -> str:
+        """Name shown on the band."""
+        return _("not visible") if self.hidden else self.space.label
 
     @property
     def half(self) -> int:
@@ -116,7 +124,7 @@ class Band:
     @property
     def name_font(self) -> float:
         """Font size that fits the name upright in the strip (long names get smaller)."""
-        return round(min(15, (self.height - 12) / max(len(self.space.label), 1) / 0.62), 1)
+        return round(min(15, (self.height - 12) / max(len(self.label), 1) / 0.62), 1)
 
 
 @dataclass
@@ -207,9 +215,22 @@ def path_id(path: Path) -> str:
     return hashlib.blake2s(key.encode(), digest_size=6).hexdigest()
 
 
+def _allowed(user: Any, permission: str, device_ids: Iterable[Any]) -> set[Any]:
+    """Devices among ``device_ids`` on which ``user`` holds ``permission``."""
+    devices = Device.objects.filter(pk__in=set(device_ids))
+    return set(policy.scope_queryset(user, permission, devices).values_list("pk", flat=True))
+
+
+def _paths(user: Any, ports: list[Port]) -> dict[Any, Path]:
+    """End to end paths where the viewer may trace; elsewhere the port alone."""
+    traceable = _allowed(user, "cabling.cable.trace", (p.device_id for p in ports))
+    paths = trace_many([p for p in ports if p.device_id in traceable])
+    return {p.pk: paths.get(p.pk) or Path([p]) for p in ports}
+
+
 def _state(port: Port, path: Path, cabled: set[Any]) -> str:
     if len(path.ports) == 1:
-        return "none"
+        return "partial" if port.pk in cabled else "none"  # cabled, but not traced
     if port.pk not in cabled:
         return "ready"  # nothing plugged in here, but the port is wired behind
     return "complete" if path.complete else "partial"
@@ -360,13 +381,16 @@ def room_layout(
             band.grip = [(elevation.area_x + x, y) for x, y in band.grip]
             if band.space.device_id:
                 by_device[band.space.device_id] = (elevation, band)
+    visible = _allowed(user, "dcim.device.view", by_device)
+    for device_id in set(by_device) - visible:
+        by_device.pop(device_id)[1].hidden = True
 
     ports = [
         p
         for p in Port.objects.filter(device_id__in=by_device).select_related("device")
         if port_face(p) == face
     ]
-    paths = trace_many(ports)
+    paths = _paths(user, ports)
     ends = {
         e.port_id: e
         for e in CableEnd.objects.filter(cable__ends__port__in=ports).select_related(
@@ -521,22 +545,24 @@ class Connection:
 
 def connections(user: Any, rack: Rack) -> list[Connection]:
     """Every cabled port of the devices in ``rack`` (both faces), in rack order."""
+    cabled = Port.objects.filter(device__space__rack=rack, cable_end__isnull=False)
+    visible = _allowed(user, "dcim.device.view", cabled.values_list("device_id", flat=True))
     ports = list(
-        Port.objects.filter(device__space__rack=rack, cable_end__isnull=False)
+        cabled.filter(device_id__in=visible)
         .select_related("device", "cable_end__cable")
         .order_by("-device__space__units", "device__name", "order", "name")
     )
-    paths = trace_many(ports)
+    paths = _paths(user, ports)
     rows = []
     for port in ports:
         path = paths[port.pk]
         far = path.ports[-1] if path.ports[0].pk == port.pk else path.ports[0]
-        visible = policy.has_perm(user, "dcim.device.view", far.device)
+        shown = far.device_id in visible or policy.has_perm(user, "dcim.device.view", far.device)
         rows.append(
             Connection(
                 port=port,
                 cable=port.cable_end.cable,
-                far=far if visible and far.pk != port.pk else None,
+                far=far if shown and far.pk != port.pk else None,
                 complete=path.complete,
                 hops=len(path.cables),
                 path_id=path_id(path),

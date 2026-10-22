@@ -18,7 +18,7 @@ from patchmanager.accounts.models import User
 from patchmanager.accounts.services import ServiceError
 from patchmanager.dcim import elevation as drawing
 from patchmanager.dcim import services
-from patchmanager.dcim.models import Rack, RackSpace
+from patchmanager.dcim.models import Device, Rack, RackSpace
 from patchmanager.locations import services as tree
 from patchmanager.locations.forms import RackForm
 from patchmanager.locations.models import Room
@@ -88,9 +88,9 @@ def rack_detail(request: HttpRequest, pk: str) -> HttpResponse:
         ),
         "stats": rack.utilisation(),
         "reservations": rack.spaces.filter(device__isnull=True),
-        "device_spaces": rack.spaces.filter(device__isnull=False).select_related(
-            "device__device_type__vendor"
-        ),
+        "device_spaces": rack.spaces.filter(
+            device__in=policy.scope_queryset(actor, "dcim.device.view", Device.objects.all())
+        ).select_related("device__device_type__vendor"),
         "can_add_device": policy.has_perm(actor, "dcim.device.add", rack),
         "form": form,
         "can_change": can_change,
