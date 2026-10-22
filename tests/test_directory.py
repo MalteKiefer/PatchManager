@@ -328,3 +328,38 @@ def test_record_pages_edit_and_delete(admin_client: Client, setup, system) -> No
     assert "still use" in blocked.content.decode()
     assert admin_client.get("/items/nothing/", secure=True).status_code == 404
     assert admin_client.get("/items/contacts/", secure=True).status_code == 404  # no own list
+||||||| 08ac51f
+
+
+def test_device_supplier_choices_are_visible_only(
+    admin_client: Client, setup, make_type, monkeypatch, system
+) -> None:
+    from patchmanager.accounts import policy
+    from patchmanager.dcim import devices
+
+    with system():
+        Organization.objects.create(tenant=setup["tenant"], name="Seen Supplier", kind="supplier")
+        Organization.objects.create(tenant=setup["tenant"], name="Hidden Supplier", kind="supplier")
+        model = make_type("Box")
+        device = devices.create(
+            setup["request"],
+            setup["request"].user,
+            device_type=model,
+            room=setup["room"],
+            rack=setup["rack"],
+            position=1,
+            name="BOX-1",
+        )
+    real = policy.has_perm
+
+    def hide(user, permission, obj=None, **kwargs):
+        if (
+            permission == "directory.organization.view"
+            and getattr(obj, "name", "") == "Hidden Supplier"
+        ):
+            return False
+        return real(user, permission, obj, **kwargs)
+
+    monkeypatch.setattr(policy, "has_perm", hide)
+    page = admin_client.get(f"/devices/{device.pk}/", secure=True).content.decode()
+    assert "Seen Supplier" in page and "Hidden Supplier" not in page
