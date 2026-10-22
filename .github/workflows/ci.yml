@@ -144,8 +144,12 @@ jobs:
           ignore-unfixed: true
           exit-code: "1"
       - name: Smoke test image
+        # Model checks ask PostgreSQL for its version (generated columns), so a database runs alongside.
         run: |
-          docker run --rm --entrypoint /app/.pixi/envs/prod/bin/python \
+          docker run -d --name smoke-db -e POSTGRES_USER=smoke -e POSTGRES_HOST_AUTH_METHOD=trust \
+            postgres:18.6-trixie@sha256:1267c7e692de235fda2a50dbcdbcbca4672ea6a0298576a6bd9d07cafc319b32
+          until docker exec smoke-db pg_isready -U smoke -q; do sleep 1; done
+          docker run --rm --network container:smoke-db --entrypoint /app/.pixi/envs/prod/bin/python \
             -e DJANGO_SECRET_KEY=smoke-only-insecure-key-0123456789-0123456789-0123456789 \
             -e PATCHMANAGER_ENCRYPTION_KEYS=AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA= \
             -e PATCHMANAGER_BASE_URL=https://smoke.example.test \
@@ -153,6 +157,7 @@ jobs:
             -e REDIS_URL=redis://localhost:6379/0 \
             -e DATABASE_URL=postgresql://smoke@localhost/smoke \
             patchmanager:scan -m django check --deploy --fail-level WARNING
+          docker rm -f smoke-db
       - name: Backup and restore drill (production stack)
         run: PATCHMANAGER_IMAGE=patchmanager:scan sh scripts/drill.sh
       - if: github.event_name != 'pull_request'
