@@ -82,7 +82,7 @@ def rack_detail(request: HttpRequest, pk: str) -> HttpResponse:
         "connections": rows,
         "cable_count": len({row.cable.pk for row in rows}),
         "add_url": (
-            f"{reverse('devices:device-create')}?rack={rack.pk}"
+            f"{reverse('devices:device-place')}?rack={rack.pk}"
             if policy.has_perm(actor, "dcim.device.add", rack)
             else ""
         ),
