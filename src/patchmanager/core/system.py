@@ -1,5 +1,6 @@
 """System status of the admin area: versions, health, jobs, backups, mail and licenses."""
 
+import json
 import platform
 import time
 from datetime import UTC, datetime, timedelta
@@ -125,7 +126,26 @@ def backups() -> dict[str, Any]:
     ]
     newest: datetime | None = rows[0]["at"] if rows else None
     stale = newest is None or timezone.now() - newest > timedelta(hours=36)
-    return {"configured": True, "readable": True, "files": rows, "stale": stale}
+    return {
+        "configured": True,
+        "readable": True,
+        "files": rows,
+        "stale": stale,
+        "offsite": _offsite(folder),
+    }
+
+
+def _offsite(folder: Path) -> dict[str, Any] | None:
+    """Last run of the restic off-site copy (deploy/offsite.sh), if it ever ran."""
+    try:
+        raw = (folder / ".offsite.json").read_bytes()[:4096]
+        data = json.loads(raw)
+        at = datetime.fromisoformat(data["at"])
+    except FileNotFoundError:
+        return None
+    except OSError, ValueError, KeyError, TypeError:
+        return {"ok": False, "at": None, "message": _("The off-site status file cannot be read.")}
+    return {"ok": data.get("ok") is True, "at": at, "message": str(data.get("message", ""))[:200]}
 
 
 def jobs() -> dict[str, Any]:
@@ -171,6 +191,7 @@ def system_view(request: HttpRequest) -> HttpResponse:
             "health": health(),
             "jobs": jobs(),
             "backups": backups(),
+            "s3_bucket": settings.S3_BUCKET,
             "mail": {
                 "backend": mailer.get("BACKEND", ""),
                 "host": mailer.get("OPTIONS", {}).get("host", ""),

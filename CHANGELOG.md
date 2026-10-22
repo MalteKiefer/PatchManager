@@ -8,6 +8,11 @@ All notable changes to this project are documented here. The format follows
 
 ### Added
 
+* Uploads in S3 compatible object storage (AWS S3, Backblaze B2, Wasabi and others)
+  with `PATCHMANAGER_S3_BUCKET`; files stay encrypted by the application (ADR 0034).
+* Encrypted off-site backups with restic to S3 or B2 (`offsite` compose profile) and a
+  `restore` service for one command restores; the system page shows the off-site status
+  and the restore command.
 * API tokens and OAuth clients can be limited to kinds of objects and to one location;
   the limits apply to every check of the request, also for super admins (ADR 0033).
 * "Add device here" on a free rack unit or on the floor plan also offers the room's
@@ -42,6 +47,9 @@ All notable changes to this project are documented here. The format follows
 
 ### Fixed
 
+* The production stack let the application containers reach nothing outside the
+  host (the backend network is internal), so mail, SSO, webhooks, DNS provider
+  imports and platform syncs failed; they now also join an `egress` network.
 * Webhook pages highlighted "Import and export" in the menu instead of
   "Administration".
 

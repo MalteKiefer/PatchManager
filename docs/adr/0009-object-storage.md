@@ -1,6 +1,6 @@
 # 9. Object storage backend
 
-* Status: accepted (Phase 3)
+* Status: accepted (Phase 3), S3 part superseded by [ADR 0034](0034-object-storage-and-offsite-backups.md)
 * Date: 2026-10-21
 
 ## Context
