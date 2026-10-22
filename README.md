@@ -5,7 +5,9 @@ racks, devices, ports, patch panels, cabling, VLANs and WLANs. Multi-tenant, wit
 grained permissions, SSO and an API.
 
 > Status: 1.0. Tenants, users, MFA, roles, the audit log, locations, racks, devices,
-> ports, cabling with path tracing, VLANs, WLANs, floor plans, change history, search,
+> ports drawn in full rack and room views, cabling with path tracing, a catalog of
+> 12 000 device types, IP address management, device configuration versions, VLANs,
+> WLANs, floor plans, change history, search,
 > imports and exports, the REST API, webhooks, single sign on (OIDC, SAML, LDAP), SCIM
 > provisioning, personal data export and the admin area. Every feature is free and
 > available on every installation.

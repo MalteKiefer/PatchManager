@@ -13,6 +13,8 @@ that changes a trust boundary.
 3. Audit log integrity.
 4. Instance secrets: Django secret key, database password, IdP keys, webhook secrets.
 5. Backups.
+6. Stored device configurations (secrets such as SNMP communities and password hashes):
+   encrypted at rest, every read audited, own permissions (ADR 0027).
 
 ## Trust boundaries
 
