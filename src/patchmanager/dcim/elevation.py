@@ -12,6 +12,9 @@ from collections.abc import Iterable
 from dataclasses import dataclass, field
 from typing import Any
 
+from django.urls import reverse
+from django.utils.html import escape
+from django.utils.safestring import mark_safe
 from django.utils.translation import gettext as _
 
 from patchmanager.accounts import policy
@@ -44,7 +47,7 @@ class PortGlyph:
     y: float
     size: float
     short: str
-    state: str  # none, ready, partial, complete
+    state: str  # none, ready, partial, complete; "cabled" when not traced (room drawing)
     colour: str
     path_id: str
     title: str
@@ -53,6 +56,8 @@ class PortGlyph:
     flipped: bool  # bottom row: the connector is drawn upside down, like on the hardware
     passive: bool
     leaves: str = ""  # "face" or "rack" when the cable continues out of sight
+    href: str = ""
+    panel: str = ""
 
     @property
     def centre_x(self) -> float:
@@ -63,6 +68,35 @@ class PortGlyph:
     def font(self) -> float:
         """Font size of the number."""
         return round(max(self.size * 0.5, 8), 1)
+
+    @property
+    def svg(self) -> str:
+        """The glyph as SVG markup (built here: a room drawing has thousands of them)."""
+        fill = ""
+        if self.state in ("complete", "cabled"):
+            fill = f' fill="{escape(self.colour)}"'
+        elif self.state == "partial":
+            fill = f' fill="{escape(self.colour)}" fill-opacity="0.45"'
+        parts = [
+            f'<a href="{escape(self.href)}" data-panel="{escape(self.panel)}" '
+            f'class="rack-port is-{self.state}{" on-passive" if self.passive else ""}" '
+            f'data-path="{escape(self.path_id)}"><title>{escape(self.title)}</title>'
+            f'<path d="{self.shape}"{fill}/>'
+        ]
+        if not self.copper:
+            parts.append(f'<path d="{self.inner}" class="rack-port-inner"/>')
+        if self.label_y is not None:
+            parts.append(
+                f'<text x="{self.centre_x}" y="{self.label_y}" font-size="{self.font}" '
+                f'text-anchor="middle">{escape(self.short)}</text>'
+            )
+        if self.leaves:
+            parts.append(
+                f'<circle cx="{self.mark_x}" cy="{self.y}" r="4.5" '
+                f'class="rack-port-leaves is-{self.leaves}"/>'
+            )
+        parts.append("</a>")
+        return mark_safe("".join(parts))  # noqa: S308  # nosec B308 B703: every value escaped or numeric
 
     @property
     def copper(self) -> bool:
@@ -221,10 +255,27 @@ def _allowed(user: Any, permission: str, device_ids: Iterable[Any]) -> set[Any]:
     return set(policy.scope_queryset(user, permission, devices).values_list("pk", flat=True))
 
 
+def _wired(ports: list[Port]) -> set[Any]:
+    """Ports with a path to follow: cabled, or a panel port whose other side is cabled."""
+    ids = [p.pk for p in ports]
+    cabled = set(CableEnd.objects.filter(port_id__in=ids).values_list("port_id", flat=True))
+    rears = {p.rear_port_id for p in ports if p.rear_port_id}
+    cabled_rears = set(CableEnd.objects.filter(port_id__in=rears).values_list("port_id", flat=True))
+    behind = {p.pk for p in ports if p.rear_port_id in cabled_rears}
+    fronts_cabled = set(
+        Port.objects.filter(
+            rear_port_id__in=[p.pk for p in ports if p.kind == "rear"], cable_end__isnull=False
+        ).values_list("rear_port_id", flat=True)
+    )
+    return cabled | behind | fronts_cabled
+
+
 def _paths(user: Any, ports: list[Port]) -> dict[Any, Path]:
     """End to end paths where the viewer may trace; elsewhere the port alone."""
-    traceable = _allowed(user, "cabling.cable.trace", (p.device_id for p in ports))
-    paths = trace_many([p for p in ports if p.device_id in traceable])
+    wired = _wired(ports)
+    candidates = [p for p in ports if p.pk in wired]
+    traceable = _allowed(user, "cabling.cable.trace", (p.device_id for p in candidates))
+    paths = trace_many([p for p in candidates if p.device_id in traceable])
     return {p.pk: paths.get(p.pk) or Path([p]) for p in ports}
 
 
@@ -340,7 +391,7 @@ def layout(user: Any, rack: Rack, face: str) -> Elevation:
 
 
 def room_layout(
-    user: Any, racks: Iterable[Rack], face: str
+    user: Any, racks: Iterable[Rack], face: str, *, trace: bool = True
 ) -> tuple[list[Elevation], list[Wire], int]:
     """Elevations side by side, the cables inside each rack, and cables between racks.
 
@@ -390,13 +441,19 @@ def room_layout(
         for p in Port.objects.filter(device_id__in=by_device).select_related("device")
         if port_face(p) == face
     ]
-    paths = _paths(user, ports)
+    # Without ``trace`` (a whole room) a port shows its own cable only; the side panel
+    # still traces the path of a selected port.
+    paths = _paths(user, ports) if trace else {p.pk: Path([p]) for p in ports}
     ends = {
         e.port_id: e
         for e in CableEnd.objects.filter(cable__ends__port__in=ports).select_related(
             "cable", "port"
         )
     }  # both ends of every cable on a drawn port
+    cabled = set(ends)
+    by_owner: dict[Any, list[Port]] = {}
+    for p in ports:
+        by_owner.setdefault(p.device_id, []).append(p)
     seen: dict[Any, bool] = {}
 
     def can_see(device: Any) -> bool:
@@ -404,11 +461,13 @@ def room_layout(
             seen[device.pk] = policy.has_perm(user, "dcim.device.view", device)
         return seen[device.pk]
 
+    # One reverse() per kind, not per port: thousands of ports in a room drawing.
+    marker = "00000000-0000-0000-0000-000000000000"
+    port_url = reverse("devices:port", args=[marker])
+    panel_url = reverse("devices:port-panel", args=[marker])
     glyphs: dict[Any, tuple[Elevation, PortGlyph]] = {}
     for device_id, (elevation, band) in by_device.items():
-        own = sorted(
-            (p for p in ports if p.device_id == device_id), key=lambda p: (p.order, p.name)
-        )
+        own = sorted(by_owner.get(device_id, []), key=lambda p: (p.order, p.name))
         band.passive = bool(own) and all(p.kind in ("front", "rear") for p in own)
         prefixes = [_prefix(p.name) for p in own]
         common = max(set(prefixes), key=prefixes.count) if prefixes else ""
@@ -433,10 +492,12 @@ def room_layout(
                 lane=round(spot["lane"], 1),
                 flipped=spot["flipped"],
                 passive=band.passive,
+                href=port_url.replace(marker, str(port.pk)),
+                panel=panel_url.replace(marker, str(port.pk)),
                 short=short_name(port.name, common),
-                state=_state(port, path, set(ends)),
+                state=_state(port, path, cabled) if trace or end is None else "cabled",
                 colour=colour or "#2563eb",
-                path_id=path_id(path),
+                path_id=path_id(path) if trace or end is None else f"c{end.cable_id.hex[:12]}",
                 title=title,
             )
             band.ports.append(glyph)

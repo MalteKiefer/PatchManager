@@ -92,7 +92,10 @@ def test_room_shows_racks_side_by_side_with_tray_cables(
     page.get_by_role("link", name="Racks and cabling").click()
     expect(page.locator(".rack-svg .rack")).to_have_count(3)
     expect(page.locator(".rack-svg .rack-wire.is-tray")).to_have_count(1)
-    page.locator(".rack-svg .rack-port.is-complete path").first.hover()
+    tray_port = page.locator(".rack-svg .rack-port").filter(
+        has=page.locator("title", has_text="sw-0001 te1")
+    )
+    tray_port.locator("path").first.hover()
     expect(page.locator(".rack-svg .rack-wire.is-tray.is-hot")).to_have_count(1)
     _shot(page, "room")
 

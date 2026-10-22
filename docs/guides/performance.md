@@ -18,8 +18,8 @@ Measured on a laptop (Apple M5, PostgreSQL 18, debug off):
 | --- | ---: | ---: |
 | Dashboard | 25 ms | 9 |
 | Room with 50 racks | 23 ms | 19 |
-| Rack drawing with every port | 118 ms | 33 |
-| Room drawing with 50 racks | 950 ms | 21 |
+| Rack drawing with every port | 64 ms | 42 |
+| Room drawing with 50 racks | 343 ms | 18 |
 | Device with 52 ports, 24 cabled | 142 ms | 28 |
 | Cable trace | 10 ms | 28 |
 | Cable list | 62 ms | 13 |

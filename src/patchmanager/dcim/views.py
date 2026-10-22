@@ -173,7 +173,9 @@ def room_cabling(request: HttpRequest, pk: str) -> HttpResponse:
         raise Http404
     face = "rear" if request.GET.get("face") == "rear" else "front"
     racks = policy.scope_queryset(actor, "dcim.rack.view", Rack.objects.filter(room=room))
-    elevations, between, tray = drawing.room_layout(actor, racks.order_by("name"), face)
+    elevations, between, tray = drawing.room_layout(
+        actor, racks.order_by("name"), face, trace=False
+    )
     height = max((e.top + e.height for e in elevations), default=0)
     width = max((e.x + e.width for e in elevations), default=0)
     return render(

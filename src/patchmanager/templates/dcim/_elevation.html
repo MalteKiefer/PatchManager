@@ -23,15 +23,7 @@
     <rect x="{{ e.area_x|add:2 }}" y="{{ b.y|add:3 }}" width="32" height="{{ b.height|add:-6 }}" rx="8" class="rack-strip"/>
     <text transform="translate({{ e.area_x|add:23 }} {{ b.y|add:b.half }}) rotate(-90)" text-anchor="middle" font-size="{{ b.name_font }}" class="rack-device-name">{{ b.label }}</text>
     {% if can_change and not b.hidden %}<g class="rack-grip" aria-hidden="true">{% for dot in b.grip %}<circle cx="{{ dot.0 }}" cy="{{ dot.1 }}" r="2"/>{% endfor %}</g>{% endif %}
-    {% for g in b.ports %}
-    <a href="{% url 'devices:port' g.port.pk %}" data-panel="{% url 'devices:port-panel' g.port.pk %}" class="rack-port is-{{ g.state }}{% if g.passive %} on-passive{% endif %}" data-path="{{ g.path_id }}">
-      <title>{{ g.title }}</title>
-      <path d="{{ g.shape }}" {% if g.state == "complete" %}fill="{{ g.colour }}"{% elif g.state == "partial" %}fill="{{ g.colour }}" fill-opacity="0.45"{% endif %}/>
-      {% if not g.copper %}<path d="{{ g.inner }}" class="rack-port-inner"/>{% endif %}
-      {% if g.label_y %}<text x="{{ g.centre_x }}" y="{{ g.label_y }}" font-size="{{ g.font }}" text-anchor="middle">{{ g.short }}</text>{% endif %}
-      {% if g.leaves %}<circle cx="{{ g.mark_x }}" cy="{{ g.y }}" r="4.5" class="rack-port-leaves is-{{ g.leaves }}"/>{% endif %}
-    </a>
-    {% endfor %}
+    {% for g in b.ports %}{{ g.svg }}{% endfor %}
   </g>
   {% endfor %}
   {% for w in e.wires %}<path d="{{ w.d }}" stroke="{{ w.colour }}" class="rack-wire" data-path="{{ w.path_id }}"><title>{{ w.title }}</title></path>{% endfor %}
