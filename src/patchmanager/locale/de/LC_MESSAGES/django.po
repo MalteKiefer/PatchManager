@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-22 07:38+0000\n"
+"POT-Creation-Date: 2026-10-22 07:48+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -675,7 +675,7 @@ msgstr "Keine gültige ID."
 msgid "Not a valid value."
 msgstr "Kein gültiger Wert."
 
-#: api/core.py:102 networks/switchconfig.py:494
+#: api/core.py:102 networks/switchconfig.py:512
 msgid "Not found."
 msgstr "Nicht gefunden."
 
@@ -3839,24 +3839,31 @@ msgstr "%(what)s: %(n)s"
 #, python-format
 msgid ""
 "DHCP pool %(pool)s: the network %(network)s is not documented in IP networks."
-msgstr "DHCP-Pool %(pool)s: Das Netz %(network)s ist unter IP-Netze nicht dokumentiert."
+msgstr ""
+"DHCP-Pool %(pool)s: Das Netz %(network)s ist unter IP-Netze nicht "
+"dokumentiert."
 
-#: networks/switchconfig.py:441
+#: networks/switchconfig.py:443
+#, python-format
+msgid "DHCP pool %(pool)s: a scope of that name belongs to another server."
+msgstr "DHCP-Pool %(pool)s: Ein Bereich dieses Namens gehört zu einem anderen Server."
+
+#: networks/switchconfig.py:454
 #, python-format
 msgid "DHCP pool %(pool)s: you may not document DHCP scopes."
 msgstr "DHCP-Pool %(pool)s: Sie dürfen keine DHCP-Bereiche dokumentieren."
 
-#: networks/switchconfig.py:459
+#: networks/switchconfig.py:471
 #, python-format
 msgid "New DHCP scope %(name)s"
 msgstr "Neuer DHCP-Bereich %(name)s"
 
-#: networks/switchconfig.py:463
+#: networks/switchconfig.py:475
 #, python-format
 msgid "DHCP scope %(name)s changed"
 msgstr "DHCP-Bereich %(name)s geändert"
 
-#: networks/switchconfig.py:488
+#: networks/switchconfig.py:506
 #, python-format
 msgid "Reservations of %(name)s: %(n)s"
 msgstr "Reservierungen von %(name)s: %(n)s"
@@ -6966,7 +6973,13 @@ msgid ""
 "states, spanning tree, static routes, OSPF, BGP, DNS servers and DHCP pools. "
 "Passwords, keys and SNMP communities are never read. You see the changes "
 "before anything is saved."
-msgstr "Gelesen werden Konfigurationen von Aruba (AOS-S, AOS-CX, Central-Vorlagen), Cisco (IOS, IOS-XE, NX-OS), Fortinet, Juniper, MikroTik, HPE Comware, H3C, Huawei und LANCOM: VLANs und ihre Ports, Adressen, Aggregationen, Portnamen und -zustände, Spanning Tree, statische Routen, OSPF, BGP, DNS-Server und DHCP-Pools. Passwörter, Schlüssel und SNMP-Communities werden nie gelesen. Sie sehen die Änderungen, bevor etwas gespeichert wird."
+msgstr ""
+"Gelesen werden Konfigurationen von Aruba (AOS-S, AOS-CX, Central-Vorlagen), "
+"Cisco (IOS, IOS-XE, NX-OS), Fortinet, Juniper, MikroTik, HPE Comware, H3C, "
+"Huawei und LANCOM: VLANs und ihre Ports, Adressen, Aggregationen, Portnamen "
+"und -zustände, Spanning Tree, statische Routen, OSPF, BGP, DNS-Server und "
+"DHCP-Pools. Passwörter, Schlüssel und SNMP-Communities werden nie gelesen. "
+"Sie sehen die Änderungen, bevor etwas gespeichert wird."
 
 #: templates/networks/switch_read.html:11
 msgid "Show changes"

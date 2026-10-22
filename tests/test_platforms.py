@@ -273,3 +273,37 @@ def test_comware_region_and_huawei_pool() -> None:
     )
     assert config.vlans[30].untagged == ["GigabitEthernet0/0/2"]
     assert config.routes[0].distance == 70 and config.interfaces["GigabitEthernet0/0/2"].bpdu_guard
+
+
+def test_apply_leaves_scopes_of_other_servers(make_tree, make_type, super_admin, system) -> None:
+    from patchmanager.dcim import devices
+    from patchmanager.ipam.models import DHCPScope, Prefix
+
+    tree = make_tree()
+    with system():
+        model = make_type("C9300-8", ports=[{"name_pattern": "GigabitEthernet1/0/{n}", "count": 8}])
+        device = devices.create(
+            tree["request"], super_admin, device_type=model, room=tree["room"], name="A"
+        )
+        other = devices.create(
+            tree["request"], super_admin, device_type=model, room=tree["room"], name="B"
+        )
+        prefix = Prefix.objects.create(tenant=tree["tenant"], prefix="10.10.0.0/24")
+        DHCPScope.objects.create(
+            tenant=tree["tenant"],
+            name="USERS",
+            prefix=prefix,
+            server=other,
+            start="10.10.0.50",
+            end="10.10.0.60",
+        )
+        result = switchconfig.apply(
+            tree["request"],
+            super_admin,
+            device,
+            platforms.parse(_read("cisco_ios.txt")),
+            commit=True,
+        )
+        assert any("another server" in s for s in result.skipped)
+        scope = DHCPScope.objects.get()
+        assert scope.server_id == other.pk and str(scope.start).split("/")[0] == "10.10.0.50"

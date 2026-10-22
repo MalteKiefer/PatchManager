@@ -436,13 +436,25 @@ def _dhcp(
                 % {"pool": pool.name, "network": pool.network}
             )
             continue
-        if not policy.has_perm(actor, "ipam.dhcpscope.add", device.tenant):
+        name = (pool.name or pool.network)[:100]
+        scope = DHCPScope.objects.filter(tenant_id=device.tenant_id, name=name).first()
+        if scope is not None and scope.server_id not in (None, device.pk):
+            result.skipped.append(
+                _("DHCP pool %(pool)s: a scope of that name belongs to another server.")
+                % {"pool": pool.name}
+            )
+            continue
+        allowed = (
+            policy.has_perm(actor, "ipam.dhcpscope.change", scope)
+            if scope is not None
+            else policy.has_perm(actor, "ipam.dhcpscope.add", device.tenant)
+        )
+        if not allowed:
             result.skipped.append(
                 _("DHCP pool %(pool)s: you may not document DHCP scopes.") % {"pool": pool.name}
             )
             continue
-        name = (pool.name or pool.network)[:100]
-        scope = DHCPScope.objects.filter(tenant_id=device.tenant_id, name=name).first()
+        created = scope is None
         fields = {
             "prefix": prefix,
             "server": device,
@@ -467,6 +479,12 @@ def _dhcp(
             result.skipped.append(f"{name}: {'; '.join(exc.messages)}")
             continue
         scope.save()
+        audit.record(
+            "ipam.dhcpscope.created" if created else "ipam.dhcpscope.changed",
+            request=request,
+            obj=scope,
+            data={"name": name, "from": "configuration"},
+        )
         have = {(r.mac_address, str(r.address).split("/")[0]) for r in scope.reservations.all()}
         want = {(mac, ip) for mac, ip, _name in pool.reservations}
         if have != want:
