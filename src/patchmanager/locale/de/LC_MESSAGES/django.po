@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-22 05:39+0000\n"
+"POT-Creation-Date: 2026-10-22 06:00+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -129,7 +129,7 @@ msgstr "Name der Kopie"
 msgid "JSON or YAML file"
 msgstr "JSON- oder YAML-Datei"
 
-#: accounts/forms.py:183 exchange/views.py:129 floorplans/views.py:226
+#: accounts/forms.py:183 exchange/views.py:129 floorplans/views.py:260
 #: metadata/uploads.py:183 metadata/views.py:65
 msgid "The file is too large."
 msgstr "Die Datei ist zu groß."
@@ -395,7 +395,7 @@ msgstr "Der letzte Super-Admin kann nicht entfernt werden."
 #: accounts/services/users.py:29 accounts/services/users.py:167 api/core.py:28
 #: api/tokens.py:99 api/tokens.py:130 cabling/services.py:50
 #: exchange/importer.py:54 exchange/importer.py:70 floorplans/services.py:193
-#: floorplans/views.py:249 history/services.py:76 history/services.py:97
+#: floorplans/views.py:283 history/services.py:76 history/services.py:97
 #: instance/services.py:23 integrations/services.py:69 metadata/services.py:99
 #: metadata/services.py:167 networks/services.py:109 networks/services.py:139
 #: networks/services.py:148
@@ -1175,10 +1175,12 @@ msgid "Leave empty to use the type's naming convention."
 msgstr "Leer lassen, um die Namenskonvention des Typs zu verwenden."
 
 #: dcim/device_views.py:84 exchange/pdf.py:199
+#: templates/floorplans/_item_panel.html:7
 msgid "Room"
 msgstr "Raum"
 
-#: dcim/device_views.py:86 templates/locations/node.html:23
+#: dcim/device_views.py:86 templates/floorplans/_item_panel.html:3
+#: templates/locations/node.html:23
 msgid "Rack"
 msgstr "Rack"
 
@@ -1384,7 +1386,7 @@ msgstr "Höheneinheiten in %(rack)s reservieren"
 msgid "Reserve"
 msgstr "Reservieren"
 
-#: dcim/views.py:146 floorplans/views.py:57 floorplans/views.py:59
+#: dcim/views.py:146 floorplans/views.py:58 floorplans/views.py:60
 msgid "Invalid request."
 msgstr "Ungültige Anfrage."
 
@@ -1500,7 +1502,7 @@ msgstr "Racks"
 
 #: exchange/pdf.py:199 exchange/tables.py:705 search/services.py:67
 #: templates/core/home.html:20 templates/dcim/rack.html:79
-#: templates/library/types.html:18
+#: templates/floorplans/_item_panel.html:11 templates/library/types.html:18
 msgid "Devices"
 msgstr "Geräte"
 
@@ -1518,12 +1520,13 @@ msgid "VID"
 msgstr "VID"
 
 #: exchange/pdf.py:215 templates/dcim/_device_panel.html:7
-#: templates/dcim/rack.html:66 templates/integrations/webhook.html:23
-#: templates/ipam/addresses.html:10 templates/ipam/prefix.html:24
-#: templates/ipam/prefixes.html:8 templates/locations/node.html:23
-#: templates/locations/node.html:42 templates/manage/system.html:17
-#: templates/manage/tenants.html:6 templates/manage/users.html:10
-#: templates/networks/vlans.html:7 templates/sso/providers.html:7
+#: templates/dcim/rack.html:66 templates/floorplans/_item_panel.html:8
+#: templates/integrations/webhook.html:23 templates/ipam/addresses.html:10
+#: templates/ipam/prefix.html:24 templates/ipam/prefixes.html:8
+#: templates/locations/node.html:23 templates/locations/node.html:42
+#: templates/manage/system.html:17 templates/manage/tenants.html:6
+#: templates/manage/users.html:10 templates/networks/vlans.html:7
+#: templates/sso/providers.html:7
 msgid "Status"
 msgstr "Status"
 
@@ -1737,8 +1740,8 @@ msgstr "Kabel"
 
 #: exchange/tables.py:772 search/services.py:75
 #: templates/dcim/_device_panel.html:8 templates/dcim/device.html:14
-#: templates/library/catalog.html:16 templates/library/catalog_entry.html:9
-#: templates/library/type_detail.html:14
+#: templates/floorplans/_item_panel.html:21 templates/library/catalog.html:16
+#: templates/library/catalog_entry.html:9 templates/library/type_detail.html:14
 msgid "Ports"
 msgstr "Ports"
 
@@ -1840,46 +1843,46 @@ msgstr "Dieses Rack befindet sich auf einer anderen Etage."
 msgid "Only floor devices of this floor can be placed."
 msgstr "Nur Raumgeräte dieser Etage können auf dem Grundriss platziert werden."
 
-#: floorplans/views.py:31
+#: floorplans/views.py:32
 msgid "Plan (JPEG, PNG, WebP, GIF or PDF)"
 msgstr "Grundriss (JPEG, PNG, WebP, GIF oder PDF)"
 
-#: floorplans/views.py:49
+#: floorplans/views.py:50
 msgid "Upload a plan first."
 msgstr "Laden Sie zuerst einen Grundriss hoch."
 
-#: floorplans/views.py:221 metadata/views.py:59
+#: floorplans/views.py:255 metadata/views.py:59
 msgid "Choose a file to upload."
 msgstr "Wählen Sie eine Datei zum Hochladen."
 
-#: floorplans/views.py:235
+#: floorplans/views.py:269
 msgid "Plan uploaded. Set the scale next."
 msgstr "Grundriss hochgeladen. Legen Sie als Nächstes den Maßstab fest."
 
-#: floorplans/views.py:252
+#: floorplans/views.py:286
 msgid "Not possible."
 msgstr "Nicht möglich."
 
-#: floorplans/views.py:262
+#: floorplans/views.py:296
 msgid "Enter the distance in metres."
 msgstr "Geben Sie die Entfernung in Metern ein."
 
-#: floorplans/views.py:273
+#: floorplans/views.py:307
 msgid "Choose a room of this floor."
 msgstr "Wählen Sie einen Raum dieser Etage."
 
-#: floorplans/views.py:289
+#: floorplans/views.py:323
 msgid "Object not found on this floor."
 msgstr "Objekt auf dieser Etage nicht gefunden."
 
-#: floorplans/views.py:298
+#: floorplans/views.py:332
 #, python-format
 msgid "Several rooms overlap here (%(rooms)s). The room was not changed."
 msgstr ""
 "Hier überlappen sich mehrere Räume (%(rooms)s). Der Raum wurde nicht "
 "geändert."
 
-#: floorplans/views.py:301
+#: floorplans/views.py:335
 #, python-format
 msgid "%(item)s lies outside the outline of its room."
 msgstr "%(item)s liegt außerhalb des Raumumrisses seines Raums."
@@ -3800,7 +3803,7 @@ msgstr "Von"
 msgid "Source"
 msgstr "Quelle"
 
-#: templates/configs/list.html:11 templates/floorplans/editor.html:58
+#: templates/configs/list.html:11 templates/floorplans/editor.html:59
 msgid "Lines"
 msgstr "Zeilen"
 
@@ -4010,15 +4013,17 @@ msgstr "Höheneinheiten"
 msgid "%(cabled)s of %(total)s cabled"
 msgstr "%(cabled)s von %(total)s verkabelt"
 
-#: templates/dcim/_device_panel.html:9
+#: templates/dcim/_device_panel.html:9 templates/floorplans/_item_panel.html:13
 msgid "Serial number"
 msgstr "Seriennummer"
 
 #: templates/dcim/_device_panel.html:10
+#: templates/floorplans/_item_panel.html:14
 msgid "Asset tag"
 msgstr "Inventarnummer"
 
 #: templates/dcim/_device_panel.html:12
+#: templates/floorplans/_item_panel.html:31
 msgid "Open device"
 msgstr "Gerät öffnen"
 
@@ -4060,7 +4065,7 @@ msgstr "ja"
 msgid "no"
 msgstr "nein"
 
-#: templates/dcim/device.html:25
+#: templates/dcim/device.html:25 templates/floorplans/_item_panel.html:28
 msgid "No ports."
 msgstr "Keine Ports."
 
@@ -4168,8 +4173,9 @@ msgstr "Diesen Port löschen?"
 msgid "Delete port"
 msgstr "Port löschen"
 
-#: templates/dcim/rack.html:10 templates/library/catalog.html:16
-#: templates/library/types.html:18 templates/locations/node.html:23
+#: templates/dcim/rack.html:10 templates/floorplans/_item_panel.html:10
+#: templates/library/catalog.html:16 templates/library/types.html:18
+#: templates/locations/node.html:23
 msgid "Height"
 msgstr "Höhe"
 
@@ -4256,7 +4262,8 @@ msgstr "verkabelt, Strecke offen"
 msgid "wired behind, nothing plugged in"
 msgstr "dahinter verkabelt, nichts eingesteckt"
 
-#: templates/dcim/rack.html:41 templates/locations/node.html:71
+#: templates/dcim/rack.html:41 templates/floorplans/_item_panel.html:27
+#: templates/locations/node.html:71
 msgid "free"
 msgstr "frei"
 
@@ -4492,6 +4499,56 @@ msgstr "Meldung"
 msgid "error"
 msgstr "Fehler"
 
+#: templates/floorplans/_item_panel.html:10
+#, python-format
+msgid "%(n)s used"
+msgstr "%(n)s belegt"
+
+#: templates/floorplans/_item_panel.html:15
+msgid "Responsible"
+msgstr "Verantwortlich"
+
+#: templates/floorplans/_item_panel.html:17
+msgid "Photos and notes"
+msgstr "Fotos und Notizen"
+
+#: templates/floorplans/_item_panel.html:17
+#, python-format
+msgid "%(n)s photo"
+msgid_plural "%(n)s photos"
+msgstr[0] "%(n)s Foto"
+msgstr[1] "%(n)s Fotos"
+
+#: templates/floorplans/_item_panel.html:17
+#, python-format
+msgid "%(n)s file"
+msgid_plural "%(n)s files"
+msgstr[0] "%(n)s Datei"
+msgstr[1] "%(n)s Dateien"
+
+#: templates/floorplans/_item_panel.html:17
+#, python-format
+msgid "%(n)s note"
+msgid_plural "%(n)s notes"
+msgstr[0] "%(n)s Notiz"
+msgstr[1] "%(n)s Notizen"
+
+#: templates/floorplans/_item_panel.html:25
+msgid "patched (not visible to you)"
+msgstr "gepatcht (für Sie nicht sichtbar)"
+
+#: templates/floorplans/_item_panel.html:26 templates/locations/node.html:70
+msgid "cabled"
+msgstr "verkabelt"
+
+#: templates/floorplans/_item_panel.html:31
+msgid "Open rack"
+msgstr "Rack öffnen"
+
+#: templates/floorplans/_item_panel.html:32
+msgid "Remove from plan"
+msgstr "Vom Grundriss entfernen"
+
 #: templates/floorplans/editor.html:9
 #, python-format
 msgid "Scale: %(s)s px per metre"
@@ -4576,71 +4633,79 @@ msgstr "Grundriss-Editor"
 msgid "This floor has no plan yet."
 msgstr "Diese Etage hat noch keinen Grundriss."
 
-#: templates/floorplans/editor.html:59
+#: templates/floorplans/editor.html:58
+msgid "Selected item"
+msgstr "Ausgewähltes Element"
+
+#: templates/floorplans/editor.html:58
+msgid "Click a pin to see what is there and where it is patched."
+msgstr "Klicken Sie auf eine Nadel, um zu sehen, was dort ist und wohin es gepatcht ist."
+
+#: templates/floorplans/editor.html:60
 msgid "patch cable"
 msgstr "Patchkabel"
 
-#: templates/floorplans/editor.html:60
+#: templates/floorplans/editor.html:61
 msgid "permanent link (installed cabling)"
 msgstr "Festverkabelung (Installationsstrecke)"
 
-#: templates/floorplans/editor.html:61
+#: templates/floorplans/editor.html:62
 msgid ""
 "Each line ends where the paths of a device end; the number says how many."
 msgstr ""
 "Jede Linie endet dort, wo die Pfade eines Geräts enden; die Zahl nennt, wie "
 "viele."
 
-#: templates/floorplans/editor.html:64
+#: templates/floorplans/editor.html:65
 msgid "Not on the plan"
 msgstr "Nicht auf dem Grundriss"
 
-#: templates/floorplans/editor.html:65
+#: templates/floorplans/editor.html:66
 msgid "Choose an item, then click on the plan."
 msgstr "Wählen Sie ein Objekt und klicken Sie dann auf den Grundriss."
 
-#: templates/floorplans/editor.html:69
+#: templates/floorplans/editor.html:70
 msgid "Everything is placed."
 msgstr "Alles ist platziert."
 
-#: templates/floorplans/editor.html:73
+#: templates/floorplans/editor.html:74
 msgid "Room outlines"
 msgstr "Raumumrisse"
 
-#: templates/floorplans/editor.html:74
+#: templates/floorplans/editor.html:75
 msgid "drawn"
 msgstr "gezeichnet"
 
-#: templates/floorplans/editor.html:75
+#: templates/floorplans/editor.html:76
 msgid "Draw"
 msgstr "Zeichnen"
 
-#: templates/floorplans/editor.html:76
+#: templates/floorplans/editor.html:77
 msgid "Clear"
 msgstr "Löschen"
 
-#: templates/floorplans/editor.html:77
+#: templates/floorplans/editor.html:78
 msgid "No rooms on this floor."
 msgstr "Keine Räume auf dieser Etage."
 
-#: templates/floorplans/editor.html:82
+#: templates/floorplans/editor.html:83
 msgid "Replace plan"
 msgstr "Grundriss ersetzen"
 
-#: templates/floorplans/editor.html:82
+#: templates/floorplans/editor.html:83
 msgid "Upload plan"
 msgstr "Grundriss hochladen"
 
-#: templates/floorplans/editor.html:84
+#: templates/floorplans/editor.html:85
 #, python-format
 msgid "PDFs use their first page. Up to %(n)s MB."
 msgstr "PDFs verwenden ihre erste Seite. Bis zu %(n)s MB."
 
-#: templates/floorplans/editor.html:84
+#: templates/floorplans/editor.html:85
 msgid "Replacing resets the scale."
 msgstr "Beim Ersetzen wird der Maßstab zurückgesetzt."
 
-#: templates/floorplans/editor.html:85 templates/metadata/_panel.html:29
+#: templates/floorplans/editor.html:86 templates/metadata/_panel.html:29
 msgid "Upload"
 msgstr "Hochladen"
 
@@ -5185,10 +5250,6 @@ msgstr "Geräte und ihre Verkabelung"
 #: templates/locations/node.html:61
 msgid "Add device"
 msgstr "Gerät hinzufügen"
-
-#: templates/locations/node.html:70
-msgid "cabled"
-msgstr "verkabelt"
 
 #: templates/locations/node.html:74
 msgid ""
