@@ -17,9 +17,31 @@ from patchmanager.accounts.decorators import permission_required
 from patchmanager.accounts.models import User
 from patchmanager.accounts.services import PermissionDeniedError, ServiceError
 from patchmanager.api import tokens
-from patchmanager.api.models import SCOPES, ApiClient, ApiToken
+from patchmanager.api.models import ApiClient, ApiToken
 
 SHOW_ONCE = "_pm_api_secret"
+ACCESS = [
+    ("read", gettext_lazy("Read")),
+    ("write", gettext_lazy("Read and write")),
+]
+# Headings of the object type groups on the token form, by the first part of the code.
+AREAS = {
+    "locations": gettext_lazy("Locations"),
+    "dcim": gettext_lazy("Racks and devices"),
+    "library": gettext_lazy("Device library"),
+    "cabling": gettext_lazy("Cabling"),
+    "networks": gettext_lazy("Networks"),
+    "ipam": gettext_lazy("IP addresses, DHCP and DNS"),
+    "compute": gettext_lazy("Servers and virtual machines"),
+    "configs": gettext_lazy("Configurations"),
+    "circuits": gettext_lazy("Lines"),
+    "directory": gettext_lazy("Customers and systems"),
+    "integrations": gettext_lazy("Integrations"),
+    "tenancy": gettext_lazy("Tenants"),
+    "accounts": gettext_lazy("Users and access"),
+    "audit": gettext_lazy("Audit"),
+    "system": gettext_lazy("System"),
+}
 DAYS = [
     (7, gettext_lazy("7 days")),
     (30, gettext_lazy("30 days")),
@@ -49,7 +71,19 @@ class LimitsMixin(forms.Form):
         from patchmanager.locations.models import Building, Floor, Room, Site
 
         types: Any = self.fields["object_types"]
-        types.choices = [(ot.code, f"{ot.label} ({ot.code})") for ot in permissions.object_types()]
+        order = list(AREAS)
+        types.choices = [
+            (ot.code, ot.label)
+            for ot in sorted(
+                permissions.object_types(),
+                key=lambda ot: (
+                    order.index(ot.code.split(".")[0])
+                    if ot.code.split(".")[0] in AREAS
+                    else len(order),
+                    str(ot.label),
+                ),
+            )
+        ]
         self.locations: dict[str, Any] = {}
         for model in (Site, Building, Floor, Room):
             for node in policy.scope_queryset(
@@ -62,6 +96,17 @@ class LimitsMixin(forms.Form):
             for key, node in sorted(self.locations.items(), key=lambda kv: str(kv[1].path))
         ]
 
+    def type_groups(self) -> list[tuple[str, Any, list[Any]]]:
+        """Object type checkboxes grouped by area: (area key, heading, checkboxes)."""
+        groups: dict[str, list[Any]] = {}
+        for box in self["object_types"]:
+            groups.setdefault(str(box.data["value"]).split(".")[0], []).append(box)
+        return [(key, AREAS.get(key, key), boxes) for key, boxes in groups.items()]
+
+    def chosen_access(self) -> list[str]:
+        """The scopes for the chosen access level (write includes read)."""
+        return ["read", "write"] if self.cleaned_data["access"] == "write" else ["read"]
+
     def chosen_scope(self) -> Any:
         """The chosen location object (or None)."""
         return self.locations.get(self.cleaned_data.get("scope") or "")
@@ -71,11 +116,8 @@ class TokenForm(LimitsMixin):
     """A new personal token."""
 
     name = forms.CharField(label=gettext_lazy("Name"), max_length=100)
-    scopes = forms.MultipleChoiceField(
-        label=gettext_lazy("Access"),
-        choices=SCOPES,
-        initial=["read"],
-        widget=forms.CheckboxSelectMultiple,
+    access = forms.ChoiceField(
+        label=gettext_lazy("Access"), choices=ACCESS, initial="read", widget=forms.RadioSelect
     )
     days = forms.TypedChoiceField(
         label=gettext_lazy("Expires after"), choices=DAYS, coerce=int, initial=90
@@ -94,11 +136,8 @@ class ClientForm(LimitsMixin):
     """A new OAuth client."""
 
     name = forms.CharField(label=gettext_lazy("Name"), max_length=100)
-    scopes = forms.MultipleChoiceField(
-        label=gettext_lazy("Access"),
-        choices=SCOPES,
-        initial=["read"],
-        widget=forms.CheckboxSelectMultiple,
+    access = forms.ChoiceField(
+        label=gettext_lazy("Access"), choices=ACCESS, initial="read", widget=forms.RadioSelect
     )
 
 
@@ -141,7 +180,7 @@ def token_create(request: HttpRequest) -> HttpResponse:
                 request,
                 user,
                 name=form.cleaned_data["name"],
-                scopes=form.cleaned_data["scopes"],
+                scopes=form.chosen_access(),
                 days=form.cleaned_data["days"],
                 tenant=tenant,
                 object_types=form.cleaned_data["object_types"],
@@ -154,7 +193,7 @@ def token_create(request: HttpRequest) -> HttpResponse:
             return redirect("api-ui:tokens")
     return render(
         request,
-        "core/create.html",
+        "api/token_form.html",
         {"title": _("New token"), "form": form, "back_url": reverse("api-ui:tokens")},
     )
 
@@ -193,7 +232,7 @@ def client_create(request: HttpRequest) -> HttpResponse:
                 request,
                 _user(request),
                 name=form.cleaned_data["name"],
-                scopes=form.cleaned_data["scopes"],
+                scopes=form.chosen_access(),
                 object_types=form.cleaned_data["object_types"],
                 scope=form.chosen_scope(),
             )
@@ -204,8 +243,13 @@ def client_create(request: HttpRequest) -> HttpResponse:
             return redirect("api-ui:clients")
     return render(
         request,
-        "core/create.html",
-        {"title": _("New API client"), "form": form, "back_url": reverse("api-ui:clients")},
+        "api/client_form.html",
+        {
+            "title": _("New API client"),
+            "form": form,
+            "back_url": reverse("api-ui:clients"),
+            "is_client": True,
+        },
     )
 
 

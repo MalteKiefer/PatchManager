@@ -225,3 +225,15 @@ tr.is-hot { @apply bg-amber-50 dark:bg-slate-800; }
 .room-ports > li { @apply flex flex-wrap items-baseline gap-1.5; }
 .plan-link { opacity: 0.85; }
 .plan-link-count { @apply fill-slate-900 dark:fill-white; font-size: 12px; font-weight: 700; paint-order: stroke; stroke: #fff; stroke-width: 3px; }
+
+/* Radio choices shown as tiles (API token access) and grouped checkbox lists. */
+@layer components {
+  .choice { @apply flex cursor-pointer items-start gap-3 rounded-lg border border-slate-300 p-3 text-sm dark:border-slate-700; }
+  .choice:has(input:checked) { @apply border-brand-600 bg-brand-50 dark:bg-slate-800; }
+  .choice:has(input:focus-visible) { @apply outline-2 outline-offset-2 outline-brand-600; }
+  .choice input { @apply mt-0.5 size-4; }
+  .check-group { @apply rounded-lg border border-slate-200 p-3 dark:border-slate-800; }
+  .check-group legend { @apply px-1 text-sm font-semibold text-slate-800 dark:text-slate-100; }
+  .check-group label { @apply flex items-center gap-2 py-0.5 text-sm text-slate-700 dark:text-slate-300; }
+  .check-group input[type=checkbox] { @apply size-4 rounded border-slate-300; }
+}

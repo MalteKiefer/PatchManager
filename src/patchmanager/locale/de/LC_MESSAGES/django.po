@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-22 11:08+0000\n"
+"POT-Creation-Date: 2026-10-22 11:46+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -40,7 +40,7 @@ msgid "Run the setup_token command to get one."
 msgstr "Führen Sie den Befehl setup_token aus, um eines zu erhalten."
 
 #: accounts/forms.py:49 accounts/forms.py:103 accounts/forms.py:110
-#: api/ui.py:73 api/ui.py:96 compute/pages.py:113 compute/pages.py:137
+#: api/ui.py:118 api/ui.py:138 compute/pages.py:113 compute/pages.py:137
 #: compute/pages.py:156 compute/pages.py:172 compute/pages.py:184
 #: directory/pages.py:86 directory/pages.py:105 directory/pages.py:123
 #: exchange/pdf.py:215 integrations/views.py:27 ipam/pages.py:127
@@ -78,7 +78,7 @@ msgstr "Authenticator-App"
 msgid "Role"
 msgstr "Rolle"
 
-#: accounts/forms.py:113 api/ui.py:83 templates/api/tokens.html:9
+#: accounts/forms.py:113 api/ui.py:125 templates/api/tokens.html:9
 #: templates/base.html:38
 msgid "Tenant"
 msgstr "Mandant"
@@ -684,7 +684,7 @@ msgstr "Kein gültiger Wert."
 msgid "Not found."
 msgstr "Nicht gefunden."
 
-#: api/models.py:10
+#: api/models.py:10 api/ui.py:24
 msgid "Read"
 msgstr "Lesen"
 
@@ -730,69 +730,139 @@ msgstr "Token laufen nach 1 bis %(n)s Tagen ab."
 msgid "The location belongs to another tenant."
 msgstr "Der Ort gehört zu einem anderen Mandanten."
 
-#: api/ui.py:24
+#: api/ui.py:25
+msgid "Read and write"
+msgstr "Lesen und schreiben"
+
+#: api/ui.py:29 exchange/pdf.py:198 exchange/tables.py:687
+#: templates/core/_breadcrumbs.html:4 templates/locations/index.html:2
+#: templates/locations/index.html:6
+msgid "Locations"
+msgstr "Orte"
+
+#: api/ui.py:30
+msgid "Racks and devices"
+msgstr "Racks und Geräte"
+
+#: api/ui.py:31 templates/base.html:55 templates/library/type_detail.html:4
+#: templates/library/types.html:2 templates/library/types.html:5
+msgid "Device library"
+msgstr "Gerätebibliothek"
+
+#: api/ui.py:32 templates/dcim/room.html:6
+msgid "Cabling"
+msgstr "Verkabelung"
+
+#: api/ui.py:33 templates/base.html:51
+msgid "Networks"
+msgstr "Netze"
+
+#: api/ui.py:34
+msgid "IP addresses, DHCP and DNS"
+msgstr "IP-Adressen, DHCP und DNS"
+
+#: api/ui.py:35
+msgid "Servers and virtual machines"
+msgstr "Server und virtuelle Maschinen"
+
+#: api/ui.py:36
+msgid "Configurations"
+msgstr "Konfigurationen"
+
+#: api/ui.py:37 circuits/pages.py:64 templates/configs/list.html:11
+#: templates/floorplans/editor.html:59
+msgid "Lines"
+msgstr "Zeilen"
+
+#: api/ui.py:38 templates/base.html:54
+msgid "Customers and systems"
+msgstr "Kunden und Systeme"
+
+#: api/ui.py:39 instance/views.py:309
+msgid "Integrations"
+msgstr "Integrationen"
+
+#: api/ui.py:40 templates/manage/_base.html:8 templates/manage/dashboard.html:6
+#: templates/manage/tenants.html:2 templates/manage/tenants.html:4
+msgid "Tenants"
+msgstr "Mandanten"
+
+#: api/ui.py:41
+msgid "Users and access"
+msgstr "Benutzer und Zugriff"
+
+#: api/ui.py:42
+msgid "Audit"
+msgstr "Audit"
+
+#: api/ui.py:43 directory/links.py:192 templates/manage/_base.html:22
+#: templates/manage/system.html:2 templates/manage/system.html:4
+msgid "System"
+msgstr "System"
+
+#: api/ui.py:46
 msgid "7 days"
 msgstr "7 Tage"
 
-#: api/ui.py:25
+#: api/ui.py:47
 msgid "30 days"
 msgstr "30 Tage"
 
-#: api/ui.py:26
+#: api/ui.py:48
 msgid "90 days"
 msgstr "90 Tage"
 
-#: api/ui.py:27
+#: api/ui.py:49
 msgid "1 year"
 msgstr "1 Jahr"
 
-#: api/ui.py:35
+#: api/ui.py:57
 msgid "Only these kinds of objects"
 msgstr "Nur diese Arten von Objekten"
 
-#: api/ui.py:38
+#: api/ui.py:60
 msgid "Leave all empty to allow every kind you may use yourself."
 msgstr ""
 "Lassen Sie alle leer, um jede Art zu erlauben, die Sie selbst nutzen dürfen."
 
-#: api/ui.py:41
+#: api/ui.py:63
 msgid "Only this location and what is in it"
 msgstr "Nur dieser Ort und was darin ist"
 
-#: api/ui.py:43
+#: api/ui.py:65
 msgid "A site, building, floor or room; empty means everywhere."
 msgstr "Ein Standort, Gebäude, Stockwerk oder Raum; leer heißt überall."
 
-#: api/ui.py:60
+#: api/ui.py:94
 msgid "everywhere"
 msgstr "überall"
 
-#: api/ui.py:75 api/ui.py:98 templates/api/clients.html:9
+#: api/ui.py:120 api/ui.py:140 templates/api/clients.html:9
 #: templates/api/tokens.html:9
 msgid "Access"
 msgstr "Zugriff"
 
-#: api/ui.py:81
+#: api/ui.py:123
 msgid "Expires after"
 msgstr "Läuft ab nach"
 
-#: api/ui.py:90
+#: api/ui.py:132
 msgid "All my tenants"
 msgstr "Alle meine Mandanten"
 
-#: api/ui.py:158 templates/api/tokens.html:4
+#: api/ui.py:197 templates/api/tokens.html:4
 msgid "New token"
 msgstr "Neuer Token"
 
-#: api/ui.py:168 scim/views.py:415
+#: api/ui.py:207 scim/views.py:415
 msgid "Token revoked."
 msgstr "Token widerrufen."
 
-#: api/ui.py:208 templates/api/clients.html:4
+#: api/ui.py:248 templates/api/clients.html:4
 msgid "New API client"
 msgstr "Neuer API-Client"
 
-#: api/ui.py:222
+#: api/ui.py:266
 msgid "Client revoked."
 msgstr "Client widerrufen."
 
@@ -1037,11 +1107,6 @@ msgstr "monatliche Kosten"
 #: circuits/models.py:67
 msgid "fault hotline"
 msgstr "Störungshotline"
-
-#: circuits/pages.py:64 templates/configs/list.html:11
-#: templates/floorplans/editor.html:59
-msgid "Lines"
-msgstr "Zeilen"
 
 #: circuits/pages.py:65
 msgid "New line"
@@ -1307,7 +1372,11 @@ msgid ""
 "VMware vCenter, or volumes and shares from a Synology or QNAP NAS. "
 "Credentials are used once and not stored; give an account with read rights "
 "only."
-msgstr "Liest Cluster, Hosts, virtuelle Maschinen und Speicher aus Proxmox VE und VMware vCenter, oder Volumes und Freigaben eines Synology- oder QNAP-NAS. Zugangsdaten werden einmal verwendet und nicht gespeichert; verwenden Sie ein Konto nur mit Leserechten."
+msgstr ""
+"Liest Cluster, Hosts, virtuelle Maschinen und Speicher aus Proxmox VE und "
+"VMware vCenter, oder Volumes und Freigaben eines Synology- oder QNAP-NAS. "
+"Zugangsdaten werden einmal verwendet und nicht gespeichert; verwenden Sie "
+"ein Konto nur mit Leserechten."
 
 #: compute/importing.py:378 ipam/pages.py:387 templates/exchange/index.html:7
 #: templates/library/types.html:30 templates/manage/roles.html:21
@@ -1379,7 +1448,9 @@ msgstr "Der Host hat nicht mit XML geantwortet."
 msgid ""
 "The host refused the credentials (accounts with two step sign in cannot be "
 "used)."
-msgstr "Der Host hat die Zugangsdaten abgelehnt (Konten mit zweistufiger Anmeldung können nicht verwendet werden)."
+msgstr ""
+"Der Host hat die Zugangsdaten abgelehnt (Konten mit zweistufiger Anmeldung "
+"können nicht verwendet werden)."
 
 #: compute/models.py:39 compute/models.py:300
 msgid "platform"
@@ -1623,7 +1694,7 @@ msgstr "Hosts"
 msgid "Add host"
 msgstr "Host hinzufügen"
 
-#: compute/pages.py:124 templates/manage/system.html:38
+#: compute/pages.py:124 templates/manage/system.html:37
 msgid "Server"
 msgstr "Server"
 
@@ -2313,11 +2384,6 @@ msgstr "Beide müssen zum selben Mandanten gehören."
 msgid "This link already exists."
 msgstr "Diese Zuordnung existiert bereits."
 
-#: directory/links.py:192 templates/manage/_base.html:22
-#: templates/manage/system.html:2 templates/manage/system.html:4
-msgid "System"
-msgstr "System"
-
 #: directory/links.py:195
 msgid "or organization"
 msgstr "oder Organisation"
@@ -2583,12 +2649,6 @@ msgstr "Seite %(n)s"
 #: templates/networks/switching.html:48
 msgid "Description"
 msgstr "Beschreibung"
-
-#: exchange/pdf.py:198 exchange/tables.py:687
-#: templates/core/_breadcrumbs.html:4 templates/locations/index.html:2
-#: templates/locations/index.html:6
-msgid "Locations"
-msgstr "Orte"
 
 #: exchange/pdf.py:199
 msgid "Building"
@@ -3072,7 +3132,9 @@ msgstr "Unbekannte Sprache."
 #, python-format
 msgid ""
 "The bucket could not be written (%(error)s). Check name, endpoint and key."
-msgstr "In den Bucket konnte nicht geschrieben werden (%(error)s). Prüfen Sie Name, Endpoint und Schlüssel."
+msgstr ""
+"In den Bucket konnte nicht geschrieben werden (%(error)s). Prüfen Sie Name, "
+"Endpoint und Schlüssel."
 
 #: instance/services.py:159
 msgid "Unknown setting."
@@ -3108,7 +3170,9 @@ msgstr "Branding gespeichert."
 
 #: instance/views.py:105
 msgid "Stored encrypted. Leave empty to keep the current value."
-msgstr "Wird verschlüsselt gespeichert. Leer lassen, um den aktuellen Wert zu behalten."
+msgstr ""
+"Wird verschlüsselt gespeichert. Leer lassen, um den aktuellen Wert zu "
+"behalten."
 
 #: instance/views.py:126
 msgid "Require a second factor for everyone"
@@ -3149,7 +3213,8 @@ msgstr "Geben Sie einen Hostnamen ein."
 
 #: instance/views.py:158
 msgid "Empty: mails are not sent (shown in the log in development)."
-msgstr "Leer: Es werden keine Mails versendet (in der Entwicklung im Log ausgegeben)."
+msgstr ""
+"Leer: Es werden keine Mails versendet (in der Entwicklung im Log ausgegeben)."
 
 #: instance/views.py:161
 msgid "Use STARTTLS"
@@ -3173,7 +3238,9 @@ msgstr "Virenscanner (clamd-Host)"
 
 #: instance/views.py:183
 msgid "Empty: no scan. When set, uploads fail while it is unreachable."
-msgstr "Leer: keine Prüfung. Wenn gesetzt, schlagen Uploads fehl, solange er nicht erreichbar ist."
+msgstr ""
+"Leer: keine Prüfung. Wenn gesetzt, schlagen Uploads fehl, solange er nicht "
+"erreichbar ist."
 
 #: instance/views.py:185
 msgid "clamd port"
@@ -3191,7 +3258,9 @@ msgstr "Geben Sie einen gültigen Bucket-Namen ein."
 msgid ""
 "Empty: files stay in the media volume. Files already stored there stay "
 "readable."
-msgstr "Leer: Dateien bleiben im Media-Volume. Dort bereits gespeicherte Dateien bleiben lesbar."
+msgstr ""
+"Leer: Dateien bleiben im Media-Volume. Dort bereits gespeicherte Dateien "
+"bleiben lesbar."
 
 #: instance/views.py:200
 msgid "Endpoint"
@@ -3201,7 +3270,9 @@ msgstr "Endpoint"
 msgid ""
 "Empty for AWS. Backblaze B2 for example https://s3.eu-"
 "central-003.backblazeb2.com."
-msgstr "Leer für AWS. Backblaze B2 zum Beispiel https://s3.eu-central-003.backblazeb2.com."
+msgstr ""
+"Leer für AWS. Backblaze B2 zum Beispiel https://s3.eu-"
+"central-003.backblazeb2.com."
 
 #: instance/views.py:207
 msgid "Region"
@@ -3267,7 +3338,8 @@ msgstr "Private Netze, die Webhooks erreichen dürfen"
 
 #: instance/views.py:267
 msgid "Comma separated, for example 10.0.0.0/8. Empty: public only."
-msgstr "Kommagetrennt, zum Beispiel 10.0.0.0/8. Leer: nur öffentliche Adressen."
+msgstr ""
+"Kommagetrennt, zum Beispiel 10.0.0.0/8. Leer: nur öffentliche Adressen."
 
 #: instance/views.py:270
 msgid "Allow plain http webhook URLs"
@@ -3300,7 +3372,8 @@ msgstr "E-Mail"
 
 #: instance/views.py:296
 msgid "The server for invitations, password resets and notifications."
-msgstr "Der Server für Einladungen, Passwort-Zurücksetzungen und Benachrichtigungen."
+msgstr ""
+"Der Server für Einladungen, Passwort-Zurücksetzungen und Benachrichtigungen."
 
 #: instance/views.py:299
 msgid "Files"
@@ -3311,7 +3384,10 @@ msgid ""
 "Uploads are encrypted before they are stored, in the media volume or in S3 "
 "compatible object storage (AWS S3, Backblaze B2, Wasabi). The bucket is "
 "checked with a test file when you save."
-msgstr "Uploads werden vor dem Speichern verschlüsselt, im Media-Volume oder in S3-kompatiblem Objektspeicher (AWS S3, Backblaze B2, Wasabi). Beim Speichern wird der Bucket mit einer Testdatei geprüft."
+msgstr ""
+"Uploads werden vor dem Speichern verschlüsselt, im Media-Volume oder in S3-"
+"kompatiblem Objektspeicher (AWS S3, Backblaze B2, Wasabi). Beim Speichern "
+"wird der Bucket mit einer Testdatei geprüft."
 
 #: instance/views.py:307
 msgid "Maps"
@@ -3320,10 +3396,6 @@ msgstr "Karten"
 #: instance/views.py:307
 msgid "Tiles shown behind the site map."
 msgstr "Kacheln, die hinter der Standortkarte angezeigt werden."
-
-#: instance/views.py:309
-msgid "Integrations"
-msgstr "Integrationen"
 
 #: instance/views.py:311
 msgid "Limits for webhooks and the API."
@@ -5164,11 +5236,11 @@ msgstr "Geben Sie einen Wiederherstellungscode ein."
 msgid "Verify"
 msgstr "Überprüfen"
 
-#: templates/accounts/mfa.html:18 templates/cabling/connect.html:19
-#: templates/core/_create_form.html:6 templates/exchange/preview.html:12
-#: templates/floorplans/editor.html:41 templates/locations/room_plan.html:15
-#: templates/locations/site_move.html:9 templates/locations/survey.html:24
-#: templates/networks/switch_read.html:13
+#: templates/accounts/mfa.html:18 templates/api/_token_form.html:43
+#: templates/cabling/connect.html:19 templates/core/_create_form.html:6
+#: templates/exchange/preview.html:12 templates/floorplans/editor.html:41
+#: templates/locations/room_plan.html:15 templates/locations/site_move.html:9
+#: templates/locations/survey.html:24 templates/networks/switch_read.html:13
 msgid "Cancel"
 msgstr "Abbrechen"
 
@@ -5365,10 +5437,85 @@ msgid "It is shown only once. Store it in a secret manager."
 msgstr ""
 "Es wird nur einmal angezeigt. Speichern Sie es in einem Passwortmanager."
 
-#: templates/api/clients.html:2 templates/api/clients.html:4
-#: templates/manage/_base.html:17
+#: templates/api/_token_form.html:1 templates/cabling/cable.html:4
+#: templates/cabling/trace.html:4 templates/compute/connection.html:4
+#: templates/compute/connection_select.html:4
+#: templates/core/_breadcrumbs.html:2 templates/core/crud_detail.html:4
+#: templates/ipam/address.html:4 templates/ipam/prefix.html:4
+#: templates/ipam/vrf.html:4 templates/library/catalog_entry.html:4
+#: templates/library/type_detail.html:4 templates/manage/list_item.html:4
+#: templates/networks/stack.html:4 templates/networks/vlan.html:4
+#: templates/networks/wlan.html:4
+msgid "Breadcrumb"
+msgstr "Brotkrumen-Navigation"
+
+#: templates/api/_token_form.html:1 templates/api/clients.html:2
+#: templates/api/clients.html:4 templates/manage/_base.html:17
 msgid "API clients"
 msgstr "API-Clients"
+
+#: templates/api/_token_form.html:1 templates/api/tokens.html:2
+#: templates/api/tokens.html:4 templates/base.html:65
+msgid "API tokens"
+msgstr "API-Token"
+
+#: templates/api/_token_form.html:8
+msgid "Client"
+msgstr "Client"
+
+#: templates/api/_token_form.html:8
+msgid "Token"
+msgstr "Token"
+
+#: templates/api/_token_form.html:15
+msgid "Create, change and delete, within your own rights."
+msgstr "Anlegen, ändern und löschen, im Rahmen Ihrer eigenen Rechte."
+
+#: templates/api/_token_form.html:15
+msgid "Look up records, change nothing."
+msgstr "Datensätze abrufen, nichts ändern."
+
+#: templates/api/_token_form.html:26
+msgid "Limits"
+msgstr "Einschränkungen"
+
+#: templates/api/_token_form.html:27
+msgid ""
+"Optional. Without limits the token can do what you can do; each limit "
+"narrows it further."
+msgstr "Optional. Ohne Einschränkungen darf der Token, was Sie dürfen; jede Einschränkung grenzt ihn weiter ein."
+
+#: templates/api/_token_form.html:35 templates/dcim/rack.html:27
+#: templates/dcim/room.html:24 templates/library/types.html:11
+#: templates/search/results.html:7 templates/search/results.html:25
+msgid "All"
+msgstr "Alle"
+
+#: templates/api/_token_form.html:43 templates/core/_create_form.html:6
+#: templates/dcim/device_form.html:10 templates/library/type_form.html:8
+#: templates/locations/site_form.html:9
+msgid "Create"
+msgstr "Erstellen"
+
+#: templates/api/_token_form.html:46
+msgid "Good to know"
+msgstr "Gut zu wissen"
+
+#: templates/api/_token_form.html:48
+msgid "The client secret is shown once after creating. Store it right away."
+msgstr "Das Client-Secret wird nach dem Anlegen einmal angezeigt. Speichern Sie es sofort."
+
+#: templates/api/_token_form.html:48
+msgid "The token is shown once after creating. Store it right away."
+msgstr "Der Token wird nach dem Anlegen einmal angezeigt. Speichern Sie ihn sofort."
+
+#: templates/api/_token_form.html:49
+msgid "It never has more rights than you, even with write access."
+msgstr "Er hat nie mehr Rechte als Sie, auch mit Schreibzugriff."
+
+#: templates/api/_token_form.html:50
+msgid "Changes made with it are recorded in the audit log under your name."
+msgstr "Änderungen damit werden unter Ihrem Namen im Audit-Log festgehalten."
 
 #: templates/api/clients.html:5
 msgid ""
@@ -5415,11 +5562,6 @@ msgstr "Widerrufen"
 #: templates/api/clients.html:16
 msgid "No clients yet."
 msgstr "Noch keine Clients."
-
-#: templates/api/tokens.html:2 templates/api/tokens.html:4
-#: templates/base.html:65
-msgid "API tokens"
-msgstr "API-Token"
 
 #: templates/api/tokens.html:5
 msgid ""
@@ -5521,10 +5663,6 @@ msgstr "Infrastruktur"
 msgid "Locations and racks"
 msgstr "Orte und Racks"
 
-#: templates/base.html:51
-msgid "Networks"
-msgstr "Netze"
-
 #: templates/base.html:52 templates/ipam/addresses.html:4
 #: templates/ipam/prefixes.html:4 templates/ipam/vrfs.html:4
 msgid "IP networks"
@@ -5533,15 +5671,6 @@ msgstr "IP-Netze"
 #: templates/base.html:53
 msgid "Servers and storage"
 msgstr "Server und Speicher"
-
-#: templates/base.html:54
-msgid "Customers and systems"
-msgstr "Kunden und Systeme"
-
-#: templates/base.html:55 templates/library/type_detail.html:4
-#: templates/library/types.html:2 templates/library/types.html:5
-msgid "Device library"
-msgstr "Gerätebibliothek"
 
 #: templates/base.html:57 templates/history/activity.html:2
 #: templates/history/activity.html:4
@@ -5585,18 +5714,6 @@ msgstr "Lizenzen"
 #: templates/cabling/_port_options.html:1
 msgid "Choose a port"
 msgstr "Port wählen"
-
-#: templates/cabling/cable.html:4 templates/cabling/trace.html:4
-#: templates/compute/connection.html:4
-#: templates/compute/connection_select.html:4
-#: templates/core/_breadcrumbs.html:2 templates/core/crud_detail.html:4
-#: templates/ipam/address.html:4 templates/ipam/prefix.html:4
-#: templates/ipam/vrf.html:4 templates/library/catalog_entry.html:4
-#: templates/library/type_detail.html:4 templates/manage/list_item.html:4
-#: templates/networks/stack.html:4 templates/networks/vlan.html:4
-#: templates/networks/wlan.html:4
-msgid "Breadcrumb"
-msgstr "Brotkrumen-Navigation"
 
 #: templates/cabling/cable.html:7 templates/history/object.html:2
 #: templates/history/object.html:5 templates/ipam/address.html:5
@@ -5721,7 +5838,7 @@ msgstr "Noch nicht aktualisiert."
 
 #: templates/compute/connection.html:16 templates/instance/settings.html:2
 #: templates/instance/settings.html:4 templates/integrations/webhook.html:32
-#: templates/manage/_base.html:20
+#: templates/manage/_base.html:20 templates/manage/system.html:42
 msgid "Settings"
 msgstr "Einstellungen"
 
@@ -5919,11 +6036,6 @@ msgstr "Diese Version endgültig löschen?"
 #: templates/configs/version.html:14
 msgid "Delete version"
 msgstr "Version löschen"
-
-#: templates/core/_create_form.html:6 templates/dcim/device_form.html:10
-#: templates/library/type_form.html:8 templates/locations/site_form.html:9
-msgid "Create"
-msgstr "Erstellen"
 
 #: templates/core/crud_detail.html:16 templates/core/crud_list.html:10
 #: templates/locations/node.html:32
@@ -6339,12 +6451,6 @@ msgstr "Breite"
 msgid "Show everything"
 msgstr "Alles zeigen"
 
-#: templates/dcim/rack.html:27 templates/dcim/room.html:24
-#: templates/library/types.html:11 templates/search/results.html:7
-#: templates/search/results.html:25
-msgid "All"
-msgstr "Alle"
-
 #: templates/dcim/rack.html:30
 msgid "Mount device"
 msgstr "Gerät einbauen"
@@ -6473,10 +6579,6 @@ msgstr "Rack löschen"
 #, python-format
 msgid "Cabling of %(name)s"
 msgstr "Verkabelung von %(name)s"
-
-#: templates/dcim/room.html:6
-msgid "Cabling"
-msgstr "Verkabelung"
 
 #: templates/dcim/room.html:11
 msgid "Cables between racks"
@@ -6867,6 +6969,7 @@ msgid "Until"
 msgstr "Bis"
 
 #: templates/history/change.html:2 templates/manage/system.html:35
+#: templates/manage/system.html:39
 msgid "Change"
 msgstr "Änderung"
 
@@ -7492,11 +7595,6 @@ msgstr "Keine Zuweisungen."
 msgid "Add assignment"
 msgstr "Zuweisung hinzufügen"
 
-#: templates/manage/_base.html:8 templates/manage/dashboard.html:6
-#: templates/manage/tenants.html:2 templates/manage/tenants.html:4
-msgid "Tenants"
-msgstr "Mandanten"
-
 #: templates/manage/_base.html:9 templates/manage/dashboard.html:7
 #: templates/manage/users.html:2 templates/manage/users.html:5
 msgid "Users"
@@ -7868,11 +7966,7 @@ msgstr ""
 "Hochgeladene Dateien liegen im Media-Volume und werden mit jeder Sicherung "
 "archiviert."
 
-#: templates/manage/system.html:37
-msgid "Backend"
-msgstr "Backend"
-
-#: templates/manage/system.html:39
+#: templates/manage/system.html:38
 msgid "Sender"
 msgstr "Absender"
 
@@ -7881,8 +7975,8 @@ msgid "Security configuration"
 msgstr "Sicherheitskonfiguration"
 
 #: templates/manage/system.html:42
-msgid "Set through environment variables, see the deployment guide."
-msgstr "Wird über Umgebungsvariablen gesetzt, siehe Bereitstellungshandbuch."
+msgid "Sign in rules are changed under"
+msgstr "Anmelderegeln ändern Sie unter"
 
 #: templates/manage/tenant_detail.html:2 templates/manage/tenant_detail.html:4
 #: templates/manage/tenants.html:4
@@ -8502,6 +8596,13 @@ msgstr "Mandant gespeichert."
 #: tenancy/views.py:105
 msgid "Tenant deleted."
 msgstr "Mandant gelöscht."
+
+#~ msgid "Backend"
+#~ msgstr "Backend"
+
+#~ msgid "Set through environment variables, see the deployment guide."
+#~ msgstr ""
+#~ "Wird über Umgebungsvariablen gesetzt, siehe Bereitstellungshandbuch."
 
 #~ msgid "Restoring is done on the server, see the deployment guide."
 #~ msgstr ""

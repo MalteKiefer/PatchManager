@@ -50,6 +50,13 @@ All notable changes to this project are documented here. The format follows
 * Floor plan pins: floor devices are drawn as pins at their exact spot; a click shows
   the device with its room, photos, notes and the patch target of every port.
 
+### Changed
+
+* The API token and client forms group the kinds of objects by area with an
+  "All" box per group and offer read or read and write as one choice; the client
+  form keeps the administration menu. The system page links mail and sign in
+  rules to the settings.
+
 ### Fixed
 
 * Webhook pages now show the administration side menu like the other admin pages.
