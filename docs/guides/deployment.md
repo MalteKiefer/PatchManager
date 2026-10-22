@@ -156,7 +156,7 @@ write ahead log. This is not part of the CI drill; rehearse it before relying on
 | Variable | Default | Meaning |
 |---|---|---|
 | `PATCHMANAGER_FORWARDED_ALLOW_IPS` | `127.0.0.1`; Caddy's address in `compose.prod.yaml` | Proxies trusted for `X-Forwarded-Proto` and `X-Forwarded-For`. The client address (rate limits, audit log) is the rightmost `X-Forwarded-For` entry of a trusted proxy. Use `*` only when nothing but the proxy can reach the app |
-| `PATCHMANAGER_BACKEND_SUBNET` / `PATCHMANAGER_PROXY_IP` | `172.30.0.0/24` / `172.30.0.2` | Subnet of the internal network and Caddy's fixed address in it, the only proxy the app trusts; change both if the subnet is taken on the host |
+| `PATCHMANAGER_BACKEND_SUBNET` / `PATCHMANAGER_BACKEND_IP_RANGE` / `PATCHMANAGER_PROXY_IP` | `172.30.0.0/24` / `172.30.0.128/25` / `172.30.0.2` | Subnet of the internal network, the range Docker assigns from, and Caddy's fixed address outside that range, the only proxy the app trusts; change all three if the subnet is taken on the host |
 
 ## Updating
 

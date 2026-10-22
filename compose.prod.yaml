@@ -203,6 +203,8 @@ networks:
     ipam:
       config:
         - subnet: ${PATCHMANAGER_BACKEND_SUBNET:-172.30.0.0/24}
+          # Dynamic addresses come from the upper half, so Caddy's fixed one stays free.
+          ip_range: ${PATCHMANAGER_BACKEND_IP_RANGE:-172.30.0.128/25}
   egress:
   offsite:
 
