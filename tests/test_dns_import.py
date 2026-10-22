@@ -144,3 +144,29 @@ def test_provider_input_is_checked() -> None:
         dns_import.fetch("desec", "example.com", "a\nb")
     with pytest.raises(ServiceError):
         dns_import.fetch("nowhere", "example.com", "t")
+
+
+def test_replace_needs_delete_permission(make_tree, super_admin, system, monkeypatch) -> None:
+    from django.test import RequestFactory
+
+    from patchmanager.accounts import policy
+    from patchmanager.accounts.services import PermissionDeniedError
+
+    real = policy.has_perm
+
+    def no_delete(user, permission, obj=None, **kwargs):
+        return permission != "ipam.dnszone.delete" and real(user, permission, obj, **kwargs)
+
+    monkeypatch.setattr(policy, "has_perm", no_delete)
+    tree = make_tree()
+    request = RequestFactory().post("/")
+    request.user = super_admin
+    with system():
+        DNSZone.objects.create(tenant=tree["tenant"], name="example.com")
+        zone = dns_import.parse_zone_file(ZONE, "example.com")
+        with pytest.raises(PermissionDeniedError):
+            dns_import.save(request, super_admin, tree["tenant"], zone, replace=True, source="file")
+        result = dns_import.save(
+            request, super_admin, tree["tenant"], zone, replace=False, source="file"
+        )
+        assert result.records == 9

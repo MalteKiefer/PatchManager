@@ -316,9 +316,12 @@ def save(
         if stored
         else policy.has_perm(actor, "ipam.dnszone.add", scope_path=path_label(tenant.pk))
     )
+    if stored is not None and replace and not policy.has_perm(actor, "ipam.dnszone.delete", stored):
+        allowed = False  # replacing deletes the documented records
     if not allowed:
         raise PermissionDeniedError(_("You do not have permission to do that."))
     skipped = list(data.skipped)
+    removed = 0
     with transaction.atomic():
         zone = stored or DNSZone(tenant=tenant, created_by=actor, name=data.name)
         for key in ("primary_server", "admin_email"):
@@ -331,7 +334,7 @@ def save(
         zone.full_clean(exclude=["tenant"])
         zone.save()
         if replace:
-            zone.records.all().delete()
+            removed, _kinds = zone.records.all().delete()
         existing = {(r.name, r.type, r.value) for r in zone.records.all()}
         count = 0
         for item in data.records:
@@ -359,6 +362,12 @@ def save(
         "ipam.dnszone.imported",
         request=request,
         obj=zone,
-        data={"source": source, "records": count, "replace": replace, "action": action},
+        data={
+            "source": source,
+            "records": count,
+            "replace": replace,
+            "removed": removed,
+            "action": action,
+        },
     )
     return Imported(zone, stored is None, count, skipped[:200])
