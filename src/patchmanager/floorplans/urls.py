@@ -11,4 +11,5 @@ urlpatterns = [
     path("<uuid:floor_pk>/outline/", views.outline, name="outline"),
     path("<uuid:floor_pk>/place/", views.place, name="place"),
     path("<uuid:floor_pk>/unplace/", views.unplace, name="unplace"),
+    path("<uuid:floor_pk>/<slug:kind>/<uuid:pk>/", views.item, name="item"),
 ]

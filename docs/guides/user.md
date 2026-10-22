@@ -93,6 +93,10 @@ to open it.
 Lines join each placed floor device with the rack or device its cables lead to;
 dashed lines are permanent links, the number says how many paths. Choose **Add
 device here** and click inside a room outline to create a device at that point.
+Floor devices appear as pins whose tip marks the exact spot in the room, so others
+can find an outlet or access point later. Drag a pin to move it. Click a pin (or focus
+it and press Enter) to see the device, its room, its photos and notes and where each
+of its ports is patched; Esc closes the details.
 **Draw new room** works like drawing an outline: click the corners, choose **Finish
 outline**, then name the new room on the next page.
 
