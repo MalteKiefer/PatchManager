@@ -309,6 +309,10 @@ def canonical(name: str) -> str:
 def finish(config: Config) -> Config:
     """Turn per interface VLAN and aggregation settings into VLAN port lists and trunks."""
     known = set(config.vlans)
+    for trunk in config.trunks.values():  # the aggregation itself may name the protocol
+        own = config.interfaces.get(trunk.name)
+        if own is not None and own.lag_protocol:
+            trunk.protocol = own.lag_protocol
     for port in config.interfaces.values():
         if port.lag:
             trunk = config.trunks.setdefault(
@@ -316,7 +320,10 @@ def finish(config: Config) -> Config:
             )
             if port.name not in trunk.members:
                 trunk.members.append(port.name)
-            if port.lag_protocol:
+            own = config.interfaces.get(port.lag)
+            if own is not None and own.lag_protocol:
+                trunk.protocol = own.lag_protocol
+            elif port.lag_protocol:
                 trunk.protocol = port.lag_protocol
             continue  # members carry the aggregation's VLANs
         if port.mode == "access" and port.access_vlan:
