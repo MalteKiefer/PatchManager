@@ -200,6 +200,7 @@ CELERY_BEAT_SCHEDULE = {
         "schedule": 86400,
     },
     "prune-job-runs": {"task": "patchmanager.instance.tasks.prune_job_runs", "schedule": 86400},
+    "offsite-copy": {"task": "patchmanager.instance.tasks.offsite_copy", "schedule": 3600},
     "sync-platform-connections": {
         "task": "patchmanager.compute.tasks.sync_connections",
         "schedule": 900,

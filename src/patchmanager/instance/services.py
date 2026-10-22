@@ -110,8 +110,8 @@ def logo_bytes() -> bytes | None:
     return bytes(row.logo) if row and row.logo else None
 
 
-def _public_host(url: str) -> None:
-    """The bucket endpoint must be https and must not point into the host itself."""
+def public_host(url: str) -> None:
+    """An endpoint must be https and must not point into the host itself."""
     parts = urlsplit(url)
     if parts.scheme != "https" or not parts.hostname or parts.username or parts.password:
         raise ServiceError(_("Enter an https address without credentials."))
@@ -168,11 +168,18 @@ def save_config(request: HttpRequest, actor: User, values: dict[str, Any]) -> No
     if effective.s3_endpoint_url and "s3_endpoint_url" in values:
         # botocore resolves again when it connects; only holders of system.settings.change
         # can set this, so the remaining rebinding window is accepted (ADR 0035).
-        _public_host(effective.s3_endpoint_url)
+        public_host(effective.s3_endpoint_url)
     if effective.s3_bucket and any(n.startswith("s3_") for n in changed):
         _probe(effective)
+    if effective.offsite_repository and "offsite_repository" in values:
+        from patchmanager.instance.offsite import check_repository
+
+        check_repository(effective.offsite_repository)
     row.config = stored
-    row.save()
+    if row.pk is None:
+        row.save()
+    else:
+        row.save(update_fields=["config", "updated_at"])
     instance_config.forget()
     state.forget()
     audit.record(

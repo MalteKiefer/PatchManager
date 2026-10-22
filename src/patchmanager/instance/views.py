@@ -18,7 +18,7 @@ from patchmanager.accounts.decorators import permission_required
 from patchmanager.accounts.models import User
 from patchmanager.accounts.services import ServiceError
 from patchmanager.instance import config as instance_config
-from patchmanager.instance import services, state
+from patchmanager.instance import offsite, services, state
 
 
 class BrandingForm(forms.Form):
@@ -284,6 +284,44 @@ class IntegrationsForm(forms.Form):
             raise forms.ValidationError(_("Enter networks such as 10.0.0.0/8.")) from exc
 
 
+class BackupsForm(forms.Form):
+    """Encrypted off-site copy of the backup volume."""
+
+    offsite_enabled = forms.BooleanField(
+        label=gettext_lazy("Copy backups off-site after every new dump"), required=False
+    )
+    offsite_repository = forms.CharField(
+        label=gettext_lazy("Repository"),
+        required=False,
+        max_length=300,
+        help_text=gettext_lazy(
+            "s3:https://host/bucket/folder, for Backblaze B2 for example"
+            " s3:https://s3.eu-central-003.backblazeb2.com/my-bucket/patchmanager."
+        ),
+    )
+    offsite_access_key_id = forms.CharField(
+        label=gettext_lazy("Access key ID"), required=False, max_length=200
+    )
+    offsite_secret_access_key = _secret(gettext_lazy("Secret access key"))
+    offsite_password = _secret(gettext_lazy("Repository password"))
+    offsite_keep_daily = forms.IntegerField(
+        label=gettext_lazy("Keep daily copies"), min_value=1, max_value=365
+    )
+    offsite_keep_weekly = forms.IntegerField(
+        label=gettext_lazy("Keep weekly copies"), min_value=0, max_value=520
+    )
+    offsite_keep_monthly = forms.IntegerField(
+        label=gettext_lazy("Keep monthly copies"), min_value=0, max_value=240
+    )
+
+    def clean(self) -> dict[str, Any]:
+        """A copy needs a repository."""
+        data = super().clean() or {}
+        if data.get("offsite_enabled") and not data.get("offsite_repository"):
+            raise forms.ValidationError(_("Enter the repository."))
+        return data
+
+
 SECTIONS: dict[str, tuple[Any, type[forms.Form], Any]] = {
     "security": (
         gettext_lazy("Sign in"),
@@ -310,6 +348,16 @@ SECTIONS: dict[str, tuple[Any, type[forms.Form], Any]] = {
         IntegrationsForm,
         gettext_lazy("Limits for webhooks and the API."),
     ),
+    "backups": (
+        gettext_lazy("Backups"),
+        BackupsForm,
+        gettext_lazy(
+            "The backup service writes a database dump every day. Here the worker copies them"
+            " encrypted with restic to S3 compatible storage (AWS S3, Backblaze B2, Wasabi)."
+            " Keep the repository password outside this installation too: without it the"
+            " copies cannot be opened. Use a key that may only write to this bucket."
+        ),
+    ),
 }
 
 
@@ -320,6 +368,13 @@ def settings_view(request: HttpRequest, section: str = "security") -> HttpRespon
         raise Http404
     title, form_class, intro = SECTIONS[section]
     current = asdict(instance_config.get())
+    copy_now = request.method == "POST" and request.POST.get("action") == "copy-now"
+    if copy_now and section == "backups":
+        from patchmanager.instance.tasks import offsite_copy
+
+        offsite_copy.delay(force=True)
+        messages.success(request, _("The off-site copy was started; see the system page."))
+        return redirect("instance:settings", section)
     form = form_class(
         request.POST or None,
         initial={k: v for k, v in current.items() if k not in instance_config.SECRETS},
@@ -335,7 +390,11 @@ def settings_view(request: HttpRequest, section: str = "security") -> HttpRespon
         else:
             messages.success(request, _("Settings saved."))
             return redirect("instance:settings", section)
-    secret = {"mail": "mail_password", "storage": "s3_secret_access_key"}.get(section)
+    secret = {
+        "mail": "mail_password",
+        "storage": "s3_secret_access_key",
+        "backups": "offsite_password",
+    }.get(section)
     return render(
         request,
         "instance/settings.html",
@@ -346,5 +405,6 @@ def settings_view(request: HttpRequest, section: str = "security") -> HttpRespon
             "intro": intro,
             "sections": [(key, label) for key, (label, _f, _i) in SECTIONS.items()],
             "secret_stored": bool(secret and current.get(secret)),
+            "offsite": offsite.status() if section == "backups" else None,
         },
     )

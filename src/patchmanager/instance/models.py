@@ -15,6 +15,8 @@ class InstanceSettings(TimestampedModel):
     default_language = models.CharField(_("default language"), max_length=8, default="en")
     # Operational settings (instance.config); secrets inside are encrypted.
     config = models.JSONField(default=dict, blank=True)
+    # Last run of the off-site copy: ok, at, message (instance.offsite).
+    offsite_status = models.JSONField(default=dict, blank=True)
 
     class Meta:
         verbose_name = _("instance settings")

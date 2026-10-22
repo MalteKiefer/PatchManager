@@ -22,16 +22,17 @@
         <tbody>{% for name, task, every in jobs.schedule %}<tr><td class="font-mono text-xs">{{ name }}</td><td>{{ every }}</td></tr>{% endfor %}</tbody></table></div>
     </div></section>
   <section class="card" aria-labelledby="backups-h"><h2 id="backups-h" class="mb-3">{% translate "Backups" %}</h2>
-    {% if not backups.configured %}<p class="text-sm text-slate-500">{% translate "Mount the backup volume read only and set PATCHMANAGER_BACKUP_DIR to see restore points here." %}</p>
+    {% if not backups.configured %}<p class="text-sm text-slate-500">{% translate "No backup volume in this installation. In the production stack the backup service writes a database dump every day." %}</p>
     {% elif not backups.readable %}<p class="text-sm text-red-600">{% translate "The backup folder cannot be read." %}</p>
     {% else %}{% if backups.stale %}<p class="mb-2 text-sm"><span class="badge-warn">{% translate "No backup in the last 36 hours." %}</span></p>{% endif %}
     <ul class="space-y-1 text-sm">{% for b in backups.files %}<li class="flex justify-between gap-3"><span class="font-mono text-xs">{{ b.name }}</span><span class="text-slate-500">{{ b.at|date:"SHORT_DATETIME_FORMAT" }} · {{ b.size|filesizeformat }}</span></li>{% empty %}<li class="text-slate-500">{% translate "No restore points yet." %}</li>{% endfor %}</ul>
-    <p class="mt-3 text-sm">{% if backups.offsite is None %}<span class="text-slate-500">{% translate "No off-site copy configured." %}</span>
-      {% elif backups.offsite.ok %}<span class="badge-ok">{% translate "Off-site copy" %}</span> {{ backups.offsite.at|date:"SHORT_DATETIME_FORMAT" }} · {{ backups.offsite.message }}
-      {% else %}<span class="badge-warn">{% translate "Off-site copy failed" %}</span> {{ backups.offsite.at|date:"SHORT_DATETIME_FORMAT" }} · {{ backups.offsite.message }}{% endif %}</p>
     {% if backups.files %}<p class="mt-3 text-xs text-slate-500">{% translate "Restore on the server after stopping app, worker, scheduler and caddy:" %}</p>
     <pre class="mt-1 overflow-x-auto rounded bg-slate-100 p-2 text-xs dark:bg-slate-800">docker compose -f compose.prod.yaml --profile restore run --rm restore {{ backups.files.0.name }}</pre>{% endif %}
-{% endif %}
+    {% endif %}
+    <p class="mt-3 text-sm">{% if backups.offsite is None %}<span class="text-slate-500">{% translate "No off-site copy yet." %}</span>
+      {% elif backups.offsite.ok %}<span class="badge-ok">{% translate "Off-site copy" %}</span> {{ backups.offsite.at|date:"SHORT_DATETIME_FORMAT" }} · {{ backups.offsite.message }}
+      {% else %}<span class="badge-warn">{% translate "Off-site copy failed" %}</span> {{ backups.offsite.at|date:"SHORT_DATETIME_FORMAT" }} · {{ backups.offsite.message }}{% endif %}
+      <a class="underline" href="{% url 'instance:settings' 'backups' %}">{% translate "Settings" %}</a></p>
     <p class="mt-3 text-xs text-slate-500">{% if s3_bucket %}{% blocktranslate %}Uploads are stored in the S3 bucket {{ s3_bucket }}; enable versioning there.{% endblocktranslate %}{% else %}{% translate "Uploads are stored in the media volume and archived with every backup." %}{% endif %} <a class="underline" href="{% url 'instance:settings' 'storage' %}">{% translate "Change" %}</a></p></section>
   <section class="card" aria-labelledby="mail-h"><h2 id="mail-h" class="mb-3">{% translate "Mail" %}</h2>
     <dl class="mb-3 grid grid-cols-2 gap-1 text-sm"><dt class="text-slate-500">{% translate "Backend" %}</dt><dd class="break-all font-mono text-xs">{{ mail.backend }}</dd>

@@ -8,6 +8,10 @@ All notable changes to this project are documented here. The format follows
 
 ### Added
 
+* Off-site backups are configured under Administration → Settings → Backups: the
+  worker copies the backup volume encrypted with restic to S3 or B2 after every new
+  dump, with retention, a check, *Copy now* and the last result on the system page
+  (ADR 0036). The compose `offsite` profile is removed.
 * Administration → Settings: sign in rules, mail server, upload limit and virus
   scanner, S3/B2 file storage, map tiles and webhook and API limits are set in the
   web interface and apply without a restart; environment variables are only initial

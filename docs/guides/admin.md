@@ -112,7 +112,7 @@ installation; there are no editions, limits or licence keys.
 
 ## Settings
 
-*Administration → Settings* holds what used to need the environment, in five parts:
+*Administration → Settings* holds what used to need the environment, in six parts:
 
 * **Sign in**: minimum password length, a second factor for everyone, session
   lifetime and idle timeout, lockout after failed sign ins, attempts per address and
@@ -125,12 +125,15 @@ installation; there are no editions, limits or licence keys.
 * **Maps**: tile server and attribution, or none.
 * **Integrations**: private networks webhooks may reach, plain http webhooks and the
   API rate per user.
+* **Backups**: the encrypted off-site copy of the daily database dumps with restic to
+  S3 compatible storage: repository, key, repository password and how many daily,
+  weekly and monthly copies to keep, with *Copy now* and the last result.
 
 Changes apply to all processes within a request and are recorded in the audit log
 (setting names only). Passwords and keys are stored encrypted with the instance keys
-and never shown again; leave the field empty to keep them. The off-site copy of
-backups keeps its own credentials on the server (see the deployment guide), so a
-compromised web process cannot delete backups.
+and never shown again; leave the field empty to keep them. Use a key for the
+off-site copy that may write to its bucket but not delete old versions (object lock or
+a lifecycle rule), so stolen settings cannot erase the backups.
 
 ## System
 

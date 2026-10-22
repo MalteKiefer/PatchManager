@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-22 11:08+0000\n"
+"POT-Creation-Date: 2026-10-22 11:51+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -1307,7 +1307,11 @@ msgid ""
 "VMware vCenter, or volumes and shares from a Synology or QNAP NAS. "
 "Credentials are used once and not stored; give an account with read rights "
 "only."
-msgstr "Liest Cluster, Hosts, virtuelle Maschinen und Speicher aus Proxmox VE und VMware vCenter, oder Volumes und Freigaben eines Synology- oder QNAP-NAS. Zugangsdaten werden einmal verwendet und nicht gespeichert; verwenden Sie ein Konto nur mit Leserechten."
+msgstr ""
+"Liest Cluster, Hosts, virtuelle Maschinen und Speicher aus Proxmox VE und "
+"VMware vCenter, oder Volumes und Freigaben eines Synology- oder QNAP-NAS. "
+"Zugangsdaten werden einmal verwendet und nicht gespeichert; verwenden Sie "
+"ein Konto nur mit Leserechten."
 
 #: compute/importing.py:378 ipam/pages.py:387 templates/exchange/index.html:7
 #: templates/library/types.html:30 templates/manage/roles.html:21
@@ -1379,7 +1383,9 @@ msgstr "Der Host hat nicht mit XML geantwortet."
 msgid ""
 "The host refused the credentials (accounts with two step sign in cannot be "
 "used)."
-msgstr "Der Host hat die Zugangsdaten abgelehnt (Konten mit zweistufiger Anmeldung können nicht verwendet werden)."
+msgstr ""
+"Der Host hat die Zugangsdaten abgelehnt (Konten mit zweistufiger Anmeldung "
+"können nicht verwendet werden)."
 
 #: compute/models.py:39 compute/models.py:300
 msgid "platform"
@@ -1458,7 +1464,7 @@ msgstr "Pfad oder Ziel"
 msgid "For example an export path, share name or iSCSI IQN."
 msgstr "Zum Beispiel ein Exportpfad, Freigabename oder eine iSCSI-IQN."
 
-#: compute/models.py:148 instance/models.py:30
+#: compute/models.py:148 instance/models.py:32
 msgid "running"
 msgstr "läuft"
 
@@ -1623,7 +1629,7 @@ msgstr "Hosts"
 msgid "Add host"
 msgstr "Host hinzufügen"
 
-#: compute/pages.py:124 templates/manage/system.html:38
+#: compute/pages.py:124 templates/manage/system.html:39
 msgid "Server"
 msgstr "Server"
 
@@ -1922,57 +1928,53 @@ msgstr "Dateispeicher"
 msgid "Background workers"
 msgstr "Hintergrund-Worker"
 
-#: core/system.py:148
-msgid "The off-site status file cannot be read."
-msgstr "Die Statusdatei der externen Sicherung kann nicht gelesen werden."
-
-#: core/system.py:202
+#: core/system.py:189
 msgid "MFA required for everyone"
 msgstr "MFA für alle erforderlich"
 
-#: core/system.py:203 instance/views.py:123
+#: core/system.py:190 instance/views.py:123
 msgid "Minimum password length"
 msgstr "Mindestlänge des Passworts"
 
-#: core/system.py:204
+#: core/system.py:191
 msgid "Session lifetime (s)"
 msgstr "Sitzungsdauer (s)"
 
-#: core/system.py:205
+#: core/system.py:192
 msgid "Session idle timeout (s)"
 msgstr "Leerlauf-Timeout der Sitzung (s)"
 
-#: core/system.py:206
+#: core/system.py:193
 msgid "Lockout after failures"
 msgstr "Sperre nach Fehlversuchen"
 
-#: core/system.py:207
+#: core/system.py:194
 msgid "Lockout duration (s)"
 msgstr "Sperrdauer (s)"
 
-#: core/system.py:208
+#: core/system.py:195
 msgid "Login attempts per IP in 10 minutes"
 msgstr "Anmeldeversuche pro IP in 10 Minuten"
 
-#: core/system.py:209
+#: core/system.py:196
 msgid "WebAuthn relying party"
 msgstr "WebAuthn Relying Party"
 
-#: core/system.py:223
+#: core/system.py:210
 #, python-format
 msgid "Test mail from %(name)s"
 msgstr "Testmail von %(name)s"
 
-#: core/system.py:224
+#: core/system.py:211
 msgid "Mail delivery works."
 msgstr "Der Mailversand funktioniert."
 
-#: core/system.py:230
+#: core/system.py:217
 #, python-format
 msgid "The mail could not be sent: %(error)s"
 msgstr "Die E-Mail konnte nicht gesendet werden: %(error)s"
 
-#: core/system.py:233
+#: core/system.py:220
 #, python-format
 msgid "A test mail was sent to %(email)s."
 msgstr "Eine Testmail wurde an %(email)s gesendet."
@@ -3036,17 +3038,47 @@ msgstr "Markenfarbe (Farbton)"
 msgid "default language"
 msgstr "Standardsprache"
 
-#: instance/models.py:20
+#: instance/models.py:22
 msgid "instance settings"
 msgstr "Instanzeinstellungen"
 
-#: instance/models.py:31 locations/models.py:222
+#: instance/models.py:33 locations/models.py:222
 msgid "done"
 msgstr "erledigt"
 
-#: instance/models.py:32 integrations/models.py:47
+#: instance/models.py:34 integrations/models.py:47
 msgid "failed"
 msgstr "fehlgeschlagen"
+
+#: instance/offsite.py:35 instance/offsite.py:38
+msgid "Enter the repository as s3:https://host/bucket/path."
+msgstr "Geben Sie das Repository als s3:https://host/bucket/pfad ein."
+
+#: instance/offsite.py:45
+msgid "restic is not installed in this image."
+msgstr "restic ist in diesem Image nicht installiert."
+
+#: instance/offsite.py:85
+msgid "Enter the key and the repository password."
+msgstr "Geben Sie den Schlüssel und das Repository-Passwort ein."
+
+#: instance/offsite.py:88
+msgid "The backup volume is not mounted (PATCHMANAGER_BACKUP_DIR)."
+msgstr "Das Sicherungsvolume ist nicht eingebunden (PATCHMANAGER_BACKUP_DIR)."
+
+#: instance/offsite.py:92
+msgid "restic init failed."
+msgstr "restic init ist fehlgeschlagen."
+
+#: instance/offsite.py:123
+#, python-format
+msgid "copied %(name)s"
+msgstr "%(name)s kopiert"
+
+#: instance/offsite.py:129
+#, python-format
+msgid "Not a PatchManager dump: %(name)s"
+msgstr "Kein PatchManager-Dump: %(name)s"
 
 #: instance/services.py:41
 msgid "The logo may be at most 512 KB."
@@ -3072,7 +3104,9 @@ msgstr "Unbekannte Sprache."
 #, python-format
 msgid ""
 "The bucket could not be written (%(error)s). Check name, endpoint and key."
-msgstr "In den Bucket konnte nicht geschrieben werden (%(error)s). Prüfen Sie Name, Endpoint und Schlüssel."
+msgstr ""
+"In den Bucket konnte nicht geschrieben werden (%(error)s). Prüfen Sie Name, "
+"Endpoint und Schlüssel."
 
 #: instance/services.py:159
 msgid "Unknown setting."
@@ -3108,7 +3142,9 @@ msgstr "Branding gespeichert."
 
 #: instance/views.py:105
 msgid "Stored encrypted. Leave empty to keep the current value."
-msgstr "Wird verschlüsselt gespeichert. Leer lassen, um den aktuellen Wert zu behalten."
+msgstr ""
+"Wird verschlüsselt gespeichert. Leer lassen, um den aktuellen Wert zu "
+"behalten."
 
 #: instance/views.py:126
 msgid "Require a second factor for everyone"
@@ -3149,7 +3185,8 @@ msgstr "Geben Sie einen Hostnamen ein."
 
 #: instance/views.py:158
 msgid "Empty: mails are not sent (shown in the log in development)."
-msgstr "Leer: Es werden keine Mails versendet (in der Entwicklung im Log ausgegeben)."
+msgstr ""
+"Leer: Es werden keine Mails versendet (in der Entwicklung im Log ausgegeben)."
 
 #: instance/views.py:161
 msgid "Use STARTTLS"
@@ -3173,7 +3210,9 @@ msgstr "Virenscanner (clamd-Host)"
 
 #: instance/views.py:183
 msgid "Empty: no scan. When set, uploads fail while it is unreachable."
-msgstr "Leer: keine Prüfung. Wenn gesetzt, schlagen Uploads fehl, solange er nicht erreichbar ist."
+msgstr ""
+"Leer: keine Prüfung. Wenn gesetzt, schlagen Uploads fehl, solange er nicht "
+"erreichbar ist."
 
 #: instance/views.py:185
 msgid "clamd port"
@@ -3191,7 +3230,9 @@ msgstr "Geben Sie einen gültigen Bucket-Namen ein."
 msgid ""
 "Empty: files stay in the media volume. Files already stored there stay "
 "readable."
-msgstr "Leer: Dateien bleiben im Media-Volume. Dort bereits gespeicherte Dateien bleiben lesbar."
+msgstr ""
+"Leer: Dateien bleiben im Media-Volume. Dort bereits gespeicherte Dateien "
+"bleiben lesbar."
 
 #: instance/views.py:200
 msgid "Endpoint"
@@ -3201,17 +3242,19 @@ msgstr "Endpoint"
 msgid ""
 "Empty for AWS. Backblaze B2 for example https://s3.eu-"
 "central-003.backblazeb2.com."
-msgstr "Leer für AWS. Backblaze B2 zum Beispiel https://s3.eu-central-003.backblazeb2.com."
+msgstr ""
+"Leer für AWS. Backblaze B2 zum Beispiel https://s3.eu-"
+"central-003.backblazeb2.com."
 
 #: instance/views.py:207
 msgid "Region"
 msgstr "Region"
 
-#: instance/views.py:209
+#: instance/views.py:209 instance/views.py:303
 msgid "Access key ID"
 msgstr "Access-Key-ID"
 
-#: instance/views.py:211
+#: instance/views.py:211 instance/views.py:305
 msgid "Secret access key"
 msgstr "Secret Access Key"
 
@@ -3267,7 +3310,8 @@ msgstr "Private Netze, die Webhooks erreichen dürfen"
 
 #: instance/views.py:267
 msgid "Comma separated, for example 10.0.0.0/8. Empty: public only."
-msgstr "Kommagetrennt, zum Beispiel 10.0.0.0/8. Leer: nur öffentliche Adressen."
+msgstr ""
+"Kommagetrennt, zum Beispiel 10.0.0.0/8. Leer: nur öffentliche Adressen."
 
 #: instance/views.py:270
 msgid "Allow plain http webhook URLs"
@@ -3285,51 +3329,105 @@ msgstr "Zum Beispiel 1200/minute."
 msgid "Enter networks such as 10.0.0.0/8."
 msgstr "Geben Sie Netze wie 10.0.0.0/8 ein."
 
-#: instance/views.py:289 templates/accounts/login.html:2
+#: instance/views.py:291
+msgid "Copy backups off-site after every new dump"
+msgstr "Sicherungen nach jedem neuen Dump extern kopieren"
+
+#: instance/views.py:294
+msgid "Repository"
+msgstr "Repository"
+
+#: instance/views.py:298
+msgid ""
+"s3:https://host/bucket/folder, for Backblaze B2 for example s3:https://s3.eu-"
+"central-003.backblazeb2.com/my-bucket/patchmanager."
+msgstr "s3:https://host/bucket/ordner, für Backblaze B2 zum Beispiel s3:https://s3.eu-central-003.backblazeb2.com/mein-bucket/patchmanager."
+
+#: instance/views.py:306
+msgid "Repository password"
+msgstr "Repository-Passwort"
+
+#: instance/views.py:308
+msgid "Keep daily copies"
+msgstr "Tägliche Kopien behalten"
+
+#: instance/views.py:311
+msgid "Keep weekly copies"
+msgstr "Wöchentliche Kopien behalten"
+
+#: instance/views.py:314
+msgid "Keep monthly copies"
+msgstr "Monatliche Kopien behalten"
+
+#: instance/views.py:321
+msgid "Enter the repository."
+msgstr "Geben Sie das Repository ein."
+
+#: instance/views.py:327 templates/accounts/login.html:2
 #: templates/accounts/login.html:5 templates/accounts/login.html:8
 msgid "Sign in"
 msgstr "Anmelden"
 
-#: instance/views.py:291
+#: instance/views.py:329
 msgid "Passwords, second factors, sessions and lockouts."
 msgstr "Passwörter, zweite Faktoren, Sitzungen und Sperren."
 
-#: instance/views.py:294 templates/manage/system.html:36
+#: instance/views.py:332 templates/manage/system.html:37
 msgid "Mail"
 msgstr "E-Mail"
 
-#: instance/views.py:296
+#: instance/views.py:334
 msgid "The server for invitations, password resets and notifications."
-msgstr "Der Server für Einladungen, Passwort-Zurücksetzungen und Benachrichtigungen."
+msgstr ""
+"Der Server für Einladungen, Passwort-Zurücksetzungen und Benachrichtigungen."
 
-#: instance/views.py:299
+#: instance/views.py:337
 msgid "Files"
 msgstr "Dateien"
 
-#: instance/views.py:302
+#: instance/views.py:340
 msgid ""
 "Uploads are encrypted before they are stored, in the media volume or in S3 "
 "compatible object storage (AWS S3, Backblaze B2, Wasabi). The bucket is "
 "checked with a test file when you save."
-msgstr "Uploads werden vor dem Speichern verschlüsselt, im Media-Volume oder in S3-kompatiblem Objektspeicher (AWS S3, Backblaze B2, Wasabi). Beim Speichern wird der Bucket mit einer Testdatei geprüft."
+msgstr ""
+"Uploads werden vor dem Speichern verschlüsselt, im Media-Volume oder in S3-"
+"kompatiblem Objektspeicher (AWS S3, Backblaze B2, Wasabi). Beim Speichern "
+"wird der Bucket mit einer Testdatei geprüft."
 
-#: instance/views.py:307
+#: instance/views.py:345
 msgid "Maps"
 msgstr "Karten"
 
-#: instance/views.py:307
+#: instance/views.py:345
 msgid "Tiles shown behind the site map."
 msgstr "Kacheln, die hinter der Standortkarte angezeigt werden."
 
-#: instance/views.py:309
+#: instance/views.py:347
 msgid "Integrations"
 msgstr "Integrationen"
 
-#: instance/views.py:311
+#: instance/views.py:349
 msgid "Limits for webhooks and the API."
 msgstr "Grenzen für Webhooks und die API."
 
-#: instance/views.py:336
+#: instance/views.py:352 templates/manage/system.html:24
+msgid "Backups"
+msgstr "Sicherungen"
+
+#: instance/views.py:355
+msgid ""
+"The backup service writes a database dump every day. Here the worker copies "
+"them encrypted with restic to S3 compatible storage (AWS S3, Backblaze B2, "
+"Wasabi). Keep the repository password outside this installation too: without "
+"it the copies cannot be opened. Use a key that may only write to this bucket."
+msgstr "Der Sicherungsdienst schreibt jeden Tag einen Datenbank-Dump. Hier kopiert der Worker sie verschlüsselt mit restic in S3-kompatiblen Speicher (AWS S3, Backblaze B2, Wasabi). Bewahren Sie das Repository-Passwort auch außerhalb dieser Installation auf: Ohne es lassen sich die Kopien nicht öffnen. Verwenden Sie einen Schlüssel, der nur in diesen Bucket schreiben darf."
+
+#: instance/views.py:376
+msgid "The off-site copy was started; see the system page."
+msgstr "Die externe Sicherung wurde gestartet; siehe Systemseite."
+
+#: instance/views.py:391
 msgid "Settings saved."
 msgstr "Einstellungen gespeichert."
 
@@ -5721,7 +5819,7 @@ msgstr "Noch nicht aktualisiert."
 
 #: templates/compute/connection.html:16 templates/instance/settings.html:2
 #: templates/instance/settings.html:4 templates/integrations/webhook.html:32
-#: templates/manage/_base.html:20
+#: templates/manage/_base.html:20 templates/manage/system.html:35
 msgid "Settings"
 msgstr "Einstellungen"
 
@@ -6866,7 +6964,7 @@ msgstr "Objektname"
 msgid "Until"
 msgstr "Bis"
 
-#: templates/history/change.html:2 templates/manage/system.html:35
+#: templates/history/change.html:2 templates/manage/system.html:36
 msgid "Change"
 msgstr "Änderung"
 
@@ -6927,7 +7025,27 @@ msgstr "Bereiche der Einstellungen"
 msgid "A secret is stored"
 msgstr "Ein Geheimnis ist gespeichert"
 
-#: templates/instance/settings.html:17 templates/manage/system.html:40
+#: templates/instance/settings.html:16
+msgid "Last off-site copy"
+msgstr "Letzte externe Sicherung"
+
+#: templates/instance/settings.html:17
+msgid "Not run yet."
+msgstr "Noch nicht gelaufen."
+
+#: templates/instance/settings.html:17
+msgid "Copied"
+msgstr "Kopiert"
+
+#: templates/instance/settings.html:17
+msgid "Failed"
+msgstr "Fehlgeschlagen"
+
+#: templates/instance/settings.html:18
+msgid "Copy now"
+msgstr "Jetzt kopieren"
+
+#: templates/instance/settings.html:23 templates/manage/system.html:41
 msgid "Send a test mail to me"
 msgstr "Testmail an mich senden"
 
@@ -7812,17 +7930,11 @@ msgstr "Zeitplan"
 msgid "Every (s)"
 msgstr "Alle (s)"
 
-#: templates/manage/system.html:24
-msgid "Backups"
-msgstr "Sicherungen"
-
 #: templates/manage/system.html:25
 msgid ""
-"Mount the backup volume read only and set PATCHMANAGER_BACKUP_DIR to see "
-"restore points here."
-msgstr ""
-"Binden Sie das Sicherungsvolume schreibgeschützt ein und setzen Sie "
-"PATCHMANAGER_BACKUP_DIR, um hier Wiederherstellungspunkte zu sehen."
+"No backup volume in this installation. In the production stack the backup "
+"service writes a database dump every day."
+msgstr "Diese Installation hat kein Sicherungsvolume. Im Produktions-Stack schreibt der Sicherungsdienst jeden Tag einen Datenbank-Dump."
 
 #: templates/manage/system.html:26
 msgid "The backup folder cannot be read."
@@ -7837,24 +7949,24 @@ msgid "No restore points yet."
 msgstr "Noch keine Wiederherstellungspunkte."
 
 #: templates/manage/system.html:29
-msgid "No off-site copy configured."
-msgstr "Keine externe Sicherung eingerichtet."
-
-#: templates/manage/system.html:30
-msgid "Off-site copy"
-msgstr "Externe Sicherung"
-
-#: templates/manage/system.html:31
-msgid "Off-site copy failed"
-msgstr "Externe Sicherung fehlgeschlagen"
-
-#: templates/manage/system.html:32
 msgid "Restore on the server after stopping app, worker, scheduler and caddy:"
 msgstr ""
 "Wiederherstellen auf dem Server, nachdem app, worker, scheduler und caddy "
 "gestoppt wurden:"
 
-#: templates/manage/system.html:35
+#: templates/manage/system.html:32
+msgid "No off-site copy yet."
+msgstr "Noch keine externe Sicherung."
+
+#: templates/manage/system.html:33
+msgid "Off-site copy"
+msgstr "Externe Sicherung"
+
+#: templates/manage/system.html:34
+msgid "Off-site copy failed"
+msgstr "Externe Sicherung fehlgeschlagen"
+
+#: templates/manage/system.html:36
 #, python-format
 msgid ""
 "Uploads are stored in the S3 bucket %(s3_bucket)s; enable versioning there."
@@ -7862,25 +7974,25 @@ msgstr ""
 "Hochgeladene Dateien liegen im S3-Bucket %(s3_bucket)s; aktivieren Sie dort "
 "die Versionierung."
 
-#: templates/manage/system.html:35
+#: templates/manage/system.html:36
 msgid "Uploads are stored in the media volume and archived with every backup."
 msgstr ""
 "Hochgeladene Dateien liegen im Media-Volume und werden mit jeder Sicherung "
 "archiviert."
 
-#: templates/manage/system.html:37
+#: templates/manage/system.html:38
 msgid "Backend"
 msgstr "Backend"
 
-#: templates/manage/system.html:39
+#: templates/manage/system.html:40
 msgid "Sender"
 msgstr "Absender"
 
-#: templates/manage/system.html:41
+#: templates/manage/system.html:42
 msgid "Security configuration"
 msgstr "Sicherheitskonfiguration"
 
-#: templates/manage/system.html:42
+#: templates/manage/system.html:43
 msgid "Set through environment variables, see the deployment guide."
 msgstr "Wird über Umgebungsvariablen gesetzt, siehe Bereitstellungshandbuch."
 
@@ -8502,6 +8614,9 @@ msgstr "Mandant gespeichert."
 #: tenancy/views.py:105
 msgid "Tenant deleted."
 msgstr "Mandant gelöscht."
+
+#~ msgid "The off-site status file cannot be read."
+#~ msgstr "Die Statusdatei der externen Sicherung kann nicht gelesen werden."
 
 #~ msgid "Restoring is done on the server, see the deployment guide."
 #~ msgstr ""
