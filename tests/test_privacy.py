@@ -84,3 +84,21 @@ def test_anonymising_is_limited(make_user, grant, make_tenant, super_admin) -> N
         privacy.anonymise(_request(super_admin), super_admin, super_admin)
     with pytest.raises(PermissionDeniedError):
         privacy.anonymise(_request(admin), admin, super_admin)
+
+
+def test_export_hides_the_devices_of_impersonating_admins(admin_client, make_user) -> None:
+    target = make_user()
+    admin_client.post(
+        f"/manage/users/{target.pk}/impersonate/", {"reason": "Ticket 7"}, secure=True
+    )
+    admin_client.post(
+        "/account/", {"action": "profile", "display_name": "X", "language": "en"}, secure=True
+    )
+    event = AuditEvent.objects.get(action="accounts.user.profile_changed")
+    assert event.actor_id == target.pk and "impersonator" in event.data
+    data = privacy.export(target)
+    exported = next(
+        e for e in data["audit_events"] if e["action"] == "accounts.user.profile_changed"
+    )
+    assert exported["by_administrator_acting_as_you"] and exported["ip_address"] is None
+    assert data["sessions"] == []

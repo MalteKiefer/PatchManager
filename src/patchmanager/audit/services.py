@@ -109,6 +109,10 @@ def record(
         return None
     if actor is None and request is not None and request.user.is_authenticated:
         actor = request.user
+    impersonator = getattr(request, "impersonator", None)
+    if impersonator is not None and getattr(actor, "pk", None) != impersonator.pk:
+        # Acting as someone else: keep who really did it next to whom it counts for.
+        data = {**(data or {}), "impersonator": str(impersonator.pk)}
     with transaction.atomic():
         with connection.cursor() as cursor:
             cursor.execute("SELECT pg_advisory_xact_lock(%s)", [_LOCK_ID])

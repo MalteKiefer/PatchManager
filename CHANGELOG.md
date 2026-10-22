@@ -23,6 +23,8 @@ All notable changes to this project are documented here. The format follows
   everyone) and the audit log recorded the proxy. The client address now comes
   from `X-Forwarded-For` of trusted proxies.
 * Pages for signed in users send `Cache-Control: no-store`.
+* Audit entries written while an administrator acts as another user name the
+  administrator; the personal data export leaves out their devices.
 
 ### Fixed
 

@@ -13,6 +13,7 @@ from django.utils import timezone
 from django.utils.translation import gettext as _
 
 from patchmanager.accounts import policy
+from patchmanager.accounts.middleware import IMPERSONATOR
 from patchmanager.accounts.models import Assignment, Invitation, User, UserSession
 from patchmanager.accounts.services import ServiceError
 from patchmanager.accounts.services.users import require, require_rights_of
@@ -26,6 +27,19 @@ ANONYMOUS = "Anonymised user"
 
 def _when(value: Any) -> str | None:
     return value.isoformat() if value else None
+
+
+def _event(event: AuditEvent) -> dict[str, Any]:
+    """One audit entry; the device data of an impersonating administrator is not theirs."""
+    by_admin = "impersonator" in event.data
+    return {
+        "at": _when(event.occurred_at),
+        "action": event.action,
+        "object": event.object_label,
+        "by_administrator_acting_as_you": by_admin,
+        "ip_address": None if by_admin else event.ip_address,
+        "user_agent": "" if by_admin else event.user_agent,
+    }
 
 
 def export(user: User) -> dict[str, Any]:
@@ -64,6 +78,7 @@ def export(user: User) -> dict[str, Any]:
                     "last_activity": _when(s.last_activity),
                 }
                 for s in UserSession.objects.filter(user=user)
+                if IMPERSONATOR not in s.get_decoded()  # an administrator's device
             ],
             "second_factors": {
                 "totp": [
@@ -100,16 +115,7 @@ def export(user: User) -> dict[str, Any]:
                 {"name": s.name, "query": s.query} for s in user.saved_searches.all()
             ],
             "changes_made": changes,
-            "audit_events": [
-                {
-                    "at": _when(e.occurred_at),
-                    "action": e.action,
-                    "object": e.object_label,
-                    "ip_address": e.ip_address,
-                    "user_agent": e.user_agent,
-                }
-                for e in events
-            ],
+            "audit_events": [_event(e) for e in events],
         }
 
 
