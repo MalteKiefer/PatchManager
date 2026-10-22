@@ -19,9 +19,12 @@
     <a href="?face=front" {% if face == "front" %}aria-current="page"{% endif %}>{% translate "Front" %}</a>
     <a href="?face=rear" {% if face == "rear" %}aria-current="page"{% endif %}>{% translate "Rear" %}</a>
   </nav>
-  <div class="segmented" id="rack-fit">
-    <button type="button" data-fit="width" aria-pressed="true">{% translate "Fill width" %}</button>
-    <button type="button" data-fit="height" aria-pressed="false">{% translate "Whole rack" %}</button>
+  <div class="segmented" id="rack-zoom" role="group" aria-label="{% translate 'Zoom' %}">
+    <button type="button" data-zoom="out" aria-label="{% translate 'Zoom out' %}" title="{% translate 'Zoom out' %} (-)">−</button>
+    <output id="rack-zoom-level" class="px-2 py-2 text-sm tabular-nums" aria-live="polite">100 %</output>
+    <button type="button" data-zoom="in" aria-label="{% translate 'Zoom in' %}" title="{% translate 'Zoom in' %} (+)">+</button>
+    <button type="button" data-zoom="width" title="{% translate 'Fit the width' %} (0)">{% translate "Width" %}</button>
+    <button type="button" data-zoom="height" title="{% translate 'Show everything' %}">{% translate "All" %}</button>
   </div>
   <span class="mr-auto"></span>
   {% if add_url %}<a class="btn-primary" href="{{ add_url }}">{% translate "Mount device" %}</a>{% endif %}
@@ -40,14 +43,19 @@
     <li><span class="legend-dot is-face" aria-hidden="true"></span>{% if face == "front" %}{% translate "continues on the rear" %}{% else %}{% translate "continues on the front" %}{% endif %}</li>
     <li><span class="legend-dot is-rack" aria-hidden="true"></span>{% translate "leaves the rack" %}</li>
   </ul>
-  <div class="rack-scroll">
-    <svg id="rack-elevation" class="rack-svg select-none" viewBox="0 -8 {{ e.width }} {{ e.height|add:16 }}" data-fit="width" role="group"
+  <div class="rack-stage">
+  <div class="rack-scroll" tabindex="0" aria-label="{% translate 'Drawing; use + and - to zoom' %}">
+    <svg id="rack-elevation" class="rack-svg select-none" viewBox="0 -8 {{ e.width }} {{ e.height|add:16 }}" role="group"
          aria-label="{% blocktranslate with name=rack.name %}Elevation of rack {{ name }}{% endblocktranslate %}"
          data-unit-px="76" data-units="{{ rack.u_height }}" data-descending="{% if rack.descending_units %}1{% endif %}" data-face="{{ face }}">
       {% include "dcim/_elevation.html" %}
     </svg>
   </div>
-  <p class="mt-2 text-xs text-slate-500">{% translate "Point at a port or cable to follow its path; select a port to open it." %}{% if can_change %} {% translate "Drag a device, or focus it and use the arrow keys, to move it." %}{% endif %}</p>
+  <aside id="rack-panel" class="rack-panel" aria-live="polite">
+    <p class="text-sm text-slate-500">{% translate "Select a port or device to see its details and the whole path. Double click opens it." %}</p>
+  </aside>
+  </div>
+  <p class="mt-2 text-xs text-slate-500">{% translate "Point at a port to follow its path. Ctrl and the mouse wheel zoom; drag an empty area to move the view." %}{% if can_change %} {% translate "Drag a device, or focus it and use the arrow keys, to move it." %}{% endif %}</p>
   <p id="rack-status" class="mt-2 text-sm text-red-600" role="alert" aria-live="polite"></p>
 </section>
 

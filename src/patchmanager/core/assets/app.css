@@ -87,9 +87,21 @@
 }
 
 /* Rack elevation drawing (dcim/_elevation.html). */
-.rack-scroll { @apply max-h-[85vh] overflow-auto; }
-.rack-svg[data-fit="width"] { width: 100%; height: auto; }
-.rack-svg[data-fit="height"] { display: block; height: 80vh; width: auto; max-width: 100%; margin: 0 auto; }
+.rack-stage { @apply grid gap-4 xl:grid-cols-[minmax(0,1fr)_21rem]; }
+.rack-scroll { @apply h-[78vh] cursor-grab overflow-auto rounded-lg border border-[#dde2e8] bg-[#fbfcfd] dark:border-slate-800 dark:bg-slate-950; }
+.rack-scroll.is-panning { @apply cursor-grabbing select-none; }
+.rack-svg { display: block; width: 100%; height: auto; margin: 0 auto; }
+.rack-panel { @apply rounded-lg border border-[#dde2e8] p-4 xl:sticky xl:top-20 xl:max-h-[78vh] xl:overflow-y-auto dark:border-slate-800; }
+.rack-panel[aria-busy="true"] { @apply opacity-60; }
+.panel-head h2 { @apply mt-0.5 text-xl; }
+.panel-facts { @apply mt-4 grid gap-2 text-sm; }
+.panel-facts > div { @apply grid grid-cols-[7rem_minmax(0,1fr)] gap-2; }
+.panel-facts dt { @apply text-slate-500; }
+.panel-sub { @apply mt-5 mb-2 text-sm font-semibold; }
+.panel-path { @apply relative space-y-2 border-l-2 border-amber-400 pl-3 text-xs; }
+.panel-path > li[aria-current] { @apply font-semibold; }
+.rack-port.is-selected path { stroke: #f59e0b !important; stroke-width: 3.5; }
+.rack-block.is-selected > rect:first-child { @apply stroke-amber-500; stroke-width: 3; }
 .rack-frame { @apply fill-slate-100 stroke-slate-300 dark:fill-slate-900 dark:stroke-slate-700; stroke-width: 2; }
 .rack-unit-line { @apply stroke-slate-200 dark:stroke-slate-800; }
 .rack-unit-number { @apply fill-slate-500 dark:fill-slate-400; font-size: 15px; font-variant-numeric: tabular-nums; }

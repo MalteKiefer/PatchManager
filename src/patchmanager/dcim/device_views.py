@@ -422,3 +422,44 @@ def port_detail(request: HttpRequest, pk: str) -> HttpResponse:
             + [(device, device_url(device))],
         },
     )
+
+
+@login_required
+def port_panel(request: HttpRequest, pk: str) -> HttpResponse:
+    """Side panel of a selected port in a rack drawing: details, cable and the whole path."""
+    from patchmanager.cabling.trace import trace
+    from patchmanager.cabling.views import full_name
+
+    port = get_object_or_404(
+        Port.objects.select_related("device__device_type", "cable_end__cable"), pk=pk
+    )
+    if not policy.has_perm(request.user, "dcim.device.view", port.device):
+        raise Http404
+    hops: list[tuple[Any, str]] = []
+    if policy.has_perm(request.user, "cabling.cable.trace", port.device):
+        for hop in trace(port).ports:
+            visible = policy.has_perm(request.user, "dcim.device.view", hop.device)
+            hops.append((hop if visible else None, full_name(hop) if visible else ""))
+    end = getattr(port, "cable_end", None)
+    return render(
+        request,
+        "dcim/_port_panel.html",
+        {"port": port, "cable": end.cable if end else None, "hops": hops},
+    )
+
+
+@login_required
+def device_panel(request: HttpRequest, pk: str) -> HttpResponse:
+    """Side panel of a selected device in a rack drawing."""
+    device = _device(request, pk)
+    ports = device.ports.all()
+    return render(
+        request,
+        "dcim/_device_panel.html",
+        {
+            "device": device,
+            "port_count": ports.count(),
+            "cabled": ports.filter(cable_end__isnull=False).count(),
+            "space": RackSpace.objects.filter(device=device).first(),
+        },
+    )

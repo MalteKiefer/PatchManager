@@ -1,0 +1,12 @@
+{% load i18n %}<div class="panel-head">
+  <p class="text-sm text-slate-500">{{ device.device_type }}</p>
+  <h2>{{ device.name }}</h2>
+</div>
+<dl class="panel-facts">
+  {% if space %}<div><dt>{% translate "Units" %}</dt><dd>{{ space.start }}{% if space.size > 1 %}–{{ space.end }}{% endif %} ({{ space.get_face_display }})</dd></div>{% endif %}
+  <div><dt>{% translate "Status" %}</dt><dd>{{ device.get_status_display }}</dd></div>
+  <div><dt>{% translate "Ports" %}</dt><dd>{% blocktranslate with cabled=cabled total=port_count %}{{ cabled }} of {{ total }} cabled{% endblocktranslate %}</dd></div>
+  {% if device.serial %}<div><dt>{% translate "Serial number" %}</dt><dd>{{ device.serial }}</dd></div>{% endif %}
+  {% if device.asset_tag %}<div><dt>{% translate "Asset tag" %}</dt><dd>{{ device.asset_tag }}</dd></div>{% endif %}
+</dl>
+<div class="mt-5"><a class="btn-primary" href="{% url 'devices:device' device.pk %}">{% translate "Open device" %}</a></div>

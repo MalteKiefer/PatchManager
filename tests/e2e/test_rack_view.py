@@ -36,8 +36,33 @@ def test_rack_shows_every_port_and_traces_cables(page: Page, live_server, super_
     hot = page.locator("#rack-elevation .is-hot")
     expect(hot).to_have_count(3)  # switch port, panel port and the cord between them
     _shot(page, "rack-hover")
-    page.get_by_role("button", name="Whole rack").click()
-    expect(page.locator("#rack-elevation")).to_have_attribute("data-fit", "height")
+    page.mouse.move(5, 5)
+    # select a port: the path stays marked and the panel shows it
+    port = page.locator("#rack-elevation .rack-port.is-partial").first
+    port.locator("path").first.click()
+    expect(page.locator("#rack-panel")).to_contain_text("Open port")
+    expect(page.locator("#rack-panel .panel-path li")).to_have_count(3)  # switch, panel front, rear
+    page.mouse.move(5, 5)
+    expect(page.locator("#rack-elevation .is-hot")).to_have_count(3)
+    _shot(page, "rack-selected")
+    page.keyboard.press("Escape")
+    expect(page.locator("#rack-elevation .is-hot")).to_have_count(0)
+    # zoom: buttons, Ctrl and wheel, fit everything
+    level = page.locator("#rack-zoom-level")
+    expect(level).to_have_text("100 %")
+    page.get_by_role("button", name="Zoom in").click()
+    expect(level).to_have_text("125 %")
+    stage = page.locator(".rack-scroll")
+    box = stage.bounding_box()
+    assert box is not None
+    page.mouse.move(box["x"] + 300, box["y"] + 200)
+    page.keyboard.down("Control")
+    page.mouse.wheel(0, -100)
+    page.keyboard.up("Control")
+    expect(level).not_to_have_text("125 %")
+    page.get_by_role("button", name="All").click()
+    drawn = page.locator("#rack-elevation").bounding_box()
+    assert drawn is not None and drawn["height"] <= box["height"]
     _shot(page, "rack-whole")
     page.goto(f"{live_server.url}/racks/{rack.pk}/?face=rear")
     expect(page.locator("#rack-elevation .rack-port")).to_have_count(24)  # panel rears

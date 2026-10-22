@@ -16,15 +16,19 @@
     <a href="?face=front" {% if face == "front" %}aria-current="page"{% endif %}>{% translate "Front" %}</a>
     <a href="?face=rear" {% if face == "rear" %}aria-current="page"{% endif %}>{% translate "Rear" %}</a>
   </nav>
-  <div class="segmented" id="rack-fit">
-    <button type="button" data-fit="width" aria-pressed="true">{% translate "Fill width" %}</button>
-    <button type="button" data-fit="height" aria-pressed="false">{% translate "Whole room" %}</button>
+  <div class="segmented" id="rack-zoom" role="group" aria-label="{% translate 'Zoom' %}">
+    <button type="button" data-zoom="out" aria-label="{% translate 'Zoom out' %}" title="{% translate 'Zoom out' %} (-)">−</button>
+    <output id="rack-zoom-level" class="px-2 py-2 text-sm tabular-nums" aria-live="polite">100 %</output>
+    <button type="button" data-zoom="in" aria-label="{% translate 'Zoom in' %}" title="{% translate 'Zoom in' %} (+)">+</button>
+    <button type="button" data-zoom="width" title="{% translate 'Fit the width' %} (0)">{% translate "Width" %}</button>
+    <button type="button" data-zoom="height" title="{% translate 'Show everything' %}">{% translate "All" %}</button>
   </div>
 </div>
 <section class="card p-3 sm:p-4" aria-label="{% translate 'Racks and cables' %}">
   {% if elevations %}
-  <div class="rack-scroll">
-    <svg class="rack-svg select-none" data-fit="width" viewBox="{{ box.x }} {{ box.y }} {{ box.w }} {{ box.h }}" role="group"
+  <div class="rack-stage">
+  <div class="rack-scroll" tabindex="0" aria-label="{% translate 'Drawing; use + and - to zoom' %}">
+    <svg class="rack-svg select-none" viewBox="{{ box.x }} {{ box.y }} {{ box.w }} {{ box.h }}" role="group"
          aria-label="{% blocktranslate with name=room.name %}Racks of {{ name }} with their cables{% endblocktranslate %}">
       {% for e in elevations %}
       <a href="{% url 'dcim:rack' e.rack.pk %}{% if face == 'rear' %}?face=rear{% endif %}"><text x="{{ e.centre_x }}" y="{{ title_y }}" text-anchor="middle" class="rack-title">{{ e.rack.name }}</text></a>
@@ -32,6 +36,10 @@
       {% endfor %}
       {% for w in between %}<path d="{{ w.d }}" stroke="{{ w.colour }}" class="rack-wire is-tray" data-path="{{ w.path_id }}"><title>{{ w.title }}</title></path>{% endfor %}
     </svg>
+  </div>
+  <aside id="rack-panel" class="rack-panel" aria-live="polite">
+    <p class="text-sm text-slate-500">{% translate "Select a port or device to see its details and the whole path. Double click opens it." %}</p>
+  </aside>
   </div>
   <p class="mt-2 text-xs text-slate-500">{% translate "Cables between racks run over the cable tray above them. Point at a port to follow its path." %}</p>
   {% else %}
