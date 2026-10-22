@@ -1,4 +1,4 @@
-"""Read clusters, virtual machines and storage from Proxmox VE, VMware vCenter and Synology.
+"""Read clusters, virtual machines and storage from Proxmox VE, VMware vCenter, Synology and QNAP.
 
 The address comes from the user, so every request goes through :class:`Client`:
 https only, the host is resolved once and every address checked (no loopback,
@@ -9,6 +9,7 @@ size. The certificate is verified, or pinned by its SHA-256 fingerprint for self
 signed certificates. Credentials are used for the one import and never stored.
 """
 
+import base64
 import ipaddress
 import json
 import re
@@ -19,6 +20,7 @@ from typing import Any
 from urllib.parse import quote, urlencode, urlsplit
 
 import urllib3
+from defusedxml import ElementTree as SafeET
 from django.utils.translation import gettext as _
 
 from patchmanager.accounts.services import ServiceError
@@ -130,6 +132,21 @@ class Client:
         body: str | None = None,
     ) -> tuple[int, Any]:
         """Send a request and return the status and the JSON answer."""
+        status, data = self.fetch(method, path, headers=headers, body=body)
+        try:
+            return status, json.loads(data) if data else None
+        except ValueError as exc:
+            raise ServiceError(_("The host did not answer with JSON.")) from exc
+
+    def fetch(
+        self,
+        method: str,
+        path: str,
+        *,
+        headers: dict[str, str] | None = None,
+        body: str | None = None,
+    ) -> tuple[int, bytes]:
+        """Send a request and return the status and the raw answer."""
         self.requests += 1
         if time.monotonic() > self.deadline or self.requests > MAX_REQUESTS:
             raise ServiceError(_("The platform is too large or too slow to read in one go."))
@@ -155,10 +172,7 @@ class Client:
             raise ServiceError(_("The answer is too large."))
         if response.status in (401, 403):
             raise ServiceError(_("The host refused the credentials."))
-        try:
-            return int(response.status), json.loads(data) if data else None
-        except ValueError as exc:
-            raise ServiceError(_("The host did not answer with JSON.")) from exc
+        return int(response.status), data
 
     def get(self, path: str, headers: dict[str, str] | None = None) -> Any:
         """GET JSON, raising on errors."""
@@ -395,4 +409,75 @@ def synology(url: str, username: str, password: str, fingerprint: str = "") -> I
     finally:
         logout = {"api": "SYNO.API.Auth", "version": "6", "method": "logout", "_sid": sid}
         client.request("GET", f"/webapi/entry.cgi?{urlencode(logout)}")
+    return inventory
+
+
+# --- QNAP QTS / QuTS hero -----------------------------------------------------------
+
+
+def _qnap_xml(client: Client, method: str, path: str, body: str | None = None) -> Any:
+    headers = {"Content-Type": "application/x-www-form-urlencoded"} if body else None
+    status, data = client.fetch(method, path, headers=headers, body=body)
+    if status != 200:
+        raise ServiceError(_("The host answered with an error (%(status)s).") % {"status": status})
+    try:
+        return SafeET.fromstring(data)
+    except (SafeET.ParseError, ValueError) as exc:
+        raise ServiceError(_("The host did not answer with XML.")) from exc
+
+
+def _text(node: Any, tag: str) -> str:
+    return (node.findtext(tag) or "").strip()
+
+
+def _bytes_gb(value: str) -> int | None:
+    return _gb(int(value), 1024**3) if value.isdigit() else None
+
+
+def qnap(url: str, username: str, password: str, fingerprint: str = "") -> Inventory:
+    """Volumes and shared folders of a QNAP NAS (QTS 4.x/5.x, QuTS hero)."""
+    client = Client(url, fingerprint)
+    # QTS expects the password base64 encoded; sent in the body, not the URL.
+    secret = base64.b64encode(password.encode()).decode()
+    login = _qnap_xml(
+        client,
+        "POST",
+        "/cgi-bin/authLogin.cgi",
+        urlencode({"user": username, "pwd": secret, "serviceKey": "1"}),
+    )
+    sid = _text(login, "authSid")
+    if _text(login, "authPassed") != "1" or not sid:
+        raise ServiceError(
+            _("The host refused the credentials (accounts with two step sign in cannot be used).")
+        )
+    inventory = Inventory("qnap")
+    try:
+        query = urlencode(
+            {"chart_func": "disk_usage", "disk_select": "all", "include": "all", "sid": sid}
+        )
+        usage = _qnap_xml(client, "GET", f"/cgi-bin/management/chartReq.cgi?{query}")
+        labels = {
+            _text(v, "volumeValue"): _text(v, "volumeLabel")
+            for v in usage.iterfind("volumeList/volume")
+        }
+        for use in usage.iterfind("volumeUseList/volumeUse"):
+            index = _text(use, "volumeValue")
+            name = (labels.get(index) or f"Volume {index}")[:150]
+            total = _bytes_gb(_text(use, "total_size"))
+            free = _bytes_gb(_text(use, "free_size"))
+            used = total - free if total is not None and free is not None else None
+            inventory.storage.append(Storage(name, "volume", total, used))
+            for folder in use.iterfind("folder_element"):
+                share = _text(folder, "sharename")[:150]
+                if share:
+                    inventory.storage.append(
+                        Storage(
+                            share,
+                            "smb",
+                            used_gb=_bytes_gb(_text(folder, "used_size")),
+                            target=name[:300],
+                        )
+                    )
+    finally:
+        client.fetch("GET", f"/cgi-bin/authLogout.cgi?{urlencode({'sid': sid})}")
     return inventory

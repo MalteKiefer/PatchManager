@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-22 10:03+0000\n"
+"POT-Creation-Date: 2026-10-22 10:31+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -1232,58 +1232,58 @@ msgstr "%(vm)s: Festplatte %(disk)s wurde ausgelassen."
 msgid "Platform"
 msgstr "Plattform"
 
-#: compute/importing.py:267 exchange/pdf.py:162 ipam/pages.py:148
+#: compute/importing.py:268 exchange/pdf.py:162 ipam/pages.py:148
 #: templates/accounts/security.html:50 templates/compute/connection.html:18
 #: templates/ipam/addresses.html:10 templates/ipam/prefix.html:24
 #: templates/manage/audit.html:18 templates/networks/switching.html:28
 msgid "Address"
 msgstr "Adresse"
 
-#: compute/importing.py:269
+#: compute/importing.py:270
 msgid ""
 "For example https://pve.example.lan:8006 or https://vcenter.example.lan."
 msgstr ""
 "Zum Beispiel https://pve.example.lan:8006 oder https://vcenter.example.lan."
 
-#: compute/importing.py:273
+#: compute/importing.py:274
 msgid "API token (Proxmox)"
 msgstr "API-Token (Proxmox)"
 
-#: compute/importing.py:276
+#: compute/importing.py:277
 msgid "user@realm!tokenid=secret, with read rights (PVEAuditor)."
 msgstr "user@realm!tokenid=secret, mit Leserechten (PVEAuditor)."
 
-#: compute/importing.py:279
-msgid "User (vCenter, Synology)"
-msgstr "Benutzer (vCenter, Synology)"
+#: compute/importing.py:280
+msgid "User (vCenter, NAS)"
+msgstr "Benutzer (vCenter, NAS)"
 
-#: compute/importing.py:282
-msgid "Password (vCenter, Synology)"
-msgstr "Passwort (vCenter, Synology)"
+#: compute/importing.py:283
+msgid "Password (vCenter, NAS)"
+msgstr "Passwort (vCenter, NAS)"
 
-#: compute/importing.py:287
+#: compute/importing.py:288
 msgid "Certificate fingerprint (SHA-256)"
 msgstr "Zertifikats-Fingerabdruck (SHA-256)"
 
-#: compute/importing.py:291
+#: compute/importing.py:292
 msgid ""
 "Only for self signed certificates; otherwise the certificate is verified."
 msgstr ""
 "Nur für selbstsignierte Zertifikate; sonst wird das Zertifikat geprüft."
 
-#: compute/importing.py:295
-msgid "NAS device (Synology)"
-msgstr "NAS-Gerät (Synology)"
+#: compute/importing.py:296
+msgid "NAS device (Synology, QNAP)"
+msgstr "NAS-Gerät (Synology, QNAP)"
 
-#: compute/importing.py:311
+#: compute/importing.py:312
 msgid "Enter the API token."
 msgstr "Geben Sie das API-Token ein."
 
-#: compute/importing.py:315
+#: compute/importing.py:316
 msgid "Enter user and password."
 msgstr "Geben Sie Benutzer und Passwort ein."
 
-#: compute/importing.py:317
+#: compute/importing.py:318
 msgid "Choose the NAS device the storage belongs to."
 msgstr "Wählen Sie das NAS-Gerät, zu dem der Speicher gehört."
 
@@ -1303,75 +1303,82 @@ msgstr "Von einer Plattform importieren"
 #: compute/importing.py:370
 msgid ""
 "Reads clusters, hosts, virtual machines and storage from Proxmox VE and "
-"VMware vCenter, or volumes and shares from a Synology NAS. Credentials are "
-"used once and not stored; give an account with read rights only."
-msgstr ""
-"Liest Cluster, Hosts, virtuelle Maschinen und Speicher aus Proxmox VE und "
-"VMware vCenter, oder Volumes und Freigaben eines Synology-NAS. Zugangsdaten "
-"werden einmal verwendet und nicht gespeichert; verwenden Sie ein Konto nur "
-"mit Leserechten."
+"VMware vCenter, or volumes and shares from a Synology or QNAP NAS. "
+"Credentials are used once and not stored; give an account with read rights "
+"only."
+msgstr "Liest Cluster, Hosts, virtuelle Maschinen und Speicher aus Proxmox VE und VMware vCenter, oder Volumes und Freigaben eines Synology- oder QNAP-NAS. Zugangsdaten werden einmal verwendet und nicht gespeichert; verwenden Sie ein Konto nur mit Leserechten."
 
 #: compute/importing.py:376 ipam/pages.py:387 templates/exchange/index.html:7
 #: templates/library/types.html:30 templates/manage/roles.html:21
 msgid "Import"
 msgstr "Importieren"
 
-#: compute/inventory.py:92
+#: compute/inventory.py:94
 msgid "Enter an https address without credentials."
 msgstr "Geben Sie eine https-Adresse ohne Zugangsdaten ein."
 
-#: compute/inventory.py:96 integrations/http.py:66
+#: compute/inventory.py:98 integrations/http.py:66
 msgid "Enter a valid port."
 msgstr "Geben Sie einen gültigen Port ein."
 
-#: compute/inventory.py:101 integrations/http.py:70
+#: compute/inventory.py:103 integrations/http.py:70
 msgid "The host cannot be resolved."
 msgstr "Der Host kann nicht aufgelöst werden."
 
-#: compute/inventory.py:104
+#: compute/inventory.py:106
 msgid "This address cannot be used."
 msgstr "Diese Adresse kann nicht verwendet werden."
 
-#: compute/inventory.py:108
+#: compute/inventory.py:110
 msgid "Enter the SHA-256 fingerprint of the certificate."
 msgstr "Geben Sie den SHA-256-Fingerabdruck des Zertifikats ein."
 
-#: compute/inventory.py:135
+#: compute/inventory.py:139
+msgid "The host did not answer with JSON."
+msgstr "Der Host hat nicht mit JSON geantwortet."
+
+#: compute/inventory.py:152
 msgid "The platform is too large or too slow to read in one go."
 msgstr ""
 "Die Plattform ist zu groß oder zu langsam, um sie in einem Durchgang zu "
 "lesen."
 
-#: compute/inventory.py:150
+#: compute/inventory.py:167
 msgid "The certificate could not be verified; enter its fingerprint."
 msgstr ""
 "Das Zertifikat konnte nicht geprüft werden; geben Sie seinen Fingerabdruck "
 "ein."
 
-#: compute/inventory.py:153
+#: compute/inventory.py:170
 msgid "The host could not be reached."
 msgstr "Der Host ist nicht erreichbar."
 
-#: compute/inventory.py:155
+#: compute/inventory.py:172
 msgid "The answer is too large."
 msgstr "Die Antwort ist zu groß."
 
-#: compute/inventory.py:157 compute/inventory.py:268 compute/inventory.py:356
+#: compute/inventory.py:174 compute/inventory.py:282 compute/inventory.py:370
 msgid "The host refused the credentials."
 msgstr "Der Host hat die Zugangsdaten abgelehnt."
 
-#: compute/inventory.py:161
-msgid "The host did not answer with JSON."
-msgstr "Der Host hat nicht mit JSON geantwortet."
-
-#: compute/inventory.py:168
+#: compute/inventory.py:182 compute/inventory.py:422
 #, python-format
 msgid "The host answered with an error (%(status)s)."
 msgstr "Der Host hat mit einem Fehler geantwortet (%(status)s)."
 
-#: compute/inventory.py:197
+#: compute/inventory.py:211
 msgid "Enter the API token as user@realm!tokenid=secret."
 msgstr "Geben Sie das API-Token als user@realm!tokenid=secret ein."
+
+#: compute/inventory.py:426
+msgid "The host did not answer with XML."
+msgstr "Der Host hat nicht mit XML geantwortet."
+
+#: compute/inventory.py:451
+msgid ""
+"The host refused the credentials (accounts with two step sign in cannot be "
+"used)."
+msgstr "Der Host hat die Zugangsdaten abgelehnt (Konten mit zweistufiger Anmeldung können nicht verwendet werden)."
 
 #: compute/models.py:39 compute/models.py:300
 msgid "platform"
@@ -7600,17 +7607,23 @@ msgstr "Externe Sicherung fehlgeschlagen"
 
 #: templates/manage/system.html:32
 msgid "Restore on the server after stopping app, worker, scheduler and caddy:"
-msgstr "Wiederherstellen auf dem Server, nachdem app, worker, scheduler und caddy gestoppt wurden:"
+msgstr ""
+"Wiederherstellen auf dem Server, nachdem app, worker, scheduler und caddy "
+"gestoppt wurden:"
 
 #: templates/manage/system.html:34
 #, python-format
 msgid ""
 "Uploads are stored in the S3 bucket %(s3_bucket)s; enable versioning there."
-msgstr "Hochgeladene Dateien liegen im S3-Bucket %(s3_bucket)s; aktivieren Sie dort die Versionierung."
+msgstr ""
+"Hochgeladene Dateien liegen im S3-Bucket %(s3_bucket)s; aktivieren Sie dort "
+"die Versionierung."
 
 #: templates/manage/system.html:34
 msgid "Uploads are stored in the media volume and archived with every backup."
-msgstr "Hochgeladene Dateien liegen im Media-Volume und werden mit jeder Sicherung archiviert."
+msgstr ""
+"Hochgeladene Dateien liegen im Media-Volume und werden mit jeder Sicherung "
+"archiviert."
 
 #: templates/manage/system.html:35
 msgid "Mail"
