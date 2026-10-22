@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-22 08:04+0000\n"
+"POT-Creation-Date: 2026-10-22 08:27+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -879,7 +879,7 @@ msgid "These ports cannot be connected."
 msgstr "Diese Ports können nicht verbunden werden."
 
 #: cabling/views.py:43 templates/accounts/security.html:50
-#: templates/networks/switching.html:58
+#: templates/dcim/place_here.html:11 templates/networks/switching.html:58
 msgid "Device"
 msgstr "Gerät"
 
@@ -897,8 +897,8 @@ msgstr "Verbunden."
 msgid "Cable removed."
 msgstr "Kabel entfernt."
 
-#: cabling/views.py:152 core/lists.py:207 dcim/device_views.py:354
-#: dcim/device_views.py:431 dcim/views.py:64 ipam/views.py:231
+#: cabling/views.py:152 core/lists.py:207 dcim/device_views.py:356
+#: dcim/device_views.py:433 dcim/views.py:64 ipam/views.py:231
 #: ipam/views.py:370 ipam/views.py:454 library/views.py:269
 #: locations/views.py:190 locations/views.py:293 networks/views.py:139
 #: networks/views.py:394
@@ -1048,7 +1048,7 @@ msgstr "Dieser Eintrag ist der Standard und kann nicht gelöscht werden."
 msgid "This entry is in use and cannot be deleted."
 msgstr "Dieser Eintrag wird verwendet und kann nicht gelöscht werden."
 
-#: core/lists.py:203 dcim/device_views.py:372 dcim/views.py:69
+#: core/lists.py:203 dcim/device_views.py:374 dcim/views.py:69
 #: ipam/views.py:225 ipam/views.py:360 ipam/views.py:448 library/views.py:294
 #: locations/views.py:298 locations/views.py:423 networks/views.py:135
 msgid "Deleted."
@@ -1159,77 +1159,92 @@ msgstr "Die E-Mail konnte nicht gesendet werden: %(error)s"
 msgid "A test mail was sent to %(email)s."
 msgstr "Eine Testmail wurde an %(email)s gesendet."
 
-#: dcim/device_views.py:59
+#: dcim/device_views.py:61
 msgid "Device type"
 msgstr "Gerätetyp"
 
-#: dcim/device_views.py:61 dcim/device_views.py:88 dcim/views.py:32
+#: dcim/device_views.py:63 dcim/device_views.py:90 dcim/views.py:32
+#: templates/dcim/place_here.html:19
 msgid "Lowest unit"
 msgstr "Unterste Höheneinheit"
 
-#: dcim/device_views.py:63 dcim/device_views.py:90 dcim/views.py:35
+#: dcim/device_views.py:65 dcim/device_views.py:92 dcim/views.py:35
 msgid "Face"
 msgstr "Seite"
 
-#: dcim/device_views.py:64 dcim/device_views.py:91 dcim/models.py:106
+#: dcim/device_views.py:66 dcim/device_views.py:93 dcim/models.py:106
 msgid "front"
 msgstr "Vorderseite"
 
-#: dcim/device_views.py:64 dcim/device_views.py:91 dcim/models.py:107
+#: dcim/device_views.py:66 dcim/device_views.py:93 dcim/models.py:107
 msgid "rear"
 msgstr "Rückseite"
 
-#: dcim/device_views.py:76
+#: dcim/device_views.py:78
 msgid "Leave empty to use the type's naming convention."
 msgstr "Leer lassen, um die Namenskonvention des Typs zu verwenden."
 
-#: dcim/device_views.py:84 exchange/pdf.py:199
+#: dcim/device_views.py:86 exchange/pdf.py:199
 #: templates/floorplans/_item_panel.html:7
 msgid "Room"
 msgstr "Raum"
 
-#: dcim/device_views.py:86 templates/floorplans/_item_panel.html:3
+#: dcim/device_views.py:88 templates/floorplans/_item_panel.html:3
 #: templates/locations/node.html:23
 msgid "Rack"
 msgstr "Rack"
 
-#: dcim/device_views.py:143 dcim/models.py:250
+#: dcim/device_views.py:145 dcim/models.py:250
 msgid "VLAN mode"
 msgstr "VLAN-Modus"
 
-#: dcim/device_views.py:145 dcim/models.py:253
+#: dcim/device_views.py:147 dcim/models.py:253
 msgid "access"
 msgstr "Access"
 
-#: dcim/device_views.py:145 dcim/models.py:253 templates/dcim/device.html:22
+#: dcim/device_views.py:147 dcim/models.py:253 templates/dcim/device.html:22
 msgid "trunk"
 msgstr "Trunk"
 
-#: dcim/device_views.py:148
+#: dcim/device_views.py:150
 msgid "Untagged / native VLAN"
 msgstr "Untagged / natives VLAN"
 
-#: dcim/device_views.py:151
+#: dcim/device_views.py:153
 msgid "Tagged VLANs"
 msgstr "Getaggte VLANs"
 
-#: dcim/device_views.py:273
+#: dcim/device_views.py:275
 #, python-format
 msgid "Device created with %(n)s ports."
 msgstr "Gerät mit %(n)s Ports angelegt."
 
-#: dcim/device_views.py:320
+#: dcim/device_views.py:322
 #, python-format
 msgid "New port on %(device)s"
 msgstr "Neuer Port an %(device)s"
 
-#: dcim/device_views.py:367
+#: dcim/device_views.py:369
 msgid "Device moved."
 msgstr "Gerät verschoben."
 
-#: dcim/device_views.py:445
+#: dcim/device_views.py:447
 msgid "VLANs saved."
 msgstr "VLANs gespeichert."
+
+#: dcim/device_views.py:572
+#, python-format
+msgid "%(device)s placed in %(rack)s."
+msgstr "%(device)s in %(rack)s eingebaut."
+
+#: dcim/device_views.py:581 floorplans/views.py:50
+msgid "Upload a plan first."
+msgstr "Laden Sie zuerst einen Grundriss hoch."
+
+#: dcim/device_views.py:583
+#, python-format
+msgid "%(device)s placed on the plan."
+msgstr "%(device)s im Grundriss platziert."
 
 #: dcim/devices.py:71 dcim/devices.py:77
 msgid "A device with this name already exists in this tenant."
@@ -1585,7 +1600,8 @@ msgid "VID"
 msgstr "VID"
 
 #: exchange/pdf.py:215 templates/dcim/_device_panel.html:7
-#: templates/dcim/rack.html:66 templates/floorplans/_item_panel.html:8
+#: templates/dcim/place_here.html:11 templates/dcim/rack.html:66
+#: templates/floorplans/_item_panel.html:8
 #: templates/integrations/webhook.html:23 templates/ipam/addresses.html:10
 #: templates/ipam/prefix.html:24 templates/ipam/prefixes.html:8
 #: templates/locations/node.html:23 templates/locations/node.html:42
@@ -1911,10 +1927,6 @@ msgstr "Nur Raumgeräte dieser Etage können auf dem Grundriss platziert werden.
 #: floorplans/views.py:32
 msgid "Plan (JPEG, PNG, WebP, GIF or PDF)"
 msgstr "Grundriss (JPEG, PNG, WebP, GIF oder PDF)"
-
-#: floorplans/views.py:50
-msgid "Upload a plan first."
-msgstr "Laden Sie zuerst einen Grundriss hoch."
 
 #: floorplans/views.py:255 metadata/views.py:59
 msgid "Choose a file to upload."
@@ -3398,9 +3410,9 @@ msgstr "Diese Anmeldemethode ist deaktiviert."
 msgid "Identifier"
 msgstr "Kennung"
 
-#: sso/views.py:189 templates/history/activity.html:7
-#: templates/manage/roles.html:11 templates/search/results.html:7
-#: templates/sso/providers.html:7
+#: sso/views.py:189 templates/dcim/place_here.html:11
+#: templates/history/activity.html:7 templates/manage/roles.html:11
+#: templates/search/results.html:7 templates/sso/providers.html:7
 msgid "Type"
 msgstr "Typ"
 
@@ -4510,6 +4522,44 @@ msgstr ""
 msgid "New device type"
 msgstr "Neuer Gerätetyp"
 
+#: templates/dcim/place_here.html:2 templates/dcim/place_here.html:4
+msgid "Place a device"
+msgstr "Gerät platzieren"
+
+#: templates/dcim/place_here.html:6
+#, python-format
+msgid "Place a device in %(rack)s"
+msgstr "Gerät in %(rack)s platzieren"
+
+#: templates/dcim/place_here.html:6
+#, python-format
+msgid "Place a device in %(room)s"
+msgstr "Gerät in %(room)s platzieren"
+
+#: templates/dcim/place_here.html:7
+msgid "Create a new device"
+msgstr "Neues Gerät anlegen"
+
+#: templates/dcim/place_here.html:9
+msgid ""
+"These devices of the room are not mounted in a rack yet. Choose one to mount "
+"it here, or create a new device."
+msgstr "Diese Geräte des Raums sind noch in keinem Rack eingebaut. Wählen Sie eines, um es hier einzubauen, oder legen Sie ein neues Gerät an."
+
+#: templates/dcim/place_here.html:9
+msgid ""
+"These devices of the room are not on the floor plan yet. Choose one to put "
+"it where you clicked, or create a new device."
+msgstr "Diese Geräte des Raums sind noch nicht im Grundriss. Wählen Sie eines, um es an die geklickte Stelle zu setzen, oder legen Sie ein neues Gerät an."
+
+#: templates/dcim/place_here.html:21
+msgid "Mount here"
+msgstr "Hier einbauen"
+
+#: templates/dcim/place_here.html:21
+msgid "Place here"
+msgstr "Hier platzieren"
+
 #: templates/dcim/port.html:9
 msgid "Front ports on this rear port"
 msgstr "Frontports an diesem Rückport"
@@ -5013,7 +5063,9 @@ msgstr "Ausgewähltes Element"
 
 #: templates/floorplans/editor.html:58
 msgid "Click a pin to see what is there and where it is patched."
-msgstr "Klicken Sie auf eine Nadel, um zu sehen, was dort ist und wohin es gepatcht ist."
+msgstr ""
+"Klicken Sie auf eine Nadel, um zu sehen, was dort ist und wohin es gepatcht "
+"ist."
 
 #: templates/floorplans/editor.html:60
 msgid "patch cable"

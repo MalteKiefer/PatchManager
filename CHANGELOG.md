@@ -8,6 +8,8 @@ All notable changes to this project are documented here. The format follows
 
 ### Added
 
+* "Add device here" on a free rack unit or on the floor plan also offers the room's
+  devices that have no place yet (not in a rack, or not on the plan).
 * Switching and routing per device: link aggregations, spanning tree (with MST
   instances), VLAN interfaces with addresses, static routes, OSPF, BGP neighbors,
   tunnelled ports, device profiles, and a port matrix coloured by VLAN (ADR 0029).

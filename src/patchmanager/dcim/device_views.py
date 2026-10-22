@@ -2,6 +2,7 @@
 
 import math
 from typing import Any
+from urllib.parse import urlencode
 
 from django import forms
 from django.contrib import messages
@@ -10,6 +11,7 @@ from django.core.exceptions import PermissionDenied
 from django.db.models import Prefetch
 from django.http import Http404, HttpRequest, HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
+from django.urls import reverse
 from django.utils.translation import gettext as _
 from django.utils.translation import gettext_lazy
 from django.views.decorators.http import require_http_methods
@@ -514,5 +516,90 @@ def device_panel(request: HttpRequest, pk: str) -> HttpResponse:
             "port_count": ports.count(),
             "cabled": ports.filter(cable_end__isnull=False).count(),
             "space": RackSpace.objects.filter(device=device).first(),
+        },
+    )
+
+
+@login_required
+@require_http_methods(["GET", "POST"])
+def device_place_here(request: HttpRequest) -> HttpResponse:
+    """Put an unplaced device of the room at a rack position or a floor plan point.
+
+    Lists the room's devices that have no place yet (outside racks, or not yet on the
+    plan); with none, it goes straight to creating a new device.
+    """
+    params = request.POST if request.method == "POST" else request.GET
+    rack_id, room_id = parse_uuid(params.get("rack")), parse_uuid(params.get("room"))
+    rack = Rack.objects.filter(pk=rack_id).select_related("room").first() if rack_id else None
+    room = rack.room if rack else Room.objects.filter(pk=room_id).first() if room_id else None
+    if room is None or not policy.has_perm(request.user, "dcim.device.view", room):
+        raise Http404
+    spot = None if rack else _plan_point(params)
+    position = params.get("position", "")
+    face = "rear" if params.get("face") == "rear" else "front"
+    query: dict[str, Any] = {"rack": rack.pk} if rack else {"room": room.pk}
+    if rack and position.isdigit():
+        query.update({"position": position, "face": face})
+    if spot:
+        query.update({"plan_x": spot[0], "plan_y": spot[1]})
+    create_url = f"{reverse('devices:device-create')}?{urlencode(query)}"
+    actor = _actor(request)
+    unplaced = Device.objects.filter(room=room, rack__isnull=True).select_related("device_type")
+    if rack:
+        unplaced = unplaced.filter(device_type__form="rack")
+    elif spot:
+        unplaced = unplaced.filter(plan_x__isnull=True)
+    candidates = [
+        d for d in unplaced.order_by("name") if policy.has_perm(actor, "dcim.device.change", d)
+    ]
+    if request.method == "POST":
+        device = next((d for d in candidates if str(d.pk) == params.get("device")), None)
+        if device is None:
+            raise Http404
+        try:
+            if rack:
+                devices.place(
+                    request,
+                    actor,
+                    device,
+                    room=room,
+                    rack=rack,
+                    position=int(position) if position.isdigit() else None,
+                    face=face,
+                )
+                messages.success(
+                    request,
+                    _("%(device)s placed in %(rack)s.")
+                    % {"device": device.name, "rack": rack.name},
+                )
+                return redirect("dcim:rack", rack.pk)
+            from patchmanager.floorplans import services as plans
+            from patchmanager.floorplans.models import FloorPlan
+
+            plan = FloorPlan.objects.filter(floor=room.floor).first()
+            if plan is None or spot is None:
+                raise ServiceError(_("Upload a plan first."))
+            plans.place(request, actor, plan, device, list(spot))
+            messages.success(request, _("%(device)s placed on the plan.") % {"device": device.name})
+            return redirect("floorplans:editor", room.floor_id)
+        except PermissionDeniedError as exc:
+            raise PermissionDenied from exc
+        except ServiceError as exc:
+            messages.error(request, str(exc))
+    elif not candidates:
+        return redirect(create_url)
+    return render(
+        request,
+        "dcim/place_here.html",
+        {
+            "room": room,
+            "rack": rack,
+            "position": position,
+            "face": face,
+            "spot": spot,
+            "candidates": candidates,
+            "create_url": create_url,
+            "can_add": policy.has_perm(actor, "dcim.device.add", rack or room),
+            "breadcrumbs": [(a, node_url(a)) for a in [*room.ancestors(), room]],
         },
     )

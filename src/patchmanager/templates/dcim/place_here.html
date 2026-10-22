@@ -1,0 +1,25 @@
+{% extends "base.html" %}{% load i18n %}
+{% block title %}{% translate "Place a device" %}{% endblock %}
+{% block content %}
+{% include "core/_breadcrumbs.html" with current=_("Place a device") %}
+<div class="mb-2 flex flex-wrap items-center gap-3">
+  <h1 class="mr-auto">{% if rack %}{% blocktranslate with rack=rack.name %}Place a device in {{ rack }}{% endblocktranslate %}{% if position %} · U{{ position }}{% endif %}{% else %}{% blocktranslate with room=room.name %}Place a device in {{ room }}{% endblocktranslate %}{% endif %}</h1>
+  {% if can_add %}<a class="btn-primary" href="{{ create_url }}">{% translate "Create a new device" %}</a>{% endif %}
+</div>
+<p class="mb-6 max-w-3xl text-sm text-slate-500">{% if rack %}{% translate "These devices of the room are not mounted in a rack yet. Choose one to mount it here, or create a new device." %}{% else %}{% translate "These devices of the room are not on the floor plan yet. Choose one to put it where you clicked, or create a new device." %}{% endif %}</p>
+<div class="card overflow-x-auto p-0"><table class="table">
+  <thead><tr><th>{% translate "Device" %}</th><th>{% translate "Type" %}</th><th>{% translate "Status" %}</th><th></th></tr></thead>
+  <tbody>{% for d in candidates %}<tr>
+    <td><a href="{% url 'devices:device' d.pk %}">{{ d.name }}</a></td>
+    <td class="text-sm">{{ d.device_type }}{% if rack %} · {{ d.device_type.u_height }} U{% endif %}</td>
+    <td class="text-sm">{{ d.get_status_display }}</td>
+    <td class="text-right"><form method="post" class="inline-flex items-center gap-2">{% csrf_token %}
+      <input type="hidden" name="device" value="{{ d.pk }}">
+      {% if rack %}<input type="hidden" name="rack" value="{{ rack.pk }}"><input type="hidden" name="face" value="{{ face }}">
+        {% if position %}<input type="hidden" name="position" value="{{ position }}">{% else %}<label class="sr-only" for="pos-{{ d.pk }}">{% translate "Lowest unit" %}</label><input id="pos-{{ d.pk }}" name="position" type="number" min="1" max="{{ rack.u_height }}" required class="w-20 rounded border border-slate-300 px-2 py-1 text-sm dark:border-slate-700 dark:bg-slate-800" placeholder="U">{% endif %}
+      {% else %}<input type="hidden" name="room" value="{{ room.pk }}"><input type="hidden" name="plan_x" value="{{ spot.0 }}"><input type="hidden" name="plan_y" value="{{ spot.1 }}">{% endif %}
+      <button class="btn-secondary py-1">{% if rack %}{% translate "Mount here" %}{% else %}{% translate "Place here" %}{% endif %}</button>
+    </form></td>
+  </tr>{% endfor %}</tbody>
+</table></div>
+{% endblock %}
