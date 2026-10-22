@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-22 02:03+0000\n"
+"POT-Creation-Date: 2026-10-22 02:20+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -63,7 +63,7 @@ msgstr "Die Passwörter stimmen nicht überein."
 msgid "Current password"
 msgstr "Aktuelles Passwort"
 
-#: accounts/forms.py:103 accounts/views/account.py:98
+#: accounts/forms.py:103 accounts/views/account.py:101
 #: templates/accounts/security.html:21 templates/accounts/security.html:31
 msgid "Authenticator app"
 msgstr "Authenticator-App"
@@ -298,7 +298,7 @@ msgstr ""
 "Die Sicherheitsschlüssel-Anfrage ist abgelaufen. Versuchen Sie es erneut."
 
 #: accounts/services/mfa.py:182 accounts/services/mfa.py:235
-#: accounts/services/mfa.py:255 accounts/views/account.py:136
+#: accounts/services/mfa.py:255 accounts/views/account.py:139
 #: accounts/views/auth.py:132
 msgid "The security key could not be verified."
 msgstr "Der Sicherheitsschlüssel konnte nicht überprüft werden."
@@ -314,6 +314,14 @@ msgstr "Dieser Sicherheitsschlüssel ist nicht registriert."
 #: accounts/services/mfa.py:267
 msgid "Factor not found."
 msgstr "Faktor nicht gefunden."
+
+#: accounts/services/privacy.py:124
+msgid "You cannot anonymise your own account."
+msgstr "Sie können Ihr eigenes Konto nicht anonymisieren."
+
+#: accounts/services/privacy.py:126
+msgid "Delete the API client instead."
+msgstr "Löschen Sie stattdessen den API-Client."
 
 #: accounts/services/rbac.py:32
 #, python-format
@@ -438,33 +446,33 @@ msgstr "Als dieser Benutzer kann nicht gehandelt werden."
 msgid "Inactive or locked users cannot be impersonated."
 msgstr "Als inaktiver oder gesperrter Benutzer kann nicht gehandelt werden."
 
-#: accounts/views/account.py:44
+#: accounts/views/account.py:47
 msgid "Profile saved."
 msgstr "Profil gespeichert."
 
-#: accounts/views/account.py:63
+#: accounts/views/account.py:66
 msgid "Password changed. Other sessions were signed out."
 msgstr "Passwort geändert. Andere Sitzungen wurden abgemeldet."
 
-#: accounts/views/account.py:113
+#: accounts/views/account.py:116
 msgid "Authenticator app added."
 msgstr "Authenticator-App hinzugefügt."
 
-#: accounts/views/account.py:115
+#: accounts/views/account.py:118
 msgid "That code did not match. Scan the code again and retry."
 msgstr ""
 "Der Code stimmte nicht überein. Scannen Sie den Code erneut und versuchen "
 "Sie es noch einmal."
 
-#: accounts/views/account.py:138
+#: accounts/views/account.py:141
 msgid "Security key added."
 msgstr "Sicherheitsschlüssel hinzugefügt."
 
-#: accounts/views/account.py:148
+#: accounts/views/account.py:151
 msgid "Add a second factor first."
 msgstr "Fügen Sie zuerst einen zweiten Faktor hinzu."
 
-#: accounts/views/account.py:163
+#: accounts/views/account.py:166
 msgid ""
 "MFA is required for your account. Add another factor before removing this "
 "one."
@@ -472,14 +480,18 @@ msgstr ""
 "Für Ihr Konto ist MFA erforderlich. Fügen Sie einen weiteren Faktor hinzu, "
 "bevor Sie diesen entfernen."
 
-#: accounts/views/account.py:171
+#: accounts/views/account.py:174
 msgid "Factor removed."
 msgstr "Faktor entfernt."
 
-#: accounts/views/account.py:191
+#: accounts/views/account.py:194
 #, python-format
 msgid "%(count)s other sessions were signed out."
 msgstr "%(count)s andere Sitzungen wurden abgemeldet."
+
+#: accounts/views/account.py:211
+msgid "Not available while acting as another user."
+msgstr "Nicht verfügbar, solange Sie als anderer Benutzer handeln."
 
 #: accounts/views/auth.py:84
 msgid "Please sign in again."
@@ -529,95 +541,99 @@ msgstr "Ihr Passwort wurde festgelegt. Bitte melden Sie sich an."
 msgid "Invitation sent to %(email)s."
 msgstr "Einladung an %(email)s gesendet."
 
-#: accounts/views/manage.py:182
+#: accounts/views/manage.py:183
 msgid "Account locked."
 msgstr "Konto gesperrt."
 
-#: accounts/views/manage.py:186
+#: accounts/views/manage.py:187
 msgid "Account unlocked."
 msgstr "Konto entsperrt."
 
-#: accounts/views/manage.py:190
+#: accounts/views/manage.py:191
 msgid "Account deactivated."
 msgstr "Konto deaktiviert."
 
-#: accounts/views/manage.py:194
+#: accounts/views/manage.py:195
 msgid "Account reactivated."
 msgstr "Konto reaktiviert."
 
-#: accounts/views/manage.py:198
+#: accounts/views/manage.py:199
 msgid "Second factors removed."
 msgstr "Zweite Faktoren entfernt."
 
-#: accounts/views/manage.py:202
+#: accounts/views/manage.py:203
 msgid "Sessions signed out."
 msgstr "Sitzungen abgemeldet."
 
-#: accounts/views/manage.py:206
+#: accounts/views/manage.py:207
 msgid "This account may now sign in with its password where SSO is enforced."
 msgstr ""
 "Dieses Konto darf sich jetzt auch dort mit Passwort anmelden, wo SSO "
 "erzwungen wird."
 
-#: accounts/views/manage.py:210
+#: accounts/views/manage.py:211
+msgid "The account was anonymised."
+msgstr "Das Konto wurde anonymisiert."
+
+#: accounts/views/manage.py:215
 msgid "This account now follows the SSO rules of its domain."
 msgstr "Dieses Konto folgt jetzt den SSO-Regeln seiner Domain."
 
-#: accounts/views/manage.py:219
+#: accounts/views/manage.py:224
 #, python-format
 msgid "You are now acting as %(user)s."
 msgstr "Sie handeln jetzt als %(user)s."
 
-#: accounts/views/manage.py:247
+#: accounts/views/manage.py:252
 #, python-format
 msgid "Check the assignment: %(errors)s"
 msgstr "Prüfen Sie die Zuweisung: %(errors)s"
 
-#: accounts/views/manage.py:265
+#: accounts/views/manage.py:270
 msgid "Assignment added."
 msgstr "Zuweisung hinzugefügt."
 
-#: accounts/views/manage.py:283
+#: accounts/views/manage.py:288
 msgid "Assignment removed."
 msgstr "Zuweisung entfernt."
 
-#: accounts/views/manage.py:341
+#: accounts/views/manage.py:346
 msgid "Group saved."
 msgstr "Gruppe gespeichert."
 
-#: accounts/views/manage.py:349
+#: accounts/views/manage.py:354
 msgid "Members saved."
 msgstr "Mitglieder gespeichert."
 
-#: accounts/views/manage.py:355
+#: accounts/views/manage.py:360
 msgid "Group nested."
 msgstr "Gruppe verschachtelt."
 
-#: accounts/views/manage.py:365
+#: accounts/views/manage.py:370
 msgid "Nesting removed."
 msgstr "Verschachtelung entfernt."
 
-#: accounts/views/manage.py:368
+#: accounts/views/manage.py:373
 msgid "Group deleted."
 msgstr "Gruppe gelöscht."
 
-#: accounts/views/manage.py:439
+#: accounts/views/manage.py:444
 msgid "Role created."
 msgstr "Rolle erstellt."
 
-#: accounts/views/manage.py:469
+#: accounts/views/manage.py:474
 msgid "Role saved."
 msgstr "Rolle gespeichert."
 
-#: accounts/views/manage.py:497
+#: accounts/views/manage.py:502
 msgid "Role copied."
 msgstr "Rolle kopiert."
 
-#: accounts/views/manage.py:506
+#: accounts/views/manage.py:511
 msgid "Role deleted."
 msgstr "Rolle gelöscht."
 
-#: accounts/views/manage.py:539
+#: accounts/views/manage.py:544
 #, python-format
 msgid "%(count)s roles imported."
 msgstr "%(count)s Rollen importiert."
@@ -2670,6 +2686,21 @@ msgstr "Speichern"
 msgid "Change password"
 msgstr "Passwort ändern"
 
+#: templates/accounts/profile.html:17
+msgid "Your data"
+msgstr "Ihre Daten"
+
+#: templates/accounts/profile.html:18
+msgid ""
+"Download everything PatchManager stores about you: profile, roles, sessions, "
+"second factors (without secrets), API tokens, sign in links and your actions "
+"in the audit log."
+msgstr "Laden Sie alles herunter, was PatchManager über Sie speichert: Profil, Rollen, Sitzungen, zweite Faktoren (ohne Geheimnisse), API-Token, Anmeldeverknüpfungen und Ihre Aktionen im Audit-Log."
+
+#: templates/accounts/profile.html:19
+msgid "Download my data"
+msgstr "Meine Daten herunterladen"
+
 #: templates/accounts/security.html:2 templates/accounts/security.html:5
 #: templates/base.html:71 templates/networks/wlans.html:7
 msgid "Security"
@@ -4471,11 +4502,21 @@ msgstr "Anmeldung mit Passwort auch dort erlauben, wo SSO erzwungen wird?"
 msgid "Make break glass account"
 msgstr "Zum Notfallkonto machen"
 
-#: templates/manage/user_detail.html:37
+#: templates/manage/user_detail.html:34
+msgid ""
+"Anonymise this account? Name, email, sign in data, roles and tokens are "
+"removed for good. The audit log keeps its records."
+msgstr "Dieses Konto anonymisieren? Name, E-Mail, Anmeldedaten, Rollen und Token werden endgültig entfernt. Das Audit-Log behält seine Einträge."
+
+#: templates/manage/user_detail.html:34
+msgid "Anonymise"
+msgstr "Anonymisieren"
+
+#: templates/manage/user_detail.html:40
 msgid "Impersonate"
 msgstr "Als Benutzer handeln"
 
-#: templates/manage/user_detail.html:38
+#: templates/manage/user_detail.html:41
 msgid ""
 "A banner stays visible, the session ends after 30 minutes, and every action "
 "is audited."

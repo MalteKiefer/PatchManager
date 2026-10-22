@@ -61,3 +61,4 @@ nav:
       - adr/0021-scim-provisioning.md
       - adr/0022-editions-and-admin-polish.md
       - adr/0023-no-editions.md
+      - adr/0024-personal-data.md

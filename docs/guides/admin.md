@@ -58,6 +58,12 @@ Lock or unlock, deactivate or reactivate, reset second factors, sign the user
 out everywhere, or impersonate them (with a reason; a banner stays visible, it
 ends after 30 minutes and is audited). Super admins cannot be impersonated.
 
+**Anonymise** answers an erasure request: email and name are replaced, the account
+is deactivated, and its sessions, second factors, tokens, sign in links, groups and
+roles are deleted. Its changes stay in the history under the anonymous account. The
+audit log keeps its entries as the security record; see
+[ADR 0024](../adr/0024-personal-data.md). This cannot be undone.
+
 ## Single sign on
 
 *Administration → Single sign on* (super admins) adds identity providers:

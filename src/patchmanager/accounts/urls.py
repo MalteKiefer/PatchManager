@@ -14,6 +14,7 @@ urlpatterns = [
     path("invite/<str:token>/", auth.invitation_view, name="invitation"),
     path("account/", account.profile_view, name="profile"),
     path("account/security/", account.security_view, name="security"),
+    path("account/my-data/", account.data_export_view, name="data-export"),
     path("account/mfa/totp/", account.totp_setup_view, name="totp-setup"),
     path(
         "account/mfa/webauthn/options/",

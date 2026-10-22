@@ -8,6 +8,8 @@ All notable changes to this project are documented here. The format follows
 
 ### Added
 
+* Personal data: everyone can download their data as JSON; administrators can
+  anonymise accounts for erasure requests (ADR 0024).
 * Load test in CI with 500 racks, 50 000 ports and 12 000 cables, with time and
   query budgets per page; `seed_scale` command for demo and load data.
 
@@ -17,6 +19,7 @@ All notable changes to this project are documented here. The format follows
   rate limit per IP was shared by all users (one client could block sign in for
   everyone) and the audit log recorded the proxy. The client address now comes
   from `X-Forwarded-For` of trusted proxies.
+* Pages for signed in users send `Cache-Control: no-store`.
 
 ### Fixed
 

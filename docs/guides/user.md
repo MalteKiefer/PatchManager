@@ -118,3 +118,10 @@ rack elevation on rack pages and the port list on device pages.
 network port set the mode: *access* with one VLAN, or *trunk* with an optional
 native VLAN and tagged VLANs. A WLAN can bridge into a VLAN; add the wireless
 ports of access points that broadcast it.
+
+## Your data
+
+*Profile → Download my data* gives you a JSON file with everything PatchManager
+stores about you: profile, roles, sessions, second factors (without secrets), API
+tokens, sign in links and your actions in the audit log. To have your account
+anonymised, ask an administrator.

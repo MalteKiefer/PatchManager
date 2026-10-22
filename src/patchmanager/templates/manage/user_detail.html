@@ -30,6 +30,9 @@
     {% if subject.break_glass %}<form method="post" action="{% url 'manage:user-action' subject.pk 'break-glass-off' %}">{% csrf_token %}<button class="btn-secondary">{% translate "Remove break glass" %}</button></form>
     {% else %}<form method="post" action="{% url 'manage:user-action' subject.pk 'break-glass-on' %}" data-confirm="{% translate 'Allow a password sign in even where SSO is enforced?' %}">{% csrf_token %}<button class="btn-secondary">{% translate "Make break glass account" %}</button></form>{% endif %}
     {% endif %}
+    {% if can_anonymise and subject.pk != user.pk and not subject.is_service %}
+    <form method="post" action="{% url 'manage:user-action' subject.pk 'anonymise' %}" data-confirm="{% translate 'Anonymise this account? Name, email, sign in data, roles and tokens are removed for good. The audit log keeps its records.' %}">{% csrf_token %}<button class="btn-danger">{% translate "Anonymise" %}</button></form>
+    {% endif %}
   </div>
   {% if not is_super_admin and subject.pk != user.pk %}
   <form method="post" action="{% url 'manage:user-action' subject.pk 'impersonate' %}" class="mt-4 max-w-lg">{% csrf_token %}

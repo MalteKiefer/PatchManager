@@ -26,7 +26,7 @@ from patchmanager.accounts.forms import (
     RoleForm,
 )
 from patchmanager.accounts.models import Assignment, Group, Role, User
-from patchmanager.accounts.services import ServiceError, rbac, users
+from patchmanager.accounts.services import ServiceError, privacy, rbac, users
 from patchmanager.core.utils import parse_uuid
 from patchmanager.tenancy.models import Tenant
 
@@ -166,6 +166,7 @@ def user_detail(request: HttpRequest, pk: str) -> HttpResponse:
             "reason_form": ReasonForm(),
             "is_super_admin": policy.is_super_admin(subject),
             "can_manage_sso": policy.has_perm(request.user, "system.sso.manage"),
+            "can_anonymise": policy.has_perm(request.user, "accounts.user.delete", subject),
         },
     )
 
@@ -204,6 +205,10 @@ def user_action(request: HttpRequest, pk: str, action: str) -> HttpResponse:
         "break-glass-on": (
             lambda: users.set_break_glass(request, actor, subject, on=True),
             _("This account may now sign in with its password where SSO is enforced."),
+        ),
+        "anonymise": (
+            lambda: privacy.anonymise(request, actor, subject),
+            _("The account was anonymised."),
         ),
         "break-glass-off": (
             lambda: users.set_break_glass(request, actor, subject, on=False),

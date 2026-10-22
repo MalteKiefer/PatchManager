@@ -24,7 +24,7 @@ present).
 | V11 Cryptography | met | Fernet (AES-128-CBC with HMAC-SHA256) for MFA secrets and uploads with key rotation; HMAC-SHA256 for tokens and webhook signatures; `secrets` for all random values; no custom primitives |
 | V12 Secure communication | met | TLS 1.2 and 1.3 at Caddy, HTTP redirected; internal network for app, database and Redis; webhooks over https only by default with an SSRF guard that pins the resolved address and rejects private, loopback and IPv4 mapped addresses |
 | V13 Configuration | met | Distroless, read only, non root image without shell; `cap_drop: ALL`, `no-new-privileges`; secrets from files; `check --deploy` in CI; signed images with SBOM and provenance; pinned dependencies (pixi lock), pip-audit, Trivy, CodeQL, gitleaks; health and metrics not exposed by the proxy |
-| V14 Data protection | met | Tenant isolation in the database; personal data kept to account fields; sensitive values never logged (audit URL redaction, SAML logs above WARNING only); backups encrypted at host level (documented); `Cache-Control: no-store` on authenticated pages through Django defaults for sessions |
+| V14 Data protection | met | Tenant isolation in the database; personal data kept to account fields; sensitive values never logged (audit URL redaction, SAML logs above WARNING only); backups encrypted at host level (documented); `Cache-Control: no-store` on every response for signed in users (`PrivateCacheMiddleware`) |
 | V15 Secure coding and architecture | met | Threat model per phase, ADRs, dependency review before adding (ldap3 and python3-saml rejected), Renovate configuration, bandit, mypy strict, 90 % coverage gate |
 | V16 Security logging and error handling | met | Append only audit log with hash chain and verifier; JSON logs with request ids; client address from trusted proxies only; generic error pages; failures of security controls fail closed (RLS context, policy engine, uploads with clamd) |
 | V17 WebRTC | n/a | Not used |
@@ -42,6 +42,9 @@ present).
 * Behind the proxy every request carried the proxy's address. The login rate limit per
   IP was therefore shared by all users, and one client could block sign in for
   everyone. Fixed by taking the client from `X-Forwarded-For` of trusted proxies only.
+* Pages for signed in users had no cache directives, so browsers or shared proxies
+  could keep sensitive documentation. They now send `no-store`.
+* The error page's status code was below AA contrast in light mode.
 * Editions and their feature gates were removed (ADR 0023), which removes a class of
   checks that could fail open.
 
