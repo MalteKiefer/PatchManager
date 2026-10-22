@@ -1,8 +1,15 @@
 """Changing the instance settings (super admins)."""
 
 import io
+import ipaddress
+import logging
+import secrets
+import socket
+from typing import Any
+from urllib.parse import urlsplit
 
 from django.conf import settings
+from django.core.files.base import ContentFile
 from django.http import HttpRequest
 from django.utils.translation import gettext as _
 from PIL import Image, UnidentifiedImageError
@@ -11,9 +18,12 @@ from patchmanager.accounts import policy
 from patchmanager.accounts.models import User
 from patchmanager.accounts.services import PermissionDeniedError, ServiceError
 from patchmanager.audit import services as audit
+from patchmanager.core import crypto
+from patchmanager.instance import config as instance_config
 from patchmanager.instance import state
 from patchmanager.instance.models import InstanceSettings
 
+logger = logging.getLogger(__name__)
 LOGO_MAX_BYTES = 512 * 1024
 LOGO_MAX_SIDE = 512
 
@@ -98,3 +108,75 @@ def logo_bytes() -> bytes | None:
         return None
     row = InstanceSettings.objects.only("logo").first()
     return bytes(row.logo) if row and row.logo else None
+
+
+def _public_host(url: str) -> None:
+    """The bucket endpoint must be https and must not point into the host itself."""
+    parts = urlsplit(url)
+    if parts.scheme != "https" or not parts.hostname or parts.username or parts.password:
+        raise ServiceError(_("Enter an https address without credentials."))
+    try:
+        answers = socket.getaddrinfo(parts.hostname, parts.port or 443, type=socket.SOCK_STREAM)
+    except (socket.gaierror, UnicodeError) as exc:
+        raise ServiceError(_("The host cannot be resolved.")) from exc
+    for answer in answers:
+        address = ipaddress.ip_address(answer[4][0])
+        if isinstance(address, ipaddress.IPv6Address) and address.ipv4_mapped:
+            address = address.ipv4_mapped
+        if (
+            address.is_loopback
+            or address.is_link_local
+            or address.is_unspecified
+            or address.is_multicast
+            or address.is_reserved
+        ):
+            raise ServiceError(_("This address cannot be used."))
+
+
+def _probe(config: instance_config.Config) -> None:
+    """Write and delete a small object, so a wrong bucket fails here and not on upload."""
+    from patchmanager.instance.runtime import s3_storage
+
+    store = s3_storage(config)
+    try:
+        name = store.save(f"health/probe-{secrets.token_hex(8)}.txt", ContentFile(b"ok"))
+        store.delete(name)
+    except Exception as exc:  # botocore raises many unrelated types
+        logger.warning("bucket check failed: %s", type(exc).__name__)
+        raise ServiceError(
+            _("The bucket could not be written (%(error)s). Check name, endpoint and key.")
+            % {"error": type(exc).__name__}
+        ) from exc
+
+
+def save_config(request: HttpRequest, actor: User, values: dict[str, Any]) -> None:
+    """Store operational settings. Empty secrets keep the stored one; ``None`` clears it."""
+    row = _require(actor)
+    stored = dict(row.config)
+    changed = []
+    for name, value in values.items():
+        if name not in instance_config.NAMES:
+            raise ServiceError(_("Unknown setting."))
+        if name in instance_config.SECRETS:
+            if value == "":
+                continue
+            value = crypto.encrypt(value) if value else ""
+        if stored.get(name) != value:
+            changed.append(name)
+        stored[name] = value
+    effective = instance_config.from_stored(stored)
+    if effective.s3_endpoint_url and "s3_endpoint_url" in values:
+        # botocore resolves again when it connects; only holders of system.settings.change
+        # can set this, so the remaining rebinding window is accepted (ADR 0035).
+        _public_host(effective.s3_endpoint_url)
+    if effective.s3_bucket and any(n.startswith("s3_") for n in changed):
+        _probe(effective)
+    row.config = stored
+    row.save()
+    instance_config.forget()
+    state.forget()
+    audit.record(
+        "instance.settings.changed",
+        request=request,
+        data={"changed": sorted(changed)},  # names only: values may be secrets
+    )

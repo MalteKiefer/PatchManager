@@ -5,7 +5,6 @@ from collections.abc import Callable
 from typing import Any
 
 from django import forms
-from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.cache import cache
@@ -25,6 +24,7 @@ from patchmanager.core.utils import parse_uuid
 from patchmanager.dcim.models import Device, Rack
 from patchmanager.exchange import formats, importer, pdf
 from patchmanager.exchange.tables import TABLES
+from patchmanager.instance import config as instance_config
 from patchmanager.locations.models import Site
 
 PENDING_SECONDS = 1800
@@ -125,7 +125,7 @@ def upload(request: HttpRequest) -> HttpResponse:
     upload_file = form.cleaned_data["file"]
     kind = form.cleaned_data["kind"]
     try:
-        if upload_file.size > settings.UPLOAD_MAX_BYTES:
+        if upload_file.size > instance_config.get().upload_max_bytes:
             raise ServiceError(_("The file is too large."))
         rows = formats.read(upload_file.read())
         results = importer.run(request, _actor(request), tenant, kind, rows, apply=False)

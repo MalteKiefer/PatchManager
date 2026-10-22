@@ -11,10 +11,10 @@ from dataclasses import dataclass
 from urllib.parse import urlsplit
 
 import urllib3
-from django.conf import settings
 from django.utils.translation import gettext as _
 
 from patchmanager.accounts.services import ServiceError
+from patchmanager.instance import config as instance_config
 
 TIMEOUT = urllib3.Timeout(total=10, connect=5)  # total: a slow sender cannot hold a worker
 NAT64 = ipaddress.ip_network("64:ff9b::/96")
@@ -43,7 +43,8 @@ def _embedded(ip: ipaddress.IPv4Address | ipaddress.IPv6Address) -> list[ipaddre
 
 def _allowed(address: str) -> bool:
     ip = ipaddress.ip_address(address)
-    allowed = [ipaddress.ip_network(net, strict=False) for net in settings.WEBHOOK_ALLOWED_NETWORKS]
+    networks = instance_config.get().allowed_networks
+    allowed = [ipaddress.ip_network(net, strict=False) for net in networks]
     return all(
         any(candidate in net for net in allowed if net.version == candidate.version)
         or candidate.is_global
@@ -55,7 +56,7 @@ def check(url: str) -> Target:
     """Validate ``url`` and resolve it to an address that may be contacted."""
     parts = urlsplit(url)
     if parts.scheme not in ("https", "http") or (
-        parts.scheme == "http" and not settings.WEBHOOK_ALLOW_HTTP
+        parts.scheme == "http" and not instance_config.get().webhook_allow_http
     ):
         raise ServiceError(_("Webhook URLs must use https."))
     if not parts.hostname or parts.username or parts.password:

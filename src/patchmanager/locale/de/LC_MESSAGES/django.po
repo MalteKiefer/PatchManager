@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-22 10:31+0000\n"
+"POT-Creation-Date: 2026-10-22 11:08+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -23,7 +23,7 @@ msgid "Email"
 msgstr "E-Mail"
 
 #: accounts/forms.py:24 accounts/forms.py:51 accounts/forms.py:69
-#: templates/accounts/profile.html:12
+#: instance/views.py:163 templates/accounts/profile.html:12
 msgid "Password"
 msgstr "Passwort"
 
@@ -157,7 +157,7 @@ msgstr "Zur Gruppe hinzufügen"
 msgid "Reason"
 msgstr "Grund"
 
-#: accounts/forms.py:226
+#: accounts/forms.py:226 instance/views.py:162
 msgid "User"
 msgstr "Benutzer"
 
@@ -173,15 +173,15 @@ msgstr "Für Mandant"
 msgid "Global (no object)"
 msgstr "Global (kein Objekt)"
 
-#: accounts/middleware.py:44
+#: accounts/middleware.py:45
 msgid "Your session expired. Please sign in again."
 msgstr "Ihre Sitzung ist abgelaufen. Bitte melden Sie sich erneut an."
 
-#: accounts/middleware.py:108
+#: accounts/middleware.py:109
 msgid "Sign in again with your second factor."
 msgstr "Melden Sie sich erneut mit Ihrem zweiten Faktor an."
 
-#: accounts/middleware.py:112
+#: accounts/middleware.py:113
 msgid "Set up a second factor to continue."
 msgstr "Richten Sie einen zweiten Faktor ein, um fortzufahren."
 
@@ -301,15 +301,15 @@ msgstr "Auditor"
 msgid "Read only access including the audit log."
 msgstr "Nur Lesezugriff, einschließlich Audit-Log."
 
-#: accounts/services/auth.py:64 accounts/services/mfa.py:230 sso/views.py:67
+#: accounts/services/auth.py:65 accounts/services/mfa.py:230 sso/views.py:67
 msgid "Too many attempts. Try again in a few minutes."
 msgstr "Zu viele Versuche. Versuchen Sie es in einigen Minuten erneut."
 
-#: accounts/services/auth.py:69
+#: accounts/services/auth.py:70
 msgid "This account is temporarily locked."
 msgstr "Dieses Konto ist vorübergehend gesperrt."
 
-#: accounts/services/auth.py:81 accounts/services/auth.py:134
+#: accounts/services/auth.py:82 accounts/services/auth.py:135
 msgid "Email or password is incorrect."
 msgstr "E-Mail oder Passwort ist falsch."
 
@@ -407,64 +407,64 @@ msgstr "API-Clients können keine Rollen erhalten, die MFA erfordern."
 msgid "The last super admin cannot be removed."
 msgstr "Der letzte Super-Admin kann nicht entfernt werden."
 
-#: accounts/services/users.py:29 accounts/services/users.py:167 api/core.py:28
+#: accounts/services/users.py:30 accounts/services/users.py:169 api/core.py:28
 #: api/tokens.py:74 api/tokens.py:134 api/tokens.py:165 cabling/services.py:50
 #: compute/importing.py:66 directory/links.py:143 directory/links.py:146
 #: directory/links.py:175 exchange/importer.py:54 exchange/importer.py:70
 #: floorplans/services.py:193 floorplans/views.py:283 history/services.py:76
-#: history/services.py:97 instance/services.py:23 integrations/services.py:69
+#: history/services.py:97 instance/services.py:33 integrations/services.py:69
 #: ipam/dns_import.py:322 metadata/services.py:113 metadata/services.py:181
 #: networks/services.py:109 networks/services.py:139 networks/services.py:148
 msgid "You do not have permission to do that."
 msgstr "Sie haben keine Berechtigung dafür."
 
-#: accounts/services/users.py:58
+#: accounts/services/users.py:59
 msgid "The setup token is invalid or expired."
 msgstr "Das Einrichtungstoken ist ungültig oder abgelaufen."
 
-#: accounts/services/users.py:108
+#: accounts/services/users.py:110
 msgid "A user with this email already exists."
 msgstr "Ein Benutzer mit dieser E-Mail-Adresse existiert bereits."
 
-#: accounts/services/users.py:137
+#: accounts/services/users.py:139
 msgid "This invitation is invalid or expired."
 msgstr "Diese Einladung ist ungültig oder abgelaufen."
 
-#: accounts/services/users.py:153
+#: accounts/services/users.py:155
 msgid "You cannot lock your own account."
 msgstr "Sie können Ihr eigenes Konto nicht sperren."
 
-#: accounts/services/users.py:169
+#: accounts/services/users.py:171
 msgid "API clients do not sign in."
 msgstr "API-Clients melden sich nicht an."
 
-#: accounts/services/users.py:178
+#: accounts/services/users.py:180
 msgid "You cannot deactivate your own account."
 msgstr "Sie können Ihr eigenes Konto nicht deaktivieren."
 
-#: accounts/services/users.py:223
+#: accounts/services/users.py:225
 msgid "Session not found."
 msgstr "Sitzung nicht gefunden."
 
-#: accounts/services/users.py:231
+#: accounts/services/users.py:233
 msgid "The current password is incorrect."
 msgstr "Das aktuelle Passwort ist falsch."
 
-#: accounts/services/users.py:266
+#: accounts/services/users.py:268
 msgid "You cannot act as a user with rights you do not hold."
 msgstr ""
 "Sie können nicht als Benutzer mit Rechten handeln, die Sie selbst nicht "
 "besitzen."
 
-#: accounts/services/users.py:273
+#: accounts/services/users.py:275
 msgid "A reason is required."
 msgstr "Ein Grund ist erforderlich."
 
-#: accounts/services/users.py:275
+#: accounts/services/users.py:277
 msgid "This user cannot be impersonated."
 msgstr "Als dieser Benutzer kann nicht gehandelt werden."
 
-#: accounts/services/users.py:277
+#: accounts/services/users.py:279
 msgid "Inactive or locked users cannot be impersonated."
 msgstr "Als inaktiver oder gesperrter Benutzer kann nicht gehandelt werden."
 
@@ -927,9 +927,10 @@ msgstr "Diese Ports können nicht verbunden werden."
 msgid "Device"
 msgstr "Gerät"
 
-#: cabling/views.py:44 exchange/pdf.py:280 templates/dcim/device.html:17
-#: templates/dcim/port.html:40 templates/dcim/rack.html:66
-#: templates/ipam/addresses.html:10 templates/ipam/prefix.html:24
+#: cabling/views.py:44 exchange/pdf.py:280 instance/views.py:160
+#: templates/dcim/device.html:17 templates/dcim/port.html:40
+#: templates/dcim/rack.html:66 templates/ipam/addresses.html:10
+#: templates/ipam/prefix.html:24
 msgid "Port"
 msgstr "Port"
 
@@ -1275,19 +1276,19 @@ msgstr ""
 msgid "NAS device (Synology, QNAP)"
 msgstr "NAS-Gerät (Synology, QNAP)"
 
-#: compute/importing.py:312
+#: compute/importing.py:314
 msgid "Enter the API token."
 msgstr "Geben Sie das API-Token ein."
 
-#: compute/importing.py:316
+#: compute/importing.py:318
 msgid "Enter user and password."
 msgstr "Geben Sie Benutzer und Passwort ein."
 
-#: compute/importing.py:318
+#: compute/importing.py:320
 msgid "Choose the NAS device the storage belongs to."
 msgstr "Wählen Sie das NAS-Gerät, zu dem der Speicher gehört."
 
-#: compute/importing.py:356
+#: compute/importing.py:358
 #, python-format
 msgid ""
 "%(created)s new and %(updated)s updated machines, %(storage)s storage "
@@ -1296,11 +1297,11 @@ msgstr ""
 "%(created)s neue und %(updated)s aktualisierte Maschinen, %(storage)s "
 "Speichereinträge."
 
-#: compute/importing.py:368
+#: compute/importing.py:370
 msgid "Import from a platform"
 msgstr "Von einer Plattform importieren"
 
-#: compute/importing.py:370
+#: compute/importing.py:372
 msgid ""
 "Reads clusters, hosts, virtual machines and storage from Proxmox VE and "
 "VMware vCenter, or volumes and shares from a Synology or QNAP NAS. "
@@ -1308,24 +1309,24 @@ msgid ""
 "only."
 msgstr "Liest Cluster, Hosts, virtuelle Maschinen und Speicher aus Proxmox VE und VMware vCenter, oder Volumes und Freigaben eines Synology- oder QNAP-NAS. Zugangsdaten werden einmal verwendet und nicht gespeichert; verwenden Sie ein Konto nur mit Leserechten."
 
-#: compute/importing.py:376 ipam/pages.py:387 templates/exchange/index.html:7
+#: compute/importing.py:378 ipam/pages.py:387 templates/exchange/index.html:7
 #: templates/library/types.html:30 templates/manage/roles.html:21
 msgid "Import"
 msgstr "Importieren"
 
-#: compute/inventory.py:94
+#: compute/inventory.py:94 instance/services.py:117
 msgid "Enter an https address without credentials."
 msgstr "Geben Sie eine https-Adresse ohne Zugangsdaten ein."
 
-#: compute/inventory.py:98 integrations/http.py:66
+#: compute/inventory.py:98 integrations/http.py:67
 msgid "Enter a valid port."
 msgstr "Geben Sie einen gültigen Port ein."
 
-#: compute/inventory.py:103 integrations/http.py:70
+#: compute/inventory.py:103 instance/services.py:121 integrations/http.py:71
 msgid "The host cannot be resolved."
 msgstr "Der Host kann nicht aufgelöst werden."
 
-#: compute/inventory.py:106
+#: compute/inventory.py:106 instance/services.py:133
 msgid "This address cannot be used."
 msgstr "Diese Adresse kann nicht verwendet werden."
 
@@ -1457,7 +1458,7 @@ msgstr "Pfad oder Ziel"
 msgid "For example an export path, share name or iSCSI IQN."
 msgstr "Zum Beispiel ein Exportpfad, Freigabename oder eine iSCSI-IQN."
 
-#: compute/models.py:148 instance/models.py:28
+#: compute/models.py:148 instance/models.py:30
 msgid "running"
 msgstr "läuft"
 
@@ -1622,7 +1623,7 @@ msgstr "Hosts"
 msgid "Add host"
 msgstr "Host hinzufügen"
 
-#: compute/pages.py:124 templates/manage/system.html:37
+#: compute/pages.py:124 templates/manage/system.html:38
 msgid "Server"
 msgstr "Server"
 
@@ -1876,102 +1877,102 @@ msgstr "Diese Kategorie ist für diesen Raumtyp bereits geplant."
 msgid "Planned devices for %(type)s"
 msgstr "Geplante Geräte für %(type)s"
 
-#: core/system.py:58
+#: core/system.py:59
 msgid "reachable"
 msgstr "erreichbar"
 
-#: core/system.py:67
+#: core/system.py:68
 msgid "up to date"
 msgstr "aktuell"
 
-#: core/system.py:74
+#: core/system.py:75
 msgid "working"
 msgstr "funktioniert"
 
-#: core/system.py:81
+#: core/system.py:82
 msgid "writable"
 msgstr "beschreibbar"
 
-#: core/system.py:86
+#: core/system.py:87
 msgid "jobs run in the web process (no broker)"
 msgstr "Aufgaben laufen im Webprozess (kein Broker)"
 
-#: core/system.py:92
+#: core/system.py:93
 #, python-format
 msgid "%(n)s worker(s) answering"
 msgstr "%(n)s Worker antworten"
 
-#: core/system.py:98
+#: core/system.py:99
 msgid "Database"
 msgstr "Datenbank"
 
-#: core/system.py:99
+#: core/system.py:100
 msgid "Migrations"
 msgstr "Migrationen"
 
-#: core/system.py:100
+#: core/system.py:101
 msgid "Cache and rate limits"
 msgstr "Cache und Ratenbegrenzung"
 
-#: core/system.py:101
+#: core/system.py:102
 msgid "File storage"
 msgstr "Dateispeicher"
 
-#: core/system.py:102
+#: core/system.py:103
 msgid "Background workers"
 msgstr "Hintergrund-Worker"
 
-#: core/system.py:147
+#: core/system.py:148
 msgid "The off-site status file cannot be read."
 msgstr "Die Statusdatei der externen Sicherung kann nicht gelesen werden."
 
-#: core/system.py:201
+#: core/system.py:202
 msgid "MFA required for everyone"
 msgstr "MFA für alle erforderlich"
 
-#: core/system.py:202
+#: core/system.py:203 instance/views.py:123
 msgid "Minimum password length"
 msgstr "Mindestlänge des Passworts"
 
-#: core/system.py:203
+#: core/system.py:204
 msgid "Session lifetime (s)"
 msgstr "Sitzungsdauer (s)"
 
-#: core/system.py:204
+#: core/system.py:205
 msgid "Session idle timeout (s)"
 msgstr "Leerlauf-Timeout der Sitzung (s)"
 
-#: core/system.py:205
+#: core/system.py:206
 msgid "Lockout after failures"
 msgstr "Sperre nach Fehlversuchen"
 
-#: core/system.py:206
+#: core/system.py:207
 msgid "Lockout duration (s)"
 msgstr "Sperrdauer (s)"
 
-#: core/system.py:207
+#: core/system.py:208
 msgid "Login attempts per IP in 10 minutes"
 msgstr "Anmeldeversuche pro IP in 10 Minuten"
 
-#: core/system.py:208
+#: core/system.py:209
 msgid "WebAuthn relying party"
 msgstr "WebAuthn Relying Party"
 
-#: core/system.py:222
+#: core/system.py:223
 #, python-format
 msgid "Test mail from %(name)s"
 msgstr "Testmail von %(name)s"
 
-#: core/system.py:223
+#: core/system.py:224
 msgid "Mail delivery works."
 msgstr "Der Mailversand funktioniert."
 
-#: core/system.py:229
+#: core/system.py:230
 #, python-format
 msgid "The mail could not be sent: %(error)s"
 msgstr "Die E-Mail konnte nicht gesendet werden: %(error)s"
 
-#: core/system.py:232
+#: core/system.py:233
 #, python-format
 msgid "A test mail was sent to %(email)s."
 msgstr "Eine Testmail wurde an %(email)s gesendet."
@@ -2312,7 +2313,7 @@ msgstr "Beide müssen zum selben Mandanten gehören."
 msgid "This link already exists."
 msgstr "Diese Zuordnung existiert bereits."
 
-#: directory/links.py:192 templates/manage/_base.html:21
+#: directory/links.py:192 templates/manage/_base.html:22
 #: templates/manage/system.html:2 templates/manage/system.html:4
 msgid "System"
 msgstr "System"
@@ -3035,75 +3036,312 @@ msgstr "Markenfarbe (Farbton)"
 msgid "default language"
 msgstr "Standardsprache"
 
-#: instance/models.py:18
+#: instance/models.py:20
 msgid "instance settings"
 msgstr "Instanzeinstellungen"
 
-#: instance/models.py:29 locations/models.py:222
+#: instance/models.py:31 locations/models.py:222
 msgid "done"
 msgstr "erledigt"
 
-#: instance/models.py:30 integrations/models.py:47
+#: instance/models.py:32 integrations/models.py:47
 msgid "failed"
 msgstr "fehlgeschlagen"
 
-#: instance/services.py:31
+#: instance/services.py:41
 msgid "The logo may be at most 512 KB."
 msgstr "Das Logo darf höchstens 512 KB groß sein."
 
-#: instance/services.py:33
+#: instance/services.py:43
 msgid "The logo must be a PNG or JPEG file."
 msgstr "Das Logo muss eine PNG- oder JPEG-Datei sein."
 
-#: instance/services.py:40
+#: instance/services.py:50
 msgid "The logo could not be read."
 msgstr "Das Logo konnte nicht gelesen werden."
 
-#: instance/services.py:57
+#: instance/services.py:67
 msgid "The colour hue is a number from 0 to 359."
 msgstr "Der Farbton ist eine Zahl von 0 bis 359."
 
-#: instance/services.py:59
+#: instance/services.py:69
 msgid "Unknown language."
 msgstr "Unbekannte Sprache."
 
-#: instance/views.py:22
+#: instance/services.py:147
+#, python-format
+msgid ""
+"The bucket could not be written (%(error)s). Check name, endpoint and key."
+msgstr "In den Bucket konnte nicht geschrieben werden (%(error)s). Prüfen Sie Name, Endpoint und Schlüssel."
+
+#: instance/services.py:159
+msgid "Unknown setting."
+msgstr "Unbekannte Einstellung."
+
+#: instance/views.py:28
 msgid "Instance name"
 msgstr "Instanzname"
 
-#: instance/views.py:25
+#: instance/views.py:31
 msgid "Empty: PATCHMANAGER_INSTANCE_NAME."
 msgstr "Leer: PATCHMANAGER_INSTANCE_NAME."
 
-#: instance/views.py:28
+#: instance/views.py:34
 msgid "Brand colour (hue, 0 to 359)"
 msgstr "Markenfarbe (Farbton, 0 bis 359)"
 
-#: instance/views.py:31
+#: instance/views.py:37
 msgid "Default language for new accounts"
 msgstr "Standardsprache für neue Konten"
 
-#: instance/views.py:33
+#: instance/views.py:39
 msgid "Logo (PNG or JPEG, up to 512 KB)"
 msgstr "Logo (PNG oder JPEG, bis 512 KB)"
 
-#: instance/views.py:34
+#: instance/views.py:40
 msgid "Remove the logo"
 msgstr "Logo entfernen"
 
-#: instance/views.py:70
+#: instance/views.py:76
 msgid "Branding saved."
 msgstr "Branding gespeichert."
 
-#: integrations/http.py:60
+#: instance/views.py:105
+msgid "Stored encrypted. Leave empty to keep the current value."
+msgstr "Wird verschlüsselt gespeichert. Leer lassen, um den aktuellen Wert zu behalten."
+
+#: instance/views.py:126
+msgid "Require a second factor for everyone"
+msgstr "Zweiten Faktor für alle verlangen"
+
+#: instance/views.py:129
+msgid "Session lifetime (hours)"
+msgstr "Sitzungsdauer (Stunden)"
+
+#: instance/views.py:132
+msgid "Sign out after inactivity (minutes)"
+msgstr "Abmelden nach Inaktivität (Minuten)"
+
+#: instance/views.py:135
+msgid "Lock an account after failed sign ins"
+msgstr "Konto sperren nach fehlgeschlagenen Anmeldungen"
+
+#: instance/views.py:138
+msgid "Lock duration (minutes)"
+msgstr "Sperrdauer (Minuten)"
+
+#: instance/views.py:141
+msgid "Sign in attempts per address in 10 minutes"
+msgstr "Anmeldeversuche pro Adresse in 10 Minuten"
+
+#: instance/views.py:146
+msgid "Invitation links are valid for (hours)"
+msgstr "Einladungslinks sind gültig für (Stunden)"
+
+#: instance/views.py:154
+msgid "SMTP server"
+msgstr "SMTP-Server"
+
+#: instance/views.py:157 instance/views.py:182 ipam/models.py:356
+#: ipam/models.py:396 ipam/models.py:450
+msgid "Enter a host name."
+msgstr "Geben Sie einen Hostnamen ein."
+
+#: instance/views.py:158
+msgid "Empty: mails are not sent (shown in the log in development)."
+msgstr "Leer: Es werden keine Mails versendet (in der Entwicklung im Log ausgegeben)."
+
+#: instance/views.py:161
+msgid "Use STARTTLS"
+msgstr "STARTTLS verwenden"
+
+#: instance/views.py:165
+msgid "Remove the stored password"
+msgstr "Gespeichertes Passwort entfernen"
+
+#: instance/views.py:167
+msgid "Sender address"
+msgstr "Absenderadresse"
+
+#: instance/views.py:174
+msgid "Largest upload (MB)"
+msgstr "Größter Upload (MB)"
+
+#: instance/views.py:179
+msgid "Virus scanner (clamd host)"
+msgstr "Virenscanner (clamd-Host)"
+
+#: instance/views.py:183
+msgid "Empty: no scan. When set, uploads fail while it is unreachable."
+msgstr "Leer: keine Prüfung. Wenn gesetzt, schlagen Uploads fehl, solange er nicht erreichbar ist."
+
+#: instance/views.py:185
+msgid "clamd port"
+msgstr "clamd-Port"
+
+#: instance/views.py:187
+msgid "S3 bucket"
+msgstr "S3-Bucket"
+
+#: instance/views.py:192
+msgid "Enter a valid bucket name."
+msgstr "Geben Sie einen gültigen Bucket-Namen ein."
+
+#: instance/views.py:196
+msgid ""
+"Empty: files stay in the media volume. Files already stored there stay "
+"readable."
+msgstr "Leer: Dateien bleiben im Media-Volume. Dort bereits gespeicherte Dateien bleiben lesbar."
+
+#: instance/views.py:200
+msgid "Endpoint"
+msgstr "Endpoint"
+
+#: instance/views.py:204
+msgid ""
+"Empty for AWS. Backblaze B2 for example https://s3.eu-"
+"central-003.backblazeb2.com."
+msgstr "Leer für AWS. Backblaze B2 zum Beispiel https://s3.eu-central-003.backblazeb2.com."
+
+#: instance/views.py:207
+msgid "Region"
+msgstr "Region"
+
+#: instance/views.py:209
+msgid "Access key ID"
+msgstr "Access-Key-ID"
+
+#: instance/views.py:211
+msgid "Secret access key"
+msgstr "Secret Access Key"
+
+#: instance/views.py:213
+msgid "Folder in the bucket"
+msgstr "Ordner im Bucket"
+
+#: instance/views.py:216
+msgid "Letters, digits, . _ - /"
+msgstr "Buchstaben, Ziffern, . _ - /"
+
+#: instance/views.py:220
+msgid "Addressing"
+msgstr "Adressierung"
+
+#: instance/views.py:223
+msgid "Provider default"
+msgstr "Standard des Anbieters"
+
+#: instance/views.py:224
+msgid "Virtual host (bucket.host)"
+msgstr "Virtueller Host (bucket.host)"
+
+#: instance/views.py:225
+msgid "Path (host/bucket)"
+msgstr "Pfad (host/bucket)"
+
+#: instance/views.py:233
+msgid "The endpoint must use https."
+msgstr "Der Endpoint muss https verwenden."
+
+#: instance/views.py:241
+msgid "Tile server"
+msgstr "Kachelserver"
+
+#: instance/views.py:244
+#, python-brace-format
+msgid "https with {z}, {x} and {y}. Empty: no map."
+msgstr "https mit {z}, {x} und {y}. Leer: keine Karte."
+
+#: instance/views.py:247
+msgid "Attribution"
+msgstr "Quellenangabe"
+
+#: instance/views.py:256
+#, python-brace-format
+msgid "Enter an https address with {z}, {x} and {y}."
+msgstr "Geben Sie eine https-Adresse mit {z}, {x} und {y} ein."
+
+#: instance/views.py:264
+msgid "Private networks webhooks may reach"
+msgstr "Private Netze, die Webhooks erreichen dürfen"
+
+#: instance/views.py:267
+msgid "Comma separated, for example 10.0.0.0/8. Empty: public only."
+msgstr "Kommagetrennt, zum Beispiel 10.0.0.0/8. Leer: nur öffentliche Adressen."
+
+#: instance/views.py:270
+msgid "Allow plain http webhook URLs"
+msgstr "Unverschlüsselte http-Webhook-URLs erlauben"
+
+#: instance/views.py:273
+msgid "API requests per user"
+msgstr "API-Anfragen pro Benutzer"
+
+#: instance/views.py:275
+msgid "For example 1200/minute."
+msgstr "Zum Beispiel 1200/minute."
+
+#: instance/views.py:284
+msgid "Enter networks such as 10.0.0.0/8."
+msgstr "Geben Sie Netze wie 10.0.0.0/8 ein."
+
+#: instance/views.py:289 templates/accounts/login.html:2
+#: templates/accounts/login.html:5 templates/accounts/login.html:8
+msgid "Sign in"
+msgstr "Anmelden"
+
+#: instance/views.py:291
+msgid "Passwords, second factors, sessions and lockouts."
+msgstr "Passwörter, zweite Faktoren, Sitzungen und Sperren."
+
+#: instance/views.py:294 templates/manage/system.html:36
+msgid "Mail"
+msgstr "E-Mail"
+
+#: instance/views.py:296
+msgid "The server for invitations, password resets and notifications."
+msgstr "Der Server für Einladungen, Passwort-Zurücksetzungen und Benachrichtigungen."
+
+#: instance/views.py:299
+msgid "Files"
+msgstr "Dateien"
+
+#: instance/views.py:302
+msgid ""
+"Uploads are encrypted before they are stored, in the media volume or in S3 "
+"compatible object storage (AWS S3, Backblaze B2, Wasabi). The bucket is "
+"checked with a test file when you save."
+msgstr "Uploads werden vor dem Speichern verschlüsselt, im Media-Volume oder in S3-kompatiblem Objektspeicher (AWS S3, Backblaze B2, Wasabi). Beim Speichern wird der Bucket mit einer Testdatei geprüft."
+
+#: instance/views.py:307
+msgid "Maps"
+msgstr "Karten"
+
+#: instance/views.py:307
+msgid "Tiles shown behind the site map."
+msgstr "Kacheln, die hinter der Standortkarte angezeigt werden."
+
+#: instance/views.py:309
+msgid "Integrations"
+msgstr "Integrationen"
+
+#: instance/views.py:311
+msgid "Limits for webhooks and the API."
+msgstr "Grenzen für Webhooks und die API."
+
+#: instance/views.py:336
+msgid "Settings saved."
+msgstr "Einstellungen gespeichert."
+
+#: integrations/http.py:61
 msgid "Webhook URLs must use https."
 msgstr "Webhook-URLs müssen https verwenden."
 
-#: integrations/http.py:62
+#: integrations/http.py:63
 msgid "Enter a URL with a host and without credentials."
 msgstr "Geben Sie eine URL mit Host und ohne Zugangsdaten ein."
 
-#: integrations/http.py:73
+#: integrations/http.py:74
 msgid "This address is not allowed for webhooks."
 msgstr "Diese Adresse ist für Webhooks nicht erlaubt."
 
@@ -3333,10 +3571,6 @@ msgstr "Seriennummer"
 #: ipam/models.py:346 ipam/pages.py:169
 msgid "DNS server"
 msgstr "DNS-Server"
-
-#: ipam/models.py:356 ipam/models.py:396 ipam/models.py:450
-msgid "Enter a host name."
-msgstr "Geben Sie einen Hostnamen ein."
 
 #: ipam/models.py:358
 msgid "Enter an email address or host name."
@@ -4891,11 +5125,6 @@ msgstr "Wählen Sie ein Passwort für %(email)s."
 msgid "Set password"
 msgstr "Passwort festlegen"
 
-#: templates/accounts/login.html:2 templates/accounts/login.html:5
-#: templates/accounts/login.html:8
-msgid "Sign in"
-msgstr "Anmelden"
-
 #: templates/accounts/login.html:10
 msgid "or"
 msgstr "oder"
@@ -4936,7 +5165,7 @@ msgid "Verify"
 msgstr "Überprüfen"
 
 #: templates/accounts/mfa.html:18 templates/cabling/connect.html:19
-#: templates/core/create.html:9 templates/exchange/preview.html:12
+#: templates/core/_create_form.html:6 templates/exchange/preview.html:12
 #: templates/floorplans/editor.html:41 templates/locations/room_plan.html:15
 #: templates/locations/site_move.html:9 templates/locations/survey.html:24
 #: templates/networks/switch_read.html:13
@@ -4962,15 +5191,15 @@ msgstr "Details"
 #: templates/accounts/profile.html:9 templates/cabling/cable.html:22
 #: templates/core/crud_detail.html:27 templates/dcim/device.html:61
 #: templates/dcim/port.html:42 templates/dcim/rack.html:100
-#: templates/instance/branding.html:9 templates/integrations/webhook.html:34
-#: templates/ipam/address.html:21 templates/ipam/prefix.html:40
-#: templates/ipam/vrf.html:10 templates/library/type_detail.html:32
-#: templates/locations/node.html:85 templates/locations/room_plan.html:15
-#: templates/manage/group_detail.html:9 templates/manage/list_item.html:10
-#: templates/manage/role_detail.html:15 templates/manage/tenant_detail.html:7
-#: templates/networks/stack.html:24 templates/networks/vlan.html:17
-#: templates/networks/wlan.html:17 templates/search/results.html:37
-#: templates/sso/provider.html:12
+#: templates/instance/branding.html:9 templates/instance/settings.html:13
+#: templates/integrations/webhook.html:34 templates/ipam/address.html:21
+#: templates/ipam/prefix.html:40 templates/ipam/vrf.html:10
+#: templates/library/type_detail.html:32 templates/locations/node.html:85
+#: templates/locations/room_plan.html:15 templates/manage/group_detail.html:9
+#: templates/manage/list_item.html:10 templates/manage/role_detail.html:15
+#: templates/manage/tenant_detail.html:7 templates/networks/stack.html:24
+#: templates/networks/vlan.html:17 templates/networks/wlan.html:17
+#: templates/search/results.html:37 templates/sso/provider.html:12
 msgid "Save"
 msgstr "Speichern"
 
@@ -5490,7 +5719,9 @@ msgstr "Letzte Aktualisierung"
 msgid "Not updated yet."
 msgstr "Noch nicht aktualisiert."
 
-#: templates/compute/connection.html:16 templates/integrations/webhook.html:32
+#: templates/compute/connection.html:16 templates/instance/settings.html:2
+#: templates/instance/settings.html:4 templates/integrations/webhook.html:32
+#: templates/manage/_base.html:20
 msgid "Settings"
 msgstr "Einstellungen"
 
@@ -5689,7 +5920,7 @@ msgstr "Diese Version endgültig löschen?"
 msgid "Delete version"
 msgstr "Version löschen"
 
-#: templates/core/create.html:9 templates/dcim/device_form.html:10
+#: templates/core/_create_form.html:6 templates/dcim/device_form.html:10
 #: templates/library/type_form.html:8 templates/locations/site_form.html:9
 msgid "Create"
 msgstr "Erstellen"
@@ -6635,7 +6866,7 @@ msgstr "Objektname"
 msgid "Until"
 msgstr "Bis"
 
-#: templates/history/change.html:2
+#: templates/history/change.html:2 templates/manage/system.html:35
 msgid "Change"
 msgstr "Änderung"
 
@@ -6664,7 +6895,7 @@ msgid "After"
 msgstr "Nachher"
 
 #: templates/instance/branding.html:2 templates/instance/branding.html:4
-#: templates/manage/_base.html:20
+#: templates/manage/_base.html:21
 msgid "Branding"
 msgstr "Branding"
 
@@ -6687,6 +6918,18 @@ msgstr "Logo"
 #: templates/instance/branding.html:14
 msgid "Button"
 msgstr "Schaltfläche"
+
+#: templates/instance/settings.html:5
+msgid "Settings sections"
+msgstr "Bereiche der Einstellungen"
+
+#: templates/instance/settings.html:11
+msgid "A secret is stored"
+msgstr "Ein Geheimnis ist gespeichert"
+
+#: templates/instance/settings.html:17 templates/manage/system.html:40
+msgid "Send a test mail to me"
+msgstr "Testmail an mich senden"
 
 #: templates/integrations/webhook.html:6
 msgid "All webhooks"
@@ -7611,7 +7854,7 @@ msgstr ""
 "Wiederherstellen auf dem Server, nachdem app, worker, scheduler und caddy "
 "gestoppt wurden:"
 
-#: templates/manage/system.html:34
+#: templates/manage/system.html:35
 #, python-format
 msgid ""
 "Uploads are stored in the S3 bucket %(s3_bucket)s; enable versioning there."
@@ -7619,33 +7862,25 @@ msgstr ""
 "Hochgeladene Dateien liegen im S3-Bucket %(s3_bucket)s; aktivieren Sie dort "
 "die Versionierung."
 
-#: templates/manage/system.html:34
+#: templates/manage/system.html:35
 msgid "Uploads are stored in the media volume and archived with every backup."
 msgstr ""
 "Hochgeladene Dateien liegen im Media-Volume und werden mit jeder Sicherung "
 "archiviert."
 
-#: templates/manage/system.html:35
-msgid "Mail"
-msgstr "E-Mail"
-
-#: templates/manage/system.html:36
+#: templates/manage/system.html:37
 msgid "Backend"
 msgstr "Backend"
 
-#: templates/manage/system.html:38
+#: templates/manage/system.html:39
 msgid "Sender"
 msgstr "Absender"
 
-#: templates/manage/system.html:39
-msgid "Send a test mail to me"
-msgstr "Testmail an mich senden"
-
-#: templates/manage/system.html:40
+#: templates/manage/system.html:41
 msgid "Security configuration"
 msgstr "Sicherheitskonfiguration"
 
-#: templates/manage/system.html:41
+#: templates/manage/system.html:42
 msgid "Set through environment variables, see the deployment guide."
 msgstr "Wird über Umgebungsvariablen gesetzt, siehe Bereitstellungshandbuch."
 
@@ -8293,9 +8528,6 @@ msgstr "Mandant gelöscht."
 #, python-format
 #~ msgid "Current tenant: %(tenant)s"
 #~ msgstr "Aktueller Mandant: %(tenant)s"
-
-#~ msgid "Getting started"
-#~ msgstr "Erste Schritte"
 
 #~ msgid ""
 #~ "Sites, racks and devices arrive in the next release. Until then, set up "

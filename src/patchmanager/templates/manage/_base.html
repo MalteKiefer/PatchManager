@@ -17,6 +17,7 @@
       <li><a class="nav-link" href="{% url 'api-ui:clients' %}" {% if '/manage/api-clients' in p %}aria-current="page"{% endif %}>{% translate "API clients" %}</a></li>
       <li><a class="nav-link" href="{% url 'manage:audit' %}" {% if '/manage/audit' in p %}aria-current="page"{% endif %}>{% translate "Audit log" %}</a></li>
       <li><a class="nav-link" href="{% url 'manage:lists' %}" {% if '/manage/lists' in p %}aria-current="page"{% endif %}>{% translate "Lists" %}</a></li>
+      <li><a class="nav-link" href="{% url 'instance:settings' 'security' %}" {% if '/manage/settings' in p %}aria-current="page"{% endif %}>{% translate "Settings" %}</a></li>
       <li><a class="nav-link" href="{% url 'instance:branding' %}" {% if '/manage/branding' in p %}aria-current="page"{% endif %}>{% translate "Branding" %}</a></li>
       <li><a class="nav-link" href="{% url 'manage:system' %}" {% if '/manage/system' in p %}aria-current="page"{% endif %}>{% translate "System" %}</a></li>
     </ul>

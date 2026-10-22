@@ -8,6 +8,10 @@ All notable changes to this project are documented here. The format follows
 
 ### Added
 
+* Administration → Settings: sign in rules, mail server, upload limit and virus
+  scanner, S3/B2 file storage, map tiles and webhook and API limits are set in the
+  web interface and apply without a restart; environment variables are only initial
+  values (ADR 0035).
 * One-off import of volumes and shared folders from QNAP NAS systems (QTS, QuTS hero).
 * Uploads in S3 compatible object storage (AWS S3, Backblaze B2, Wasabi and others)
   with `PATCHMANAGER_S3_BUCKET`; files stay encrypted by the application (ADR 0034).

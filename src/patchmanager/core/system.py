@@ -27,6 +27,7 @@ from django.views.decorators.http import require_POST
 
 from patchmanager import __version__
 from patchmanager.accounts.decorators import permission_required
+from patchmanager.instance import config as instance_config
 from patchmanager.instance import state
 
 VENDORED = [  # front end assets shipped in core/static/vendor
@@ -177,7 +178,7 @@ def system_view(request: HttpRequest) -> HttpResponse:
             pg_version = cursor.fetchone()[0]
     except DatabaseError:
         pg_version = "?"
-    mailer: dict[str, Any] = dict(settings.MAILERS).get("default", {})
+    current = instance_config.get()
     return render(
         request,
         "manage/system.html",
@@ -191,20 +192,20 @@ def system_view(request: HttpRequest) -> HttpResponse:
             "health": health(),
             "jobs": jobs(),
             "backups": backups(),
-            "s3_bucket": settings.S3_BUCKET,
+            "s3_bucket": current.s3_bucket,
             "mail": {
-                "backend": mailer.get("BACKEND", ""),
-                "host": mailer.get("OPTIONS", {}).get("host", ""),
-                "sender": settings.DEFAULT_FROM_EMAIL,
+                "backend": settings.MAILERS["default"]["BACKEND"],
+                "host": current.mail_host,
+                "sender": current.mail_from,
             },
             "security": [
-                (gettext_lazy("MFA required for everyone"), settings.MFA_REQUIRED_FOR_ALL),
-                (gettext_lazy("Minimum password length"), settings.PASSWORD_MIN_LENGTH),
-                (gettext_lazy("Session lifetime (s)"), settings.SESSION_MAX_AGE),
-                (gettext_lazy("Session idle timeout (s)"), settings.SESSION_IDLE_TIMEOUT),
-                (gettext_lazy("Lockout after failures"), settings.LOGIN_MAX_FAILURES),
-                (gettext_lazy("Lockout duration (s)"), settings.LOGIN_LOCKOUT_SECONDS),
-                (gettext_lazy("Login attempts per IP in 10 minutes"), settings.LOGIN_RATE_PER_IP),
+                (gettext_lazy("MFA required for everyone"), current.mfa_required),
+                (gettext_lazy("Minimum password length"), current.password_min_length),
+                (gettext_lazy("Session lifetime (s)"), current.session_max_age),
+                (gettext_lazy("Session idle timeout (s)"), current.session_idle_timeout),
+                (gettext_lazy("Lockout after failures"), current.login_max_failures),
+                (gettext_lazy("Lockout duration (s)"), current.login_lockout_seconds),
+                (gettext_lazy("Login attempts per IP in 10 minutes"), current.login_rate_per_ip),
                 (gettext_lazy("WebAuthn relying party"), settings.WEBAUTHN_RP_ID),
             ],
         },
@@ -230,6 +231,8 @@ def test_mail(request: HttpRequest) -> HttpResponse:
         )
     else:
         messages.success(request, _("A test mail was sent to %(email)s.") % {"email": email})
+    if request.POST.get("back") == "settings":
+        return redirect("instance:settings", "mail")
     return redirect("manage:system")
 
 

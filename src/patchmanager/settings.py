@@ -123,6 +123,7 @@ MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.middleware.csp.ContentSecurityPolicyMiddleware",
+    "patchmanager.instance.runtime.MapTilesCspMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.locale.LocaleMiddleware",
     "django.middleware.common.CommonMiddleware",
@@ -150,7 +151,7 @@ PASSWORD_MIN_LENGTH = int(env("PATCHMANAGER_PASSWORD_MIN_LENGTH", "12"))
 AUTH_PASSWORD_VALIDATORS = [
     {"NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"},
     {
-        "NAME": "django.contrib.auth.password_validation.MinimumLengthValidator",
+        "NAME": "patchmanager.instance.runtime.ConfiguredMinimumLength",
         "OPTIONS": {"min_length": PASSWORD_MIN_LENGTH},
     },
     {"NAME": "django.contrib.auth.password_validation.CommonPasswordValidator"},
@@ -161,7 +162,8 @@ SESSION_COOKIE_NAME = "__Host-pm_session" if not DEBUG else "pm_session"
 CSRF_COOKIE_NAME = "__Host-pm_csrf" if not DEBUG else "pm_csrf"
 SESSION_MAX_AGE = int(env("PATCHMANAGER_SESSION_MAX_AGE", str(12 * 3600)))
 SESSION_IDLE_TIMEOUT = int(env("PATCHMANAGER_SESSION_IDLE_TIMEOUT", str(30 * 60)))
-SESSION_COOKIE_AGE = SESSION_MAX_AGE
+# The session policy in the admin area ends sessions earlier; this is only the upper bound.
+SESSION_COOKIE_AGE = 30 * 24 * 3600
 MFA_REQUIRED_FOR_ALL = env_bool("PATCHMANAGER_MFA_REQUIRED")
 LOGIN_MAX_FAILURES = int(env("PATCHMANAGER_LOGIN_MAX_FAILURES", "10"))
 LOGIN_LOCKOUT_SECONDS = int(env("PATCHMANAGER_LOGIN_LOCKOUT_SECONDS", "900"))
@@ -208,26 +210,20 @@ CELERY_BEAT_SCHEDULE = {
 WEBHOOK_ALLOWED_NETWORKS = env_list("PATCHMANAGER_WEBHOOK_ALLOWED_NETWORKS")
 WEBHOOK_ALLOW_HTTP = env_bool("PATCHMANAGER_WEBHOOK_ALLOW_HTTP", False)
 
-# Mail
-_MAIL_BACKEND = env(
-    "PATCHMANAGER_EMAIL_BACKEND",
-    "django.core.mail.backends.console.EmailBackend"
-    if DEBUG
-    else "django.core.mail.backends.smtp.EmailBackend",
-)
+# Mail: the server is set in the admin area (instance.runtime.ConfiguredMailBackend); these
+# environment values are its initial values. PATCHMANAGER_EMAIL_BACKEND replaces it entirely.
+MAIL_DEFAULTS = {
+    "host": env("PATCHMANAGER_EMAIL_HOST", ""),
+    "port": int(env("PATCHMANAGER_EMAIL_PORT", "587")),
+    "username": env("PATCHMANAGER_EMAIL_USER", ""),
+    "password": env("PATCHMANAGER_EMAIL_PASSWORD", ""),
+    "use_tls": env_bool("PATCHMANAGER_EMAIL_USE_TLS", True),
+}
 MAILERS = {
     "default": {
-        "BACKEND": _MAIL_BACKEND,
-        "OPTIONS": {
-            "host": env("PATCHMANAGER_EMAIL_HOST", "localhost"),
-            "port": int(env("PATCHMANAGER_EMAIL_PORT", "587")),
-            "username": env("PATCHMANAGER_EMAIL_USER", ""),
-            "password": env("PATCHMANAGER_EMAIL_PASSWORD", ""),
-            "use_tls": env_bool("PATCHMANAGER_EMAIL_USE_TLS", True),
-            "timeout": 20,
-        }
-        if _MAIL_BACKEND.endswith("smtp.EmailBackend")
-        else {},
+        "BACKEND": env(
+            "PATCHMANAGER_EMAIL_BACKEND", "patchmanager.instance.runtime.ConfiguredMailBackend"
+        ),
     }
 }
 DEFAULT_FROM_EMAIL = env("PATCHMANAGER_EMAIL_FROM", "patchmanager@localhost")
@@ -270,9 +266,10 @@ STATIC_ROOT = Path(env("PATCHMANAGER_STATIC_ROOT", str(BASE_DIR.parent.parent / 
 MEDIA_ROOT = Path(env("PATCHMANAGER_MEDIA_ROOT", str(BASE_DIR.parent.parent / "media")))
 STORAGES = {
     "staticfiles": {"BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage"},
-    # Encrypted uploads. Never served directly: see metadata.views.download.
+    # Encrypted uploads, in the media volume or the bucket set in the admin area
+    # (instance.runtime). Never served directly: see metadata.views.download.
     "attachments": {
-        "BACKEND": "django.core.files.storage.FileSystemStorage",
+        "BACKEND": "patchmanager.instance.runtime.AttachmentStorage",
         "OPTIONS": {
             "location": MEDIA_ROOT / "attachments",
             "base_url": None,
@@ -281,30 +278,22 @@ STORAGES = {
         },
     },
 }
-# S3 compatible object storage (AWS S3, Backblaze B2, Wasabi, Ceph, Garage) instead of the
-# media volume. Files are already encrypted by the application; the bucket stays private.
-S3_BUCKET = env("PATCHMANAGER_S3_BUCKET", "")
-S3_ENDPOINT_URL = env("PATCHMANAGER_S3_ENDPOINT_URL", "")
-if S3_ENDPOINT_URL and not S3_ENDPOINT_URL.startswith("https://"):
+# Initial values for the storage settings in the admin area: S3 compatible object storage
+# (AWS S3, Backblaze B2, Wasabi, Ceph, Garage) instead of the media volume.
+S3_DEFAULTS = {
+    "bucket": env("PATCHMANAGER_S3_BUCKET", ""),
+    "endpoint_url": env("PATCHMANAGER_S3_ENDPOINT_URL", ""),
+    "region": env("PATCHMANAGER_S3_REGION", ""),
+    "access_key_id": env("PATCHMANAGER_S3_ACCESS_KEY_ID", ""),
+    "secret_access_key": env("PATCHMANAGER_S3_SECRET_ACCESS_KEY", ""),
+    "prefix": env("PATCHMANAGER_S3_PREFIX", "attachments"),
+    "addressing_style": env("PATCHMANAGER_S3_ADDRESSING_STYLE", ""),
+}
+if S3_DEFAULTS["endpoint_url"] and not S3_DEFAULTS["endpoint_url"].startswith("https://"):
     raise ImproperlyConfigured("PATCHMANAGER_S3_ENDPOINT_URL must use https.")
-if S3_BUCKET:
-    STORAGES["attachments"] = {
-        "BACKEND": "storages.backends.s3.S3Storage",
-        "OPTIONS": {
-            "bucket_name": S3_BUCKET,
-            "endpoint_url": S3_ENDPOINT_URL or None,
-            "region_name": env("PATCHMANAGER_S3_REGION", "") or None,
-            "access_key": env("PATCHMANAGER_S3_ACCESS_KEY_ID"),
-            "secret_key": env("PATCHMANAGER_S3_SECRET_ACCESS_KEY"),
-            "location": env("PATCHMANAGER_S3_PREFIX", "attachments"),
-            # B2 and most other providers reject ACL headers; access is the bucket policy.
-            "default_acl": None,
-            "file_overwrite": False,
-            "addressing_style": env("PATCHMANAGER_S3_ADDRESSING_STYLE", "") or None,
-        },
-    }
 UPLOAD_MAX_BYTES = int(env("PATCHMANAGER_UPLOAD_MAX_MB", "20")) * 1024 * 1024
-DATA_UPLOAD_MAX_MEMORY_SIZE = UPLOAD_MAX_BYTES + 1024 * 1024
+UPLOAD_LIMIT_MB = 25  # Caddy limits request bodies to 25 MB; the admin setting stays below
+DATA_UPLOAD_MAX_MEMORY_SIZE = (UPLOAD_LIMIT_MB + 1) * 1024 * 1024
 FILE_UPLOAD_MAX_MEMORY_SIZE = 5 * 1024 * 1024
 CLAMD_HOST = env("PATCHMANAGER_CLAMD_HOST", "")
 CLAMD_PORT = int(env("PATCHMANAGER_CLAMD_PORT", "3310"))
@@ -362,6 +351,7 @@ LOGGING = {
 }
 
 # REST API (ADR 0019)
+API_RATE = env("PATCHMANAGER_API_RATE", "1200/minute")  # initial value of the admin setting
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": [
         "patchmanager.api.authentication.TokenAuthentication",
@@ -372,8 +362,8 @@ REST_FRAMEWORK = {
     "DEFAULT_RENDERER_CLASSES": ["rest_framework.renderers.JSONRenderer"],
     "DEFAULT_PARSER_CLASSES": ["rest_framework.parsers.JSONParser"],
     "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
-    "DEFAULT_THROTTLE_CLASSES": ["rest_framework.throttling.UserRateThrottle"],
-    "DEFAULT_THROTTLE_RATES": {"user": env("PATCHMANAGER_API_RATE", "1200/minute")},
+    "DEFAULT_THROTTLE_CLASSES": ["patchmanager.instance.runtime.ConfiguredUserRateThrottle"],
+    "DEFAULT_THROTTLE_RATES": {"user": API_RATE},
     "EXCEPTION_HANDLER": "patchmanager.api.core.exception_handler",
     "UNAUTHENTICATED_USER": "django.contrib.auth.models.AnonymousUser",
 }
