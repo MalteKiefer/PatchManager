@@ -3,10 +3,37 @@
 {% block manage %}
 <h1 class="mb-4">{% translate "System" %}</h1>
 <div class="grid gap-6 lg:grid-cols-2">
-  <section class="card"><h2 class="mb-3">{% translate "Versions" %}</h2>
-    <dl class="grid grid-cols-2 gap-1 text-sm">{% for k, v in versions.items %}<dt class="text-slate-500">{{ k }}</dt><dd class="font-mono">{{ v }}</dd>{% endfor %}</dl></section>
-  <section class="card"><h2 class="mb-1">{% translate "Security configuration" %}</h2>
+  <section class="card" aria-labelledby="health-h"><h2 id="health-h" class="mb-3">{% translate "Health" %}</h2>
+    <ul class="space-y-2 text-sm">{% for c in health %}<li class="flex items-center gap-2">
+      {% if c.ok %}<span class="badge-ok">{% translate "OK" %}</span>{% else %}<span class="badge-warn">{% translate "problem" %}</span>{% endif %}
+      <span class="font-medium">{{ c.label }}</span><span class="text-slate-500">{{ c.detail }} · {{ c.ms }} ms</span></li>{% endfor %}</ul></section>
+  <section class="card" aria-labelledby="versions-h"><h2 id="versions-h" class="mb-3">{% translate "Versions" %}</h2>
+    <dl class="grid grid-cols-2 gap-1 text-sm">{% for k, v in versions.items %}<dt class="text-slate-500">{{ k }}</dt><dd class="font-mono">{{ v }}</dd>{% endfor %}</dl>
+    <p class="mt-3 text-sm"><a href="{% url 'licenses' %}">{% translate "License notices" %}</a></p></section>
+  <section class="card lg:col-span-2" aria-labelledby="jobs-h"><h2 id="jobs-h" class="mb-1">{% translate "Background jobs" %}</h2>
+    <p class="mb-3 text-sm text-slate-500">{% blocktranslate count n=jobs.failures %}{{ n }} failure in the last 24 hours.{% plural %}{{ n }} failures in the last 24 hours.{% endblocktranslate %}
+      {% blocktranslate with p=jobs.deliveries.pending f=jobs.deliveries.failed %}Webhook deliveries: {{ p }} pending, {{ f }} failed.{% endblocktranslate %}</p>
+    <div class="grid gap-6 lg:grid-cols-2">
+      <div class="overflow-x-auto"><table class="table"><thead><tr><th>{% translate "Job" %}</th><th>{% translate "Started" %}</th><th>{% translate "Status" %}</th></tr></thead>
+        <tbody>{% for r in jobs.recent %}<tr><td class="font-mono text-xs">{{ r.name }}</td><td class="text-xs">{{ r.started_at|date:"SHORT_DATETIME_FORMAT" }}</td>
+          <td>{% if r.status == "failure" %}<span class="badge-warn">{{ r.get_status_display }}</span> <span class="text-xs">{{ r.error }}</span>{% else %}{{ r.get_status_display }}{% endif %}</td></tr>
+        {% empty %}<tr><td colspan="3" class="text-slate-500">{% translate "No runs recorded yet." %}</td></tr>{% endfor %}</tbody></table></div>
+      <div class="overflow-x-auto"><table class="table"><thead><tr><th>{% translate "Schedule" %}</th><th>{% translate "Every (s)" %}</th></tr></thead>
+        <tbody>{% for name, task, every in jobs.schedule %}<tr><td class="font-mono text-xs">{{ name }}</td><td>{{ every }}</td></tr>{% endfor %}</tbody></table></div>
+    </div></section>
+  <section class="card" aria-labelledby="backups-h"><h2 id="backups-h" class="mb-3">{% translate "Backups" %}</h2>
+    {% if not backups.configured %}<p class="text-sm text-slate-500">{% translate "Mount the backup volume read only and set PATCHMANAGER_BACKUP_DIR to see restore points here." %}</p>
+    {% elif not backups.readable %}<p class="text-sm text-red-600">{% translate "The backup folder cannot be read." %}</p>
+    {% else %}{% if backups.stale %}<p class="mb-2 text-sm"><span class="badge-warn">{% translate "No backup in the last 36 hours." %}</span></p>{% endif %}
+    <ul class="space-y-1 text-sm">{% for b in backups.files %}<li class="flex justify-between gap-3"><span class="font-mono text-xs">{{ b.name }}</span><span class="text-slate-500">{{ b.at|date:"SHORT_DATETIME_FORMAT" }} · {{ b.size|filesizeformat }}</span></li>{% empty %}<li class="text-slate-500">{% translate "No restore points yet." %}</li>{% endfor %}</ul>
+    <p class="mt-3 text-xs text-slate-500">{% translate "Restoring is done on the server, see the deployment guide." %}</p>{% endif %}</section>
+  <section class="card" aria-labelledby="mail-h"><h2 id="mail-h" class="mb-3">{% translate "Mail" %}</h2>
+    <dl class="mb-3 grid grid-cols-2 gap-1 text-sm"><dt class="text-slate-500">{% translate "Backend" %}</dt><dd class="break-all font-mono text-xs">{{ mail.backend }}</dd>
+      <dt class="text-slate-500">{% translate "Server" %}</dt><dd class="font-mono text-xs">{{ mail.host|default:"-" }}</dd>
+      <dt class="text-slate-500">{% translate "Sender" %}</dt><dd class="font-mono text-xs">{{ mail.sender }}</dd></dl>
+    <form method="post" action="{% url 'manage:test-mail' %}">{% csrf_token %}<button class="btn-secondary">{% translate "Send a test mail to me" %}</button></form></section>
+  <section class="card lg:col-span-2" aria-labelledby="sec-h"><h2 id="sec-h" class="mb-1">{% translate "Security configuration" %}</h2>
     <p class="mb-3 text-xs text-slate-500">{% translate "Set through environment variables, see the deployment guide." %}</p>
-    <dl class="grid grid-cols-2 gap-1 text-sm">{% for k, v in security.items %}<dt class="text-slate-500">{{ k }}</dt><dd class="font-mono">{{ v }}</dd>{% endfor %}</dl></section>
+    <dl class="grid grid-cols-2 gap-1 text-sm">{% for k, v in security %}<dt class="text-slate-500">{{ k }}</dt><dd class="font-mono">{{ v }}</dd>{% endfor %}</dl></section>
 </div>
 {% endblock %}

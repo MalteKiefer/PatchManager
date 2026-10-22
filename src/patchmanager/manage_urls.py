@@ -4,7 +4,7 @@ from django.urls import path
 
 from patchmanager.accounts.views import manage
 from patchmanager.audit import views as audit
-from patchmanager.core.system import system_view
+from patchmanager.core.system import system_view, test_mail
 from patchmanager.tenancy import views as tenancy
 
 app_name = "manage"
@@ -37,4 +37,5 @@ urlpatterns = [
     path("audit/export.csv", audit.event_export, name="audit-export"),
     path("audit/verify/", audit.verify_chain, name="audit-verify"),
     path("system/", system_view, name="system"),
+    path("system/test-mail/", test_mail, name="test-mail"),
 ]

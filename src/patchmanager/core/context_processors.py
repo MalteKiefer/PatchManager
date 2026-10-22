@@ -2,6 +2,7 @@
 
 from typing import Any
 
+from django.conf import settings
 from django.http import HttpRequest
 from django.utils.functional import SimpleLazyObject
 
@@ -13,6 +14,7 @@ def ui(request: HttpRequest) -> dict[str, Any]:
     return {
         "instance_name": SimpleLazyObject(state.instance_name),
         "branding": SimpleLazyObject(state.get),
+        "source_url": settings.SOURCE_URL,
         "features": SimpleLazyObject(lambda: editions.current().features),  # only read where shown
         "theme": request.COOKIES.get("pm_theme", "system"),
         "current_tenant": getattr(request, "tenant", None),

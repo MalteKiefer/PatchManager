@@ -28,7 +28,7 @@ class Snapshot:
 
 def get() -> Snapshot:
     """The current settings (defaults while none are stored)."""
-    snapshot = cache.get(CACHE_KEY)
+    snapshot: Snapshot | None = cache.get(CACHE_KEY)
     if snapshot is None:
         from patchmanager.instance.models import InstanceSettings
 

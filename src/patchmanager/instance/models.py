@@ -23,3 +23,25 @@ class InstanceSettings(TimestampedModel):
 
     def __str__(self) -> str:
         return self.name or "PatchManager"
+
+
+class JobRun(models.Model):
+    """One run of a background job (kept a few days for the job monitor)."""
+
+    class Status(models.TextChoices):
+        RUNNING = "running", _("running")
+        SUCCESS = "success", _("done")
+        FAILURE = "failure", _("failed")
+
+    task_id = models.CharField(max_length=64, unique=True)
+    name = models.CharField(max_length=200)
+    status = models.CharField(max_length=10, choices=Status.choices, default=Status.RUNNING)
+    started_at = models.DateTimeField(db_index=True)
+    finished_at = models.DateTimeField(null=True)
+    error = models.CharField(max_length=300, blank=True)
+
+    class Meta:
+        ordering = ["-started_at"]
+
+    def __str__(self) -> str:
+        return f"{self.name} {self.status}"

@@ -5,12 +5,13 @@ from functools import wraps
 from typing import Any
 
 from django.http import HttpRequest, HttpResponse
+from django.http.response import HttpResponseBase
 from django.shortcuts import render
 from django.utils.translation import gettext as _
 
 from patchmanager.instance import editions
 
-View = Callable[..., HttpResponse]
+View = Callable[..., HttpResponseBase]
 
 
 def not_in_edition(request: HttpRequest, feature: str) -> HttpResponse:
@@ -24,7 +25,7 @@ def feature_required(feature: str) -> Callable[[View], View]:
 
     def decorator(view: View) -> View:
         @wraps(view)
-        def wrapped(request: HttpRequest, *args: Any, **kwargs: Any) -> HttpResponse:
+        def wrapped(request: HttpRequest, *args: Any, **kwargs: Any) -> HttpResponseBase:
             if not editions.enabled(feature):
                 return not_in_edition(request, feature)
             return view(request, *args, **kwargs)
