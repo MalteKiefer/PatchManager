@@ -178,6 +178,24 @@ Port settings such as link aggregation, MTU, edge port, guards and OSPF can also
 edited on each port. Under *Networks → Stacks* you group switches into stacks, VSF,
 VSX or MLAG pairs or a virtual chassis, with member number, role and priority.
 
+## Customers, systems and lines
+
+*Customers and systems* lists organisations (customers, suppliers, providers,
+service partners, departments) with their contacts, systems such as a phone system
+or building automation, and lines from providers with their contracts. On the page
+of a device, building, VLAN, network, address, configuration or stack, **Link** puts
+it into a system or assigns it to an organisation, for example as its customer. A
+system's page lists everything linked to it.
+
+Devices also record their supplier, warranty, support contract and end of life.
+
+## DHCP and DNS
+
+Under *IP networks*, **DHCP** documents scopes (range, gateway, DNS servers, domain,
+lease time, relays and further options) with reservations by MAC address, and
+**DNS** documents zones with their records. A scope downloads as a Kea
+configuration, a zone as a zone file.
+
 ## VLANs and WLANs
 
 **Networks** holds VLANs (for the whole tenant or one site) and WLANs. On a

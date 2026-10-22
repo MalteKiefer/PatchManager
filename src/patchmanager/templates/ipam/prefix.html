@@ -30,6 +30,7 @@
     {% endif %}
   </div>
   <aside class="space-y-6">
+    {% links_panel prefix %}
     {% if free %}<section class="card" aria-labelledby="free-h"><h2 id="free-h" class="mb-3">{% translate "Free addresses" %}</h2>
       <ul class="space-y-1.5 text-sm">{% for first, last, count in free %}<li class="flex items-center gap-2">
         <span class="tabular-nums">{{ first }}{% if count > 1 %} – {{ last }}{% endif %}</span><span class="text-xs text-slate-500">{{ count }}</span>

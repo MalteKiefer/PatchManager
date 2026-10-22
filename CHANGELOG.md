@@ -12,6 +12,13 @@ All notable changes to this project are documented here. The format follows
   instances), VLAN interfaces with addresses, static routes, OSPF, BGP neighbors,
   tunnelled ports, device profiles, and a port matrix coloured by VLAN (ADR 0029).
 * Stacks and virtual switches (stacking, VSF, VSX, MLAG, virtual chassis).
+* Customers and systems: organisations with contacts, systems (telephony, building
+  automation, access control ...), and links that assign devices, buildings, VLANs,
+  networks, configurations and more to a system or customer (ADR 0030).
+* DHCP scopes with reservations (Kea export) and DNS zones with records (zone file
+  export).
+* Lines from providers with bandwidth, handover port and contract; device supplier,
+  warranty, support and end of life.
 * Read ArubaOS-Switch configurations and Aruba Central templates into the
   documentation with a preview of every change; write the documentation back as an
   ArubaOS-Switch configuration.

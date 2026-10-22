@@ -1,0 +1,9 @@
+{% if not hide %}{% load i18n %}<section class="card" aria-labelledby="links-{{ target.pk }}">
+  <div class="mb-2 flex items-center gap-2"><h2 id="links-{{ target.pk }}" class="mr-auto">{% translate "Systems and organizations" %}</h2>
+    {% if can_change %}<a class="btn-secondary" href="{% url 'directory:link-create' %}?target={{ label }}:{{ target.pk }}">{% translate "Link" %}</a>{% endif %}</div>
+  <ul class="space-y-1 text-sm">{% for link in links %}
+    <li class="flex items-center gap-2"><span class="badge-muted">{{ link.get_role_display }}</span>
+      {% if link.system %}<a href="{% url 'objects:detail' 'systems' link.system_id %}">{{ link.system }}</a>{% else %}<a href="{% url 'objects:detail' 'organizations' link.organization_id %}">{{ link.organization }}</a>{% endif %}
+      {% if can_change %}<form method="post" action="{% url 'directory:link-delete' link.pk %}" class="ml-auto"><input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}"><input type="hidden" name="next" value="{{ request.get_full_path }}"><button class="btn-secondary py-0.5 text-xs">{% translate "Remove" %}</button></form>{% endif %}</li>
+  {% empty %}<li class="text-slate-500">{% translate "Not linked to a system or organization." %}</li>{% endfor %}</ul>
+</section>{% endif %}

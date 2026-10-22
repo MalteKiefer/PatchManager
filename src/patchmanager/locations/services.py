@@ -144,6 +144,28 @@ def _check_site_is_self_contained(site: Any, device_model: Any) -> None:
         raise ServiceError(
             _("Ports in this site use tenant wide VLANs or WLANs. Remove those assignments first.")
         )
+    from patchmanager.circuits.models import Circuit
+    from patchmanager.directory.models import Link, System
+    from patchmanager.ipam.models import DHCPScope, DNSZone
+
+    inside = device_model.objects.filter(path__descendant_of=site.path)
+    if (
+        System.objects.filter(site=site).exists()
+        or Circuit.objects.filter(site=site).exists()
+        or Circuit.objects.filter(port__in=inside_ports).exists()
+        or DHCPScope.objects.filter(server__in=inside).exists()
+        or DNSZone.objects.filter(server__in=inside).exists()
+        or inside.filter(supplier__isnull=False).exists()
+        or Link.objects.filter(
+            object_id__in=[site.pk, *inside.values_list("pk", flat=True)]
+        ).exists()
+    ):
+        raise ServiceError(
+            _(
+                "Systems, lines, suppliers, customers or DHCP and DNS servers refer to this site."
+                " Remove those references first."
+            )
+        )
 
 
 def move_site(request: HttpRequest, actor: User, site: Any, target: Tenant) -> None:

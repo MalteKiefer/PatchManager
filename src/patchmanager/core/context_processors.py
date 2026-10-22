@@ -16,6 +16,7 @@ SECTIONS = {
     "library": "library",
     "cabling": "cables",
     "networks": "networks",
+    "directory": "directory",
     "ipam": "ipam",
     "history": "activity",
     "search": "search",
@@ -26,6 +27,18 @@ SECTIONS = {
     "sso": "admin",
     "instance": "admin",
 }
+
+
+def _section(request: HttpRequest) -> str:
+    """The navigation entry of the current page."""
+    match = request.resolver_match
+    namespace = getattr(match, "namespace", "") or ""
+    if namespace == "objects":  # shared record pages: DHCP and DNS belong to IP networks
+        from patchmanager.core.crud import REGISTRY
+
+        resource = REGISTRY.get(match.kwargs.get("key", "")) if match else None
+        return "ipam" if resource is not None and resource.group == "services" else "directory"
+    return SECTIONS.get(namespace, "")
 
 
 def ui(request: HttpRequest) -> dict[str, Any]:
@@ -40,5 +53,5 @@ def ui(request: HttpRequest) -> dict[str, Any]:
         "current_tenant": getattr(request, "tenant", None),
         "available_tenants": getattr(request, "available_tenants", []),
         "impersonator": getattr(request, "impersonator", None),
-        "section": SECTIONS.get(getattr(request.resolver_match, "namespace", "") or "", ""),
+        "section": _section(request),
     }

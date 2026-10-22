@@ -1,0 +1,2 @@
+{% load i18n %}<section class="card text-sm" aria-labelledby="facts-h"><h2 id="facts-h" class="mb-3">{% translate "Overview" %}</h2>
+  <dl class="panel-facts mt-0">{% for label, value in facts %}<div><dt>{{ label }}</dt><dd>{{ value }}</dd></div>{% endfor %}</dl></section>

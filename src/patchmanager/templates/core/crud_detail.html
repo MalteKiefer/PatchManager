@@ -1,0 +1,32 @@
+{% extends "base.html" %}{% load i18n pm %}
+{% block title %}{{ obj }}{% endblock %}
+{% block content %}
+<nav aria-label="{% translate 'Breadcrumb' %}" class="mb-3 text-sm"><a href="{{ back_url }}">{% if parent %}{{ parent }}{% else %}{{ resource.title }}{% endif %}</a> / {{ obj }}</nav>
+<div class="mb-6 flex flex-wrap items-center gap-3"><h1 class="mr-auto">{{ obj }}</h1>{% block actions %}{% if export_url %}<a class="btn-secondary" href="{{ export_url }}">{{ export_label }}</a>{% endif %}{% endblock %}</div>
+<div class="grid gap-6 lg:grid-cols-3">
+  <div class="space-y-6 lg:col-span-2">
+    {% if resource.template %}{% include resource.template %}{% endif %}
+    {% for child in children %}
+    <section class="card" aria-labelledby="child-{{ child.resource.key }}">
+      <div class="mb-3 flex items-center gap-2"><h2 id="child-{{ child.resource.key }}" class="mr-auto">{{ child.resource.title }}</h2>
+        {% if can_change %}<a class="btn-secondary" href="{% url 'objects:new' child.resource.key %}?parent={{ obj.pk }}">{{ child.resource.new }}</a>{% endif %}</div>
+      <div class="overflow-x-auto"><table class="table">
+        <thead><tr>{% for h in child.headers %}<th>{{ h }}</th>{% endfor %}</tr></thead>
+        <tbody>{% for o, cells in child.rows %}<tr>{% for c in cells %}<td>{% if forloop.first %}<a href="{% url 'objects:detail' child.resource.key o.pk %}">{{ c }}</a>{% else %}{{ c }}{% endif %}</td>{% endfor %}</tr>
+        {% empty %}<tr><td colspan="{{ child.headers|length }}" class="text-slate-500">{% translate "Nothing here yet." %}</td></tr>{% endfor %}</tbody>
+      </table></div>
+    </section>
+    {% endfor %}
+    {% links_panel obj %}
+    {% metadata_panel obj %}
+  </div>
+  <aside class="space-y-6">
+    <form method="post" class="card" novalidate>{% csrf_token %}<input type="hidden" name="action" value="edit">
+      <h2 class="mb-3">{% translate "Details" %}</h2>
+      <fieldset {% if not can_change %}disabled{% endif %}>{% include "core/_form.html" %}</fieldset>
+      {% if can_change %}<button class="btn-primary">{% translate "Save" %}</button>{% endif %}
+    </form>
+    {% if can_delete %}<form method="post" data-confirm="{% translate 'Delete this entry?' %}">{% csrf_token %}<button name="action" value="delete" class="btn-danger">{% translate "Delete" %}</button></form>{% endif %}
+  </aside>
+</div>
+{% endblock %}

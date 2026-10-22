@@ -1,4 +1,4 @@
-{% extends "base.html" %}{% load i18n %}
+{% extends "base.html" %}{% load i18n pm %}
 {% block title %}{{ stack.name }}{% endblock %}
 {% block content %}
 <nav aria-label="{% translate 'Breadcrumb' %}" class="mb-3 text-sm"><a href="{% url 'networks:stacks' %}">{% translate "Stacks" %}</a> / {{ stack.name }}</nav>
@@ -17,6 +17,7 @@
       </li>{% empty %}<li class="text-sm text-slate-500">{% translate "No switches in this stack yet." %}</li>{% endfor %}</ol>
   </section>
   <aside class="space-y-6">
+    {% links_panel stack %}
     <form method="post" class="card" novalidate>{% csrf_token %}<input type="hidden" name="action" value="edit">
       <h2 class="mb-3">{% translate "Details" %}</h2>
       <fieldset {% if not can_change %}disabled{% endif %}>{% include "core/_form.html" %}</fieldset>
