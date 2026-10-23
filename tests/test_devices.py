@@ -4,6 +4,7 @@ import pytest
 from django.db import DatabaseError, transaction
 from django.test import Client
 
+from patchmanager.accounts.models import Assignment, Role
 from patchmanager.accounts.services import ServiceError
 from patchmanager.dcim import devices
 from patchmanager.dcim.models import Device, Port, Rack, RackSpace
@@ -159,7 +160,7 @@ def test_patch_panel_front_to_rear_mapping(make_tree, make_type, super_admin) ->
         ] == list(range(1, 13))
 
 
-def test_place_and_move(make_tree, make_type, super_admin) -> None:
+def test_place_and_move(make_tree, make_type, make_user, super_admin) -> None:
     t = make_tree()
     other_rack = None
     server = make_type("Server", u_height=1)
@@ -173,11 +174,20 @@ def test_place_and_move(make_tree, make_type, super_admin) -> None:
             rack=t["rack"],
             position=5,
         )
+        viewer = make_user()
+        granted = Assignment.objects.create(
+            role=Role.objects.get(key="viewer"),
+            user=viewer,
+            tenant=t["tenant"],
+            scope_path=device.path,
+        )
         devices.place(
             t["request"], super_admin, device, room=t["room"], rack=other_rack, position=7
         )
         device = Device.objects.get(pk=device.pk)
         assert device.rack == other_rack and device.space.start == 7
+        # A role on the device still covers it at the new place.
+        assert str(Assignment.objects.get(pk=granted.pk).scope_path) == str(device.path)
         assert str(device.path).startswith(str(other_rack.path))
         devices.place(t["request"], super_admin, device, room=t["room"], rack=None, position=None)
         assert not RackSpace.objects.filter(device=device).exists()

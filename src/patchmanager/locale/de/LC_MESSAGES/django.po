@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-23 03:38+0000\n"
+"POT-Creation-Date: 2026-10-23 04:34+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -680,7 +680,7 @@ msgstr "Keine gültige ID."
 msgid "Not a valid value."
 msgstr "Kein gültiger Wert."
 
-#: api/core.py:102 networks/switchconfig.py:531
+#: api/core.py:102 networks/switchconfig.py:533
 msgid "Not found."
 msgstr "Nicht gefunden."
 
@@ -1171,7 +1171,9 @@ msgstr ""
 msgid ""
 "The cluster %(cluster)s is already updated by the connection %(other)s. "
 "Rename the documented cluster first."
-msgstr "Der Cluster %(cluster)s wird bereits von der Verbindung %(other)s aktualisiert. Benennen Sie zuerst den dokumentierten Cluster um."
+msgstr ""
+"Der Cluster %(cluster)s wird bereits von der Verbindung %(other)s "
+"aktualisiert. Benennen Sie zuerst den dokumentierten Cluster um."
 
 #: compute/connections.py:159
 msgid "The person who set up this connection can no longer sign in."
@@ -1295,88 +1297,89 @@ msgstr "Host %(name)s ist nicht als Gerät dokumentiert."
 msgid "Host %(name)s belongs to another cluster."
 msgstr "Host %(name)s gehört zu einem anderen Cluster."
 
-#: compute/importing.py:222
+#: compute/importing.py:228
 #, python-format
 msgid "%(vm)s: network card %(nic)s was left out."
 msgstr "%(vm)s: Netzwerkkarte %(nic)s wurde ausgelassen."
 
-#: compute/importing.py:239
+#: compute/importing.py:245
 #, python-format
 msgid "%(vm)s: disk %(disk)s was left out."
 msgstr "%(vm)s: Festplatte %(disk)s wurde ausgelassen."
 
-#: compute/importing.py:292
+#: compute/importing.py:304
 #, python-format
 msgid "%(address)s is no longer on %(vm)s but stays linked: %(error)s"
-msgstr "%(address)s ist nicht mehr auf %(vm)s, bleibt aber verknüpft: %(error)s"
+msgstr ""
+"%(address)s ist nicht mehr auf %(vm)s, bleibt aber verknüpft: %(error)s"
 
-#: compute/importing.py:316
+#: compute/importing.py:328
 #, python-format
 msgid "%(address)s of %(vm)s is already used elsewhere and was not linked."
 msgstr ""
 "%(address)s von %(vm)s wird bereits anderweitig verwendet und wurde nicht "
 "verknüpft."
 
-#: compute/importing.py:354 compute/pages.py:124 networks/switch_views.py:39
+#: compute/importing.py:366 compute/pages.py:124 networks/switch_views.py:39
 msgid "Platform"
 msgstr "Plattform"
 
-#: compute/importing.py:363 exchange/pdf.py:172 ipam/pages.py:148
+#: compute/importing.py:375 exchange/pdf.py:172 ipam/pages.py:148
 #: templates/accounts/security.html:50 templates/compute/connection.html:18
 #: templates/ipam/addresses.html:10 templates/ipam/prefix.html:24
 #: templates/manage/audit.html:18 templates/networks/switching.html:28
 msgid "Address"
 msgstr "Adresse"
 
-#: compute/importing.py:365
+#: compute/importing.py:377
 msgid ""
 "For example https://pve.example.lan:8006 or https://vcenter.example.lan."
 msgstr ""
 "Zum Beispiel https://pve.example.lan:8006 oder https://vcenter.example.lan."
 
-#: compute/importing.py:369
+#: compute/importing.py:381
 msgid "API token (Proxmox)"
 msgstr "API-Token (Proxmox)"
 
-#: compute/importing.py:372
+#: compute/importing.py:384
 msgid "user@realm!tokenid=secret, with read rights (PVEAuditor)."
 msgstr "user@realm!tokenid=secret, mit Leserechten (PVEAuditor)."
 
-#: compute/importing.py:375
+#: compute/importing.py:387
 msgid "User (vCenter, NAS)"
 msgstr "Benutzer (vCenter, NAS)"
 
-#: compute/importing.py:378
+#: compute/importing.py:390
 msgid "Password (vCenter, NAS)"
 msgstr "Passwort (vCenter, NAS)"
 
-#: compute/importing.py:383
+#: compute/importing.py:395
 msgid "Certificate fingerprint (SHA-256)"
 msgstr "Zertifikats-Fingerabdruck (SHA-256)"
 
-#: compute/importing.py:387
+#: compute/importing.py:399
 msgid ""
 "Only for self signed certificates; otherwise the certificate is verified."
 msgstr ""
 "Nur für selbstsignierte Zertifikate; sonst wird das Zertifikat geprüft."
 
-#: compute/importing.py:391
+#: compute/importing.py:403
 msgid "NAS device (Synology, QNAP)"
 msgstr "NAS-Gerät (Synology, QNAP)"
 
-#: compute/importing.py:409
+#: compute/importing.py:421
 msgid "Enter the API token."
 msgstr "Geben Sie das API-Token ein."
 
-#: compute/importing.py:413
+#: compute/importing.py:425
 msgid "Enter user and password."
 msgstr "Geben Sie Benutzer und Passwort ein."
 
-#: compute/importing.py:415
+#: compute/importing.py:427
 msgid "Choose the NAS device the storage belongs to."
 msgstr "Wählen Sie das NAS-Gerät, zu dem der Speicher gehört."
 
-#: compute/importing.py:453
+#: compute/importing.py:465
 #, python-format
 msgid ""
 "%(created)s new and %(updated)s updated machines, %(storage)s storage "
@@ -1385,11 +1388,11 @@ msgstr ""
 "%(created)s neue und %(updated)s aktualisierte Maschinen, %(storage)s "
 "Speichereinträge."
 
-#: compute/importing.py:465
+#: compute/importing.py:477
 msgid "Import from a platform"
 msgstr "Von einer Plattform importieren"
 
-#: compute/importing.py:467
+#: compute/importing.py:479
 msgid ""
 "Reads clusters, hosts, virtual machines and storage from Proxmox VE and "
 "VMware vCenter, or volumes and shares from a Synology or QNAP NAS. "
@@ -1401,78 +1404,78 @@ msgstr ""
 "Zugangsdaten werden einmal verwendet und nicht gespeichert; verwenden Sie "
 "ein Konto nur mit Leserechten."
 
-#: compute/importing.py:473 ipam/pages.py:387 templates/exchange/index.html:7
+#: compute/importing.py:485 ipam/pages.py:387 templates/exchange/index.html:7
 #: templates/library/types.html:30 templates/manage/roles.html:21
 msgid "Import"
 msgstr "Importieren"
 
-#: compute/inventory.py:94 instance/services.py:122
+#: compute/inventory.py:95 instance/services.py:122
 msgid "Enter an https address without credentials."
 msgstr "Geben Sie eine https-Adresse ohne Zugangsdaten ein."
 
-#: compute/inventory.py:98 instance/services.py:126 integrations/http.py:67
+#: compute/inventory.py:99 instance/services.py:126 integrations/http.py:67
 msgid "Enter a valid port."
 msgstr "Geben Sie einen gültigen Port ein."
 
-#: compute/inventory.py:103 instance/services.py:130 integrations/http.py:71
+#: compute/inventory.py:104 instance/services.py:130 integrations/http.py:71
 msgid "The host cannot be resolved."
 msgstr "Der Host kann nicht aufgelöst werden."
 
-#: compute/inventory.py:106 instance/services.py:142
+#: compute/inventory.py:107 instance/services.py:142
 msgid "This address cannot be used."
 msgstr "Diese Adresse kann nicht verwendet werden."
 
-#: compute/inventory.py:110
+#: compute/inventory.py:111
 msgid "Enter the SHA-256 fingerprint of the certificate."
 msgstr "Geben Sie den SHA-256-Fingerabdruck des Zertifikats ein."
 
-#: compute/inventory.py:139
+#: compute/inventory.py:140
 msgid "The host did not answer with JSON."
 msgstr "Der Host hat nicht mit JSON geantwortet."
 
-#: compute/inventory.py:152
+#: compute/inventory.py:153
 msgid "The platform is too large or too slow to read in one go."
 msgstr ""
 "Die Plattform ist zu groß oder zu langsam, um sie in einem Durchgang zu "
 "lesen."
 
-#: compute/inventory.py:167
+#: compute/inventory.py:168
 msgid "The certificate could not be verified; enter its fingerprint."
 msgstr ""
 "Das Zertifikat konnte nicht geprüft werden; geben Sie seinen Fingerabdruck "
 "ein."
 
-#: compute/inventory.py:170
+#: compute/inventory.py:171
 msgid "The host could not be reached."
 msgstr "Der Host ist nicht erreichbar."
 
-#: compute/inventory.py:172
+#: compute/inventory.py:173
 msgid "The answer is too large."
 msgstr "Die Antwort ist zu groß."
 
-#: compute/inventory.py:174 compute/inventory.py:282 compute/inventory.py:380
+#: compute/inventory.py:175 compute/inventory.py:285 compute/inventory.py:381
 msgid "The host refused the credentials."
 msgstr "Der Host hat die Zugangsdaten abgelehnt."
 
-#: compute/inventory.py:182 compute/inventory.py:432
+#: compute/inventory.py:183 compute/inventory.py:433
 #, python-format
 msgid "The host answered with an error (%(status)s)."
 msgstr "Der Host hat mit einem Fehler geantwortet (%(status)s)."
 
-#: compute/inventory.py:211
+#: compute/inventory.py:214
 msgid "Enter the API token as user@realm!tokenid=secret."
 msgstr "Geben Sie das API-Token als user@realm!tokenid=secret ein."
 
-#: compute/inventory.py:295
+#: compute/inventory.py:296
 #, python-format
 msgid "The vCenter has %(n)s clusters; they are documented as one."
 msgstr "Das vCenter hat %(n)s Cluster; sie werden als einer dokumentiert."
 
-#: compute/inventory.py:436
+#: compute/inventory.py:437
 msgid "The host did not answer with XML."
 msgstr "Der Host hat nicht mit XML geantwortet."
 
-#: compute/inventory.py:461
+#: compute/inventory.py:462
 msgid ""
 "The host refused the credentials (accounts with two step sign in cannot be "
 "used)."
@@ -2159,44 +2162,44 @@ msgstr "Laden Sie zuerst einen Grundriss hoch."
 msgid "%(device)s placed on the plan."
 msgstr "%(device)s im Grundriss platziert."
 
-#: dcim/devices.py:71 dcim/devices.py:77
+#: dcim/devices.py:72 dcim/devices.py:78
 msgid "A device with this name already exists in this tenant."
 msgstr "In diesem Mandanten existiert bereits ein Gerät mit diesem Namen."
 
-#: dcim/devices.py:79
+#: dcim/devices.py:80
 msgid "This device type cannot be used here."
 msgstr "Dieser Gerätetyp kann hier nicht verwendet werden."
 
-#: dcim/devices.py:91
+#: dcim/devices.py:92
 msgid "The device does not fit at this position."
 msgstr "Das Gerät passt nicht an diese Position."
 
-#: dcim/devices.py:96 dcim/services.py:28
+#: dcim/devices.py:97 dcim/services.py:28
 msgid "These units are already taken."
 msgstr "Diese Höheneinheiten sind bereits belegt."
 
-#: dcim/devices.py:114
+#: dcim/devices.py:115
 msgid "This device type is private to another tenant."
 msgstr "Dieser Gerätetyp ist nur für einen anderen Mandanten verfügbar."
 
-#: dcim/devices.py:116 dcim/devices.py:164
+#: dcim/devices.py:117 dcim/devices.py:165
 msgid "Rack devices need a rack mounted type and a position."
 msgstr "Rackgeräte benötigen einen Typ für den Rackeinbau und eine Position."
 
-#: dcim/devices.py:166
+#: dcim/devices.py:167
 msgid "The rack is not in this room."
 msgstr "Das Rack befindet sich nicht in diesem Raum."
 
-#: dcim/devices.py:248
+#: dcim/devices.py:260
 msgid "The rear port must belong to the same device."
 msgstr "Der Rückport muss zum selben Gerät gehören."
 
-#: dcim/devices.py:251
+#: dcim/devices.py:263
 msgid "A port joins only a link aggregation of its own device."
 msgstr ""
 "Ein Port kann nur einer Link-Aggregation seines eigenen Geräts beitreten."
 
-#: dcim/devices.py:277 dcim/devices.py:283
+#: dcim/devices.py:289 dcim/devices.py:295
 msgid "This port name or rear position is already used."
 msgstr "Dieser Portname oder diese Rückposition wird bereits verwendet."
 
@@ -2383,13 +2386,13 @@ msgid "This change conflicts with existing data."
 msgstr "Diese Änderung steht im Konflikt mit vorhandenen Daten."
 
 #: dcim/services.py:150
-msgid "Ports in this rack use VLANs of the old site; change them first."
-msgstr "Ports in diesem Rack verwenden VLANs des alten Standorts; ändern Sie diese zuerst."
+msgid "Ports being moved use VLANs of the old site; change them first."
+msgstr "Ports der verschobenen Geräte verwenden VLANs des alten Standorts; ändern Sie diese zuerst."
 
 #: dcim/services.py:153
 msgid ""
-"Switches in this rack belong to a stack of the old site; take them out first."
-msgstr "Switches in diesem Rack gehören zu einem Stack des alten Standorts; nehmen Sie sie zuerst heraus."
+"Switches being moved belong to a stack of the old site; take them out first."
+msgstr "Verschobene Switches gehören zu einem Stack des alten Standorts; nehmen Sie sie zuerst heraus."
 
 #: dcim/views.py:54 exchange/pdf.py:324 templates/dcim/_port_panel.html:8
 #: templates/dcim/device.html:17
@@ -3188,32 +3191,32 @@ msgstr "erledigt"
 msgid "failed"
 msgstr "fehlgeschlagen"
 
-#: instance/offsite.py:37 instance/offsite.py:40
+#: instance/offsite.py:40 instance/offsite.py:43
 msgid "Enter the repository as s3:https://host/bucket/path."
 msgstr "Geben Sie das Repository als s3:https://host/bucket/pfad ein."
 
-#: instance/offsite.py:47
+#: instance/offsite.py:50
 msgid "restic is not installed in this image."
 msgstr "restic ist in diesem Image nicht installiert."
 
-#: instance/offsite.py:87
+#: instance/offsite.py:90
 msgid "Enter the key and the repository password."
 msgstr "Geben Sie den Schlüssel und das Repository-Passwort ein."
 
-#: instance/offsite.py:90
+#: instance/offsite.py:93
 msgid "The backup volume is not mounted (PATCHMANAGER_BACKUP_DIR)."
 msgstr "Das Sicherungsvolume ist nicht eingebunden (PATCHMANAGER_BACKUP_DIR)."
 
-#: instance/offsite.py:94
+#: instance/offsite.py:97
 msgid "restic init failed."
 msgstr "restic init ist fehlgeschlagen."
 
-#: instance/offsite.py:125
+#: instance/offsite.py:128
 #, python-format
 msgid "copied %(name)s"
 msgstr "%(name)s kopiert"
 
-#: instance/offsite.py:131
+#: instance/offsite.py:134
 #, python-format
 msgid "Not a PatchManager dump: %(name)s"
 msgstr "Kein PatchManager-Dump: %(name)s"
@@ -5058,12 +5061,12 @@ msgstr "BGP-Nachbarn"
 msgid "device profiles"
 msgstr "Geräteprofile"
 
-#: networks/switchconfig.py:431
+#: networks/switchconfig.py:433
 #, python-format
 msgid "%(what)s: %(n)s"
 msgstr "%(what)s: %(n)s"
 
-#: networks/switchconfig.py:454
+#: networks/switchconfig.py:456
 #, python-format
 msgid ""
 "DHCP pool %(pool)s: the network %(network)s is not documented in IP networks."
@@ -5071,28 +5074,28 @@ msgstr ""
 "DHCP-Pool %(pool)s: Das Netz %(network)s ist unter IP-Netze nicht "
 "dokumentiert."
 
-#: networks/switchconfig.py:462
+#: networks/switchconfig.py:464
 #, python-format
 msgid "DHCP pool %(pool)s: a scope of that name belongs to another server."
 msgstr ""
 "DHCP-Pool %(pool)s: Ein Bereich dieses Namens gehört zu einem anderen Server."
 
-#: networks/switchconfig.py:473
+#: networks/switchconfig.py:475
 #, python-format
 msgid "DHCP pool %(pool)s: you may not document DHCP scopes."
 msgstr "DHCP-Pool %(pool)s: Sie dürfen keine DHCP-Bereiche dokumentieren."
 
-#: networks/switchconfig.py:490
+#: networks/switchconfig.py:492
 #, python-format
 msgid "New DHCP scope %(name)s"
 msgstr "Neuer DHCP-Bereich %(name)s"
 
-#: networks/switchconfig.py:494
+#: networks/switchconfig.py:496
 #, python-format
 msgid "DHCP scope %(name)s changed"
 msgstr "DHCP-Bereich %(name)s geändert"
 
-#: networks/switchconfig.py:525
+#: networks/switchconfig.py:527
 #, python-format
 msgid "Reservations of %(name)s: %(n)s"
 msgstr "Reservierungen von %(name)s: %(n)s"

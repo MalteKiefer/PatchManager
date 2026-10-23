@@ -89,6 +89,7 @@ def parse(text: str) -> Config:
     irb: dict[str, list[str]] = {}
     group_of: dict[str, str] = {}  # BGP neighbor address -> its group
     group_as: dict[str, int] = {}  # BGP group -> its peer AS
+    descriptions: dict[str, str] = {}  # BGP neighbor address -> description
     for number, line in enumerate(to_set(lines_of(text)), 1):
         if SECRET.search(line):
             config.secrets_skipped += 1
@@ -108,7 +109,7 @@ def parse(text: str) -> Config:
                 config.domain = w[2][:253]
             elif w[:2] == ["system", "name-server"]:
                 config.dns_servers.append(_ip(w[2]))
-            elif w[0] == "vlans" and len(w) >= 4 and w[2] == "vlan-id" and w[3].isdigit():
+            elif w[0] == "vlans" and len(w) >= 4 and w[2] == "vlan-id" and w[3].isdecimal():
                 vid = int(w[3])
                 vlan_names[w[1]] = vid
                 vlan = config.vlans.setdefault(vid, Vlan(vid))
@@ -125,19 +126,21 @@ def parse(text: str) -> Config:
                 config.routes.append(Route(network_of([w[3]]), _ip(w[5])))
             elif w[:2] == ["routing-options", "router-id"]:
                 config.bgp_router_id = config.ospf_router_id = _ip(w[2])
-            elif w[:2] == ["routing-options", "autonomous-system"] and w[2].isdigit():
+            elif w[:2] == ["routing-options", "autonomous-system"] and w[2].isdecimal():
                 config.bgp_asn = int(w[2])
-            elif w[:2] == ["protocols", "bgp"] and "neighbor" in w:
+            elif w[:2] == ["protocols", "bgp"] and "neighbor" in w[:-1]:
                 address = _ip(w[w.index("neighbor") + 1])
-                if "peer-as" in w and w[w.index("peer-as") + 1].isdigit():
-                    config.neighbors[address] = Neighbor(address, int(w[w.index("peer-as") + 1]))
-                elif "description" in w and address in config.neighbors:
-                    config.neighbors[address].description = w[w.index("description") + 1][:200]
-                elif "group" in w:  # the AS may be set on the group (the usual layout)
-                    group_of.setdefault(address, w[w.index("group") + 1])
+                peer_as = _after(w, "peer-as")
+                if peer_as.isdecimal():
+                    config.neighbors[address] = Neighbor(address, int(peer_as))
+                elif "description" in w:  # the neighbor may only be created later
+                    descriptions[address] = _after(w, "description")[:200]
+                if "group" in w:  # the AS may be set on the group (the usual layout)
+                    group_of.setdefault(address, _after(w, "group"))
             elif w[:2] == ["protocols", "bgp"] and "group" in w and "peer-as" in w:
-                if w[w.index("peer-as") + 1].isdigit():
-                    group_as[w[w.index("group") + 1]] = int(w[w.index("peer-as") + 1])
+                peer_as = _after(w, "peer-as")
+                if peer_as.isdecimal():
+                    group_as[_after(w, "group")] = int(peer_as)
             elif w[:2] == ["protocols", "ospf"] and "interface" in w and w[2] == "area":
                 _ospf(config, w[3], w[w.index("interface") + 1], "passive" in w)
             elif w[:1] == ["protocols"] and w[1] in ("rstp", "mstp", "vstp", "stp"):
@@ -146,22 +149,39 @@ def parse(text: str) -> Config:
                 _pool(config, w)
             else:
                 config.unknown.append(" ".join(w)[:120])
+        except TooLargeError:
+            raise  # the whole text is refused, not one line
         except ParseError as exc:
             config.warnings.append(f"statement {number}: {exc}")
+    count = {port: 0 for port, _name in members}
+    for port, _name in members:
+        count[port] += 1
     for port, name in members:
-        member_vid = vlan_names.get(name) or (int(name) if name.isdigit() else None)
+        member_vid = vlan_names.get(name) or (int(name) if name.isdecimal() else None)
         if member_vid is not None:
             vid = member_vid
             interface = config.interface(port)
             config.allow(port, [vid])
-            if interface.mode != "trunk":
-                # Without interface-mode a switching port is an access port (Junos default).
+            if interface.mode != "trunk" and count[port] == 1:
+                # Without interface-mode a switching port is an access port (Junos default),
+                # which takes one VLAN; more members mean a mode set elsewhere (apply-groups).
                 interface.mode, interface.access_vlan = "access", vid
     for address, group in group_of.items():
         if address not in config.neighbors and group in group_as:
             config.neighbors[address] = Neighbor(address, group_as[group])
+    for address, description in descriptions.items():
+        if address in config.neighbors:
+            config.neighbors[address].description = description
     config.unknown = config.unknown[:200]
     return finish(config)
+
+
+def _after(words: list[str], key: str) -> str:
+    """The word after ``key``, or "" when ``key`` is missing or ends the statement."""
+    if key not in words:
+        return ""
+    index = words.index(key) + 1
+    return words[index] if index < len(words) else ""
 
 
 def _interface(
@@ -171,7 +191,7 @@ def _interface(
     members: list[tuple[str, str]],
     irb: dict[str, list[str]],
 ) -> None:
-    if name in ("irb", "vlan") and w[:1] == ["unit"] and len(w) >= 2 and w[1].isdigit():
+    if name in ("irb", "vlan") and w[:1] == ["unit"] and len(w) >= 2 and w[1].isdecimal():
         if "address" in w:
             vid = int(w[1])
             config.vlans.setdefault(vid, Vlan(vid)).addresses.append(
@@ -200,7 +220,7 @@ def _interface(
             port.allowed = None
         else:
             members.append((name, value))
-    elif w[:1] == ["native-vlan-id"] and w[1].isdigit():
+    elif w[:1] == ["native-vlan-id"] and w[1].isdecimal():
         port.native_vlan = int(w[1])
 
 
@@ -218,21 +238,16 @@ def _stp(config: Config, w: list[str]) -> None:
     if "bridge-priority" in w:
         value = w[w.index("bridge-priority") + 1].lower()
         priority: int | None = None
-        if value.endswith("k") and value[:-1].isdigit():
+        if value.endswith("k") and value[:-1].isdecimal():
             priority = int(value[:-1]) * 1024
-        elif value.isdigit():
+        elif value.isdecimal():
             priority = int(value)
         if priority is not None and "msti" not in w:
             config.stp_priority = priority
     if "configuration-name" in w:
         config.mst_region = w[w.index("configuration-name") + 1][:32]
     if "msti" in w and "vlan" in w:
-        number = int(w[w.index("msti") + 1])
-        vlans, priority = config.mst_instances.get(number, ([], None))
-        config.mst_instances[number] = (
-            sorted(set(vlans) | set(vid_list(w[w.index("vlan") + 1]))),
-            priority,
-        )
+        config.add_mst_vlans(int(w[w.index("msti") + 1]), vid_list(w[w.index("vlan") + 1]))
     if "interface" in w and "edge" in w:
         config.interface(w[w.index("interface") + 1]).edge = True
 
@@ -252,7 +267,7 @@ def _pool(config: Config, w: list[str]) -> None:
         pool.dns.append(_ip(w[w.index("name-server") + 1]))
     if "domain-name" in w:
         pool.domain = w[w.index("domain-name") + 1][:253]
-    if "maximum-lease-time" in w and w[w.index("maximum-lease-time") + 1].isdigit():
+    if "maximum-lease-time" in w and w[w.index("maximum-lease-time") + 1].isdecimal():
         pool.lease_seconds = max(60, int(w[w.index("maximum-lease-time") + 1]))
     if "host" in w and "hardware-address" in w and "ip-address" in w:
         pool.reservations.append(

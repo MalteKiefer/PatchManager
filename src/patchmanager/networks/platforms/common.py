@@ -186,15 +186,29 @@ class Config:
         self.extend_allowed(self.interface(name), vids)
 
     def extend_allowed(self, port: Interface, vids: list[int]) -> None:
-        """Add VLANs to ``port``'s allowed list in place, counted against the budget.
+        """Add VLANs to ``port``'s allowed list in place.
 
         Repeated "allowed vlan add" lines must neither copy the list each time nor grow it
-        without limit.
+        without limit. The budget is charged once per membership by :func:`finish`, so the
+        list is only deduplicated here whenever it outgrows the 4094 possible VLAN IDs.
         """
-        self.charge(len(vids))
         if port.allowed is None:
             port.allowed = []
         port.allowed.extend(vids)
+        if len(port.allowed) > 4094:
+            port.allowed[:] = sorted(set(port.allowed))
+
+    def add_mst_vlans(self, number: int, vids: list[int]) -> None:
+        """Map ``vids`` to MST instance ``number``, counted against the budget.
+
+        Each line is charged in full, so many lines that each name all VLANs cannot
+        allocate without limit.
+        """
+        if not 0 <= number <= 4094:
+            raise ParseError(f"MST instance {number} is out of range")
+        self.charge(len(vids))
+        vlans, priority = self.mst_instances.get(number, ([], None))
+        self.mst_instances[number] = (sorted(set(vlans) | set(vids)), priority)
 
     def pool_index(self) -> dict[str, Pool]:
         """Pools by network, for :meth:`pool_for` (build once, look up many times)."""
@@ -277,7 +291,7 @@ def vids(spec: str) -> list[int]:
     result: list[int] = []
     for part in filter(None, (p.strip() for p in spec.split(","))):
         first, _sep, last = part.partition("-")
-        if not first.isdigit() or (last and not last.isdigit()):
+        if not first.isdecimal() or (last and not last.isdecimal()):
             raise ParseError(f"cannot read the VLAN list {spec}")
         start, end = int(first), int(last or first)
         if not 1 <= start <= end <= 4094:
@@ -312,6 +326,15 @@ def _network(address: str, mask: str | None) -> str:
         return str(ipaddress.ip_network(f"{address}/{mask}", strict=False))
     except ValueError as exc:
         raise ParseError(f"cannot read the network {address}") from exc
+
+
+def is_address(value: str) -> bool:
+    """Whether ``value`` is an IP address (BGP peers may also name a peer group)."""
+    try:
+        ipaddress.ip_address(value)
+    except ValueError:
+        return False
+    return True
 
 
 def _ip(value: str) -> str:
@@ -481,7 +504,7 @@ def address_of(words: list[str]) -> str:
         raise ParseError("an address is missing")
     if "/" in words[0]:
         return _address(words[0], None)
-    if len(words) > 1 and words[1][:1].isdigit():
+    if len(words) > 1 and words[1][:1].isdecimal():
         return _address(words[0], str(mask_to_prefix(words[1])))
     raise ParseError(f"cannot read the address {words[0][:40]}")
 

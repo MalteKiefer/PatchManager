@@ -6,6 +6,7 @@ from typing import Any
 
 import pytest
 from django.test import Client
+from django.utils import timezone
 
 from patchmanager.accounts.models import Assignment, Role
 from patchmanager.accounts.services import PermissionDeniedError, ServiceError
@@ -374,6 +375,13 @@ def test_tenant_wide_sight_required_and_checked_on_delivery(
         delivery = Delivery.objects.get(webhook=hook)
         assert delivery.status == "failed" and "lost access" in delivery.last_error
         assert calls == []
+        # Narrowed patterns do not let queued deliveries of other types through unchecked.
+        type(hook).objects.filter(pk=hook.pk).update(events=["unknown.*"])
+        Delivery.objects.filter(pk=delivery.pk).update(
+            status="pending", last_error="", next_attempt_at=timezone.now()
+        )
+        services.deliver_due()
+        assert Delivery.objects.get(pk=delivery.pk).status == "failed" and calls == []
         deny.delete()
 
 

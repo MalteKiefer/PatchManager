@@ -11,6 +11,7 @@ from patchmanager.networks.platforms.common import (
     ParseError,
     Pool,
     Route,
+    TooLargeError,
     Vlan,
     _ip,
     address_of,
@@ -131,6 +132,8 @@ def parse(text: str) -> Config:
     for name, node in root.get("system interface", {}).items():
         try:
             _interface(config, name, node)
+        except TooLargeError:
+            raise  # the whole text is refused, not one line
         except ParseError as exc:
             config.warnings.append(f"interface {name}: {exc}")
     for node in root.get("router static", {}).values():
@@ -140,15 +143,17 @@ def parse(text: str) -> Config:
             config.routes.append(
                 Route(network_of(dst), _ip(gateway) if gateway and gateway != UNSET else None)
             )
+        except TooLargeError:
+            raise  # the whole text is refused, not one line
         except ParseError as exc:
             config.warnings.append(f"static route: {exc}")
     bgp = root.get("router bgp", {})
-    if _one(bgp, "as").isdigit():
+    if _one(bgp, "as").isdecimal():
         config.bgp_asn = int(_one(bgp, "as"))
         if _one(bgp, "router-id"):
             config.bgp_router_id = _ip(_one(bgp, "router-id"))
         for address, node in bgp.get("neighbor", {}).items():
-            if _one(node, "remote-as").isdigit():
+            if _one(node, "remote-as").isdecimal():
                 config.neighbors[_ip(address)] = Neighbor(
                     _ip(address),
                     int(_one(node, "remote-as")),
@@ -161,6 +166,8 @@ def parse(text: str) -> Config:
     for node in root.get("system dhcp server", {}).values():
         try:
             _dhcp(config, node)
+        except TooLargeError:
+            raise  # the whole text is refused, not one line
         except ParseError as exc:
             config.warnings.append(f"DHCP server: {exc}")
     config.unknown = [
@@ -184,7 +191,7 @@ def _interface(config: Config, name: str, node: dict[str, Any]) -> None:
     ip = node.get("ip", [])
     address = address_of(ip) if len(ip) >= 2 and ip[0] != UNSET else ""
     vid = _one(node, "vlanid")
-    if vid.isdigit() and 1 <= int(vid) <= 4094:  # a VLAN on a parent port
+    if vid.isdecimal() and 1 <= int(vid) <= 4094:  # a VLAN on a parent port
         vlan = config.vlans.setdefault(int(vid), Vlan(int(vid), name=name[:64]))
         if address:
             vlan.addresses.append(address)
@@ -226,7 +233,8 @@ def _dhcp(config: Config, node: dict[str, Any]) -> None:
     ]
     pool.domain = _one(node, "domain")[:253]
     lease = _one(node, "lease-time")
-    pool.lease_seconds = int(lease) if lease.isdigit() and int(lease) >= 60 else pool.lease_seconds
+    if lease.isdecimal() and int(lease) >= 60:
+        pool.lease_seconds = int(lease)
     for item in node.get("reserved-address", {}).values():
         if _one(item, "ip") and _one(item, "mac"):
             pool.reservations.append(

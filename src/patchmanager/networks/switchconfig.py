@@ -415,17 +415,19 @@ def _replace(device: Device, config: model.Config, result: Result) -> None:
         ),
     ]
     for table, rows, label, key in lists:
-        current = list(table.objects.filter(device=device))
-        if sorted(map(key, current), key=str) == sorted(map(key, rows), key=str):
-            continue
-        valid = []
+        valid, keys = [], []
         for row in rows:
+            before = key(row)  # full_clean turns addresses into networks (/32)
             try:
                 row.full_clean(exclude=["tenant", "device"])
             except ValidationError as exc:  # for example an MST instance above 64
                 result.skipped.append(f"{label}: {'; '.join(exc.messages)}")
             else:
                 valid.append(row)
+                keys.append(before)
+        current = list(table.objects.filter(device=device))
+        if sorted(map(key, current), key=str) == sorted(keys, key=str):
+            continue
         table.objects.filter(device=device).delete()
         table.objects.bulk_create(valid)
         result.add(_("%(what)s: %(n)s") % {"what": label, "n": len(valid)})
@@ -556,7 +558,7 @@ def document(device: Device, user: Any) -> model.Config:
             config.trunks[p.name] = model.Trunk(p.name, members, p.lag_protocol or "static")
     for p in ports:
         if p.kind == PortKind.VIRTUAL and p.name.startswith("vlan "):
-            vid = int(p.name.split()[1]) if p.name.split()[1].isdigit() else None
+            vid = int(p.name.split()[1]) if p.name.split()[1].isdecimal() else None
             if vid is None:
                 continue
             vlan = config.vlans.setdefault(vid, model.Vlan(vid))

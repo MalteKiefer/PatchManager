@@ -8,6 +8,7 @@ from django.db import DatabaseError, IntegrityError, transaction
 from django.http import HttpRequest
 from django.utils.translation import gettext as _
 
+from patchmanager.accounts import policy
 from patchmanager.accounts.models import User
 from patchmanager.accounts.services import ServiceError
 from patchmanager.accounts.services.users import require
@@ -164,6 +165,13 @@ def place(
         raise ServiceError(_("Rack devices need a rack mounted type and a position."))
     if rack is not None and rack.room_id != room.pk:
         raise ServiceError(_("The rack is not in this room."))
+    from patchmanager.dcim.services import check_site_bound
+    from patchmanager.locations import services as locations
+
+    site = room.floor.building.site_id
+    if site != device.room.floor.building.site_id:
+        check_site_bound([device], site)
+    old_path = str(device.path)
     with transaction.atomic():
         RackSpace.objects.filter(device=device).delete()
         if rack is not None or room.floor_id != device.room.floor_id:
@@ -173,6 +181,10 @@ def place(
         if rack is not None and position is not None:
             _mount(device, rack, position, face)
         follow(device)
+        # Roles granted or denied on the device keep covering it at its new place.
+        locations.rebase_assignments(old_path, str(device.path))
+    if old_path != str(device.path):
+        policy.bump_version()
     audit.record(
         "dcim.device.moved",
         request=request,

@@ -64,7 +64,7 @@ def qr_svg(data: str) -> str:
 def _match_step(device: TOTPDevice, code: str) -> int | None:
     """Return the matching time step within +-1 window, if not used before."""
     code = code.strip().replace(" ", "")
-    if not (code.isdigit() and len(code) == 6):
+    if not (code.isdecimal() and len(code) == 6):
         return None
     totp = pyotp.TOTP(crypto.decrypt(device.encrypted_secret))
     current = int(time.time()) // TOTP_INTERVAL

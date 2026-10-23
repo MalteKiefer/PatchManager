@@ -118,7 +118,7 @@ def parse_zone_file(text: str, name: str) -> Zone:
         if tokens[0].upper() == "$ORIGIN" and len(tokens) == 2:
             origin = tokens[1].rstrip(".").lower()
             continue
-        if tokens[0].upper() == "$TTL" and len(tokens) == 2 and tokens[1].isdigit():
+        if tokens[0].upper() == "$TTL" and len(tokens) == 2 and tokens[1].isdecimal():
             ttl = zone.default_ttl = int(tokens[1])
             continue
         if tokens[0].startswith("$"):
@@ -128,8 +128,8 @@ def parse_zone_file(text: str, name: str) -> Zone:
         if owner_given:
             owner, rest = _relative(tokens[0], origin), tokens[1:]
         record_ttl = ttl
-        while rest and (rest[0].isdigit() or rest[0].upper() in ("IN", "CH", "HS")):
-            if rest[0].isdigit():
+        while rest and (rest[0].isdecimal() or rest[0].upper() in ("IN", "CH", "HS")):
+            if rest[0].isdecimal():
                 record_ttl = int(rest[0])
             rest = rest[1:]
         if not rest:
@@ -138,7 +138,7 @@ def parse_zone_file(text: str, name: str) -> Zone:
         if kind == "SOA" and len(data) >= 3:
             zone.primary_server = data[0].rstrip(".")
             zone.admin_email = data[1].rstrip(".").replace(".", "@", 1)
-            zone.serial = int(data[2]) if data[2].isdigit() else None
+            zone.serial = int(data[2]) if data[2].isdecimal() else None
             continue
         if kind not in TYPES:
             zone.skipped.append(f"line {number}: type {kind[:10]} is not documented")
@@ -146,7 +146,7 @@ def parse_zone_file(text: str, name: str) -> Zone:
         if len(zone.records) >= MAX_RECORDS:
             raise ServiceError(_("The zone has more than 20 000 records."))
         priority = None
-        if kind in ("MX", "SRV") and data and data[0].isdigit():
+        if kind in ("MX", "SRV") and data and data[0].isdecimal():
             priority, data = int(data[0]), data[1:]
         if kind in ("TXT", "CAA"):
             value = (
@@ -208,7 +208,7 @@ def _desec(name: str, token: str) -> Zone:
         for value in rrset.get("records", [])[:MAX_RECORDS]:
             priority = None
             text = str(value)
-            if kind in ("MX", "SRV") and text.split(" ", 1)[0].isdigit():
+            if kind in ("MX", "SRV") and text.split(" ", 1)[0].isdecimal():
                 first, text = text.split(" ", 1)
                 priority = int(first)
             if kind == "TXT":
@@ -265,7 +265,7 @@ def _hetzner(name: str, token: str) -> Zone:
             continue
         value = str(item.get("value", ""))
         priority = None
-        if kind in ("MX", "SRV") and value.split(" ", 1)[0].isdigit():
+        if kind in ("MX", "SRV") and value.split(" ", 1)[0].isdecimal():
             first, value = value.split(" ", 1)
             priority = int(first)
         if kind == "TXT":

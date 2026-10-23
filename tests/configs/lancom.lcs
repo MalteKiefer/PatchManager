@@ -24,6 +24,7 @@ cd /Setup/VLAN/Port-Table
 tab Port Allow-all-VLANs Port-VLAN-Id Tagging-Mode
 add LAN-2 No 60 Access
 add LAN-3 No 1 Trunk
+add LAN-4 No 1 Ingress-mixed
 cd /
 
 cd /Setup/IP-Router/IP-Routing-Table

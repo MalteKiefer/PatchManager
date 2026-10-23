@@ -46,7 +46,8 @@ class Guest:
     memory_mb: int | None = None
     disk_gb: int | None = None
     operating_system: str = ""
-    nics: list[dict[str, str]] = field(default_factory=list)  # name, mac, bridge, vlan, addresses
+    # name, mac, bridge, vlan, addresses; None where the platform does not report a value
+    nics: list[dict[str, str | None]] = field(default_factory=list)
     disks: list[tuple[str, int, str]] = field(default_factory=list)  # name, size GB, storage
 
 
@@ -191,17 +192,19 @@ def _gb(value: Any, unit: int) -> int | None:
 # --- Proxmox VE --------------------------------------------------------------------
 
 
-def _pve_nic(key: str, spec: str, kind: str) -> dict[str, str]:
+def _pve_nic(key: str, spec: str, kind: str) -> dict[str, str | None]:
     values = dict(part.split("=", 1) for part in spec.split(",") if "=" in part)
     mac = values.get("hwaddr", "")
     if kind == "qemu":  # "virtio=AA:BB:..,bridge=vmbr0,tag=10"
         mac = next((v for k, v in values.items() if re.fullmatch(r"[0-9A-Fa-f:]{17}", v)), "")
+    ip = values.get("ip", "")
     return {
         "name": values.get("name", key)[:64],
         "mac": mac.lower(),
         "bridge": values.get("bridge", "")[:100],
-        "vlan": values.get("tag", ""),
-        "addresses": values.get("ip", "") if values.get("ip", "") not in ("dhcp", "manual") else "",
+        "vlan": values.get("tag", ""),  # no tag: untagged
+        # Only containers carry their address in the configuration.
+        "addresses": ("" if ip in ("dhcp", "manual") else ip) if kind == "lxc" else None,
     }
 
 
@@ -284,17 +287,15 @@ def vmware(url: str, username: str, password: str, fingerprint: str = "") -> Inv
     inventory = Inventory("vmware")
     try:
         clusters = client.get("/api/vcenter/cluster", headers) or []
-        # Hosts and machines are read from the whole vCenter, so one cluster is documented:
-        # the vCenter's only cluster, or the vCenter itself when it has none or several.
-        if len(clusters) == 1:
-            inventory.cluster = str(clusters[0].get("name", ""))[:100]
-        else:
-            inventory.cluster = client.host[:100]
-            if clusters:
-                inventory.notes.append(
-                    _("The vCenter has %(n)s clusters; they are documented as one.")
-                    % {"n": len(clusters)}
-                )
+        # Hosts and machines are read from the whole vCenter, so one cluster is documented.
+        # It keeps the first cluster's name, as before: imports find their cluster by name,
+        # and a new name would document every machine a second time.
+        inventory.cluster = str(clusters[0].get("name", ""))[:100] if clusters else ""
+        if len(clusters) > 1:
+            inventory.notes.append(
+                _("The vCenter has %(n)s clusters; they are documented as one.")
+                % {"n": len(clusters)}
+            )
         hosts = client.get("/api/vcenter/host", headers) or []
         inventory.hosts = [str(h.get("name", ""))[:150] for h in hosts]
         for host in hosts:
@@ -322,8 +323,8 @@ def vmware(url: str, username: str, password: str, fingerprint: str = "") -> Inv
                             "name": str(nic.get("label", key))[:64],
                             "mac": str(nic.get("mac_address", "")).lower(),
                             "bridge": str((nic.get("backing") or {}).get("network_name", ""))[:100],
-                            "vlan": "",
-                            "addresses": "",
+                            "vlan": None,
+                            "addresses": None,
                         }
                     )
                 total = 0
@@ -441,7 +442,7 @@ def _text(node: Any, tag: str) -> str:
 
 
 def _bytes_gb(value: str) -> int | None:
-    return _gb(int(value), 1024**3) if value.isdigit() else None
+    return _gb(int(value), 1024**3) if value.isdecimal() else None
 
 
 def qnap(url: str, username: str, password: str, fingerprint: str = "") -> Inventory:
