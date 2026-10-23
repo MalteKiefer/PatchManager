@@ -223,7 +223,8 @@ lease time, relays and further options) with reservations by MAC address, and
 **DNS** documents zones with their records. A scope downloads as a Kea
 configuration, a zone as a zone file. **Import zone** reads a zone file or fetches a
 zone from deSEC, Cloudflare or Hetzner DNS with an API token that is used once and
-never stored.
+never stored. For Hetzner DNS this is an API token of the Hetzner Console project
+that holds the zone (read access is enough).
 
 ## VLANs and WLANs
 

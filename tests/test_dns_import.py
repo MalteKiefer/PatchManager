@@ -105,14 +105,15 @@ def test_providers(admin_client: Client, make_tree, system, monkeypatch, provide
                 ],
                 "result_info": {"total_pages": 1},
             }
-        if "zones?name" in url:
-            return {"zones": [{"id": "Z1"}]}
+        assert url == "https://api.hetzner.cloud/v1/zones/example.org/zonefile"
+        assert headers == {"Authorization": "Bearer tok-123"}
         return {
-            "records": [
-                {"name": "www", "type": "A", "value": "192.0.2.1", "ttl": 300},
-                {"name": "@", "type": "MX", "value": "10 mail.example.org."},
-                {"name": "@", "type": "TXT", "value": '"v=spf1 -all"'},
-            ]
+            "zonefile": "$ORIGIN example.org.\n$TTL 3600\n"
+            "@ IN SOA hydrogen.ns.hetzner.com. dns.hetzner.com. "
+            "2026102301 86400 10800 3600000 3600\n"
+            "www 300 IN A 192.0.2.1\n"
+            "@ IN MX 10 mail.example.org.\n"
+            '@ IN TXT "v=spf1 -all"\n'
         }
 
     monkeypatch.setattr(dns_import, "_get", fake)
@@ -134,10 +135,16 @@ def test_providers(admin_client: Client, make_tree, system, monkeypatch, provide
         assert all("tok-123" not in str(e.data) for e in AuditEvent.objects.all())
     from urllib.parse import urlsplit
 
-    hosts = {"desec.io", "api.cloudflare.com", "dns.hetzner.com"}
+    hosts = {"desec.io", "api.cloudflare.com", "api.hetzner.cloud"}
     assert all(
         urlsplit(url).scheme == "https" and urlsplit(url).hostname in hosts for url, _h in calls
     )
+
+
+def test_hetzner_without_zone_file(monkeypatch) -> None:
+    monkeypatch.setattr(dns_import, "_get", lambda url, headers: {"error": {"code": "x"}})
+    with pytest.raises(ServiceError, match="no zone file"):
+        dns_import.fetch("hetzner", "example.org", "t")
 
 
 def test_provider_input_is_checked() -> None:

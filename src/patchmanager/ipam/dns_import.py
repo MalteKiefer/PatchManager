@@ -251,27 +251,15 @@ def _cloudflare(name: str, token: str) -> Zone:
 
 
 def _hetzner(name: str, token: str) -> Zone:
-    headers = {"Auth-API-Token": token}
-    found = _get(f"https://dns.hetzner.com/api/v1/zones?name={name}", headers)
-    zones = found.get("zones") or []
-    if not zones:
-        raise ServiceError(_("The provider does not know this zone."))
-    zone_id = re.sub(r"[^0-9A-Za-z]", "", str(zones[0].get("id", "")))
-    data = _get(f"https://dns.hetzner.com/api/v1/records?zone_id={zone_id}", headers)
-    zone = Zone(name)
-    for item in data.get("records") or []:
-        kind = str(item.get("type", "")).upper()
-        if kind not in TYPES:
-            continue
-        value = str(item.get("value", ""))
-        priority = None
-        if kind in ("MX", "SRV") and value.split(" ", 1)[0].isdecimal():
-            first, value = value.split(" ", 1)
-            priority = int(first)
-        if kind == "TXT":
-            value = "".join(re.findall(r'"((?:[^"\\]|\\.)*)"', value)) or value
-        zone.records.append(Record(item.get("name") or "@", kind, value, item.get("ttl"), priority))
-    return zone
+    # Hetzner DNS moved into the Cloud API (dns.hetzner.com is retired); it exports a zone,
+    # addressed by its name, as a zone file in one answer.
+    data = _get(
+        f"https://api.hetzner.cloud/v1/zones/{name}/zonefile", {"Authorization": f"Bearer {token}"}
+    )
+    text = data.get("zonefile") if isinstance(data, dict) else None
+    if not isinstance(text, str):
+        raise ServiceError(_("The provider sent no zone file."))
+    return parse_zone_file(text, name)
 
 
 PROVIDERS = {

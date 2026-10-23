@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-23 04:34+0000\n"
+"POT-Creation-Date: 2026-10-23 06:52+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -413,7 +413,7 @@ msgstr "Der letzte Super-Admin kann nicht entfernt werden."
 #: directory/links.py:175 exchange/importer.py:54 exchange/importer.py:70
 #: floorplans/services.py:193 floorplans/views.py:291 history/services.py:76
 #: history/services.py:97 instance/services.py:33 integrations/services.py:78
-#: ipam/dns_import.py:322 metadata/services.py:113 metadata/services.py:181
+#: ipam/dns_import.py:310 metadata/services.py:113 metadata/services.py:181
 #: networks/services.py:109 networks/services.py:139 networks/services.py:148
 msgid "You do not have permission to do that."
 msgstr "Sie haben keine Berechtigung dafür."
@@ -2387,12 +2387,16 @@ msgstr "Diese Änderung steht im Konflikt mit vorhandenen Daten."
 
 #: dcim/services.py:150
 msgid "Ports being moved use VLANs of the old site; change them first."
-msgstr "Ports der verschobenen Geräte verwenden VLANs des alten Standorts; ändern Sie diese zuerst."
+msgstr ""
+"Ports der verschobenen Geräte verwenden VLANs des alten Standorts; ändern "
+"Sie diese zuerst."
 
 #: dcim/services.py:153
 msgid ""
 "Switches being moved belong to a stack of the old site; take them out first."
-msgstr "Verschobene Switches gehören zu einem Stack des alten Standorts; nehmen Sie sie zuerst heraus."
+msgstr ""
+"Verschobene Switches gehören zu einem Stack des alten Standorts; nehmen Sie "
+"sie zuerst heraus."
 
 #: dcim/views.py:54 exchange/pdf.py:324 templates/dcim/_port_panel.html:8
 #: templates/dcim/device.html:17
@@ -3671,7 +3675,7 @@ msgstr "Der Provider ist nicht erreichbar."
 msgid "The provider refused the token."
 msgstr "Der Provider hat das Token abgelehnt."
 
-#: ipam/dns_import.py:180 ipam/dns_import.py:225 ipam/dns_import.py:258
+#: ipam/dns_import.py:180 ipam/dns_import.py:225
 msgid "The provider does not know this zone."
 msgstr "Der Provider kennt diese Zone nicht."
 
@@ -3684,11 +3688,15 @@ msgstr "Der Provider hat mit einem Fehler geantwortet (%(status)s)."
 msgid "The provider sent an answer that is not JSON."
 msgstr "Die Antwort des Providers ist kein JSON."
 
-#: ipam/dns_import.py:289 ipam/models.py:347
+#: ipam/dns_import.py:261
+msgid "The provider sent no zone file."
+msgstr "Der Anbieter hat keine Zonendatei geschickt."
+
+#: ipam/dns_import.py:277 ipam/models.py:347
 msgid "Enter a domain name like example.com."
 msgstr "Geben Sie einen Domainnamen wie example.com ein."
 
-#: ipam/dns_import.py:291 ipam/pages.py:340
+#: ipam/dns_import.py:279 ipam/pages.py:340
 msgid "Choose a provider and enter its token."
 msgstr "Wählen Sie einen Provider und geben Sie sein Token ein."
 
