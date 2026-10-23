@@ -109,6 +109,12 @@ def _apply(
     _settings(device, config, result, source)
     for trunk in config.trunks.values():
         lag = ports.get(model.canonical(trunk.name))
+        if lag is not None and lag.kind != PortKind.LAG:  # documented as a plain port
+            result.skipped.append(
+                _("%(port)s is documented as a port, not as a link aggregation.")
+                % {"port": lag.name}
+            )
+            continue
         if lag is None:
             lag = Port.objects.create(
                 device=device,
@@ -175,7 +181,10 @@ def _settings(device: Device, config: model.Config, result: Result, source: str)
             label = getattr(SwitchSettings._meta.get_field(name), "verbose_name", name)
             result.add(_("%(field)s: %(value)s") % {"field": label, "value": value or "-"})
     settings.source = source[:200]
-    settings.full_clean(exclude=["tenant", "device"])
+    try:
+        settings.full_clean(exclude=["tenant", "device"])
+    except ValidationError as exc:
+        raise ServiceError("; ".join(exc.messages)) from exc
     settings.save()
 
 
@@ -330,6 +339,10 @@ def _addresses(
         if existing is None:
             ipam.create_address(request, actor, device.tenant, address=text, port=target)
             result.add(_("Address %(address)s on %(name)s") % label)
+        elif existing.vm_interface_id is not None:
+            result.skipped.append(
+                _("Address %(address)s is on a virtual machine.") % {"address": text}
+            )
         elif existing.port_id is None:
             ipam.update_address(request, actor, existing, port=target)
             result.add(_("Address %(address)s on %(name)s") % label)
@@ -405,11 +418,17 @@ def _replace(device: Device, config: model.Config, result: Result) -> None:
         current = list(table.objects.filter(device=device))
         if sorted(map(key, current), key=str) == sorted(map(key, rows), key=str):
             continue
-        table.objects.filter(device=device).delete()
+        valid = []
         for row in rows:
-            row.full_clean(exclude=["tenant", "device"])
-        table.objects.bulk_create(rows)
-        result.add(_("%(what)s: %(n)s") % {"what": label, "n": len(rows)})
+            try:
+                row.full_clean(exclude=["tenant", "device"])
+            except ValidationError as exc:  # for example an MST instance above 64
+                result.skipped.append(f"{label}: {'; '.join(exc.messages)}")
+            else:
+                valid.append(row)
+        table.objects.filter(device=device).delete()
+        table.objects.bulk_create(valid)
+        result.add(_("%(what)s: %(n)s") % {"what": label, "n": len(valid)})
 
 
 def _dhcp(

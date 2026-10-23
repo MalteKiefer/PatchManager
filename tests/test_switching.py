@@ -454,3 +454,11 @@ def test_read_from_file_and_stored_version(admin_client: Client, switch, system)
         base + "read/", {"content": "hello", "action": "preview"}, secure=True
     )
     assert "not recognised" in unknown.content.decode()
+
+
+def test_aruba_if_lines_are_rejected_in_linear_time() -> None:
+    import time
+
+    started = time.monotonic()
+    aruba.parse(("%if a =" + " " * 1990 + "x\n") * 50, {})
+    assert time.monotonic() - started < 2

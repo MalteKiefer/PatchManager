@@ -26,8 +26,8 @@
     {% elif not backups.readable %}<p class="text-sm text-red-600">{% translate "The backup folder cannot be read." %}</p>
     {% else %}{% if backups.stale %}<p class="mb-2 text-sm"><span class="badge-warn">{% translate "No backup in the last 36 hours." %}</span></p>{% endif %}
     <ul class="space-y-1 text-sm">{% for b in backups.files %}<li class="flex justify-between gap-3"><span class="font-mono text-xs">{{ b.name }}</span><span class="text-slate-500">{{ b.at|date:"SHORT_DATETIME_FORMAT" }} · {{ b.size|filesizeformat }}</span></li>{% empty %}<li class="text-slate-500">{% translate "No restore points yet." %}</li>{% endfor %}</ul>
-    {% if backups.files %}<p class="mt-3 text-xs text-slate-500">{% translate "Restore on the server after stopping app, worker, scheduler and caddy:" %}</p>
-    <pre class="mt-1 overflow-x-auto rounded bg-slate-100 p-2 text-xs dark:bg-slate-800">docker compose -f compose.prod.yaml --profile restore run --rm restore {{ backups.files.0.name }}</pre>{% endif %}
+    {% if backups.newest_dump %}<p class="mt-3 text-xs text-slate-500">{% translate "Restore on the server after stopping app, worker, scheduler and caddy:" %}</p>
+    <pre class="mt-1 overflow-x-auto rounded bg-slate-100 p-2 text-xs dark:bg-slate-800">docker compose -f compose.prod.yaml --profile restore run --rm restore {{ backups.newest_dump }}</pre>{% endif %}
     {% endif %}
     <p class="mt-3 text-sm">{% if backups.offsite is None %}<span class="text-slate-500">{% translate "No off-site copy yet." %}</span>
       {% elif backups.offsite.ok %}<span class="badge-ok">{% translate "Off-site copy" %}</span> {{ backups.offsite.at|date:"SHORT_DATETIME_FORMAT" }} · {{ backups.offsite.message }}

@@ -6,7 +6,7 @@ from django import forms
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.contenttypes.models import ContentType
-from django.core.exceptions import PermissionDenied
+from django.core.exceptions import PermissionDenied, ValidationError
 from django.db import IntegrityError, transaction
 from django.http import Http404, HttpRequest, HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
@@ -159,7 +159,7 @@ def add(
         with transaction.atomic():
             link.full_clean(exclude=["tenant"])
             link.save()
-    except IntegrityError as exc:
+    except (IntegrityError, ValidationError) as exc:  # the unique constraint, checked twice
         raise ServiceError(_("This link already exists.")) from exc
     audit.record(
         "directory.link.created", request=request, obj=target, data={"to": str(owner), "role": role}

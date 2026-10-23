@@ -578,7 +578,7 @@ def device_place_here(request: HttpRequest) -> HttpResponse:
     position = params.get("position", "")
     face = "rear" if params.get("face") == "rear" else "front"
     query: dict[str, Any] = {"rack": rack.pk} if rack else {"room": room.pk}
-    if rack and position.isdigit():
+    if rack and position.isascii() and position.isdigit():
         query.update({"position": position, "face": face})
     if spot:
         query.update({"plan_x": spot[0], "plan_y": spot[1]})
@@ -604,7 +604,7 @@ def device_place_here(request: HttpRequest) -> HttpResponse:
                     device,
                     room=room,
                     rack=rack,
-                    position=int(position) if position.isdigit() else None,
+                    position=int(position) if position.isascii() and position.isdigit() else None,
                     face=face,
                 )
                 messages.success(

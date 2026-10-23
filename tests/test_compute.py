@@ -539,3 +539,39 @@ def test_vm_addresses_are_linked_in_ipam(
     with system():
         clash = importing.save(request, super_admin, tenant, both)
     assert "10.0.0.5 of db is already used elsewhere and was not linked." in clash.notes
+
+
+def test_connections_keep_clusters_and_manual_cards(
+    admin_client: Client, make_tree, super_admin, make_user, pve, system
+) -> None:
+    from patchmanager.compute.models import VMInterface
+    from patchmanager.core import crypto
+
+    tree = make_tree()
+    admin_client.post("/tenants/switch/", {"tenant": tree["tenant"].pk}, secure=True)
+    fields = {
+        "tenant": tree["tenant"],
+        "url": "https://pve1.lab:8006",
+        "secret": crypto.encrypt(TOKEN),
+        "guests": ["100"],
+        "seen": ["100", "101", "200"],
+    }
+    with system():
+        first = Connection.objects.create(created_by=super_admin, name="A", **fields)
+        second = Connection.objects.create(created_by=make_user(), name="B", **fields)
+        connections.sync(first, super_admin)
+        card = VMInterface.objects.get(vm__external_id="100")
+        card.addresses = "10.5.0.5/24"  # documented by hand; Proxmox VMs report none
+        card.save()
+        connections.sync(first, super_admin)
+        assert VMInterface.objects.get(pk=card.pk).addresses == "10.5.0.5/24"
+        with pytest.raises(ServiceError, match="already updated by the connection A"):
+            connections.sync(second, super_admin)
+    admin_client.post(
+        f"/compute/connections/{second.pk}/select/",
+        {"guests": ["100"], "interval": "0"},
+        secure=True,
+    )
+    with system():
+        second.refresh_from_db()
+        assert second.created_by == super_admin  # scheduled runs act as the last editor

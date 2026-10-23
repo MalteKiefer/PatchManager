@@ -250,7 +250,7 @@ def prefix_detail(request: HttpRequest, pk: str) -> HttpResponse:
     kids = services.children(prefix, visible_prefixes)
     addresses = services.addresses(
         prefix, _visible(actor, "ipam.ipaddress.view", IPAddress.objects.all())
-    ).select_related("port__device")
+    ).select_related("port__device", "vm_interface__vm")
     # Free space counts every address of the tenant, also those the viewer may not see.
     taken = list(
         IPAddress.objects.filter(

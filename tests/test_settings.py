@@ -100,3 +100,20 @@ def test_s3_storage_writes_private_objects() -> None:
         name = store.save("a/b.bin", ContentFile(b"ciphertext"))
         stub.assert_no_pending_responses()
     assert name == "a/b.bin"
+
+
+def test_explicit_smtp_backend_gets_the_server_options() -> None:
+    environment = {
+        **os.environ,
+        "DJANGO_SETTINGS_MODULE": "patchmanager.settings",
+        "PATCHMANAGER_EMAIL_BACKEND": "django.core.mail.backends.smtp.EmailBackend",
+        "PATCHMANAGER_EMAIL_HOST": "mailpit",
+        "PATCHMANAGER_EMAIL_PORT": "1025",
+    }
+    code = "import json, patchmanager.settings as s; print(json.dumps(s.MAILERS))"
+    result = subprocess.run(  # noqa: S603 - fixed interpreter and code, no outside input
+        [sys.executable, "-c", code], env=environment, capture_output=True, text=True, check=False
+    )
+    assert result.returncode == 0, result.stderr
+    options = json.loads(result.stdout)["default"]["OPTIONS"]
+    assert (options["host"], options["port"]) == ("mailpit", 1025)

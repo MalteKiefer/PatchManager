@@ -6,6 +6,7 @@ read from a file by setting ``<NAME>_FILE`` (Docker secrets).
 
 import os
 from pathlib import Path
+from typing import Any
 from urllib.parse import parse_qs, unquote, urlsplit
 
 from django.core.exceptions import ImproperlyConfigured
@@ -220,13 +221,16 @@ MAIL_DEFAULTS = {
     "password": env("PATCHMANAGER_EMAIL_PASSWORD", ""),
     "use_tls": env_bool("PATCHMANAGER_EMAIL_USE_TLS", True),
 }
-MAILERS = {
-    "default": {
-        "BACKEND": env(
-            "PATCHMANAGER_EMAIL_BACKEND", "patchmanager.instance.runtime.ConfiguredMailBackend"
-        ),
+_MAIL_BACKEND = env(
+    "PATCHMANAGER_EMAIL_BACKEND", "patchmanager.instance.runtime.ConfiguredMailBackend"
+)
+MAILERS: dict[str, dict[str, Any]] = {"default": {"BACKEND": _MAIL_BACKEND}}
+if _MAIL_BACKEND.endswith("smtp.EmailBackend"):  # a fixed server, as in the development stack
+    MAILERS["default"]["OPTIONS"] = {
+        **MAIL_DEFAULTS,
+        "host": MAIL_DEFAULTS["host"] or "localhost",
+        "timeout": 20,
     }
-}
 DEFAULT_FROM_EMAIL = env("PATCHMANAGER_EMAIL_FROM", "patchmanager@localhost")
 
 ROOT_URLCONF = "patchmanager.urls"

@@ -19,6 +19,7 @@ from patchmanager.networks.platforms.common import (
     network_of,
 )
 
+MAX_VALUE = 256 * 1024  # characters of one value spanning lines
 MAX_DEPTH = 32
 # FortiOS writes the any address for values that are not set (and for the default route).
 UNSET = "0.0.0.0"  # noqa: S104  # nosec B104: a value, not a bind address
@@ -36,18 +37,53 @@ def detect(text: str) -> int:
     return min(score, 100)
 
 
+def _quote_state(text: str, state: str) -> str:
+    """Whether ``text`` leaves a quote open ('' when not), continuing ``state`` (shlex rules)."""
+    escaped = False
+    for char in text:
+        if escaped:
+            escaped = False
+        elif char == "\\" and state != "'":
+            escaped = True
+        elif not state and char in "\"'":
+            state = char
+        elif char == state:
+            state = ""
+    return state
+
+
 def tree(lines: list[str], config: Config) -> dict[str, Any]:
-    """``config``/``edit``/``set`` blocks as nested dictionaries (secrets left out)."""
+    """``config``/``edit``/``set`` blocks as nested dictionaries (secrets left out).
+
+    Quoted values may span lines (certificates, keys, message texts): they are joined
+    before the line is split, up to MAX_VALUE characters.
+    """
     root: dict[str, Any] = {}
     stack: list[dict[str, Any]] = [root]
+    pending: list[str] = []
+    state, start, size = "", 0, 0
     for number, raw in enumerate(lines, 1):
-        line = raw.strip()
-        if not line or line.startswith("#"):
-            continue
+        if pending:
+            pending.append(raw)
+            size += len(raw)
+            state = _quote_state("\n" + raw, state)
+            if size > MAX_VALUE:
+                raise ParseError(f"line {start}: unbalanced quotes")
+            if state:
+                continue
+            line, pending = "\n".join(pending), []
+        else:
+            line = raw.strip()
+            if not line or line.startswith("#"):
+                continue
+            state, start, size = _quote_state(line, ""), number, len(line)
+            if state:
+                pending = [line]
+                continue
         try:
             words = shlex.split(line, posix=True)
         except ValueError as exc:
-            raise ParseError(f"line {number}: unbalanced quotes") from exc
+            raise ParseError(f"line {start}: unbalanced quotes") from exc
         key = words[0]
         if key == "config":
             node = stack[-1].setdefault(" ".join(words[1:]), {})
@@ -67,6 +103,8 @@ def tree(lines: list[str], config: Config) -> dict[str, Any]:
             continue
         if len(stack) > MAX_DEPTH:
             raise ParseError(f"line {number}: blocks nested too deeply")
+    if pending:
+        raise ParseError(f"line {start}: unbalanced quotes")
     return root
 
 

@@ -1,6 +1,5 @@
 """Take a platform's inventory into the documentation, and the page that starts it."""
 
-import contextlib
 import ipaddress
 from dataclasses import dataclass, field
 from typing import Any
@@ -170,7 +169,7 @@ def _guests(
         d.name.lower(): d
         for d in Device.objects.filter(tenant=tenant, cluster_host__cluster=cluster)
     }
-    vlans = {v.vid: v for v in VLAN.objects.filter(tenant=tenant)}
+    vlans = _vlans_by_vid(tenant, cluster)
     for guest in data.guests:
         if pick.guests is not None and guest.external_id not in pick.guests:
             continue
@@ -209,8 +208,12 @@ def _guests(
                 tenant=tenant, vm=vm, name=nic["name"]
             )
             interface.mac_address, interface.bridge = nic["mac"], nic["bridge"]
-            interface.addresses = nic["addresses"][:300]
-            interface.vlan = vlans.get(vid) if vid else None
+            # Many platforms never report addresses or VLANs (Proxmox VMs, vCenter): what
+            # was documented by hand stays unless the platform says otherwise.
+            if nic["addresses"]:
+                interface.addresses = nic["addresses"][:300]
+            if vid:
+                interface.vlan = vlans.get(vid)
             try:
                 interface.full_clean(exclude=["tenant"])
                 interface.save()
@@ -239,6 +242,27 @@ def _guests(
             disk.save()
 
 
+def _vlans_by_vid(tenant: Any, cluster: Cluster) -> dict[int, VLAN]:
+    """VLANs a tag on this cluster can mean: of the cluster's site, else tenant wide.
+
+    VLAN IDs repeat between sites; a tag that matches only VLANs of other sites is left
+    unlinked rather than guessed.
+    """
+    sites = {cluster.site_id} if cluster.site_id else set()
+    sites |= set(
+        Device.objects.filter(cluster_host__cluster=cluster).values_list(
+            "room__floor__building__site_id", flat=True
+        )
+    )
+    found: dict[int, VLAN] = {}
+    for vlan in VLAN.objects.filter(tenant=tenant).order_by("site_id"):
+        own = vlan.site_id is not None and vlan.site_id in sites
+        # A site's own VLAN wins over a tenant wide one with the same ID.
+        if own or (vlan.site_id is None and vlan.vid not in found):
+            found[vlan.vid] = vlan
+    return found
+
+
 def _reported(text: str) -> dict[str, str]:
     """Host address -> address with prefix length, from the card's address list."""
     found: dict[str, str] = {}
@@ -261,9 +285,13 @@ def _link_addresses(
     """
     reported = _reported(interface.addresses)
     for gone in IPAddress.objects.filter(vm_interface=interface).exclude(host__in=reported):
-        # Without the right to change it, the address stays linked until someone removes it.
-        with contextlib.suppress(ServiceError, PermissionDeniedError):
+        try:
             ipam.update_address(request, actor, gone, vm_interface=None)
+        except (ServiceError, PermissionDeniedError) as exc:
+            result.notes.append(
+                _("%(address)s is no longer on %(vm)s but stays linked: %(error)s")
+                % {"address": gone.host, "vm": interface.vm.name, "error": exc}
+            )
     if not reported:
         return
     existing = {

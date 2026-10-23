@@ -8,7 +8,7 @@ from hypothesis import strategies as st
 from patchmanager.accounts.services import ServiceError
 from patchmanager.dcim import services
 from patchmanager.dcim.elevation import UNIT, layout
-from patchmanager.dcim.models import Rack, RackSpace
+from patchmanager.dcim.models import Port, Rack, RackSpace
 from patchmanager.tenancy import rls
 
 pytestmark = pytest.mark.django_db
@@ -283,6 +283,25 @@ def test_move_rack_with_its_devices(
             tenant=t["tenant"], address="10.1.0.1/24", port=port, path=str(sw.path)
         )
         Rack.objects.filter(pk=t["rack"].pk).update(plan_x=1.0, plan_y=2.0)
+        from patchmanager.accounts.models import Assignment, Role
+        from patchmanager.networks.models import VLAN
+
+        colo = make_user()
+        scoped = Assignment.objects.create(
+            role=Role.objects.get(key="viewer"),
+            user=colo,
+            tenant=t["tenant"],
+            scope_path=t["rack"].path,
+            scope_label="A01",
+        )
+        local = VLAN.objects.create(tenant=t["tenant"], site=t["site"], vid=10, name="HQ users")
+        Port.objects.filter(pk=port.pk).update(untagged_vlan=local)
+    refused = admin_client.post(
+        f"/racks/{t['rack'].pk}/", {"action": "move", "room": other["room"].pk}, secure=True
+    ).content.decode()
+    assert "use VLANs of the old site" in refused
+    with system():
+        Port.objects.filter(pk=port.pk).update(untagged_vlan=None)
     page = admin_client.get(f"/racks/{t['rack'].pk}/", secure=True).content.decode()
     assert "Move rack" in page and "Branch / B1 / F1 / R1" in page
     taken = admin_client.post(
@@ -306,6 +325,8 @@ def test_move_rack_with_its_devices(
         assert str(rack.path).startswith(str(other["room"].path))
         assert str(sw.path).startswith(str(rack.path)) and str(address.path) == str(sw.path)
         assert rack.spaces.get(device=sw).start == 1  # still mounted at the same unit
+        scoped.refresh_from_db()
+        assert str(scoped.scope_path) == str(rack.path)  # the rack's role stays on the rack
         with pytest.raises(PermissionDeniedError):
             services.relocate(t["request"], make_user(), rack, t["room"])
         foreign = make_tree(name="Elsewhere")

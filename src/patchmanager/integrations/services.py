@@ -8,6 +8,7 @@ import re
 import secrets
 import time
 from datetime import timedelta
+from fnmatch import fnmatchcase
 from typing import Any
 from urllib.parse import urlsplit
 
@@ -29,6 +30,7 @@ from patchmanager.tenancy import rls
 from patchmanager.tenancy.models import Tenant
 
 logger = logging.getLogger(__name__)
+OPERATIONS = ("insert", "update", "delete")  # actions of history changes, the event suffix
 PATTERN = re.compile(r"^(\*|[a-z]+(\.[a-z]+){0,2}(\.\*)?)$")
 BACKOFF = (60, 300, 1800, 7200, 21600, 86400)  # seconds after attempt 1, 2, ...
 LEASE = timedelta(minutes=5)  # longer than a batch can take (BATCH x total timeout)
@@ -39,19 +41,26 @@ SEND_WINDOW = (
 KEEP_DAYS = 30
 
 
-def sees_everything(user: Any, tenant: Tenant) -> bool:
+def sees_everything(user: Any, tenant: Tenant, events: list[str] | None = None) -> bool:
     """True if ``user`` may view every tracked object type in the whole tenant, without exceptions.
 
     Webhooks send every change with before and after values, so whoever sets one
     up must be able to see all of it: a tenant wide view grant per type and no
-    deny rule anywhere inside the tenant.
+    deny rule anywhere inside the tenant. With ``events`` only the types those
+    patterns can send count, so object types added later do not stop a webhook
+    that never sends them.
     """
     from patchmanager.history.registry import TRACKED
 
     if user is None or not user.is_active:
         return False
     path = tenant.policy_path
-    views = {f"{t.policy_type}.view" for t in TRACKED.values()}
+    views = {
+        f"{t.policy_type}.view"
+        for label, t in TRACKED.items()
+        if events is None
+        or any(fnmatchcase(f"{label}.{op}", e) for e in events for op in OPERATIONS)
+    }
     if not all(policy.has_perm(user, perm, scope_path=path) for perm in views):
         return False
     return not any(
@@ -267,7 +276,7 @@ def deliver_due(limit: int = BATCH) -> int:
                 continue
             hook = delivery.webhook
             if hook.pk not in allowed:  # the creator must still see everything the webhook sends
-                allowed[hook.pk] = sees_everything(hook.created_by, hook.tenant)
+                allowed[hook.pk] = sees_everything(hook.created_by, hook.tenant, hook.events)
             if not hook.active:
                 Delivery.objects.filter(pk=delivery.pk).update(
                     status=Delivery.Status.FAILED, last_error="The webhook is inactive."

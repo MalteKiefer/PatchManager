@@ -4,6 +4,7 @@ Each one replaces a value Django would otherwise fix at start: password length, 
 server, the API rate, the attachment storage and the map tile origin in the CSP.
 """
 
+import re
 import threading
 from collections.abc import Callable
 from functools import lru_cache
@@ -163,7 +164,8 @@ def _csp_with_tiles(tile_url: str) -> dict[str, list[str]]:
     policy = {key: list(values) for key, values in base.items()}
     parts = urlsplit(tile_url)
     images = [v for v in policy["img-src"] if v in (CSP.SELF, "data:")]
-    if parts.scheme == "https" and parts.netloc:
+    # Only a plain host (as the form allows), so the value cannot add CSP directives.
+    if parts.scheme == "https" and re.fullmatch(r"[A-Za-z0-9.{}*-]+(:[0-9]{1,5})?", parts.netloc):
         images.append(f"https://{parts.netloc.replace('{s}', '*')}")
     policy["img-src"] = images
     return policy

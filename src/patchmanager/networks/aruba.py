@@ -102,7 +102,9 @@ def fill_template(text: str, variables: dict[str, Any], warnings: list[str]) -> 
         if len(raw) > MAX_LINE:  # before variables can make it longer
             raise ParseError(f"line {number} is longer than {MAX_LINE} characters")
         stripped = raw.strip()
-        if match := re.fullmatch(r"%if\s+([A-Za-z0-9_.-]+)\s*(?:(!?=)\s*(.*?))?\s*%", stripped):
+        # No two neighbouring parts can both take spaces, so a line that does not match fails
+        # in linear time (the old pattern backtracked cubically on long runs of spaces).
+        if match := re.fullmatch(r"%if\s+([A-Za-z0-9_.-]+)\s*(?:(!?=)([^%]*))?%", stripped):
             name, op, expected = match.groups()
             value = str(variables.get(name, "")).strip()
             if op:

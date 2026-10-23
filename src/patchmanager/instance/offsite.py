@@ -16,6 +16,7 @@ from pathlib import Path
 from typing import Any
 
 from django.conf import settings
+from django.core.cache import cache
 from django.utils import timezone
 from django.utils.translation import gettext as _
 
@@ -25,6 +26,7 @@ from patchmanager.instance import config as instance_config
 logger = logging.getLogger(__name__)
 TIMEOUT = 6 * 3600  # one run, in seconds
 DUMP_GLOB = "patchmanager-*.dump"
+LOCK = "instance:offsite:running"
 
 
 def check_repository(repository: str) -> None:
@@ -128,18 +130,20 @@ def fetch(config: instance_config.Config, name: str, target: str) -> None:
     if not name.startswith("patchmanager-") or not name.endswith(".dump") or "/" in name:
         raise ServiceError(_("Not a PatchManager dump: %(name)s") % {"name": name})
     folder = str(settings.BACKUP_DIR or "/backups")
+    # "latest:<folder>" restores relative to the backup folder, so the files land directly
+    # in ``target`` where the restore service finds them.
     result = _run(
         config,
         "restore",
-        "latest",
+        f"latest:{folder}",
         "--host",
         "patchmanager",
         "--target",
         target,
         "--include",
-        f"{folder}/{name}",
+        f"/{name}",
         "--include",
-        f"{folder}/{name}.media.tar",
+        f"/{name}.media.tar",
     )
     if result.returncode != 0:
         raise ServiceError(_scrub(result.stderr, config) or "restic restore failed")
@@ -178,20 +182,33 @@ def due(config: instance_config.Config) -> bool:
     """Enabled, and a dump newer than the last successful copy exists."""
     if not config.offsite_enabled or not settings.BACKUP_DIR:
         return False
-    newest = _newest(str(settings.BACKUP_DIR))
+    folder = Path(str(settings.BACKUP_DIR))
+    if any(folder.glob("patchmanager-*.partial")):
+        return False  # the backup service is still writing; copy the complete set later
+    newest = _newest(str(folder))
     if newest is None:
         return False
     last = status()
     if last is None or not last["ok"] or last["at"] is None:
         return True
     copied: datetime = last["at"]
-    return datetime.fromtimestamp(newest.stat().st_mtime, tz=UTC) > copied
+    # The uploads archive is written after its dump, so it decides when the set is new.
+    parts = [newest, newest.with_name(newest.name + ".media.tar")]
+    written = max(p.stat().st_mtime for p in parts if p.exists())
+    return datetime.fromtimestamp(written, tz=UTC) > copied
 
 
 def run(force: bool = False) -> bool:
-    """Copy when due (or forced), record the outcome; True when a copy succeeded."""
+    """Copy when due (or forced), record the outcome; True when a copy succeeded.
+
+    Only one copy runs at a time: a copy can take longer than the hourly schedule, and
+    "Copy now" or a redelivered task must not start a second restic on the repository.
+    """
     config = instance_config.get()
     if not force and not due(config):
+        return False
+    if not cache.add(LOCK, timezone.now().isoformat(), TIMEOUT + 60):
+        logger.info("off-site copy already running")
         return False
     try:
         message = copy(config)
@@ -200,5 +217,7 @@ def run(force: bool = False) -> bool:
         logger.warning("off-site copy failed: %s", reason)
         _record(False, reason)
         return False
+    finally:
+        cache.delete(LOCK)
     _record(True, message)
     return True

@@ -83,14 +83,18 @@ def _command(
         declare_vlans(config, words[1], body)
     elif key == "interface" and len(words) >= 2:
         _interface(config, "".join(words[1:]), body)
-    elif words[:2] == ["ip", "route"] and len(words) >= 5 and words[2] != "vrf":
-        prefix = network_of(words[2:4])
-        hop = words[4]
+    elif words[:2] == ["ip", "route"] and len(words) >= 4 and words[2] != "vrf":
+        # IOS writes "prefix mask hop", NX-OS and EOS "prefix/length hop".
+        if "/" in words[2]:
+            prefix, rest = network_of(words[2:3]), words[3:]
+        elif len(words) >= 5:
+            prefix, rest = network_of(words[2:4]), words[4:]
+        else:
+            raise ParseError(f"cannot read the route {' '.join(words)[:60]}")
+        hop = rest[0]
         next_hop = _ip(hop) if hop[:1].isdigit() or ":" in hop else None
         distance = (
-            int(words[5])
-            if len(words) > 5 and words[5].isdigit() and int(words[5]) <= 255
-            else None
+            int(rest[1]) if len(rest) > 1 and rest[1].isdigit() and int(rest[1]) <= 255 else None
         )
         config.routes.append(Route(prefix, next_hop, distance))
     elif words[:2] == ["ipv6", "route"] and len(words) >= 4 and words[2] != "vrf":
@@ -105,8 +109,12 @@ def _command(
     ]:
         _dns(config, words)
     elif words[:3] == ["ip", "dhcp", "excluded-address"] and len(words) >= 4:
-        first = ipaddress.IPv4Address(words[3])
-        last = ipaddress.IPv4Address(words[4]) if len(words) > 4 else first
+        args = words[5:] if words[3] == "vrf" else words[3:]  # "vrf NAME" scopes the range
+        try:
+            first = ipaddress.IPv4Address(args[0])
+            last = ipaddress.IPv4Address(args[1]) if len(args) > 1 else first
+        except (IndexError, ValueError) as exc:
+            raise ParseError(f"cannot read the excluded range {' '.join(words)[:60]}") from exc
         excluded.append((first, last))
     elif words[:3] == ["ip", "dhcp", "pool"] and len(words) == 4:
         _pool(config, words[3], body)
@@ -190,7 +198,7 @@ def _interface(config: Config, name: str, body: list[str]) -> None:
         elif parts[:4] == ["switchport", "trunk", "allowed", "vlan"] and len(parts) >= 5:
             spec = " ".join(parts[4:])
             if parts[4] == "add":
-                port.allowed = (port.allowed or []) + vid_list(" ".join(parts[5:]))
+                config.extend_allowed(port, vid_list(" ".join(parts[5:])))
             elif parts[4] == "none":
                 port.allowed = []
             else:
@@ -323,20 +331,27 @@ def _pool_ranges(
         if home is not None:
             home.reservations += pool.reservations
             del config.pools[name]
+    # Merge the excluded ranges once (sorted, overlapping or adjacent joined), so each pool
+    # needs one pass from each end instead of repeating the scan until nothing changes.
+    merged: list[list[ipaddress.IPv4Address]] = []
+    for low, high in sorted(excluded):
+        if merged and int(low) <= int(merged[-1][1]) + 1:
+            merged[-1][1] = max(merged[-1][1], high)
+        else:
+            merged.append([low, high])
     for pool in config.pools.values():
         if not pool.network or ":" in pool.network:
             continue
         network = ipaddress.IPv4Network(pool.network)
         if network.num_addresses < 4:
             continue
-        first, last = network.network_address + 1, network.broadcast_address - 1
-        changed = True
-        while changed:
-            changed = False
-            for low, high in excluded:
-                if low <= first <= high:
-                    first, changed = high + 1, True
-                if low <= last <= high:
-                    last, changed = low - 1, True
+        first, last = int(network.network_address) + 1, int(network.broadcast_address) - 1
+        for low, high in merged:
+            if int(low) <= first <= int(high):
+                first = int(high) + 1
+        for low, high in reversed(merged):
+            if int(low) <= last <= int(high):
+                last = int(low) - 1
         if first <= last:
-            pool.start, pool.end = str(first), str(last)
+            pool.start = str(ipaddress.IPv4Address(first))
+            pool.end = str(ipaddress.IPv4Address(last))

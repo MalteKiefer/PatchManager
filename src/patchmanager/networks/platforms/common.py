@@ -183,9 +183,18 @@ class Config:
 
     def allow(self, name: str, vids: list[int]) -> None:
         """Add VLANs to a trunk's allowed list (duplicates are removed by :func:`finish`)."""
-        port = self.interface(name)
+        self.extend_allowed(self.interface(name), vids)
+
+    def extend_allowed(self, port: Interface, vids: list[int]) -> None:
+        """Add VLANs to ``port``'s allowed list in place, counted against the budget.
+
+        Repeated "allowed vlan add" lines must neither copy the list each time nor grow it
+        without limit.
+        """
         self.charge(len(vids))
-        port.allowed = [*(port.allowed or []), *vids]
+        if port.allowed is None:
+            port.allowed = []
+        port.allowed.extend(vids)
 
     def pool_index(self) -> dict[str, Pool]:
         """Pools by network, for :meth:`pool_for` (build once, look up many times)."""

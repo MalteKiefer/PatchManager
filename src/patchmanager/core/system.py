@@ -111,12 +111,12 @@ def backups() -> dict[str, Any]:
     folder = Path(settings.BACKUP_DIR)
     try:
         files = sorted(
-            (p for p in folder.glob("patchmanager-*") if p.is_file()),
+            (p for p in folder.glob("patchmanager-*") if p.is_file() and p.suffix != ".partial"),
             key=lambda p: p.stat().st_mtime,
             reverse=True,
         )
     except OSError:
-        return {"configured": True, "readable": False, "files": []}
+        return {"configured": True, "readable": False, "files": [], "offsite": offsite.status()}
     rows: list[dict[str, Any]] = [
         {
             "name": p.name,
@@ -131,6 +131,8 @@ def backups() -> dict[str, Any]:
         "configured": True,
         "readable": True,
         "files": rows,
+        # The uploads archive is written after its dump: restore takes the dump's name.
+        "newest_dump": next((r["name"] for r in rows if r["name"].endswith(".dump")), ""),
         "stale": stale,
         "offsite": offsite.status(),
     }

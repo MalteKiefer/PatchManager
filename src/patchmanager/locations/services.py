@@ -3,7 +3,7 @@
 from typing import Any
 
 from django.core.exceptions import ValidationError
-from django.db import DatabaseError, IntegrityError, transaction
+from django.db import DatabaseError, IntegrityError, connection, transaction
 from django.db.models import ProtectedError
 from django.http import HttpRequest
 from django.utils.translation import gettext as _
@@ -312,12 +312,7 @@ def move_site(request: HttpRequest, actor: User, site: Any, target: Tenant) -> N
                     [target.pk, source_tenant, *([new] * len(_TREE_TABLES)), new, new],
                 )
         Assignment.objects.filter(scope_path__descendant_of=old).update(tenant=target)
-        with connection.cursor() as cursor:
-            cursor.execute(
-                f"UPDATE accounts_assignment SET scope_path = {_REBASE.format(column='scope_path')}"  # noqa: S608  # nosec B608: constant fragment
-                " WHERE scope_path <@ %s::ltree",
-                [old, new, new, old, old],
-            )
+        rebase_assignments(old, new)
     policy.bump_version()
     audit.record(
         "locations.site.moved",
@@ -326,6 +321,19 @@ def move_site(request: HttpRequest, actor: User, site: Any, target: Tenant) -> N
         tenant_id=target.pk,
         data={"from": str(source_tenant), "to": str(target.pk)},
     )
+
+
+def rebase_assignments(old: str, new: str) -> None:
+    """Role assignments scoped at or below path ``old`` follow it to ``new``.
+
+    Callers bump the policy version afterwards.
+    """
+    with connection.cursor() as cursor:
+        cursor.execute(
+            f"UPDATE accounts_assignment SET scope_path = {_REBASE.format(column='scope_path')}"  # noqa: S608  # nosec B608: constant fragment
+            " WHERE scope_path <@ %s::ltree",
+            [old, new, new, old, old],
+        )
 
 
 def validate_message(exc: ValidationError) -> str:
