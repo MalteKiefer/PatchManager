@@ -158,9 +158,15 @@ def type_list(request: HttpRequest) -> HttpResponse:
     if form in DeviceType.Form.values:
         types = types.filter(form=form)
     tenant = getattr(request, "tenant", None)
-    can_add = policy.has_perm(request.user, "library.devicetype.add") or (
-        tenant is not None and policy.has_perm(request.user, "library.devicetype.add", tenant)
-    )
+    may = {
+        action: policy.has_perm(request.user, f"library.devicetype.{action}")
+        or (
+            tenant is not None
+            and policy.has_perm(request.user, f"library.devicetype.{action}", tenant)
+        )
+        for action in ("add", "import")
+    }
+    can_add = may["add"]
     return render(
         request,
         "library/types.html",
@@ -170,6 +176,7 @@ def type_list(request: HttpRequest) -> HttpResponse:
             "form_filter": form,
             "forms": DeviceType.Form.choices,
             "can_add": can_add,
+            "can_import": may["add"] and may["import"],
             "import_form": ImportForm(),
         },
     )
@@ -379,8 +386,10 @@ def catalog_adopt(request: HttpRequest, pk: int) -> HttpResponse:
     form = AdoptForm(request.POST or None)
     actor = _actor(request)
     tenant = getattr(request, "tenant", None)
-    can_add = policy.has_perm(actor, "library.devicetype.add") or (
-        tenant is not None and policy.has_perm(actor, "library.devicetype.add", tenant)
+    can_add = all(  # adopting a catalog type is an import
+        policy.has_perm(actor, f"library.devicetype.{action}")
+        or (tenant is not None and policy.has_perm(actor, f"library.devicetype.{action}", tenant))
+        for action in ("add", "import")
     )
     if request.method == "POST" and form.is_valid():
         try:  # the service checks the permission for the chosen scope

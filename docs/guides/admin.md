@@ -31,6 +31,12 @@ typing its identifier.
   group apply to every member of it and of its nested groups.
 * **Roles** bundle permissions. The six system roles cannot be changed; clone
   one to adapt it. Custom roles can be exported and imported as JSON or YAML.
+  Every import needs the **import** permission of what it creates, besides adding
+  or changing it: tables, DNS zones (`ipam.dnszone.import`), platforms and NAS
+  storage (`compute.vm.import`, `compute.storage.import`), device types from a file
+  or the catalog (`library.devicetype.import`) and reading a switch configuration
+  (`dcim.device.import`). API tokens limited to object types also limit the
+  vendor, device type and tenant lists.
 * **Assignments** connect a user or group to a role, globally, within a
   tenant, or below a site, building, floor, room or rack (the scope covers
   everything inside it). A **deny** assignment removes the role's permissions even if another

@@ -316,8 +316,9 @@ def connection_list(request: HttpRequest) -> HttpResponse:
         "compute/connections.html",
         {
             "connections": rows,
-            "can_add": policy.has_perm(
-                request.user, "compute.cluster.add", scope_path=path_label(tenant.pk)
+            "can_add": all(
+                policy.has_perm(request.user, permission, scope_path=path_label(tenant.pk))
+                for permission in ("compute.cluster.add", "compute.vm.import")
             ),
         },
     )
@@ -331,7 +332,10 @@ def connection_create(request: HttpRequest) -> HttpResponse:
     if tenant is None:
         raise Http404
     actor = _actor(request)
-    if not policy.has_perm(actor, "compute.cluster.add", scope_path=path_label(tenant.pk)):
+    if not all(
+        policy.has_perm(actor, permission, scope_path=path_label(tenant.pk))
+        for permission in ("compute.cluster.add", "compute.vm.import")
+    ):
         raise PermissionDenied
     form = ConnectionForm(request.POST or None)
     if request.method == "POST" and form.is_valid():
