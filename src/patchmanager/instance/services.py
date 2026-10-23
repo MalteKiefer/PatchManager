@@ -72,7 +72,12 @@ def save_branding(
         row.logo = None
     elif logo is not None:
         row.logo = _logo(logo)
-    row.save()
+    # Only the branding columns: settings and the off-site status are saved elsewhere.
+    fields = ["name", "brand_hue", "default_language", "logo", "updated_at"]
+    if row.pk is None:
+        row.save()
+    else:
+        row.save(update_fields=fields)
     state.forget()
     audit.record(
         "instance.branding.changed",
@@ -116,7 +121,11 @@ def public_host(url: str) -> None:
     if parts.scheme != "https" or not parts.hostname or parts.username or parts.password:
         raise ServiceError(_("Enter an https address without credentials."))
     try:
-        answers = socket.getaddrinfo(parts.hostname, parts.port or 443, type=socket.SOCK_STREAM)
+        port = parts.port or 443
+    except ValueError as exc:  # out of range or not a number
+        raise ServiceError(_("Enter a valid port.")) from exc
+    try:
+        answers = socket.getaddrinfo(parts.hostname, port, type=socket.SOCK_STREAM)
     except (socket.gaierror, UnicodeError) as exc:
         raise ServiceError(_("The host cannot be resolved.")) from exc
     for answer in answers:
@@ -137,8 +146,8 @@ def _probe(config: instance_config.Config) -> None:
     """Write and delete a small object, so a wrong bucket fails here and not on upload."""
     from patchmanager.instance.runtime import s3_storage
 
-    store = s3_storage(config)
     try:
+        store = s3_storage(config)  # also rejects settings the storage cannot use
         name = store.save(f"health/probe-{secrets.token_hex(8)}.txt", ContentFile(b"ok"))
         store.delete(name)
     except Exception as exc:  # botocore raises many unrelated types
@@ -152,6 +161,7 @@ def _probe(config: instance_config.Config) -> None:
 # Destination settings and the secrets that belong to them: a stored secret is only sent
 # to the destination it was entered for.
 DESTINATIONS = (
+    (("mail_host", "mail_port", "mail_user"), ("mail_password",)),
     (("s3_endpoint_url", "s3_bucket"), ("s3_secret_access_key",)),
     (("offsite_repository",), ("offsite_secret_access_key", "offsite_password")),
 )

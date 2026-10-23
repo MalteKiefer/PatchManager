@@ -176,7 +176,10 @@ def _port(config: Config, name: str, body: list[str]) -> None:
             port.mode, port.native_vlan = "trunk", int(parts[3])
         elif parts[:3] == ["vlan", "trunk", "allowed"] and len(parts) >= 4:
             port.mode = "trunk"
-            port.allowed = None if parts[3] == "all" else (port.allowed or []) + vid_list(parts[3])
+            if parts[3] == "all":
+                port.allowed = None
+            else:
+                config.extend_allowed(port, vid_list(parts[3]))
         elif parts[:1] == ["lag"] and len(parts) == 2 and parts[1].isdigit():
             port.lag = f"lag{parts[1]}"
         elif parts[:2] == ["lacp", "mode"]:

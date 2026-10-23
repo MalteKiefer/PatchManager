@@ -85,14 +85,21 @@ class LimitsMixin(forms.Form):
             )
         ]
         self.locations: dict[str, Any] = {}
-        for model in (Site, Building, Floor, Room):
+        # The parents come along for the labels (one query per level, not per node).
+        parents = {
+            Site: Site.objects.all(),
+            Building: Building.objects.select_related("site"),
+            Floor: Floor.objects.select_related("building__site"),
+            Room: Room.objects.select_related("floor__building__site"),
+        }
+        for model, rows in parents.items():
             for node in policy.scope_queryset(
-                actor, f"{model.policy_object_type}.view", model.objects.all()
+                actor, f"{model.policy_object_type}.view", rows
             ).order_by("path")[:2000]:
                 self.locations[f"{model.__name__.lower()}:{node.pk}"] = node
         scope: Any = self.fields["scope"]
         scope.choices = [("", _("everywhere"))] + [
-            (key, " / ".join([*(a.name for a in node.ancestors()[1:]), node.name]))
+            (key, " / ".join([*(a.name for a in node.ancestors()), node.name]))
             for key, node in sorted(self.locations.items(), key=lambda kv: str(kv[1].path))
         ]
 

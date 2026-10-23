@@ -124,6 +124,7 @@ def create(
         _ports_from(device, list(device_type.port_templates.all()))
     audit.record(
         "dcim.device.created",
+        actor=actor,
         request=request,
         obj=device,
         data={"type": str(device_type), "rack": str(rack) if rack else None, "position": position},

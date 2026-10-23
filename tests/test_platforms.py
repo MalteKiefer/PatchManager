@@ -307,3 +307,78 @@ def test_apply_leaves_scopes_of_other_servers(make_tree, make_type, super_admin,
         assert any("another server" in s for s in result.skipped)
         scope = DHCPScope.objects.get()
         assert scope.server_id == other.pk and str(scope.start).split("/")[0] == "10.10.0.50"
+
+
+def test_junos_brace_lists_cannot_expand_without_limit() -> None:
+    from patchmanager.networks.platforms import junos
+
+    deep = "".join(f"{'b' * 1900}{i} {{\n" for i in range(30))
+    values = "a [ " + " ".join(["v"] * 900) + " ];\n"
+    with pytest.raises(common.TooLargeError):
+        junos.to_set((deep + values * 30).split("\n"))
+
+
+def test_repeated_allowed_vlan_adds_stay_within_the_budget() -> None:
+    from patchmanager.networks.platforms import cisco
+
+    text = "interface Gi1/0/1\n switchport mode trunk\n"
+    text += " switchport trunk allowed vlan add 1-4094\n" * 2000
+    with pytest.raises(common.TooLargeError):
+        cisco.parse(text)
+
+
+def test_cisco_excluded_ranges_routes_and_vrf() -> None:
+    from patchmanager.networks.platforms import cisco
+
+    many = "".join(f"ip dhcp excluded-address 10.0.{i // 250}.{i % 250 + 1}\n" for i in range(3000))
+    config = cisco.parse(
+        many
+        + "ip dhcp excluded-address 10.0.0.240 10.0.0.254\n"
+        + "ip dhcp excluded-address vrf GUEST 10.9.0.1 10.9.0.9\n"
+        + "ip dhcp pool A\n network 10.0.0.0 255.255.0.0\n"
+        + "ip route 0.0.0.0/0 10.0.0.1\nip route 10.2.0.0 255.255.0.0 10.1.1.2 5\n"
+        + "ip route 172.16.0.0/16 10.1.1.3 250\n"
+    )
+    pool = config.pools["A"]
+    assert (pool.start, pool.end) == ("10.0.0.255", "10.0.255.254")  # 10.0.0.1-254 excluded
+    routes = [(r.prefix, r.next_hop, r.distance) for r in config.routes]
+    assert routes == [
+        ("0.0.0.0/0", "10.0.0.1", None),
+        ("10.2.0.0/16", "10.1.1.2", 5),
+        ("172.16.0.0/16", "10.1.1.3", 250),
+    ]
+    assert not config.warnings
+
+
+def test_junos_group_peer_as_and_default_access_mode() -> None:
+    from patchmanager.networks.platforms import junos
+
+    config = junos.parse(
+        "set protocols bgp group EXT peer-as 65001\n"
+        "set protocols bgp group EXT neighbor 192.0.2.1\n"
+        "set protocols bgp group EXT neighbor 192.0.2.2 peer-as 65002\n"
+        "set vlans USERS vlan-id 100\n"
+        "set interfaces ge-0/0/1 unit 0 family ethernet-switching vlan members USERS\n"
+    )
+    assert {a: n.remote_asn for a, n in config.neighbors.items()} == {
+        "192.0.2.1": 65001,
+        "192.0.2.2": 65002,
+    }
+    assert config.vlans[100].untagged == ["ge-0/0/1"]
+
+
+def test_fortios_reads_values_spanning_lines() -> None:
+    from patchmanager.networks.platforms import fortios
+
+    config = fortios.parse(
+        "#config-version=FGT60F-7.2.5-FW-build1517:opmode=0:vdom=0\n"
+        'config system global\n    set hostname "fw1"\nend\n'
+        'config vpn certificate local\n    edit "Factory"\n'
+        '        set certificate "-----BEGIN CERTIFICATE-----\nMIIDdzCCAl+gAwIB\n'
+        '-----END CERTIFICATE-----"\n    next\nend\n'
+        'config system interface\n    edit "port1"\n        set ip 192.0.2.1 255.255.255.0\n'
+        "    next\nend\n"
+    )
+    assert config.hostname == "fw1" and "port1" in config.interfaces
+    with pytest.raises(platforms.ParseError, match="unbalanced quotes"):
+        fortios.parse('config system global\n set hostname "x\n' + "a\n" * 10)

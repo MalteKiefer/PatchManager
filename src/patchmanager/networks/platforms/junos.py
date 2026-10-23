@@ -4,12 +4,15 @@ import re
 import shlex
 
 from patchmanager.networks.platforms.common import (
+    MAX_BYTES,
+    MAX_LINES,
     SECRET,
     Config,
     Neighbor,
     ParseError,
     Pool,
     Route,
+    TooLargeError,
     Vlan,
     _ip,
     address_of,
@@ -35,15 +38,28 @@ def detect(text: str) -> int:
 
 
 def to_set(lines: list[str]) -> list[str]:
-    """The curly brace format as ``set`` lines (``set`` lines pass through)."""
+    """The curly brace format as ``set`` lines (``set`` lines pass through).
+
+    Each list value repeats its whole block path, so the output is bounded by the same
+    limits as the input; a small, deeply nested text cannot expand without limit.
+    """
     result: list[str] = []
     path: list[str] = []
+    size = 0
+
+    def emit(line: str) -> None:
+        nonlocal size
+        size += len(line)
+        if len(result) >= MAX_LINES or size > MAX_BYTES:
+            raise TooLargeError("the configuration expands to too many set commands")
+        result.append(line)
+
     for number, raw in enumerate(lines, 1):
         line = raw.split("#", 1)[0].strip() if not raw.strip().startswith('"') else raw.strip()
         if not line or line.startswith(("/*", "*")):
             continue
         if line.startswith(("set ", "delete ", "deactivate ")):
-            result.append(line)
+            emit(line)
             continue
         if line.endswith("{"):
             path.append(line[:-1].strip())
@@ -59,9 +75,9 @@ def to_set(lines: list[str]) -> list[str]:
             if "[" in statement and statement.endswith("]"):  # a list: one set line per value
                 head, _sep, values = statement.partition("[")
                 for value in values[:-1].split():
-                    result.append("set " + " ".join([*path, head.strip(), value]))
+                    emit("set " + " ".join([*path, head.strip(), value]))
             else:
-                result.append("set " + " ".join([*path, statement]))
+                emit("set " + " ".join([*path, statement]))
     return result
 
 
@@ -71,6 +87,8 @@ def parse(text: str) -> Config:
     vlan_names: dict[str, int] = {}
     members: list[tuple[str, str]] = []  # (port, vlan name or ID)
     irb: dict[str, list[str]] = {}
+    group_of: dict[str, str] = {}  # BGP neighbor address -> its group
+    group_as: dict[str, int] = {}  # BGP group -> its peer AS
     for number, line in enumerate(to_set(lines_of(text)), 1):
         if SECRET.search(line):
             config.secrets_skipped += 1
@@ -115,6 +133,11 @@ def parse(text: str) -> Config:
                     config.neighbors[address] = Neighbor(address, int(w[w.index("peer-as") + 1]))
                 elif "description" in w and address in config.neighbors:
                     config.neighbors[address].description = w[w.index("description") + 1][:200]
+                elif "group" in w:  # the AS may be set on the group (the usual layout)
+                    group_of.setdefault(address, w[w.index("group") + 1])
+            elif w[:2] == ["protocols", "bgp"] and "group" in w and "peer-as" in w:
+                if w[w.index("peer-as") + 1].isdigit():
+                    group_as[w[w.index("group") + 1]] = int(w[w.index("peer-as") + 1])
             elif w[:2] == ["protocols", "ospf"] and "interface" in w and w[2] == "area":
                 _ospf(config, w[3], w[w.index("interface") + 1], "passive" in w)
             elif w[:1] == ["protocols"] and w[1] in ("rstp", "mstp", "vstp", "stp"):
@@ -132,7 +155,11 @@ def parse(text: str) -> Config:
             interface = config.interface(port)
             config.allow(port, [vid])
             if interface.mode != "trunk":
-                interface.access_vlan = vid
+                # Without interface-mode a switching port is an access port (Junos default).
+                interface.mode, interface.access_vlan = "access", vid
+    for address, group in group_of.items():
+        if address not in config.neighbors and group in group_as:
+            config.neighbors[address] = Neighbor(address, group_as[group])
     config.unknown = config.unknown[:200]
     return finish(config)
 

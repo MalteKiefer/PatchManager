@@ -284,7 +284,17 @@ def vmware(url: str, username: str, password: str, fingerprint: str = "") -> Inv
     inventory = Inventory("vmware")
     try:
         clusters = client.get("/api/vcenter/cluster", headers) or []
-        inventory.cluster = str(clusters[0].get("name", ""))[:100] if clusters else ""
+        # Hosts and machines are read from the whole vCenter, so one cluster is documented:
+        # the vCenter's only cluster, or the vCenter itself when it has none or several.
+        if len(clusters) == 1:
+            inventory.cluster = str(clusters[0].get("name", ""))[:100]
+        else:
+            inventory.cluster = client.host[:100]
+            if clusters:
+                inventory.notes.append(
+                    _("The vCenter has %(n)s clusters; they are documented as one.")
+                    % {"n": len(clusters)}
+                )
         hosts = client.get("/api/vcenter/host", headers) or []
         inventory.hosts = [str(h.get("name", ""))[:150] for h in hosts]
         for host in hosts:

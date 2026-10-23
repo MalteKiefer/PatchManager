@@ -96,12 +96,13 @@ as above:
 
 ```bash
 docker compose -f compose.prod.yaml run --rm --no-deps -v patchmanager_backups:/restore \
-  worker /app/.pixi/envs/prod/bin/python -m django offsite_fetch patchmanager-<stamp>.dump
+  --entrypoint /app/.pixi/envs/prod/bin/python worker \
+  -m django offsite_fetch patchmanager-<stamp>.dump
 ```
 
-The files land below `/restore/backups/` in the volume; move them up one folder (or
-pass that path to the restore service). Keep `secrets/encryption_keys` outside the host
-too: uploads and second factors cannot be read without it.
+The dump and its uploads archive land at the top of the `backups` volume, where the
+restore service expects them. Keep `secrets/encryption_keys` outside the host too:
+uploads and second factors cannot be read without it.
 
 ### Point in time recovery
 

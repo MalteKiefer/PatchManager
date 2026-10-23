@@ -454,7 +454,8 @@ class DNSRecord(TenantScopedModel):
                 raise ValidationError({"value": _("A records take IPv4, AAAA records IPv6.")})
         if self.type in (self.Type.MX, self.Type.SRV) and self.priority is None:
             raise ValidationError({"priority": _("MX and SRV records need a priority.")})
-        target = self.value.split()[-1] if self.type == self.Type.SRV else self.value
+        parts = self.value.split()
+        target = (parts[-1] if parts else "") if self.type == self.Type.SRV else self.value
         if self.type in (
             self.Type.CNAME,
             self.Type.MX,

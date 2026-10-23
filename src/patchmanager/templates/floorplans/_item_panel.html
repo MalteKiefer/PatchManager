@@ -4,7 +4,7 @@
   <h2>{{ obj.name }}</h2>
 </div>
 <dl class="panel-facts">
-  <div><dt>{% translate "Room" %}</dt><dd>{{ obj.room.name }}</dd></div>
+  <div><dt>{% translate "Room" %}</dt><dd>{{ room }}</dd></div>
   <div><dt>{% translate "Status" %}</dt><dd>{{ obj.get_status_display }}</dd></div>
   {% if kind == "rack" %}
   <div><dt>{% translate "Height" %}</dt><dd>{{ obj.u_height }} U, {% blocktranslate with n=used %}{{ n }} used{% endblocktranslate %}</dd></div>

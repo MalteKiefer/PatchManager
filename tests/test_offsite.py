@@ -1,3 +1,4 @@
+import dataclasses
 import subprocess
 from pathlib import Path
 
@@ -133,3 +134,44 @@ def test_new_destination_needs_secrets_again(admin_client: Client, public, resti
     saved = admin_client.post("/manage/settings/backups/", same, secure=True, follow=True)
     assert "Settings saved" in saved.content.decode()
     assert config.get().offsite_password == "repo-pass-123"  # kept for the same destination
+
+
+def test_one_copy_at_a_time_and_only_complete_sets(
+    admin_client: Client, settings, tmp_path: Path, public, restic
+) -> None:
+    from django.core.cache import cache
+
+    settings.BACKUP_DIR = str(tmp_path)
+    admin_client.post("/manage/settings/backups/", SETTINGS, secure=True)
+    (tmp_path / "patchmanager-20261022T030000Z.dump").write_bytes(b"dump")
+    partial = tmp_path / "patchmanager-20261022T030000Z.dump.media.tar.partial"
+    partial.write_bytes(b"t")
+    assert offsite.run() is False and restic == []  # the backup is still being written
+    partial.unlink()
+    cache.add(offsite.LOCK, "x", 60)
+    assert offsite.run(force=True) is False and restic == []  # another copy runs
+    cache.delete(offsite.LOCK)
+    assert offsite.run() is True
+    assert cache.get(offsite.LOCK) is None
+
+
+def test_fetch_restores_into_the_backup_folder(settings, restic) -> None:
+    from django.core.management import call_command
+    from django.core.management.base import CommandError
+
+    settings.BACKUP_DIR = "/backups"
+    stored = dataclasses.replace(
+        config.defaults(),
+        offsite_repository=SETTINGS["offsite_repository"],
+        offsite_password="repo-pass-123",
+    )
+    offsite.fetch(stored, "patchmanager-20261022T030000Z.dump", "/restore")
+    args = restic[-1][0]
+    assert args[2:4] == ["restore", "latest:/backups"]
+    assert args[args.index("--target") + 1] == "/restore"
+    assert "/patchmanager-20261022T030000Z.dump.media.tar" in args
+    with pytest.raises(ServiceError):
+        offsite.fetch(stored, "../etc/passwd", "/restore")
+    restic.fail = "restore"
+    with pytest.raises(CommandError):
+        call_command("offsite_fetch", "patchmanager-20261022T030000Z.dump")

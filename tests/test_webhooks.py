@@ -448,3 +448,21 @@ def test_inactive_hooks_bad_ports_and_broken_sends(
             and second.attempts == 1
             and "server log" in second.last_error
         )
+
+
+def test_types_added_later_do_not_stop_older_webhooks(make_tree, make_user) -> None:
+    """A role from before new object types existed still sees everything its webhook sends."""
+    t = make_tree()
+    owner = make_user()
+    with rls.system_context():
+        role = Role.objects.create(
+            key="old-viewer",
+            name="Old viewer",
+            permissions=["dcim.device.view", "dcim.port.view", "dcim.rack.view"],
+        )
+        Assignment.objects.create(
+            role=role, user=owner, tenant=t["tenant"], scope_path=t["tenant"].policy_path
+        )
+        assert services.sees_everything(owner, t["tenant"], ["dcim.device.*", "dcim.port.update"])
+        assert not services.sees_everything(owner, t["tenant"], ["*"])
+        assert not services.sees_everything(owner, t["tenant"])

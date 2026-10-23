@@ -1,8 +1,10 @@
 """Branding and settings pages, and the public branding assets."""
 
 import ipaddress
+import re
 from dataclasses import asdict
 from typing import Any
+from urllib.parse import urlsplit
 
 from django import forms
 from django.conf import settings
@@ -17,6 +19,7 @@ from django.views.decorators.http import require_GET
 from patchmanager.accounts.decorators import permission_required
 from patchmanager.accounts.models import User
 from patchmanager.accounts.services import ServiceError
+from patchmanager.audit import services as audit
 from patchmanager.instance import config as instance_config
 from patchmanager.instance import offsite, services, state
 
@@ -218,7 +221,10 @@ class StorageForm(forms.Form):
         label=gettext_lazy("Folder in the bucket"),
         max_length=100,
         validators=[
-            RegexValidator(r"^[A-Za-z0-9._/-]+$", gettext_lazy("Letters, digits, . _ - /"))
+            RegexValidator(
+                r"^[A-Za-z0-9._-][A-Za-z0-9._/-]*$",
+                gettext_lazy("Letters, digits, . _ - /, not starting with /"),
+            )
         ],
     )
     s3_addressing_style = forms.ChoiceField(
@@ -255,8 +261,11 @@ class MapsForm(forms.Form):
     def clean_map_tile_url(self) -> str:
         """An https tile template."""
         url = str(self.cleaned_data.get("map_tile_url") or "").strip()
+        # The host goes into the Content Security Policy: only host name characters.
+        host = urlsplit(url).netloc if url.startswith("https://") else ""
         if url and (
-            not url.startswith("https://") or not all(p in url for p in ("{z}", "{x}", "{y}"))
+            not re.fullmatch(r"[A-Za-z0-9.{}*-]+(:[0-9]{1,5})?", host)
+            or not all(p in url for p in ("{z}", "{x}", "{y}"))
         ):
             raise forms.ValidationError(_("Enter an https address with {z}, {x} and {y}."))
         return url
@@ -382,6 +391,7 @@ def settings_view(request: HttpRequest, section: str = "security") -> HttpRespon
     if copy_now and section == "backups":
         from patchmanager.instance.tasks import offsite_copy
 
+        audit.record("instance.offsite.started", request=request)
         offsite_copy.delay(force=True)
         messages.success(request, _("The off-site copy was started; see the system page."))
         return redirect("instance:settings", section)
@@ -407,11 +417,7 @@ def settings_view(request: HttpRequest, section: str = "security") -> HttpRespon
                 return redirect("instance:settings", section)
             # Nothing was saved: show the page again with the entries.
             messages.success(request, _("The bucket can be written and read. Save to use it."))
-    secret = {
-        "mail": "mail_password",
-        "storage": "s3_secret_access_key",
-        "backups": "offsite_password",
-    }.get(section)
+    secrets = [n for n in form_class.base_fields if n in instance_config.SECRETS]
     return render(
         request,
         "instance/settings.html",
@@ -421,7 +427,8 @@ def settings_view(request: HttpRequest, section: str = "security") -> HttpRespon
             "title": title,
             "intro": intro,
             "sections": [(key, label) for key, (label, _f, _i) in SECTIONS.items()],
-            "secret_stored": bool(secret and current.get(secret)),
+            # Every secret of the section must be stored, or the badge would mislead.
+            "secret_stored": bool(secrets) and all(current.get(n) for n in secrets),
             "offsite": offsite.status() if section == "backups" else None,
         },
     )

@@ -56,6 +56,8 @@ def sync(
         room=connection.node_room,
         device_type=connection.node_type,
     )
+    if connection.cluster is None:
+        _refuse_cluster_of_another_connection(connection, data)
     result = importing.save(
         request, actor, connection.tenant, data, pick=pick, cluster=connection.cluster
     )
@@ -93,6 +95,28 @@ def sync(
         ]
     )
     return result
+
+
+def _refuse_cluster_of_another_connection(connection: Connection, data: sources.Inventory) -> None:
+    """A new connection must not take over a cluster another connection updates.
+
+    Clusters are found by name, and machines inside a cluster by their platform ID, so
+    two platforms with the same cluster (or node) name would overwrite each other.
+    """
+    name = data.cluster or data.platform
+    other = (
+        Connection.objects.filter(tenant=connection.tenant, cluster__name__iexact=name)
+        .exclude(pk=connection.pk)
+        .first()
+    )
+    if other is not None:
+        raise ServiceError(
+            _(
+                "The cluster %(cluster)s is already updated by the connection %(other)s."
+                " Rename the documented cluster first."
+            )
+            % {"cluster": name, "other": other.name}
+        )
 
 
 def due() -> list[Any]:
@@ -377,6 +401,15 @@ def connection_select(request: HttpRequest, pk: str) -> HttpResponse:
     form = SelectionForm(
         request.POST or None, initial=initial, data_found=found, connection=connection, actor=actor
     )
+    if (
+        request.method == "POST"
+        and form.is_valid()
+        and form.cleaned_data["add_new_guests"]
+        and not policy.has_perm(
+            actor, "compute.vm.add", scope_path=path_label(connection.tenant_id)
+        )
+    ):
+        form.add_error("add_new_guests", _("You may not add virtual machines."))
     if request.method == "POST" and form.is_valid():
         data = form.cleaned_data
         connection.nodes, connection.guests, connection.storage = (
@@ -386,10 +419,23 @@ def connection_select(request: HttpRequest, pk: str) -> HttpResponse:
         )
         connection.add_new_guests, connection.interval = data["add_new_guests"], data["interval"]
         connection.node_room, connection.node_type = data["node_room"], data["node_type"]
+        # Scheduled updates act as whoever last chose what is taken over, so nobody can
+        # schedule work that runs with someone else's rights.
+        connection.created_by = actor
         # Guests offered now but left out stay out, also with "take over new machines".
         connection.seen = [g.external_id for g in found.guests]
         connection.last_result = ""
         connection.save()
+        audit.record(
+            "compute.connection.changed",
+            request=request,
+            obj=connection,
+            data={
+                "guests": len(connection.guests),
+                "add_new_guests": connection.add_new_guests,
+                "interval": connection.interval,
+            },
+        )
         try:
             result = sync(connection, actor, request)
         except PermissionDeniedError as exc:

@@ -232,7 +232,12 @@ def item(request: HttpRequest, floor_pk: str, kind: str, pk: str) -> HttpRespons
     obj = get_object_or_404(model.objects.select_related("room"), pk=pk, room__floor=floor)
     if not policy.has_perm(request.user, f"{obj.policy_object_type}.view", obj):
         raise Http404
-    context: dict[str, Any] = {"kind": kind, "obj": obj, "floor": floor}
+    # The room as the plan shows it: hidden from viewers who may not see it.
+    context: dict[str, Any] = {
+        "kind": kind,
+        "obj": obj,
+        "room": services.room_label(request.user, obj.room),
+    }
     if kind == "device":
         context["ports"] = outlets(request.user, [obj])[0][1]
     else:

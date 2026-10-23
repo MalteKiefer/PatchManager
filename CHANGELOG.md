@@ -77,6 +77,26 @@ All notable changes to this project are documented here. The format follows
 
 ### Fixed
 
+* Review fixes since 1.0:
+  * Configuration readers: Junos brace files, ArubaOS-S `%if` lines and repeated
+    "allowed vlan add" lines can no longer exhaust memory or CPU; NX-OS style static
+    routes, Junos BGP peers with the AS on the group, Junos access ports without
+    interface-mode, multi-line FortiOS values and Cisco excluded ranges with a VRF are
+    read, so applying no longer deletes documented routes or peers.
+  * Platform connections: scheduled updates act as whoever last changed the
+    selection; a second connection cannot take over another connection's cluster;
+    addresses and VLANs documented by hand on virtual machine cards are kept; VLAN tags
+    resolve to the cluster's site.
+  * Moving a rack keeps role assignments scoped to it, needs the right to add
+    devices in the target room and is refused while ports use VLANs or stacks of the
+    old site.
+  * Changing the mail server needs the password again, like the bucket and the
+    off-site repository; an explicit `PATCHMANAGER_EMAIL_BACKEND` SMTP backend gets
+    its server settings again.
+  * Webhooks created before new object types existed keep delivering.
+  * Backups: the restore command names the dump, the off-site fetch command works and
+    restores into the backup folder, only one off-site copy runs at a time and only
+    complete backup sets are copied.
 * Pages failed with "current transaction is aborted" when the instance settings
   could not be read (for example before running the latest migration); the read now
   falls back to the defaults without breaking the request.

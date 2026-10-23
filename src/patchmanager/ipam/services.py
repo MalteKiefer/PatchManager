@@ -109,7 +109,10 @@ def update_prefix(request: HttpRequest, actor: User, prefix: Prefix, **fields: A
 def delete_prefix(request: HttpRequest, actor: User, prefix: Prefix) -> None:
     """Delete a prefix; the addresses inside stay."""
     require(actor, "ipam.prefix.delete", prefix)
-    prefix.delete()
+    try:
+        prefix.delete()
+    except ProtectedError as exc:  # DHCP scopes in the prefix
+        raise ServiceError(_("Other records still use this prefix.")) from exc
     audit.record("ipam.prefix.deleted", request=request, data={"prefix": prefix.prefix})
 
 
@@ -128,7 +131,7 @@ def create_address(
     if address.vm_interface is not None:
         require(actor, "compute.vm.change", address.vm_interface.vm)
     _save(address, _("This address is already used in this VRF."))
-    audit.record("ipam.ipaddress.created", request=request, obj=address)
+    audit.record("ipam.ipaddress.created", actor=actor, request=request, obj=address)
     return address
 
 
@@ -147,7 +150,7 @@ def update_address(
     if "port" in fields and stored.port is not None:
         require(actor, "dcim.device.change", stored.port.device)
     _save(stored, _("This address is already used in this VRF."))
-    audit.record("ipam.ipaddress.changed", request=request, obj=stored)
+    audit.record("ipam.ipaddress.changed", actor=actor, request=request, obj=stored)
     return stored
 
 

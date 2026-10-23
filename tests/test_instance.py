@@ -131,9 +131,15 @@ def test_backups_and_licenses(admin_client: Client, settings, tmp_path) -> None:
     settings.BACKUP_DIR = str(tmp_path)
     assert system.backups()["stale"] is True
     assert system.backups()["offsite"] is None
-    (tmp_path / "patchmanager-20261022T030000Z.dump").write_bytes(b"x")
+    import os
+
+    dump = tmp_path / "patchmanager-20261022T030000Z.dump"
+    dump.write_bytes(b"x")
+    archive = tmp_path / "patchmanager-20261022T030000Z.dump.media.tar"
+    archive.write_bytes(b"t")  # written after the dump, so it is the newest file
+    os.utime(dump, (1_000, 1_000))
     page = admin_client.get("/manage/system/", secure=True).content.decode()
-    assert "--profile restore run --rm restore patchmanager-20261022T030000Z.dump" in page
+    assert "--profile restore run --rm restore patchmanager-20261022T030000Z.dump<" in page
     page = admin_client.get("/licenses/", secure=True).content.decode()
     assert "GNU Affero" in page and "Django" in page and "htmx" in page
     assert "Source code (AGPL-3.0)" in Client().get("/auth/login/", secure=True).content.decode()

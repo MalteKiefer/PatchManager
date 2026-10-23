@@ -178,3 +178,13 @@ def test_unreadable_settings_do_not_abort_the_request(db, monkeypatch) -> None:
         assert config.get() == config.defaults()
         assert state.get().name == ""
         assert InstanceSettings.objects.count() >= 0  # the transaction is still usable
+
+
+def test_new_mail_server_needs_the_password_again(admin_client: Client) -> None:
+    _post(admin_client, "mail", {**MAIL, "mail_password": "s3cret!", "mail_from": "pm@example.com"})
+    moved = {**MAIL, "mail_host": "mx.attacker.example", "mail_from": "pm@example.com"}
+    page = _post(admin_client, "mail", moved)
+    assert "needs its secret key and password entered again" in page
+    assert config.get().mail_host == "smtp.example.com"
+    _post(admin_client, "mail", {**moved, "mail_password": "other"})
+    assert (config.get().mail_host, config.get().mail_password) == ("mx.attacker.example", "other")
