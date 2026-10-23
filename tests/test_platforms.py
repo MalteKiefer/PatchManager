@@ -323,9 +323,10 @@ def test_repeated_allowed_vlan_adds_stay_within_the_budget() -> None:
     from patchmanager.networks.platforms import cisco
 
     text = "interface Gi1/0/1\n switchport mode trunk\n"
-    text += " switchport trunk allowed vlan add 1-4094\n" * 2000
-    port = cisco.parse(text)
+    port = cisco.parse(text + " switchport trunk allowed vlan add 1-4094\n" * 200)
     assert len(port.vlans) == 4094 and port.vlans[4094].tagged == ["Gi1/0/1"]
+    with pytest.raises(common.TooLargeError):  # the expansion work stays bounded
+        cisco.parse(text + " switchport trunk allowed vlan add 1-4094\n" * 2000)
 
 
 def test_allowed_vlan_lists_are_charged_once_per_membership() -> None:
@@ -459,7 +460,7 @@ def test_bgp_peer_groups_do_not_drop_the_other_peers() -> None:
 def test_mst_instances_are_charged_and_bounded() -> None:
     from patchmanager.networks.platforms import comware
 
-    text = "stp region-configuration\n" + " instance 1 vlan 1 to 4094\n" * 10
+    text = "stp region-configuration\n" + " instance 1 vlan 1 to 4094\n" * 200
     with pytest.raises(common.TooLargeError):
         comware.parse(text)
     config = common.Config(vendor="test")

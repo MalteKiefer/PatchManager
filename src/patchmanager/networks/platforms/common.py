@@ -14,6 +14,7 @@ MAX_RANGE = 1024  # ports in one range like 1-48
 MAX_LINE = 2000  # characters; longer lines are not configuration
 MAX_NAME = 64  # characters of one port name
 MAX_NAMES = 20_000  # port names in all ranges of one configuration
+MAX_VIDS = 1_000_000  # VLAN IDs expanded from all allowed and MST lists (244 x 1-4094)
 MAX_BYTES = 4 * 1024 * 1024  # text after template variables are filled in
 MAX_VARIABLE = 1000  # characters of one template variable
 
@@ -156,6 +157,7 @@ class Config:
     warnings: list[str] = field(default_factory=list)
 
     names_left: int = field(default=MAX_NAMES, repr=False, compare=False)
+    vids_left: int = field(default=MAX_VIDS, repr=False, compare=False)
 
     def expand(self, spec: str) -> list[str]:
         """:func:`expand`, counted against the budget of the whole configuration."""
@@ -168,6 +170,12 @@ class Config:
         self.names_left -= count
         if self.names_left < 0:
             raise TooLargeError(f"the configuration names more than {MAX_NAMES} ports")
+
+    def charge_vids(self, count: int) -> None:
+        """Count expanded VLAN IDs; memberships are charged later, by :func:`finish`."""
+        self.vids_left -= count
+        if self.vids_left < 0:
+            raise TooLargeError(f"the configuration names more than {MAX_VIDS} VLAN IDs")
 
     def interface(self, name: str) -> Interface:
         """The interface entry of ``name`` (created on first use, counted against the budget)."""
@@ -189,9 +197,10 @@ class Config:
         """Add VLANs to ``port``'s allowed list in place.
 
         Repeated "allowed vlan add" lines must neither copy the list each time nor grow it
-        without limit. The budget is charged once per membership by :func:`finish`, so the
-        list is only deduplicated here whenever it outgrows the 4094 possible VLAN IDs.
+        without limit. Memberships are charged by :func:`finish`; here only the expanded IDs
+        count, on their own budget, which bounds the work of many repeated lines.
         """
+        self.charge_vids(len(vids))
         if port.allowed is None:
             port.allowed = []
         port.allowed.extend(vids)
@@ -201,13 +210,13 @@ class Config:
     def add_mst_vlans(self, number: int, vids: list[int]) -> None:
         """Map ``vids`` to MST instance ``number``, counted against the budget.
 
-        Each line is charged in full, so many lines that each name all VLANs cannot
-        allocate without limit.
+        Each line is charged with the work it causes (the new and the existing IDs), so many
+        lines that each name all VLANs cannot allocate or loop without limit.
         """
         if not 0 <= number <= 4094:
             raise ParseError(f"MST instance {number} is out of range")
-        self.charge(len(vids))
         vlans, priority = self.mst_instances.get(number, ([], None))
+        self.charge_vids(len(vids) + len(vlans))
         self.mst_instances[number] = (sorted(set(vlans) | set(vids)), priority)
 
     def pool_index(self) -> dict[str, Pool]:
