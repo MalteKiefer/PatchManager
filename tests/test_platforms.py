@@ -466,6 +466,10 @@ def test_mst_instances_are_charged_and_bounded() -> None:
     config = common.Config(vendor="test")
     with pytest.raises(common.ParseError):
         config.add_mst_vlans(5000, [1])
+    for number in range(common.MAX_MST):
+        config.add_mst_vlans(number, [1])
+    with pytest.raises(common.ParseError, match="MST instances"):  # stored lists stay bounded
+        config.add_mst_vlans(4000, [1])
 
 
 def test_routeros_bridge_vlans_without_ports_count() -> None:

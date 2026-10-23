@@ -14,6 +14,7 @@ MAX_RANGE = 1024  # ports in one range like 1-48
 MAX_LINE = 2000  # characters; longer lines are not configuration
 MAX_NAME = 64  # characters of one port name
 MAX_NAMES = 20_000  # port names in all ranges of one configuration
+MAX_MST = 65  # MST instances with their VLAN lists: the CIST and 64 more
 MAX_VIDS = 1_000_000  # VLAN IDs expanded from all allowed and MST lists (244 x 1-4094)
 MAX_BYTES = 4 * 1024 * 1024  # text after template variables are filled in
 MAX_VARIABLE = 1000  # characters of one template variable
@@ -215,6 +216,8 @@ class Config:
         """
         if not 0 <= number <= 4094:
             raise ParseError(f"MST instance {number} is out of range")
+        if number not in self.mst_instances and len(self.mst_instances) >= MAX_MST:
+            raise ParseError(f"more than {MAX_MST} MST instances")
         vlans, priority = self.mst_instances.get(number, ([], None))
         self.charge_vids(len(vids) + len(vlans))
         self.mst_instances[number] = (sorted(set(vlans) | set(vids)), priority)
