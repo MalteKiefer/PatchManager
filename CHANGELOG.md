@@ -77,6 +77,8 @@ All notable changes to this project are documented here. The format follows
 
 ### Fixed
 
+* The Hetzner DNS import uses the Hetzner Cloud API; the old DNS API at
+  dns.hetzner.com is retired. It needs an API token of the Hetzner Console project.
 * Review fixes since 1.0:
   * Configuration readers: Junos brace files, ArubaOS-S `%if` lines and repeated
     "allowed vlan add" lines can no longer exhaust memory or CPU; NX-OS style static
