@@ -112,7 +112,7 @@ def test_proxmox_inventory(pve) -> None:
         "mac": "aa:bb:cc:00:00:01",
         "bridge": "vmbr0",
         "vlan": "10",
-        "addresses": "",
+        "addresses": None,  # VMs do not carry their address in the configuration
     }
     assert web.disks == [("scsi0", 32, "local-lvm")]
     dns = next(g for g in found.guests if g.external_id == "200")
@@ -327,6 +327,15 @@ def test_vmware_and_synology(
             name="NAS-1",
         )
     assert ("DELETE", "/api/session") in calls  # signed out again
+    # A second cluster keeps the documented name, so a re-import finds the same machines.
+    answers["/api/vcenter/cluster"] = [{"name": "VC-CL"}, {"name": "VC-B"}]
+    admin_client.post(
+        "/compute/import/",
+        {"platform": "vmware", "url": "https://vc.lab", "username": "ro", "password": "pw"},
+        secure=True,
+    )
+    with system():
+        assert VirtualMachine.objects.get(external_id="vm-7").cluster.name == "VC-CL"
     admin_client.post(
         "/compute/import/",
         {
@@ -575,3 +584,41 @@ def test_connections_keep_clusters_and_manual_cards(
     with system():
         second.refresh_from_db()
         assert second.created_by == super_admin  # scheduled runs act as the last editor
+
+
+def test_proxmox_reports_removed_tags_and_container_addresses(
+    make_tree, super_admin, pve, system
+) -> None:
+    from patchmanager.compute.models import VMInterface
+    from patchmanager.core import crypto
+    from patchmanager.ipam.models import IPAddress
+    from patchmanager.networks.models import VLAN
+
+    tree = make_tree()
+    with system():
+        # The cluster's site is unknown, so a VLAN ID used once in the tenant is clear.
+        vlan = VLAN.objects.create(tenant=tree["tenant"], site=tree["site"], vid=10, name="Ten")
+        connection = Connection.objects.create(
+            created_by=super_admin,
+            name="A",
+            tenant=tree["tenant"],
+            url="https://pve1.lab:8006",
+            secret=crypto.encrypt(TOKEN),
+            guests=["100", "200"],
+            seen=["100", "101", "200"],
+        )
+        connections.sync(connection, super_admin)
+        assert VMInterface.objects.get(vm__external_id="100").vlan == vlan
+        assert IPAddress.objects.get(host="10.0.0.53").vm_interface is not None
+        answer = pve.answer
+        pve.answer = lambda path: (
+            {"data": {"net0": "virtio=AA:BB:CC:00:00:01,bridge=vmbr0"}}
+            if path.endswith("/qemu/100/config")
+            else {"data": {"net0": "name=eth0,bridge=vmbr0,hwaddr=AA:BB:CC:00:00:02,ip=dhcp"}}
+            if path.endswith("/lxc/200/config")
+            else answer(path)
+        )
+        connections.sync(connection, super_admin)
+        assert VMInterface.objects.get(vm__external_id="100").vlan is None
+        assert VMInterface.objects.get(vm__external_id="200").addresses == ""
+        assert IPAddress.objects.get(host="10.0.0.53").vm_interface is None

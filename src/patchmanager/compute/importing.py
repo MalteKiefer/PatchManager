@@ -203,17 +203,23 @@ def _guests(
         # Cards are updated in place (by name), so addresses linked to them stay linked.
         kept = []
         for nic in guest.nics:
-            vid = int(nic["vlan"]) if nic.get("vlan", "").isdigit() else None
-            interface = VMInterface.objects.filter(vm=vm, name=nic["name"]).first() or VMInterface(
-                tenant=tenant, vm=vm, name=nic["name"]
+            name = nic["name"] or ""
+            interface = VMInterface.objects.filter(vm=vm, name=name).first() or VMInterface(
+                tenant=tenant, vm=vm, name=name
             )
-            interface.mac_address, interface.bridge = nic["mac"], nic["bridge"]
-            # Many platforms never report addresses or VLANs (Proxmox VMs, vCenter): what
-            # was documented by hand stays unless the platform says otherwise.
-            if nic["addresses"]:
-                interface.addresses = nic["addresses"][:300]
-            if vid:
-                interface.vlan = vlans.get(vid)
+            interface.mac_address, interface.bridge = nic["mac"] or "", nic["bridge"] or ""
+            # Some platforms never report addresses or VLANs (None: Proxmox VMs, vCenter);
+            # what was documented by hand stays unless the platform says otherwise.
+            if nic.get("addresses") is not None:
+                interface.addresses = (nic["addresses"] or "")[:300]
+            if nic.get("vlan") is not None:
+                tag = nic["vlan"] or ""
+                vid = int(tag) if tag.isdecimal() else None
+                if vid is None:
+                    interface.vlan = None
+                elif vid in vlans or interface.vlan is None or interface.vlan.vid != vid:
+                    # A tag no VLAN can be found for keeps a VLAN with that ID set by hand.
+                    interface.vlan = vlans.get(vid)
             try:
                 interface.full_clean(exclude=["tenant"])
                 interface.save()
@@ -255,11 +261,17 @@ def _vlans_by_vid(tenant: Any, cluster: Cluster) -> dict[int, VLAN]:
         )
     )
     found: dict[int, VLAN] = {}
+    by_vid: dict[int, list[VLAN]] = {}
     for vlan in VLAN.objects.filter(tenant=tenant).order_by("site_id"):
+        by_vid.setdefault(vlan.vid, []).append(vlan)
         own = vlan.site_id is not None and vlan.site_id in sites
         # A site's own VLAN wins over a tenant wide one with the same ID.
         if own or (vlan.site_id is None and vlan.vid not in found):
             found[vlan.vid] = vlan
+    if not sites:  # the cluster's site is unknown: an ID used once in the tenant is clear
+        for vid, same in by_vid.items():
+            if vid not in found and len(same) == 1:
+                found[vid] = same[0]
     return found
 
 

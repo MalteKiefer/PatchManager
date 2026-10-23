@@ -11,6 +11,7 @@ from patchmanager.networks.platforms.common import (
     ParseError,
     Pool,
     Route,
+    TooLargeError,
     Vlan,
     _ip,
     _unquote,
@@ -18,6 +19,7 @@ from patchmanager.networks.platforms.common import (
     blocks,
     declare_vlans,
     finish,
+    is_address,
     keywords,
     lines_of,
     network_of,
@@ -56,6 +58,8 @@ def parse(text: str) -> Config:
             continue
         try:
             _command(config, head, without_secrets(config, body))
+        except TooLargeError:
+            raise  # the whole text is refused, not one line
         except ParseError as exc:
             config.warnings.append(f"line {number}: {exc}")
     return finish(config)
@@ -68,7 +72,7 @@ def _command(config: Config, head: str, body: list[str]) -> None:
         config.hostname = _unquote(words[1])[:100]
     elif key == "vlan" and len(words) == 2:
         declare_vlans(config, words[1], body)
-    elif key == "interface" and words[1:2] == ["vlan"] and len(words) == 3 and words[2].isdigit():
+    elif key == "interface" and words[1:2] == ["vlan"] and len(words) == 3 and words[2].isdecimal():
         _svi(config, int(words[2]), body)
     elif key == "interface" and re.fullmatch(r"vlan\d+", words[1] if len(words) > 1 else ""):
         _svi(config, int(words[1][4:]), body)
@@ -80,13 +84,13 @@ def _command(config: Config, head: str, body: list[str]) -> None:
         hop = words[3]
         distance = (
             int(words[-1])
-            if len(words) > 4 and words[-2] == "distance" and words[-1].isdigit()
+            if len(words) > 4 and words[-2] == "distance" and words[-1].isdecimal()
             else None
         )
         config.routes.append(
             Route(
                 network_of([words[2]]),
-                _ip(hop) if hop[:1].isdigit() or ":" in hop else None,
+                _ip(hop) if hop[:1].isdecimal() or ":" in hop else None,
                 distance,
             )
         )
@@ -101,7 +105,7 @@ def _command(config: Config, head: str, body: list[str]) -> None:
             parts = line.split()
             if parts[:1] == ["router-id"] and len(parts) == 2:
                 config.ospf_router_id = _ip(parts[1])
-    elif key == "router" and words[1:2] == ["bgp"] and len(words) == 3 and words[2].isdigit():
+    elif key == "router" and words[1:2] == ["bgp"] and len(words) == 3 and words[2].isdecimal():
         config.bgp_asn = int(words[2])
         for line in body:
             parts = line.split()
@@ -111,7 +115,8 @@ def _command(config: Config, head: str, body: list[str]) -> None:
                 parts[:1] == ["neighbor"]
                 and len(parts) >= 4
                 and parts[2] == "remote-as"
-                and parts[3].isdigit()
+                and parts[3].isdecimal()
+                and is_address(parts[1])
             ):
                 config.neighbors[_ip(parts[1])] = Neighbor(_ip(parts[1]), int(parts[3]))
             elif parts[:1] == ["neighbor"] and len(parts) >= 3 and parts[2] == "description":
@@ -124,14 +129,14 @@ def _command(config: Config, head: str, body: list[str]) -> None:
                     neighbor.enabled = False
     elif key == "dhcp-server" and words[1:2] == ["vrf"]:
         _dhcp(config, body)
-    elif key == "vsf" and words[1:2] == ["member"] and len(words) == 3 and words[2].isdigit():
+    elif key == "vsf" and words[1:2] == ["member"] and len(words) == 3 and words[2].isdecimal():
         config.stack_kind = "vsf"
         member = config.members.setdefault(int(words[2]), Member(int(words[2])))
         for line in body:
             parts = line.split()
             if parts[:1] == ["type"] and len(parts) >= 2:
                 member.model = parts[1][:40]
-            elif parts[:1] == ["priority"] and len(parts) == 2 and parts[1].isdigit():
+            elif parts[:1] == ["priority"] and len(parts) == 2 and parts[1].isdecimal():
                 member.priority = int(parts[1])
     elif key == "ip" and words[1:2] == ["routing"]:
         config.ip_routing = True
@@ -170,9 +175,9 @@ def _port(config: Config, name: str, body: list[str]) -> None:
             port.enabled = True
         elif parts == ["shutdown"]:
             port.enabled = False
-        elif parts[:2] == ["vlan", "access"] and len(parts) == 3 and parts[2].isdigit():
+        elif parts[:2] == ["vlan", "access"] and len(parts) == 3 and parts[2].isdecimal():
             port.mode, port.access_vlan = "access", int(parts[2])
-        elif parts[:3] == ["vlan", "trunk", "native"] and len(parts) >= 4 and parts[3].isdigit():
+        elif parts[:3] == ["vlan", "trunk", "native"] and len(parts) >= 4 and parts[3].isdecimal():
             port.mode, port.native_vlan = "trunk", int(parts[3])
         elif parts[:3] == ["vlan", "trunk", "allowed"] and len(parts) >= 4:
             port.mode = "trunk"
@@ -180,7 +185,7 @@ def _port(config: Config, name: str, body: list[str]) -> None:
                 port.allowed = None
             else:
                 config.extend_allowed(port, vid_list(parts[3]))
-        elif parts[:1] == ["lag"] and len(parts) == 2 and parts[1].isdigit():
+        elif parts[:1] == ["lag"] and len(parts) == 2 and parts[1].isdecimal():
             port.lag = f"lag{parts[1]}"
         elif parts[:2] == ["lacp", "mode"]:
             port.lag_protocol = "lacp"
@@ -201,19 +206,18 @@ def _spanning_tree(config: Config, words: list[str], body: list[str]) -> None:
         config.stp_mode = config.stp_mode or "mstp"
     elif words[:1] == ["mode"] and len(words) == 2:
         config.stp_mode = {"rpvst": "rpvst", "mstp": "mstp"}.get(words[1], "")
-    elif words[:1] == ["priority"] and len(words) == 2 and words[1].isdigit():
+    elif words[:1] == ["priority"] and len(words) == 2 and words[1].isdecimal():
         config.stp_priority = int(words[1]) * 4096
     elif words[:1] == ["config-name"] and len(words) == 2:
         config.mst_region = _unquote(words[1])[:32]
-    elif words[:1] == ["config-revision"] and len(words) == 2 and words[1].isdigit():
+    elif words[:1] == ["config-revision"] and len(words) == 2 and words[1].isdecimal():
         config.mst_revision = int(words[1])
-    elif words[:1] == ["instance"] and len(words) >= 4 and words[1].isdigit():
-        vlans, priority = config.mst_instances.get(int(words[1]), ([], None))
+    elif words[:1] == ["instance"] and len(words) >= 4 and words[1].isdecimal():
         if words[2] == "vlan":
-            vlans = sorted(set(vlans) | set(vid_list(words[3])))
-        elif words[2] == "priority" and words[3].isdigit():
-            priority = int(words[3]) * 4096
-        config.mst_instances[int(words[1])] = (vlans, priority)
+            config.add_mst_vlans(int(words[1]), vid_list(words[3]))
+        elif words[2] == "priority" and words[3].isdecimal():
+            vlans, _priority = config.mst_instances.get(int(words[1]), ([], None))
+            config.mst_instances[int(words[1])] = (vlans, int(words[3]) * 4096)
 
 
 def _dhcp(config: Config, body: list[str]) -> None:
@@ -237,10 +241,11 @@ def _dhcp(config: Config, body: list[str]) -> None:
             pool.domain = parts[1][:253]
         elif parts[:1] == ["lease"] and len(parts) >= 2:
             hours, _sep, rest = parts[1].partition(":")
-            if hours.isdigit():
+            if hours.isdecimal():
                 pool.lease_seconds = max(
                     60,
-                    int(hours) * 3600 + (int(rest.split(":")[0]) * 60 if rest[:2].isdigit() else 0),
+                    int(hours) * 3600
+                    + (int(rest.split(":")[0]) * 60 if rest[:2].isdecimal() else 0),
                 )
         elif parts[:1] == ["static-bind"] and "ip" in parts and "mac" in parts:
             pool.reservations.append(

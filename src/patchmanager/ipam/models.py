@@ -276,7 +276,7 @@ class DHCPScope(TenantScopedModel):
                     ) from exc
         for line in filter(None, (s.strip() for s in self.options.splitlines())):
             code, sep, _value = line.partition("=")
-            if not sep or not code.strip().isdigit() or not 1 <= int(code) <= 254:
+            if not sep or not code.strip().isdecimal() or not 1 <= int(code) <= 254:
                 raise ValidationError({"options": _("Write each option as code=value.")})
 
     def option_list(self) -> list[tuple[int, str]]:

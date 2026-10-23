@@ -13,6 +13,7 @@ from patchmanager.networks.platforms.common import (
     ParseError,
     Pool,
     Route,
+    TooLargeError,
     Vlan,
     _ip,
     address_of,
@@ -99,6 +100,7 @@ def parse(text: str) -> Config:
     pools: dict[str, tuple[str, str]] = {}
     dhcp_servers: dict[str, str] = {}  # server name -> pool name
     names: dict[str, str] = {}  # default-name -> name
+    bridge_members: dict[int, set[str]] = {}  # VLAN -> ports already listed
     for menu, verb, pairs, number in statements(lines_of(text)):
         if any(SECRET.search(k) or SECRET.search(v) for k, v in pairs.items()):
             config.secrets_skipped += 1  # the whole command, as on every platform
@@ -125,21 +127,26 @@ def parse(text: str) -> Config:
                     config.interface(member).lag_protocol = protocol
             elif menu == "/interface bridge port" and "interface" in pairs:
                 pvid = pairs.get("pvid", "")
-                if pvid.isdigit() and pvid != "1":
+                if pvid.isdecimal() and pvid != "1":
                     port = config.interface(pairs["interface"])
                     port.mode, port.access_vlan = port.mode or "access", int(pvid)
             elif menu == "/interface bridge vlan" and "vlan-ids" in pairs:
                 tagged = _names(pairs.get("tagged", ""))
                 untagged = _names(pairs.get("untagged", ""))
-                vlan_ids = vid_list(pairs["vlan-ids"])
-                config.charge(len(vlan_ids) * (len(tagged) + len(untagged)))
+                vlan_ids = sorted(set(vid_list(pairs["vlan-ids"])))
+                # Every VLAN counts even without ports, so the loop stays bounded.
+                config.charge(len(vlan_ids) * max(1, len(tagged) + len(untagged)))
                 for vid in vlan_ids:
                     vlan = config.vlans.setdefault(vid, Vlan(vid))
-                    have = set(vlan.tagged) | set(vlan.untagged)
-                    vlan.tagged += [
-                        m for m in tagged if m not in have and not m.startswith("bridge")
-                    ]
-                    vlan.untagged += [m for m in untagged if m not in have]
+                    have = bridge_members.setdefault(vid, set())
+                    for m in tagged:
+                        if m not in have and not m.startswith("bridge"):
+                            have.add(m)
+                            vlan.tagged.append(m)
+                    for m in untagged:
+                        if m not in have:
+                            have.add(m)
+                            vlan.untagged.append(m)
             elif menu == "/ip address" and "address" in pairs:
                 target = pairs.get("interface", "")
                 address = address_of([pairs["address"]])
@@ -152,11 +159,11 @@ def parse(text: str) -> Config:
                     port.addresses.append(address)
             elif menu == "/ip route" and "gateway" in pairs:
                 hop = pairs["gateway"].split("%")[0]
-                distance = int(pairs["distance"]) if pairs.get("distance", "").isdigit() else None
+                distance = int(pairs["distance"]) if pairs.get("distance", "").isdecimal() else None
                 config.routes.append(
                     Route(
                         network_of([pairs.get("dst-address", "0.0.0.0/0")]),
-                        _ip(hop) if hop[:1].isdigit() else None,
+                        _ip(hop) if hop[:1].isdecimal() else None,
                         distance,
                     )
                 )
@@ -184,22 +191,24 @@ def parse(text: str) -> Config:
                     (pairs.get("remote.address") or pairs["remote-address"]).split("/")[0]
                 )
                 remote = pairs.get("remote.as") or pairs.get("remote-as", "")
-                if remote.isdigit():
+                if remote.isdecimal():
                     config.neighbors[address] = Neighbor(
                         address, int(remote), pairs.get("comment", "")[:200]
                     )
                 local = pairs.get("as") or pairs.get("local.as", "")
-                if local.isdigit():
+                if local.isdecimal():
                     config.bgp_asn = int(local)
             elif (
                 menu in ("/routing bgp instance", "/routing bgp template")
-                and pairs.get("as", "").isdigit()
+                and pairs.get("as", "").isdecimal()
             ):
                 config.bgp_asn = int(pairs["as"])
                 if pairs.get("router-id"):
                     config.bgp_router_id = _ip(pairs["router-id"])
-            elif menu in ("/routing ospf instance",) and pairs.get("router-id", "")[:1].isdigit():
+            elif menu in ("/routing ospf instance",) and pairs.get("router-id", "")[:1].isdecimal():
                 config.ospf_router_id = _ip(pairs["router-id"])
+        except TooLargeError:
+            raise  # the whole text is refused, not one line
         except (ParseError, ValueError, KeyError) as exc:
             config.warnings.append(f"line {number}: {exc}")
     _leases(config)

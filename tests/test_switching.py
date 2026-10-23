@@ -462,3 +462,15 @@ def test_aruba_if_lines_are_rejected_in_linear_time() -> None:
     started = time.monotonic()
     aruba.parse(("%if a =" + " " * 1990 + "x\n") * 50, {})
     assert time.monotonic() - started < 2
+
+
+def test_invalid_rows_do_not_count_as_a_change_on_every_apply(switch, system) -> None:
+    text = ROUTED.replace(
+        "spanning-tree instance 1 vlan 20-21\n",
+        "spanning-tree instance 1 vlan 20-21\nspanning-tree instance 100 vlan 30\n",
+    )
+    with system():
+        first = _apply(switch, text)
+        assert any("MST" in line for line in first.skipped)
+        assert MSTInstance.objects.get(device=switch["device"]).instance == 1
+        assert not [c for c in _apply(switch, text).changes if "MST" in c]

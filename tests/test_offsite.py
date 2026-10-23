@@ -1,4 +1,5 @@
 import dataclasses
+import os
 import subprocess
 from pathlib import Path
 
@@ -148,6 +149,9 @@ def test_one_copy_at_a_time_and_only_complete_sets(
     partial.write_bytes(b"t")
     assert offsite.run() is False and restic == []  # the backup is still being written
     partial.unlink()
+    stale = tmp_path / "patchmanager-20261001T030000Z.dump.partial"  # a failed earlier run
+    stale.write_bytes(b"d")
+    os.utime(stale, (0, 0))
     cache.add(offsite.LOCK, "x", 60)
     assert offsite.run(force=True) is False and restic == []  # another copy runs
     cache.delete(offsite.LOCK)

@@ -205,7 +205,7 @@ def _command(config: Config, head: str, body: list[str]) -> None:
         return
     if key == "hostname" and len(words) > 1:
         config.hostname = _unquote(head.split(None, 1)[1])[:100]
-    elif key == "vlan" and len(words) == 2 and words[1].isdigit():
+    elif key == "vlan" and len(words) == 2 and words[1].isdecimal():
         _vlan(config, int(words[1]), body)
     elif key == "interface" and len(words) == 2:
         settings = _interface_settings(body)
@@ -234,7 +234,7 @@ def _command(config: Config, head: str, body: list[str]) -> None:
                 config.ospf_router_id = _ip(parts[1])
     elif key == "ip" and words[1:2] == ["router-id"] and len(words) == 3:
         config.ospf_router_id = config.ospf_router_id or _ip(words[2])
-    elif key == "router" and words[1:2] == ["bgp"] and len(words) == 3 and words[2].isdigit():
+    elif key == "router" and words[1:2] == ["bgp"] and len(words) == 3 and words[2].isdecimal():
         config.bgp_asn = int(words[2])
         _bgp(config, body)
     elif key == "device-profile" and words[1:2] == ["name"]:
@@ -330,18 +330,18 @@ def _spanning_tree(config: Config, words: list[str]) -> None:
         config.stp_mode = {"stp-compatible": "stp", "rstp-operation": "rstp"}.get(
             words[1], config.stp_mode
         )
-    elif words[0] == "priority" and len(words) == 2 and words[1].isdigit():
+    elif words[0] == "priority" and len(words) == 2 and words[1].isdecimal():
         config.stp_priority = int(words[1]) * 4096  # AOS-S counts in steps of 4096
     elif words[0] == "config-name" and len(words) >= 2:
         config.mst_region = _unquote(" ".join(words[1:]))[:32]
-    elif words[0] == "config-revision" and len(words) == 2 and words[1].isdigit():
+    elif words[0] == "config-revision" and len(words) == 2 and words[1].isdecimal():
         config.mst_revision = int(words[1])
-    elif words[0] == "instance" and len(words) >= 4 and words[1].isdigit():
+    elif words[0] == "instance" and len(words) >= 4 and words[1].isdecimal():
         number = int(words[1])
         vlans, priority = config.mst_instances.get(number, ([], None))
         if words[2] == "vlan":
             vlans = sorted(set(vlans) | set(vids(words[3])))
-        elif words[2] == "priority" and words[3].isdigit():
+        elif words[2] == "priority" and words[3].isdecimal():
             priority = int(words[3]) * 4096
         config.mst_instances[number] = (vlans, priority)
     elif words[0] not in (
@@ -372,7 +372,7 @@ def _route(config: Config, words: list[str]) -> None:
     distance = None
     if "distance" in rest and rest.index("distance") + 1 < len(rest):
         value = rest[rest.index("distance") + 1]
-        distance = int(value) if value.isdigit() and int(value) <= 255 else None
+        distance = int(value) if value.isdecimal() and int(value) <= 255 else None
     config.routes.append(Route(prefix, next_hop, distance))
 
 
@@ -384,7 +384,7 @@ def _bgp(config: Config, body: list[str]) -> None:
         elif parts[0] == "neighbor" and len(parts) >= 3:
             address = _ip(parts[1])
             neighbor = config.neighbors.get(address)
-            if parts[2] == "remote-as" and len(parts) == 4 and parts[3].isdigit():
+            if parts[2] == "remote-as" and len(parts) == 4 and parts[3].isdecimal():
                 if neighbor is None:
                     config.neighbors[address] = Neighbor(address, int(parts[3]))
                 else:
@@ -399,7 +399,7 @@ def _profile(config: Config, name: str, body: list[str]) -> None:
     profile = config.profiles.setdefault(name[:64], Profile(name[:64]))
     for line in body:
         parts = line.split()
-        if parts[0] == "untagged-vlan" and len(parts) == 2 and parts[1].isdigit():
+        if parts[0] == "untagged-vlan" and len(parts) == 2 and parts[1].isdecimal():
             profile.untagged = int(parts[1])
         elif parts[0] == "tagged-vlan" and len(parts) == 2:
             profile.tagged = vids(parts[1])
@@ -412,17 +412,17 @@ def _stack(config: Config, key: str, words: list[str], body: list[str]) -> None:
     lines = [" ".join(words)] if words else []
     for line in [*lines, *body]:
         parts = line.split()
-        if parts[:1] == ["member"] and len(parts) >= 2 and parts[1].isdigit():
+        if parts[:1] == ["member"] and len(parts) >= 2 and parts[1].isdecimal():
             member = config.members.setdefault(int(parts[1]), Member(int(parts[1])))
             rest = parts[2:]
-            if rest[:1] == ["priority"] and len(rest) == 2 and rest[1].isdigit():
+            if rest[:1] == ["priority"] and len(rest) == 2 and rest[1].isdecimal():
                 member.priority = int(rest[1])
             elif rest[:1] == ["type"] and len(rest) >= 2:
                 member.model = _unquote(rest[1])[:40]
         elif (
             parts[:1] == ["priority"]
             and len(parts) == 2
-            and parts[1].isdigit()
+            and parts[1].isdecimal()
             and words[:1] == ["member"]
         ):
             config.members[int(words[1])].priority = int(parts[1])
@@ -460,6 +460,8 @@ def render(config: Config) -> str:
     if config.ip_routing:
         out.append("ip routing")
     for route in config.routes:
+        if route.next_hop is None and route.interface:
+            continue  # an interface route has no ArubaOS-S form; never write it as a discard
         out.append(
             f"ip route {route.prefix} {route.next_hop or 'blackhole'}"
             + (f" distance {route.distance}" if route.distance else "")

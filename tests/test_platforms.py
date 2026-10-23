@@ -106,6 +106,7 @@ def test_lancom() -> None:
     config = platforms.parse(_read("lancom.lcs"))
     assert config.platform == "LCOS 10.80.0123" and config.hostname == "LC-01"
     assert config.vlans[60].untagged == ["LAN-2"] and config.vlans[60].tagged == ["LAN-3"]
+    assert config.interfaces["LAN-4"].mode == "access"  # Ingress-mixed never sends tags
     assert config.interfaces["LAN-1"].addresses == ["192.168.1.1/24"]
     assert config.routes[0].prefix == "0.0.0.0/0" and config.routes[0].interface == "INTERNET"
     assert config.pools["GUESTS"].lease_seconds == 480 * 60
@@ -322,9 +323,26 @@ def test_repeated_allowed_vlan_adds_stay_within_the_budget() -> None:
     from patchmanager.networks.platforms import cisco
 
     text = "interface Gi1/0/1\n switchport mode trunk\n"
-    text += " switchport trunk allowed vlan add 1-4094\n" * 2000
-    with pytest.raises(common.TooLargeError):
-        cisco.parse(text)
+    port = cisco.parse(text + " switchport trunk allowed vlan add 1-4094\n" * 200)
+    assert len(port.vlans) == 4094 and port.vlans[4094].tagged == ["Gi1/0/1"]
+    with pytest.raises(common.TooLargeError):  # the expansion work stays bounded
+        cisco.parse(text + " switchport trunk allowed vlan add 1-4094\n" * 2000)
+
+
+def test_allowed_vlan_lists_are_charged_once_per_membership() -> None:
+    from patchmanager.networks.platforms import arubacx, cisco
+
+    aruba = "".join(
+        f"interface 1/1/{n}\n vlan trunk native 1\n vlan trunk allowed 2-401\n"
+        for n in range(1, 49)
+    )
+    assert len(arubacx.parse(aruba).vlans[401].tagged) == 48
+    ios = "".join(
+        f"interface Gi1/0/{n}\n switchport mode trunk\n"
+        + "".join(f" switchport trunk allowed vlan add {v}\n" for v in range(2, 252))
+        for n in range(1, 49)
+    )
+    assert len(cisco.parse(ios).vlans[251].tagged) == 48
 
 
 def test_cisco_excluded_ranges_routes_and_vrf() -> None:
@@ -382,3 +400,98 @@ def test_fortios_reads_values_spanning_lines() -> None:
     assert config.hostname == "fw1" and "port1" in config.interfaces
     with pytest.raises(platforms.ParseError, match="unbalanced quotes"):
         fortios.parse('config system global\n set hostname "x\n' + "a\n" * 10)
+
+
+def test_interface_routes_keep_their_interface_and_are_not_exported_as_discards() -> None:
+    from patchmanager.networks import aruba
+    from patchmanager.networks.platforms import cisco
+
+    config = cisco.parse(
+        "ip route 10.20.0.0 255.255.0.0 Vlan20\n"
+        "ip route 10.30.0.0 255.255.0.0 GigabitEthernet1/0/1 10.0.0.2 5\n"
+        "ip route 10.40.0.0 255.255.0.0 Null0 250\n"
+    )
+    routes = [(r.prefix, r.next_hop, r.distance, r.interface) for r in config.routes]
+    assert routes == [
+        ("10.20.0.0/16", None, None, "Vlan20"),
+        ("10.30.0.0/16", "10.0.0.2", 5, "GigabitEthernet1/0/1"),
+        ("10.40.0.0/16", None, 250, ""),
+    ]
+    rendered = aruba.render(config)
+    assert "ip route 10.20.0.0/16" not in rendered
+    assert "ip route 10.40.0.0/16 blackhole distance 250" in rendered
+
+
+def test_junos_trunks_from_groups_and_group_neighbors() -> None:
+    from patchmanager.networks.platforms import junos
+
+    config = junos.parse(
+        "set vlans v10 vlan-id 10\nset vlans v20 vlan-id 20\n"
+        "set interfaces xe-0/0/1 apply-groups TRUNKS\n"
+        "set interfaces xe-0/0/1 unit 0 family ethernet-switching vlan members v10\n"
+        "set interfaces xe-0/0/1 unit 0 family ethernet-switching vlan members v20\n"
+        "set interfaces xe-0/0/2 unit 0 family ethernet-switching vlan members v10\n"
+        "set protocols bgp group EXT peer-as 64500\n"
+        'set protocols bgp group EXT neighbor 192.0.2.1 description "Transit A"\n'
+        "set protocols bgp group EMPTY peer-as\n"
+        "set protocols bgp group EXT neighbor\n"
+    )
+    assert config.interfaces["xe-0/0/1"].mode != "access"  # mode set by the group
+    assert config.interfaces["xe-0/0/2"].access_vlan == 10
+    neighbor = config.neighbors["192.0.2.1"]
+    assert (neighbor.remote_asn, neighbor.description) == (64500, "Transit A")
+
+
+def test_bgp_peer_groups_do_not_drop_the_other_peers() -> None:
+    from patchmanager.networks.platforms import arubacx, comware
+
+    config = comware.parse(
+        "bgp 65050\n group EXT external\n peer EXT as-number 65000\n"
+        " peer 192.0.2.9 as-number 65009\n#\n"
+    )
+    assert list(config.neighbors) == ["192.0.2.9"]
+    aruba = arubacx.parse(
+        "!Version ArubaOS-CX\nrouter bgp 65050\n neighbor SPINE remote-as 65000\n"
+        " neighbor 192.0.2.10 remote-as 65010\n"
+    )
+    assert list(aruba.neighbors) == ["192.0.2.10"]
+
+
+def test_mst_instances_are_charged_and_bounded() -> None:
+    from patchmanager.networks.platforms import comware
+
+    text = "stp region-configuration\n" + " instance 1 vlan 1 to 4094\n" * 200
+    with pytest.raises(common.TooLargeError):
+        comware.parse(text)
+    config = common.Config(vendor="test")
+    with pytest.raises(common.ParseError):
+        config.add_mst_vlans(5000, [1])
+    for number in range(common.MAX_MST):
+        config.add_mst_vlans(number, [1])
+    with pytest.raises(common.ParseError, match="MST instances"):  # stored lists stay bounded
+        config.add_mst_vlans(4000, [1])
+
+
+def test_routeros_bridge_vlans_without_ports_count() -> None:
+    from patchmanager.networks.platforms import routeros
+
+    text = "/interface bridge vlan\n" + "add bridge=bridge1 vlan-ids=1-4094\n" * 10
+    with pytest.raises(common.TooLargeError):
+        routeros.parse(text)
+    config = routeros.parse(
+        "/interface bridge vlan\nadd bridge=bridge1 tagged=ether2 vlan-ids=10,10,10\n"
+    )
+    assert config.vlans[10].tagged == ["ether2"]
+
+
+@pytest.mark.parametrize(
+    ("vendor", "text"),
+    [
+        ("cisco", "vlan ²\n"),
+        ("comware", "ip route-static 10.8.0.0 16 10.9.0.254 description lower preference\n"),
+    ],
+)
+def test_odd_digits_are_warnings_not_errors(vendor, text) -> None:
+    from patchmanager.networks import platforms
+
+    platforms.parse(text, vendor)  # no exception other than ParseError escapes

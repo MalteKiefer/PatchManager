@@ -104,7 +104,7 @@ def relocate(request: HttpRequest, actor: User, rack: Rack, room: Room) -> Rack:
         require(actor, "dcim.device.add", room)
     site = room.floor.building.site_id
     if site != stored.room.floor.building.site_id:
-        _check_site_bound(mounted, site)
+        check_site_bound(mounted, site)
     before, old_path = str(stored.room), str(stored.path)
     try:
         with transaction.atomic():
@@ -132,7 +132,7 @@ def relocate(request: HttpRequest, actor: User, rack: Rack, room: Room) -> Rack:
     return stored
 
 
-def _check_site_bound(devices: list[Device], site: Any) -> None:
+def check_site_bound(devices: list[Device], site: Any) -> None:
     """Refuse a move to another site while VLANs or stacks of the old site are in use.
 
     The database only checks these when ports or members are written, so a moved rack
@@ -147,8 +147,8 @@ def _check_site_bound(devices: list[Device], site: Any) -> None:
         vlan__site_id=site
     )
     if foreign.exists() or tagged.exists():
-        raise ServiceError(_("Ports in this rack use VLANs of the old site; change them first."))
+        raise ServiceError(_("Ports being moved use VLANs of the old site; change them first."))
     if StackMember.objects.filter(device__in=devices).exclude(stack__site_id=site).exists():
         raise ServiceError(
-            _("Switches in this rack belong to a stack of the old site; take them out first.")
+            _("Switches being moved belong to a stack of the old site; take them out first.")
         )

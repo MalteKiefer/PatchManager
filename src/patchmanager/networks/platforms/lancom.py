@@ -22,6 +22,7 @@ from patchmanager.networks.platforms.common import (
     ParseError,
     Pool,
     Route,
+    TooLargeError,
     Vlan,
     _ip,
     address_of,
@@ -111,12 +112,16 @@ def parse(text: str) -> Config:
     for row in tables.get("/setup/tcp-ip/network-list", []):
         try:
             _network(config, row)
+        except TooLargeError:
+            raise  # the whole text is refused, not one line
         except ParseError as exc:
             config.warnings.append(f"network {row.get('network-name', '')}: {exc}")
     _vlans(config, tables)
     for row in tables.get("/setup/ip-router/ip-routing-table", []):
         try:
             config.routes.append(_route(row))
+        except TooLargeError:
+            raise  # the whole text is refused, not one line
         except ParseError as exc:
             config.warnings.append(f"route: {exc}")
     networks = {
@@ -125,12 +130,16 @@ def parse(text: str) -> Config:
     for row in tables.get("/setup/dhcp/network-list", []):
         try:
             _dhcp(config, row, networks)
+        except TooLargeError:
+            raise  # the whole text is refused, not one line
         except ParseError as exc:
             config.warnings.append(f"DHCP {row.get('network-name', '')}: {exc}")
     index = config.pool_index()
     for row in tables.get("/setup/dhcp/hosts", []):
         try:
             _host(config, row, index)
+        except TooLargeError:
+            raise  # the whole text is refused, not one line
         except ParseError as exc:
             config.warnings.append(f"DHCP host: {exc}")
     known = {
@@ -151,7 +160,7 @@ def _network(config: Config, row: dict[str, str]) -> None:
         return
     interface_address = address_of([address, mask])
     vid = row.get("vlan-id", "0")
-    if vid.isdigit() and 1 <= int(vid) <= 4094:
+    if vid.isdecimal() and 1 <= int(vid) <= 4094:
         vlan = config.vlans.setdefault(int(vid), Vlan(int(vid)))
         vlan.name = vlan.name or row.get("network-name", "")[:64]
         vlan.addresses.append(interface_address)
@@ -177,17 +186,19 @@ def _vlans(config: Config, tables: dict[str, list[dict[str, str]]]) -> None:
         pvid = row.get("port-vlan-id", "")
         if not port:
             continue
-        modes[port.lower()] = "access" if mode in ("access", "never") else "trunk"
+        # Ingress-mixed (the default) accepts tags but never sends them: untagged only.
+        untagged = mode in ("access", "never", "ingress-mixed")
+        modes[port.lower()] = "access" if untagged else "trunk"
         interface = config.interface(port)
         interface.mode = modes[port.lower()]
-        if pvid.isdigit() and 1 <= int(pvid) <= 4094:
+        if pvid.isdecimal() and 1 <= int(pvid) <= 4094:
             if interface.mode == "access":
                 interface.access_vlan = int(pvid)
             else:
                 interface.native_vlan = int(pvid)
     for row in tables.get("/setup/vlan/networks", []):
         vid = row.get("vlan-id", "")
-        if not vid.isdigit() or not 1 <= int(vid) <= 4094:
+        if not vid.isdecimal() or not 1 <= int(vid) <= 4094:
             continue
         vlan = config.vlans.setdefault(int(vid), Vlan(int(vid)))
         vlan.name = vlan.name or row.get("name", "")[:64]
@@ -213,7 +224,7 @@ def _route(row: dict[str, str]) -> Route:
     return Route(
         prefix,
         next_hop,
-        int(distance) if distance.isdigit() and int(distance) <= 255 else None,
+        int(distance) if distance.isdecimal() and int(distance) <= 255 else None,
         interface,
     )
 
@@ -234,7 +245,7 @@ def _dhcp(config: Config, row: dict[str, str], networks: dict[str, dict[str, str
     pool.gateway = _ip(gateway) if gateway and gateway != _ANY else network.get("ip-address", "")
     pool.dns = [_ip(row[k]) for k in ("dns-default", "dns-backup") if row.get(k) and row[k] != _ANY]
     lease = row.get("def.-lease", "")
-    pool.lease_seconds = int(lease) * 60 if lease.isdigit() and int(lease) else None  # minutes
+    pool.lease_seconds = int(lease) * 60 if lease.isdecimal() and int(lease) else None  # minutes
 
 
 def _host(config: Config, row: dict[str, str], index: dict[str, Pool]) -> None:

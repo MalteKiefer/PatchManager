@@ -12,6 +12,7 @@ from patchmanager.networks.platforms.common import (
     ParseError,
     Pool,
     Route,
+    TooLargeError,
     Vlan,
     _ip,
     _unquote,
@@ -19,6 +20,7 @@ from patchmanager.networks.platforms.common import (
     blocks,
     declare_vlans,
     finish,
+    is_address,
     keywords,
     lines_of,
     network_of,
@@ -61,6 +63,8 @@ def parse(text: str) -> Config:
             continue
         try:
             _command(config, head, without_secrets(config, body), excluded)
+        except TooLargeError:
+            raise  # the whole text is refused, not one line
         except ParseError as exc:
             config.warnings.append(f"line {number}: {exc}")
     _pool_ranges(config, excluded)
@@ -91,12 +95,17 @@ def _command(
             prefix, rest = network_of(words[2:4]), words[4:]
         else:
             raise ParseError(f"cannot read the route {' '.join(words)[:60]}")
-        hop = rest[0]
-        next_hop = _ip(hop) if hop[:1].isdigit() or ":" in hop else None
-        distance = (
-            int(rest[1]) if len(rest) > 1 and rest[1].isdigit() and int(rest[1]) <= 255 else None
-        )
-        config.routes.append(Route(prefix, next_hop, distance))
+        hop, interface = rest[0], ""
+        if not is_address(hop):
+            if hop[:1].isdecimal():
+                _ip(hop)  # a mistyped next hop is an error, not an interface
+            interface = "" if hop.lower() == "null0" else hop[:100]  # Null0 discards
+            rest = rest[1:]
+        next_hop = _ip(rest[0]) if rest and is_address(rest[0]) else None
+        if next_hop is not None:
+            rest = rest[1:]
+        distance = int(rest[0]) if rest and rest[0].isdecimal() and int(rest[0]) <= 255 else None
+        config.routes.append(Route(prefix, next_hop, distance, interface))
     elif words[:2] == ["ipv6", "route"] and len(words) >= 4 and words[2] != "vrf":
         config.routes.append(
             Route(network_of([words[2]]), _ip(words[3]) if ":" in words[3] else None)
@@ -128,10 +137,10 @@ def _command(
             elif parts[:1] == ["passive-interface"] and len(parts) == 2:
                 config.interface(parts[1]).mode = config.interface(parts[1]).mode
                 _passive(config, parts[1])
-    elif key == "router" and words[1:2] == ["bgp"] and len(words) == 3 and words[2].isdigit():
+    elif key == "router" and words[1:2] == ["bgp"] and len(words) == 3 and words[2].isdecimal():
         config.bgp_asn = int(words[2])
         _bgp(config, body)
-    elif key == "switch" and len(words) >= 3 and words[1].isdigit() and words[2] == "provision":
+    elif key == "switch" and len(words) >= 3 and words[1].isdecimal() and words[2] == "provision":
         config.stack_kind = "stack"
         config.members[int(words[1])] = Member(
             int(words[1]), model=words[3][:40] if len(words) > 3 else ""
@@ -147,7 +156,7 @@ def _new_vlan(vid: int) -> Vlan:
 def _dns(config: Config, words: list[str]) -> None:
     if words[1] == "name-server":
         servers = [w for w in words[2:] if w != "vrf"]
-        config.dns_servers += [_ip(w) for w in servers if w[:1].isdigit() or ":" in w]
+        config.dns_servers += [_ip(w) for w in servers if w[:1].isdecimal() or ":" in w]
     elif len(words) >= 3:  # ip domain name x / ip domain-name x
         config.domain = words[-1][:253]
 
@@ -189,12 +198,14 @@ def _interface(config: Config, name: str, body: list[str]) -> None:
         elif parts[:2] == ["switchport", "mode"] and len(parts) >= 3:
             port.mode = "trunk" if parts[2] == "trunk" else "access"
         elif (
-            parts[:3] == ["switchport", "access", "vlan"] and len(parts) == 4 and parts[3].isdigit()
+            parts[:3] == ["switchport", "access", "vlan"]
+            and len(parts) == 4
+            and parts[3].isdecimal()
         ):
             port.access_vlan = int(parts[3])
             port.mode = port.mode or "access"
         elif parts[:4] == ["switchport", "trunk", "native", "vlan"] and len(parts) == 5:
-            port.native_vlan = int(parts[4]) if parts[4].isdigit() else None
+            port.native_vlan = int(parts[4]) if parts[4].isdecimal() else None
         elif parts[:4] == ["switchport", "trunk", "allowed", "vlan"] and len(parts) >= 5:
             spec = " ".join(parts[4:])
             if parts[4] == "add":
@@ -205,7 +216,7 @@ def _interface(config: Config, name: str, body: list[str]) -> None:
                 port.allowed = vid_list(spec)
         elif parts == ["no", "switchport"]:
             port.mode = "routed"
-        elif parts[:1] == ["channel-group"] and len(parts) >= 2 and parts[1].isdigit():
+        elif parts[:1] == ["channel-group"] and len(parts) >= 2 and parts[1].isdecimal():
             port.lag = f"Port-channel{parts[1]}"
             mode = parts[3] if len(parts) > 3 else "on"
             port.lag_protocol = "lacp" if mode in ("active", "passive") else "static"
@@ -232,27 +243,23 @@ def _spanning_tree(config: Config, words: list[str], body: list[str]) -> None:
         config.stp_mode = {"rapid-pvst": "rpvst", "mst": "mstp", "pvst": "pvst"}.get(words[1], "")
     elif words[:1] == ["vlan"] and "priority" in words:
         value = words[words.index("priority") + 1]
-        if value.isdigit():
+        if value.isdecimal():
             config.stp_priority = int(value)
     elif words[:2] == ["mst", "configuration"]:
         for line in body:
             parts = line.split()
             if parts[:1] == ["name"] and len(parts) == 2:
                 config.mst_region = parts[1][:32]
-            elif parts[:1] == ["revision"] and len(parts) == 2 and parts[1].isdigit():
+            elif parts[:1] == ["revision"] and len(parts) == 2 and parts[1].isdecimal():
                 config.mst_revision = int(parts[1])
-            elif parts[:1] == ["instance"] and len(parts) >= 4 and parts[1].isdigit():
-                vlans, priority = config.mst_instances.get(int(parts[1]), ([], None))
-                config.mst_instances[int(parts[1])] = (
-                    sorted(set(vlans) | set(vid_list(parts[3]))),
-                    priority,
-                )
-    elif words[:1] == ["mst"] and "priority" in words and words[1].isdigit():
+            elif parts[:1] == ["instance"] and len(parts) >= 4 and parts[1].isdecimal():
+                config.add_mst_vlans(int(parts[1]), vid_list(parts[3]))
+    elif words[:1] == ["mst"] and "priority" in words and words[1].isdecimal():
         number, value = int(words[1]), words[words.index("priority") + 1]
         vlans, _priority = config.mst_instances.get(number, ([], None))
-        if number == 0 and value.isdigit():
+        if number == 0 and value.isdecimal():
             config.stp_priority = int(value)
-        elif value.isdigit():
+        elif value.isdecimal():
             config.mst_instances[number] = (vlans, int(value))
 
 
@@ -264,11 +271,11 @@ def _bgp(config: Config, body: list[str]) -> None:
         elif (
             parts[:1] == ["neighbor"]
             and len(parts) >= 3
-            and (parts[1][:1].isdigit() or ":" in parts[1])
+            and (parts[1][:1].isdecimal() or ":" in parts[1])
         ):
             address = _ip(parts[1])
             neighbor = config.neighbors.get(address)
-            if parts[2] == "remote-as" and len(parts) == 4 and parts[3].isdigit():
+            if parts[2] == "remote-as" and len(parts) == 4 and parts[3].isdecimal():
                 if neighbor is None:
                     config.neighbors[address] = Neighbor(address, int(parts[3]))
                 else:
@@ -301,7 +308,8 @@ def _pool(config: Config, name: str, body: list[str]) -> None:
             if parts[1] == "infinite":
                 pool.lease_seconds = None
             else:
-                days, hours, minutes = ([*(int(p) for p in parts[1:4] if p.isdigit()), 0, 0, 0])[:3]
+                numbers = [int(p) for p in parts[1:4] if p.isdecimal()]
+                days, hours, minutes = [*numbers, 0, 0, 0][:3]
                 pool.lease_seconds = max(60, days * 86400 + hours * 3600 + minutes * 60)
     if host and mac:  # a manual binding: one host pool
         pool.reservations.append((mac, _ip(host), name[:100]))

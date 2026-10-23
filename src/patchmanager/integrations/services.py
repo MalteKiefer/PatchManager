@@ -266,7 +266,7 @@ def deliver_due(limit: int = BATCH) -> int:
                 next_attempt_at=now + LEASE
             )
         started = time.monotonic()
-        allowed: dict[Any, bool] = {}
+        allowed: dict[tuple[Any, str], bool] = {}
         claimed = Delivery.objects.filter(pk__in=[d.pk for d in batch])
         for delivery in claimed.select_related("webhook__created_by", "webhook__tenant"):
             if (
@@ -275,13 +275,16 @@ def deliver_due(limit: int = BATCH) -> int:
                 Delivery.objects.filter(pk=delivery.pk).update(next_attempt_at=timezone.now())
                 continue
             hook = delivery.webhook
-            if hook.pk not in allowed:  # the creator must still see everything the webhook sends
-                allowed[hook.pk] = sees_everything(hook.created_by, hook.tenant, hook.events)
+            # The creator must still see what this delivery sends: its own event, which the
+            # webhook's patterns may no longer cover once they were narrowed.
+            key = (hook.pk, delivery.event)
+            if key not in allowed:
+                allowed[key] = sees_everything(hook.created_by, hook.tenant, [delivery.event])
             if not hook.active:
                 Delivery.objects.filter(pk=delivery.pk).update(
                     status=Delivery.Status.FAILED, last_error="The webhook is inactive."
                 )
-            elif allowed[hook.pk]:
+            elif allowed[key]:
                 try:
                     _send(delivery)
                 except Exception:  # one broken delivery must not stop the others; it is retried

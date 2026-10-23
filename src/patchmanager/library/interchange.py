@@ -237,7 +237,7 @@ def _rename_rears(data: dict[str, Any]) -> None:
     for port in data.get("rear-ports") or []:
         name = str(port.get("name", ""))
         if name.lower() in fronts:
-            renamed[name] = f"R{name}" if name.isdigit() else f"{name} rear"
+            renamed[name] = f"R{name}" if name.isdecimal() else f"{name} rear"
             port["name"] = renamed[name]
     for port in data.get("front-ports") or []:
         rear = str(port.get("rear_port", ""))

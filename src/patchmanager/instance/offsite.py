@@ -11,6 +11,7 @@ import logging
 import os
 import shutil
 import subprocess  # nosec B404: fixed restic arguments, no shell
+import time
 from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
@@ -27,6 +28,8 @@ logger = logging.getLogger(__name__)
 TIMEOUT = 6 * 3600  # one run, in seconds
 DUMP_GLOB = "patchmanager-*.dump"
 LOCK = "instance:offsite:running"
+STEPS = 5  # restic calls of one copy: cat config, init, backup, forget, check
+PARTIAL_AGE = 3600  # seconds since a partial file last grew before it counts as left over
 
 
 def check_repository(repository: str) -> None:
@@ -183,8 +186,11 @@ def due(config: instance_config.Config) -> bool:
     if not config.offsite_enabled or not settings.BACKUP_DIR:
         return False
     folder = Path(str(settings.BACKUP_DIR))
-    if any(folder.glob("patchmanager-*.partial")):
-        return False  # the backup service is still writing; copy the complete set later
+    # A partial file still growing means the backup service is writing; copy the complete
+    # set later. One left behind by a failed run is old and must not stop the copies.
+    recent = time.time() - PARTIAL_AGE
+    if any(p.stat().st_mtime > recent for p in folder.glob("patchmanager-*.partial")):
+        return False
     newest = _newest(str(folder))
     if newest is None:
         return False
@@ -207,7 +213,9 @@ def run(force: bool = False) -> bool:
     config = instance_config.get()
     if not force and not due(config):
         return False
-    if not cache.add(LOCK, timezone.now().isoformat(), TIMEOUT + 60):
+    token = timezone.now().isoformat()
+    # A copy runs up to five restic steps of TIMEOUT each; the lock must outlast them all.
+    if not cache.add(LOCK, token, STEPS * TIMEOUT + 60):
         logger.info("off-site copy already running")
         return False
     try:
@@ -218,6 +226,9 @@ def run(force: bool = False) -> bool:
         _record(False, reason)
         return False
     finally:
-        cache.delete(LOCK)
+        # ponytail: get and delete are two calls; an expired lock retaken in between is
+        # freed early. Use a Redis compare-and-delete script if that window ever matters.
+        if cache.get(LOCK) == token:
+            cache.delete(LOCK)
     _record(True, message)
     return True

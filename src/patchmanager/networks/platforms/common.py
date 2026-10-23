@@ -14,6 +14,8 @@ MAX_RANGE = 1024  # ports in one range like 1-48
 MAX_LINE = 2000  # characters; longer lines are not configuration
 MAX_NAME = 64  # characters of one port name
 MAX_NAMES = 20_000  # port names in all ranges of one configuration
+MAX_MST = 65  # MST instances with their VLAN lists: the CIST and 64 more
+MAX_VIDS = 1_000_000  # VLAN IDs expanded from all allowed and MST lists (244 x 1-4094)
 MAX_BYTES = 4 * 1024 * 1024  # text after template variables are filled in
 MAX_VARIABLE = 1000  # characters of one template variable
 
@@ -156,6 +158,7 @@ class Config:
     warnings: list[str] = field(default_factory=list)
 
     names_left: int = field(default=MAX_NAMES, repr=False, compare=False)
+    vids_left: int = field(default=MAX_VIDS, repr=False, compare=False)
 
     def expand(self, spec: str) -> list[str]:
         """:func:`expand`, counted against the budget of the whole configuration."""
@@ -168,6 +171,12 @@ class Config:
         self.names_left -= count
         if self.names_left < 0:
             raise TooLargeError(f"the configuration names more than {MAX_NAMES} ports")
+
+    def charge_vids(self, count: int) -> None:
+        """Count expanded VLAN IDs; memberships are charged later, by :func:`finish`."""
+        self.vids_left -= count
+        if self.vids_left < 0:
+            raise TooLargeError(f"the configuration names more than {MAX_VIDS} VLAN IDs")
 
     def interface(self, name: str) -> Interface:
         """The interface entry of ``name`` (created on first use, counted against the budget)."""
@@ -186,15 +195,32 @@ class Config:
         self.extend_allowed(self.interface(name), vids)
 
     def extend_allowed(self, port: Interface, vids: list[int]) -> None:
-        """Add VLANs to ``port``'s allowed list in place, counted against the budget.
+        """Add VLANs to ``port``'s allowed list in place.
 
         Repeated "allowed vlan add" lines must neither copy the list each time nor grow it
-        without limit.
+        without limit. Memberships are charged by :func:`finish`; here only the expanded IDs
+        count, on their own budget, which bounds the work of many repeated lines.
         """
-        self.charge(len(vids))
+        self.charge_vids(len(vids))
         if port.allowed is None:
             port.allowed = []
         port.allowed.extend(vids)
+        if len(port.allowed) > 4094:
+            port.allowed[:] = sorted(set(port.allowed))
+
+    def add_mst_vlans(self, number: int, vids: list[int]) -> None:
+        """Map ``vids`` to MST instance ``number``, counted against the budget.
+
+        Each line is charged with the work it causes (the new and the existing IDs), so many
+        lines that each name all VLANs cannot allocate or loop without limit.
+        """
+        if not 0 <= number <= 4094:
+            raise ParseError(f"MST instance {number} is out of range")
+        if number not in self.mst_instances and len(self.mst_instances) >= MAX_MST:
+            raise ParseError(f"more than {MAX_MST} MST instances")
+        vlans, priority = self.mst_instances.get(number, ([], None))
+        self.charge_vids(len(vids) + len(vlans))
+        self.mst_instances[number] = (sorted(set(vlans) | set(vids)), priority)
 
     def pool_index(self) -> dict[str, Pool]:
         """Pools by network, for :meth:`pool_for` (build once, look up many times)."""
@@ -277,7 +303,7 @@ def vids(spec: str) -> list[int]:
     result: list[int] = []
     for part in filter(None, (p.strip() for p in spec.split(","))):
         first, _sep, last = part.partition("-")
-        if not first.isdigit() or (last and not last.isdigit()):
+        if not first.isdecimal() or (last and not last.isdecimal()):
             raise ParseError(f"cannot read the VLAN list {spec}")
         start, end = int(first), int(last or first)
         if not 1 <= start <= end <= 4094:
@@ -312,6 +338,15 @@ def _network(address: str, mask: str | None) -> str:
         return str(ipaddress.ip_network(f"{address}/{mask}", strict=False))
     except ValueError as exc:
         raise ParseError(f"cannot read the network {address}") from exc
+
+
+def is_address(value: str) -> bool:
+    """Whether ``value`` is an IP address (BGP peers may also name a peer group)."""
+    try:
+        ipaddress.ip_address(value)
+    except ValueError:
+        return False
+    return True
 
 
 def _ip(value: str) -> str:
@@ -481,7 +516,7 @@ def address_of(words: list[str]) -> str:
         raise ParseError("an address is missing")
     if "/" in words[0]:
         return _address(words[0], None)
-    if len(words) > 1 and words[1][:1].isdigit():
+    if len(words) > 1 and words[1][:1].isdecimal():
         return _address(words[0], str(mask_to_prefix(words[1])))
     raise ParseError(f"cannot read the address {words[0][:40]}")
 

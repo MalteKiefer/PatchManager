@@ -11,12 +11,14 @@ from patchmanager.networks.platforms.common import (
     ParseError,
     Pool,
     Route,
+    TooLargeError,
     Vlan,
     _ip,
     _unquote,
     address_of,
     declare_vlans,
     finish,
+    is_address,
     keywords,
     lines_of,
     network_of,
@@ -53,6 +55,8 @@ def parse(text: str) -> Config:
             continue
         try:
             _command(config, head, without_secrets(config, body))
+        except TooLargeError:
+            raise  # the whole text is refused, not one line
         except ParseError as exc:
             config.warnings.append(f"line {number}: {exc}")
     return finish(config)
@@ -86,17 +90,17 @@ def _command(config: Config, head: str, body: list[str]) -> None:
                 config.ospf_router_id = _ip(parts[1])
     elif key == "router" and words[1:2] == ["id"] and len(words) == 3:
         config.ospf_router_id = config.ospf_router_id or _ip(words[2])
-    elif key == "bgp" and len(words) >= 2 and words[1].isdigit():
+    elif key == "bgp" and len(words) >= 2 and words[1].isdecimal():
         config.bgp_asn = int(words[1])
         _bgp(config, body)
     elif key == "dhcp" and words[1:3] == ["server", "ip-pool"] and len(words) >= 4:
         _pool(config, words[3], body)
     elif key == "ip" and words[1:2] == ["pool"] and len(words) >= 3:  # VRP
         _pool(config, words[2], body)
-    elif key == "irf" and words[1:2] == ["member"] and len(words) >= 3 and words[2].isdigit():
+    elif key == "irf" and words[1:2] == ["member"] and len(words) >= 3 and words[2].isdecimal():
         config.stack_kind = "stack"
         member = config.members.setdefault(int(words[2]), Member(int(words[2])))
-        if "priority" in words and words[-1].isdigit():
+        if "priority" in words and words[-1].isdecimal():
             member.priority = int(words[-1])
     elif key not in _IGNORED:
         config.unknown.append(head[:120])
@@ -165,7 +169,7 @@ def _interface(config: Config, name: str, body: list[str]) -> None:
             parts[:3] in (["port", "access", "vlan"], ["port", "default", "vlan"])
             and len(parts) == 4
         ):
-            port.access_vlan = int(parts[3]) if parts[3].isdigit() else None
+            port.access_vlan = int(parts[3]) if parts[3].isdecimal() else None
             if port.mode != "trunk":
                 port.mode = "access"
         elif (
@@ -177,11 +181,11 @@ def _interface(config: Config, name: str, body: list[str]) -> None:
                 port.allowed = None
             else:
                 config.allow(name, vid_list(spec))
-        elif parts[:3] == ["port", "trunk", "pvid"] and len(parts) == 5 and parts[4].isdigit():
+        elif parts[:3] == ["port", "trunk", "pvid"] and len(parts) == 5 and parts[4].isdecimal():
             port.native_vlan = int(parts[4])
-        elif parts[:2] == ["port", "link-aggregation"] and parts[-1].isdigit():
+        elif parts[:2] == ["port", "link-aggregation"] and parts[-1].isdecimal():
             port.lag = _lag_name(parts[-1], vrp=False)
-        elif parts[:1] == ["eth-trunk"] and len(parts) == 2 and parts[1].isdigit():
+        elif parts[:1] == ["eth-trunk"] and len(parts) == 2 and parts[1].isdecimal():
             port.lag = _lag_name(parts[1], vrp=True)
         elif (parts[:2] == ["link-aggregation", "mode"] and parts[2:3] == ["dynamic"]) or parts[
             :2
@@ -200,7 +204,7 @@ def _interface(config: Config, name: str, body: list[str]) -> None:
 
 def _mask(words: list[str]) -> list[str]:
     """``A.B.C.D 24`` (length instead of a mask) as ``A.B.C.D/24``."""
-    if len(words) == 2 and words[1].isdigit():
+    if len(words) == 2 and words[1].isdecimal():
         return [f"{words[0]}/{words[1]}"]
     return words
 
@@ -209,12 +213,13 @@ def _route(words: list[str]) -> Route:
     """``prefix mask|len next-hop [preference n]``; ``vpn-instance`` routes are skipped."""
     if words[0] == "vpn-instance":
         raise ParseError("routes of VPN instances are not documented")
-    prefix = network_of(_mask(words[:2])) if words[1].isdigit() else network_of(words[:2])
+    prefix = network_of(_mask(words[:2])) if words[1].isdecimal() else network_of(words[:2])
     hop = words[2]
     distance = None
-    if "preference" in words and words[words.index("preference") + 1].isdigit():
-        distance = min(255, int(words[words.index("preference") + 1]))
-    return Route(prefix, _ip(hop) if hop[:1].isdigit() else None, distance)
+    after = words[words.index("preference") + 1 :] if "preference" in words else []
+    if after and after[0].isdecimal():  # "preference" may also end a description
+        distance = min(255, int(after[0]))
+    return Route(prefix, _ip(hop) if hop[:1].isdecimal() else None, distance)
 
 
 def _stp(config: Config, words: list[str], body: list[str]) -> None:
@@ -222,10 +227,10 @@ def _stp(config: Config, words: list[str], body: list[str]) -> None:
         config.stp_mode = {"stp": "stp", "rstp": "rstp", "mstp": "mstp", "pvst": "pvst"}.get(
             words[1], ""
         )
-    elif words[:1] == ["priority"] and len(words) == 2 and words[1].isdigit():
+    elif words[:1] == ["priority"] and len(words) == 2 and words[1].isdecimal():
         config.stp_priority = int(words[1])
     elif words[:2] == ["instance", "0"] and "priority" in words:
-        config.stp_priority = int(words[-1]) if words[-1].isdigit() else config.stp_priority
+        config.stp_priority = int(words[-1]) if words[-1].isdecimal() else config.stp_priority
     elif words[:2] == ["global", "enable"] or words == ["enable"]:
         config.stp_mode = config.stp_mode or "mstp"
     elif words[:1] == ["region-configuration"]:
@@ -233,13 +238,11 @@ def _stp(config: Config, words: list[str], body: list[str]) -> None:
             parts = line.split()
             if parts[:1] == ["region-name"] and len(parts) == 2:
                 config.mst_region = parts[1][:32]
-            elif parts[:1] == ["revision-level"] and parts[1:2] and parts[1].isdigit():
+            elif parts[:1] == ["revision-level"] and parts[1:2] and parts[1].isdecimal():
                 config.mst_revision = int(parts[1])
-            elif parts[:1] == ["instance"] and "vlan" in parts and parts[1].isdigit():
-                number = int(parts[1])
-                vlans, priority = config.mst_instances.get(number, ([], None))
+            elif parts[:1] == ["instance"] and "vlan" in parts and parts[1].isdecimal():
                 spec = " ".join(parts[parts.index("vlan") + 1 :])
-                config.mst_instances[number] = (sorted(set(vlans) | set(vid_list(spec))), priority)
+                config.add_mst_vlans(int(parts[1]), vid_list(spec))
 
 
 def _bgp(config: Config, body: list[str]) -> None:
@@ -251,7 +254,8 @@ def _bgp(config: Config, body: list[str]) -> None:
             parts[:1] == ["peer"]
             and len(parts) >= 4
             and parts[2] == "as-number"
-            and parts[3].isdigit()
+            and parts[3].isdecimal()
+            and is_address(parts[1])
         ):
             config.neighbors[_ip(parts[1])] = Neighbor(_ip(parts[1]), int(parts[3]))
         elif parts[:1] == ["peer"] and len(parts) >= 4 and parts[2] == "description":
