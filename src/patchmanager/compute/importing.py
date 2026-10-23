@@ -86,6 +86,9 @@ def save(
     """
     pick = pick or Pick()
     result = Result(notes=list(data.notes))
+    # Importing is its own right, as for tables: machines from a cluster, storage from a NAS.
+    kind = "vm" if data.platform in ("proxmox", "vmware") else "storage"
+    _need(actor, f"compute.{kind}.import", tenant)
     with transaction.atomic():
         if data.platform in ("proxmox", "vmware"):
             cluster = cluster or _cluster(actor, tenant, data)
@@ -436,9 +439,10 @@ def import_view(request: HttpRequest) -> HttpResponse:
     if tenant is None:
         raise Http404
     actor: Any = request.user
-    if not (
-        policy.has_perm(actor, "compute.vm.add", scope_path=path_label(tenant.pk))
-        or policy.has_perm(actor, "compute.storage.add", scope_path=path_label(tenant.pk))
+    if not any(
+        policy.has_perm(actor, f"compute.{kind}.add", scope_path=path_label(tenant.pk))
+        and policy.has_perm(actor, f"compute.{kind}.import", scope_path=path_label(tenant.pk))
+        for kind in ("vm", "storage")
     ):
         raise PermissionDenied
     form = ImportForm(request.POST or None, tenant=tenant, actor=actor)

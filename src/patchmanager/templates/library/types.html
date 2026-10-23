@@ -11,8 +11,8 @@
       <option value="">{% translate "All" %}</option>{% for value, label in forms %}<option value="{{ value }}" {% if value == form_filter %}selected{% endif %}>{{ label }}</option>{% endfor %}
     </select>
   </form>
-  {% if can_add %}<a class="btn-primary" href="{% url 'library:catalog' %}">{% translate "Add from catalog" %}</a>
-  <a class="btn-secondary" href="{% url 'library:type-create' %}">{% translate "New device type" %}</a>{% endif %}
+  {% if can_import %}<a class="btn-primary" href="{% url 'library:catalog' %}">{% translate "Add from catalog" %}</a>{% endif %}
+  {% if can_add %}<a class="btn-secondary" href="{% url 'library:type-create' %}">{% translate "New device type" %}</a>{% endif %}
 </div>
 <div class="card mb-6 overflow-x-auto p-0"><table class="table">
   <thead><tr><th>{% translate "Vendor" %}</th><th>{% translate "Model" %}</th><th>{% translate "Category" %}</th><th>{% translate "Form" %}</th><th>{% translate "Height" %}</th><th>{% translate "Scope" %}</th><th>{% translate "Devices" %}</th></tr></thead>
@@ -22,7 +22,7 @@
     <td>{% if t.tenant_id %}<span class="badge-muted">{% translate "this tenant" %}</span>{% else %}{% translate "shared" %}{% endif %}</td><td>{{ t.device_count }}</td>
   </tr>{% empty %}<tr><td colspan="7" class="text-slate-500">{% translate "No device types yet." %}</td></tr>{% endfor %}</tbody>
 </table></div>
-{% if can_add %}
+{% if can_import %}
 <form method="post" action="{% url 'library:type-import' %}" enctype="multipart/form-data" class="card max-w-xl">{% csrf_token %}
   <h2 class="mb-1">{% translate "Import device type" %}</h2>
   <p class="mb-3 text-xs text-slate-500">{% translate "YAML or JSON in the community device type library format." %}</p>

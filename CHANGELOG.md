@@ -67,6 +67,12 @@ All notable changes to this project are documented here. The format follows
 
 ### Changed
 
+* Every import needs the import permission of its object type, as table imports
+  already did: DNS zones, platform and NAS imports and connections, device types from
+  a file or the catalog, and reading a switch configuration. Import buttons show only
+  to those who may import. The Editor, Admin and Tenant Owner roles keep these rights.
+* API tokens limited to object types or a location also limit the vendor, device type
+  and tenant lists, and the tenant list shows only tenants the caller may view.
 * Placing a rack or device on the floor plan is clearer: the chosen entry and the plan
   are framed, the cursor aims, the hint names the item, its room outline is marked,
   and Esc cancels. Racks not on the plan show their room.

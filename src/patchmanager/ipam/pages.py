@@ -349,7 +349,10 @@ def dns_import_view(request: HttpRequest) -> HttpResponse:
     if tenant is None:
         raise Http404
     actor: Any = request.user
-    if not policy.has_perm(actor, "ipam.dnszone.add", scope_path=path_label(tenant.pk)):
+    if not all(
+        policy.has_perm(actor, f"ipam.dnszone.{action}", scope_path=path_label(tenant.pk))
+        for action in ("add", "import")
+    ):
         raise PermissionDenied
     form = ZoneImportForm(request.POST or None, request.FILES or None)
     if request.method == "POST" and form.is_valid():
