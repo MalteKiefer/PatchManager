@@ -4,6 +4,7 @@ from typing import Any
 
 import pytest
 
+from patchmanager.audit.models import AuditEvent
 from patchmanager.directory.models import Organization
 from patchmanager.tenancy import rls
 from tests.test_api import _api, _get, _send, _token
@@ -73,6 +74,10 @@ def test_records_through_services(tree, make_tree, super_admin) -> None:
     in_use = _send(api, "delete", f"/api/v1/organizations/{org['id']}/", None)
     assert in_use.status_code == 400
     assert _send(api, "delete", f"/api/v1/circuits/{line['id']}/", None).status_code == 204
+    with rls.system_context():  # the audit names the deleted record
+        assert AuditEvent.objects.filter(
+            action="circuits.circuit.deleted", object_id=line["id"]
+        ).exists()
     assert _send(api, "delete", f"/api/v1/organizations/{org['id']}/", None).status_code == 204
 
     zone = _send(api, "post", "/api/v1/dns-zones/", {"tenant": tenant, "name": "example.org"})
@@ -105,6 +110,8 @@ def test_viewer_cannot_write(tree, make_user, grant, super_admin) -> None:
         grant(viewer, "viewer", tree["tenant"])
     api = _api(_token(viewer))
     assert _get(api, f"/api/v1/organizations/{org['id']}/").status_code == 200
+    # Lists every member reads in the pages are readable with a role inside a tenant.
+    assert _get(api, "/api/v1/categories/").json()["count"] > 0
     url = "/api/v1/organizations/"
     body = {"tenant": str(tree["tenant"].pk), "name": "New"}
     assert _send(api, "post", url, body).status_code == 403

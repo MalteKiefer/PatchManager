@@ -145,13 +145,17 @@ def delete(request: HttpRequest, actor: User, obj: Any) -> None:
     require(actor, _perm(obj, "delete"), obj)
     try:
         with transaction.atomic():
+            # Recorded first: after delete() the object has no id; a refusal rolls it back.
+            audit.record(
+                f"{obj.policy_object_type}.deleted",
+                request=request,
+                obj=obj,
+                data={"name": str(obj)[:200]},
+            )
             metadata.purge(obj)
             obj.delete()
     except ProtectedError as exc:
         raise ServiceError(_("Other records still use this one.")) from exc
-    audit.record(
-        f"{obj.policy_object_type}.deleted", request=request, obj=obj, data={"name": str(obj)[:200]}
-    )
 
 
 # --- Views ---------------------------------------------------------------------

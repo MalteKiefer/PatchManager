@@ -915,10 +915,12 @@ class AdminLists(viewsets.ReadOnlyModelViewSet):  # type: ignore[type-arg]
     object_type: ClassVar[str]
 
     def get_queryset(self) -> QuerySet[Any]:
-        """All entries if the caller may view the list (token limits included), else none."""
-        rows: QuerySet[Any] = self.model.objects.order_by("order", "name")
-        if not policy.has_perm(self.request.user, f"{self.object_type}.view"):
-            return rows.none()
+        """All entries, as in the pages every member reads; API token limits apply."""
+        rows = _token_allows(
+            self.request.user,
+            f"{self.object_type}.view",
+            self.model.objects.order_by("order", "name"),
+        )
         return filtered(rows, self.request.query_params, {"q": "name__icontains"})
 
 
