@@ -46,7 +46,8 @@ class Resource:
     context: Callable[[HttpRequest, Any], dict[str, Any]] | None = None
     template: str = ""  # extra content of the detail page
     hidden: bool = False  # no own list (child records)
-    actions: tuple[tuple[Any, str], ...] = ()  # (label, URL name) shown next to "New" on the list
+    # (label, URL name) of imports, shown next to "New" to those who may also import
+    actions: tuple[tuple[Any, str], ...] = ()
     order: tuple[str, ...] = field(default=("name",))
 
 
@@ -182,6 +183,9 @@ def index(request: HttpRequest, key: str) -> HttpResponse:
             "rows": [(o, [cell(o, attr) for _label, attr in resource.columns]) for o in rows],
             "can_add": policy.has_perm(
                 request.user, _perm(resource.model, "add"), scope_path=path_label(tenant.pk)
+            ),
+            "can_import": policy.has_perm(
+                request.user, _perm(resource.model, "import"), scope_path=path_label(tenant.pk)
             ),
         },
     )

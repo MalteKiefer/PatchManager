@@ -306,6 +306,8 @@ def save(
     )
     if stored is not None and replace and not policy.has_perm(actor, "ipam.dnszone.delete", stored):
         allowed = False  # replacing deletes the documented records
+    if not policy.has_perm(actor, "ipam.dnszone.import", scope_path=path_label(tenant.pk)):
+        allowed = False  # importing is its own right, as for tables
     if not allowed:
         raise PermissionDeniedError(_("You do not have permission to do that."))
     skipped = list(data.skipped)

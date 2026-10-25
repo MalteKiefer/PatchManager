@@ -161,7 +161,10 @@ def overview(request: HttpRequest, pk: str) -> HttpResponse:
             "stack_members": (
                 member.stack.members.select_related("device") if member is not None else []
             ),
-            "can_change": policy.has_perm(request.user, "dcim.device.change", device),
+            "can_change": all(  # reading a configuration is an import
+                policy.has_perm(request.user, f"dcim.device.{action}", device)
+                for action in ("change", "import")
+            ),
             "breadcrumbs": _crumbs(device),
         },
     )

@@ -62,6 +62,7 @@ def apply(
 ) -> Result:
     """Make the documentation of ``device`` match ``config`` (or show what that would do)."""
     require(actor, "dcim.device.change", device)
+    require(actor, "dcim.device.import", device)  # reading a configuration is an import
     result = Result(skipped=[*config.warnings])
     if config.secrets_skipped:
         result.skipped.append(

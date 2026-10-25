@@ -9,6 +9,7 @@ from rest_framework.decorators import action, api_view
 from rest_framework.request import Request
 from rest_framework.response import Response
 
+from patchmanager.accounts import policy
 from patchmanager.accounts.models import User
 from patchmanager.api import serializers as s
 from patchmanager.api.core import filtered, lookup, not_found, tenant_scope, visible
@@ -202,6 +203,18 @@ class RackViewSet(TreeNodes):
 # ---------------------------------------------------------------- library (read only)
 
 
+def _token_allows(user: Any, permission: str, rows: QuerySet[Any]) -> QuerySet[Any]:
+    """No rows when the API token's object types or location leave out ``permission``.
+
+    Shared library rows have no location of their own, so only the limits apply, as in the
+    library pages every member can read.
+    """
+    limits = policy.token_limits(user)
+    if limits is not None and not limits.allows(permission, limits.scope_path or None):
+        return rows.none()
+    return rows
+
+
 class VendorViewSet(viewsets.ReadOnlyModelViewSet):  # type: ignore[type-arg]
     """Vendors are shared by all tenants."""
 
@@ -209,9 +222,8 @@ class VendorViewSet(viewsets.ReadOnlyModelViewSet):  # type: ignore[type-arg]
 
     def get_queryset(self) -> QuerySet[Vendor]:
         """Rows the caller may view, filtered by the query parameters."""
-        return filtered(
-            Vendor.objects.order_by("name"), self.request.query_params, {"q": "name__icontains"}
-        )
+        rows = _token_allows(self.request.user, "library.vendor.view", Vendor.objects.all())
+        return filtered(rows.order_by("name"), self.request.query_params, {"q": "name__icontains"})
 
 
 class DeviceTypeViewSet(viewsets.ReadOnlyModelViewSet):  # type: ignore[type-arg]
@@ -224,6 +236,7 @@ class DeviceTypeViewSet(viewsets.ReadOnlyModelViewSet):  # type: ignore[type-arg
         rows = DeviceType.objects.select_related("vendor").order_by(
             "vendor__name", "model"
         )  # RLS bounds tenants
+        rows = _token_allows(self.request.user, "library.devicetype.view", rows)
         return filtered(
             rows,
             self.request.query_params,
@@ -751,9 +764,12 @@ class TenantViewSet(viewsets.ReadOnlyModelViewSet):  # type: ignore[type-arg]
 
     def get_queryset(self) -> QuerySet[Tenant]:
         """Rows the caller may view, filtered by the query parameters."""
-        return Tenant.objects.filter(archived_at__isnull=True).order_by(
-            "name"
-        )  # RLS: tenants with any grant
+        rows = Tenant.objects.filter(archived_at__isnull=True)  # RLS: tenants with any grant
+        if getattr(self, "swagger_fake_view", False):  # schema generation has no caller
+            return rows
+        # As on the tenants page: only those the caller may view (token limits included).
+        seen = [t.pk for t in rows if policy.has_perm(self.request.user, "tenancy.tenant.view", t)]
+        return rows.filter(pk__in=seen).order_by("name")
 
 
 class ChangeViewSet(viewsets.ReadOnlyModelViewSet):  # type: ignore[type-arg]

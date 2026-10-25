@@ -18,6 +18,7 @@ from django.utils.translation import gettext as _
 
 from patchmanager.accounts.models import User
 from patchmanager.accounts.services import ServiceError
+from patchmanager.accounts.services.users import require
 from patchmanager.library import services
 from patchmanager.library.models import (
     Airflow,
@@ -147,6 +148,7 @@ def import_type(
     request: HttpRequest, actor: User, payload: str, *, tenant: Tenant | None
 ) -> DeviceType:
     """Create a device type from one YAML or JSON document."""
+    require(actor, "library.devicetype.import", scope_path=tenant.policy_path if tenant else None)
     try:
         data = yaml.safe_load(payload)
     except yaml.YAMLError as exc:
