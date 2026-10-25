@@ -91,3 +91,29 @@ def test_library_and_tenant_endpoints_follow_token_limits(
     sites_only = _api(_token(super_admin, ("read",), object_types=["locations.site"]))
     for url in ("/api/v1/vendors/", "/api/v1/device-types/", "/api/v1/tenants/"):
         assert _get(sites_only, url).json()["results"] == [], url
+
+
+def test_platform_is_not_asked_without_the_right_for_what_it_delivers(
+    client: Client, make_tree, make_user, grant, monkeypatch
+) -> None:
+    from patchmanager.compute import inventory
+
+    asked = []
+    monkeypatch.setattr(inventory, "proxmox", lambda *args: asked.append(args))
+    Role.objects.create(
+        key="storage-import",
+        name="Storage import",
+        permissions=["compute.storage.view", "compute.storage.add", "compute.storage.import"],
+    )
+    tree = make_tree()
+    user = make_user()
+    grant(user, "storage-import", tree["tenant"])
+    login(client, user)
+    client.post("/tenants/switch/", {"tenant": tree["tenant"].pk}, secure=True)
+    token = "monitor@pve!patchmanager=12345678-1234-1234-1234-123456789abc"
+    page = client.post(
+        "/compute/import/",
+        {"platform": "proxmox", "url": "https://p.lab", "token": token},
+        secure=True,
+    )
+    assert page.status_code == 403 and asked == []

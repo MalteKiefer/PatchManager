@@ -119,3 +119,25 @@ def test_viewer_cannot_write(tree, make_user, grant, super_admin) -> None:
     assert _send(api, "delete", f"{url}{org['id']}/", None).status_code == 403
     with rls.system_context():
         assert Organization.objects.get(pk=org["id"]).name == "Telco"
+
+
+def test_record_writes_reject_bad_input(tree, super_admin) -> None:
+    from patchmanager.ipam import services as ipam
+
+    api = _api(_token(super_admin))
+    with rls.system_context():
+        prefix = ipam.create_prefix(
+            tree["request"], super_admin, tree["tenant"], prefix="10.9.0.0/24"
+        )
+    scope = {
+        "tenant": str(tree["tenant"].pk),
+        "name": "LAN",
+        "prefix": str(prefix.pk),
+        "start": "10.9.0.10",
+        "end": "10.9.0.20",
+        "gateway": "10.9.0.x",
+    }
+    assert _send(api, "post", "/api/v1/dhcp-scopes/", scope).status_code == 400  # not a 500
+    org = _org(api, tree["tenant"])
+    misspelt = _send(api, "patch", f"/api/v1/organizations/{org['id']}/", {"nmae": "New"})
+    assert misspelt.status_code == 400 and "nmae" in misspelt.json()

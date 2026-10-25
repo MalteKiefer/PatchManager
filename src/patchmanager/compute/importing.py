@@ -59,6 +59,11 @@ class Result:
     notes: list[str] = field(default_factory=list)
 
 
+def _import_right(platform: str) -> str:
+    """Importing is its own right, as for tables: machines from a cluster, storage from a NAS."""
+    return f"compute.{'vm' if platform in ('proxmox', 'vmware') else 'storage'}.import"
+
+
 def _need(actor: User, permission: str, tenant: Any, obj: Any = None) -> None:
     allowed = (
         policy.has_perm(actor, permission, obj)
@@ -86,9 +91,7 @@ def save(
     """
     pick = pick or Pick()
     result = Result(notes=list(data.notes))
-    # Importing is its own right, as for tables: machines from a cluster, storage from a NAS.
-    kind = "vm" if data.platform in ("proxmox", "vmware") else "storage"
-    _need(actor, f"compute.{kind}.import", tenant)
+    _need(actor, _import_right(data.platform), tenant)
     with transaction.atomic():
         if data.platform in ("proxmox", "vmware"):
             cluster = cluster or _cluster(actor, tenant, data)
@@ -449,6 +452,7 @@ def import_view(request: HttpRequest) -> HttpResponse:
     if request.method == "POST" and form.is_valid():
         data = form.cleaned_data
         try:
+            _need(actor, _import_right(data["platform"]), tenant)  # before the platform is asked
             if data["platform"] == "proxmox":
                 found = sources.proxmox(data["url"], data["token"], data["fingerprint"])
             elif data["platform"] == "vmware":
