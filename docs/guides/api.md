@@ -43,6 +43,14 @@ admin; read only tokens are limited to reading in every check.
 * Configurations: `GET`/`POST /api/v1/devices/<id>/configs/` lists or stores versions
   (`{"content": "...", "comment": "..."}`; `201` new, `200` unchanged),
   `GET /api/v1/devices/<id>/configs/<version>/` returns one with its text.
+* Records: `/api/v1/circuits/`, `/api/v1/organizations/`, `/api/v1/systems/`,
+  `/api/v1/clusters/`, `/api/v1/vms/`, `/api/v1/storage/`, `/api/v1/dhcp-scopes/`
+  and `/api/v1/dns-zones/` take the fields of their page and a `tenant` id on create.
+  References (provider, site, cluster, prefix, server ...) are ids and must belong to
+  the same tenant. Contacts, hosts, network cards, disks, reservations and DNS
+  records are edited on the pages.
+* Device categories (`/api/v1/categories/`) and room types (`/api/v1/room-types/`)
+  are read only; administrators edit them under Administration → Lists.
 
 ## Webhooks
 

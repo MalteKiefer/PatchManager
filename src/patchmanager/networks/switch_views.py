@@ -176,7 +176,9 @@ def read(request: HttpRequest, pk: str) -> HttpResponse:
     """Read a switch configuration: preview the changes, then apply them."""
     device = _device(request, pk)
     actor = _actor(request)
-    if not policy.has_perm(actor, "dcim.device.change", device):
+    if not all(  # reading a configuration is an import
+        policy.has_perm(actor, f"dcim.device.{action}", device) for action in ("change", "import")
+    ):
         raise PermissionDenied
     stored = [
         c

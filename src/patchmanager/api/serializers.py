@@ -5,12 +5,19 @@ from typing import Any
 from rest_framework import serializers
 
 from patchmanager.cabling.models import Cable
+from patchmanager.circuits.models import Circuit
+from patchmanager.circuits.pages import CircuitForm
+from patchmanager.compute.models import Cluster, StorageVolume, VirtualMachine
+from patchmanager.compute.pages import ClusterForm, StorageForm, VMForm
 from patchmanager.configs.models import DeviceConfig
 from patchmanager.dcim.models import Device, Port, Rack
+from patchmanager.directory.models import Organization, System
+from patchmanager.directory.pages import OrganizationForm, SystemForm
 from patchmanager.history.models import Change
-from patchmanager.ipam.models import VRF, IPAddress, Prefix
-from patchmanager.library.models import DeviceType, Vendor
-from patchmanager.locations.models import Building, Floor, Room, Site
+from patchmanager.ipam.models import VRF, DHCPScope, DNSZone, IPAddress, Prefix
+from patchmanager.ipam.pages import ScopeForm, ZoneForm
+from patchmanager.library.models import DeviceCategory, DeviceType, Vendor
+from patchmanager.locations.models import Building, Floor, Room, RoomType, Site
 from patchmanager.networks.models import VLAN, WLAN
 from patchmanager.tenancy.models import Tenant
 
@@ -323,6 +330,119 @@ class IPAddressSerializer(serializers.ModelSerializer):  # type: ignore[type-arg
         model = IPAddress
         fields = [*BASE, "tenant", "vrf", "address", "status", "dns_name", "description", "port"]
         read_only_fields = BASE
+
+
+class RecordSerializer(serializers.ModelSerializer):  # type: ignore[type-arg]
+    """A tenant record; references are ids. Writes are validated by the record's page form."""
+
+    tenant = serializers.UUIDField(source="tenant_id")
+
+    def build_relational_field(self, field_name: str, relation_info: Any) -> Any:
+        """References as plain ids, like the other endpoints."""
+        null = relation_info.model_field.null
+        return serializers.UUIDField, {
+            "source": f"{field_name}_id",
+            "required": not null,
+            "allow_null": null,
+        }
+
+
+def _record(form: Any) -> list[str]:
+    return [*BASE, "tenant", *form._meta.fields]
+
+
+class CircuitSerializer(RecordSerializer):
+    """Line as stored and as accepted on writes."""
+
+    class Meta:
+        model = Circuit
+        fields = _record(CircuitForm)
+        read_only_fields = BASE
+
+
+class ClusterSerializer(RecordSerializer):
+    """Cluster as stored and as accepted on writes."""
+
+    class Meta:
+        model = Cluster
+        fields = _record(ClusterForm)
+        read_only_fields = BASE
+
+
+class VMSerializer(RecordSerializer):
+    """Virtual machine as stored and as accepted on writes."""
+
+    class Meta:
+        model = VirtualMachine
+        fields = _record(VMForm)
+        read_only_fields = BASE
+
+
+class StorageSerializer(RecordSerializer):
+    """Storage as stored and as accepted on writes."""
+
+    class Meta:
+        model = StorageVolume
+        fields = _record(StorageForm)
+        read_only_fields = BASE
+
+
+class OrganizationSerializer(RecordSerializer):
+    """Organization as stored and as accepted on writes."""
+
+    class Meta:
+        model = Organization
+        fields = _record(OrganizationForm)
+        read_only_fields = BASE
+
+
+class SystemSerializer(RecordSerializer):
+    """System as stored and as accepted on writes."""
+
+    class Meta:
+        model = System
+        fields = _record(SystemForm)
+        read_only_fields = BASE
+
+
+class DHCPScopeSerializer(RecordSerializer):
+    """DHCP scope as stored and as accepted on writes."""
+
+    start = serializers.CharField(max_length=50)
+    end = serializers.CharField(max_length=50)
+    gateway = serializers.CharField(max_length=50, required=False, allow_null=True)
+
+    class Meta:
+        model = DHCPScope
+        fields = _record(ScopeForm)
+        read_only_fields = BASE
+
+
+class DNSZoneSerializer(RecordSerializer):
+    """DNS zone as stored and as accepted on writes."""
+
+    class Meta:
+        model = DNSZone
+        fields = _record(ZoneForm)
+        read_only_fields = BASE
+
+
+class CategorySerializer(serializers.ModelSerializer):  # type: ignore[type-arg]
+    """Device category (edited in the administration)."""
+
+    class Meta:
+        model = DeviceCategory
+        fields = ["id", "key", "name", "glyph", "colour", "order", "builtin"]
+        read_only_fields = fields
+
+
+class RoomTypeSerializer(serializers.ModelSerializer):  # type: ignore[type-arg]
+    """Room type (edited in the administration)."""
+
+    class Meta:
+        model = RoomType
+        fields = ["id", "key", "name", "description", "order", "builtin"]
+        read_only_fields = fields
 
 
 class ConfigSerializer(serializers.ModelSerializer):  # type: ignore[type-arg]

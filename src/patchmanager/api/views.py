@@ -3,8 +3,9 @@
 from typing import Any, ClassVar
 
 from django.db.models import QuerySet
+from django.forms.models import model_to_dict
 from drf_spectacular.utils import OpenApiParameter, extend_schema
-from rest_framework import status, viewsets
+from rest_framework import exceptions, status, viewsets
 from rest_framework.decorators import action, api_view
 from rest_framework.request import Request
 from rest_framework.response import Response
@@ -15,17 +16,21 @@ from patchmanager.api import serializers as s
 from patchmanager.api.core import filtered, lookup, not_found, tenant_scope, visible
 from patchmanager.cabling import services as cabling
 from patchmanager.cabling.models import Cable
+from patchmanager.circuits.models import Circuit
+from patchmanager.compute.models import Cluster, StorageVolume, VirtualMachine
 from patchmanager.configs import services as configs
 from patchmanager.configs.models import DeviceConfig
+from patchmanager.core import crud
 from patchmanager.dcim import devices
 from patchmanager.dcim.models import Device, Port, Rack
+from patchmanager.directory.models import Organization, System
 from patchmanager.history import services as history
 from patchmanager.history.models import Change
 from patchmanager.ipam import services as ipam
-from patchmanager.ipam.models import VRF, IPAddress, Prefix
-from patchmanager.library.models import DeviceType, Vendor
+from patchmanager.ipam.models import VRF, DHCPScope, DNSZone, IPAddress, Prefix
+from patchmanager.library.models import DeviceCategory, DeviceType, Vendor
 from patchmanager.locations import services as tree
-from patchmanager.locations.models import Building, Floor, Room, Site
+from patchmanager.locations.models import Building, Floor, Room, RoomType, Site
 from patchmanager.networks import services as networks
 from patchmanager.networks.models import VLAN, WLAN
 from patchmanager.search import services as search_services
@@ -755,6 +760,182 @@ class IPAddressViewSet(Base):
         """Delete it."""
         ipam.delete_address(self.http, self.actor, self.get_object())
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+# ---------------------------------------------------------------- records with shared pages
+
+
+class Records(Base):
+    """Tenant records edited through the shared record pages (``core.crud``).
+
+    Writes are validated by the page's form, so references are limited to the record's
+    tenant and to what the caller may see, exactly as in the UI.
+    """
+
+    resource: ClassVar[str]  # key in crud.REGISTRY
+    path_field = "scope"
+
+    def base_queryset(self) -> QuerySet[Any]:
+        """Rows before permission scoping (tenant wide records)."""
+        return tenant_scope(super().base_queryset())
+
+    def _body(self) -> dict[str, Any]:
+        if not isinstance(self.request.data, dict):
+            raise exceptions.ValidationError({"detail": "Expected a JSON object."})
+        return self.request.data
+
+    def _form(self, tenant: Tenant, instance: Any = None) -> dict[str, Any]:
+        """Cleaned fields of the request body; stored values (or defaults) fill the gaps."""
+        resource = crud.REGISTRY[self.resource]
+        data = model_to_dict(instance or resource.model(), fields=resource.form._meta.fields)
+        data.update(self._body())
+        form = resource.form(data, instance=instance, tenant=tenant, actor=self.actor)
+        if not form.is_valid():
+            raise exceptions.ValidationError({k: list(v) for k, v in form.errors.items()})
+        return dict(form.cleaned_data)
+
+    def create(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+        """Create one through the record service (permissions, validation, audit apply)."""
+        tenant = lookup(request.user, Tenant, self._body().get("tenant"), None, "tenant")
+        record = crud.create(
+            self.http, self.actor, crud.REGISTRY[self.resource], tenant, **self._form(tenant)
+        )
+        return self.created(record)
+
+    def partial_update(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+        """Change the fields that are sent."""
+        record = self.get_object()
+        fields = self._form(record.tenant, record)
+        return self.updated(crud.update(self.http, self.actor, record, **fields))
+
+    def update(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+        """Same as PATCH: only the fields sent change."""
+        return self.partial_update(request, *args, **kwargs)
+
+    def destroy(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+        """Delete it with its photos and notes."""
+        crud.delete(self.http, self.actor, self.get_object())
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class CircuitViewSet(Records):
+    """Lines from providers."""
+
+    serializer_class = s.CircuitSerializer
+    model, object_type, resource = Circuit, "circuits.circuit", "circuits"
+    search = "circuit_id__icontains"
+    filters: ClassVar[dict[str, str]] = {
+        "tenant": "tenant_id",
+        "provider": "provider_id",
+        "site": "site_id",
+        "kind": "kind",
+        "status": "status",
+    }
+
+
+class ClusterViewSet(Records):
+    """Virtualisation clusters."""
+
+    serializer_class = s.ClusterSerializer
+    model, object_type, resource = Cluster, "compute.cluster", "clusters"
+    filters: ClassVar[dict[str, str]] = {"tenant": "tenant_id", "site": "site_id", "kind": "kind"}
+
+
+class VMViewSet(Records):
+    """Virtual machines."""
+
+    serializer_class = s.VMSerializer
+    model, object_type, resource = VirtualMachine, "compute.vm", "vms"
+    filters: ClassVar[dict[str, str]] = {
+        "tenant": "tenant_id",
+        "cluster": "cluster_id",
+        "host": "host_id",
+        "status": "status",
+    }
+
+
+class StorageViewSet(Records):
+    """Pools, volumes, LUNs, shares and datastores."""
+
+    serializer_class = s.StorageSerializer
+    model, object_type, resource = StorageVolume, "compute.storage", "storage"
+    filters: ClassVar[dict[str, str]] = {
+        "tenant": "tenant_id",
+        "device": "device_id",
+        "cluster": "cluster_id",
+        "kind": "kind",
+    }
+
+
+class OrganizationViewSet(Records):
+    """Customers, providers, vendors and other organisations."""
+
+    serializer_class = s.OrganizationSerializer
+    model, object_type, resource = Organization, "directory.organization", "organizations"
+    filters: ClassVar[dict[str, str]] = {"tenant": "tenant_id", "kind": "kind"}
+
+
+class SystemViewSet(Records):
+    """Systems with their customer, site and contact."""
+
+    serializer_class = s.SystemSerializer
+    model, object_type, resource = System, "directory.system", "systems"
+    filters: ClassVar[dict[str, str]] = {
+        "tenant": "tenant_id",
+        "customer": "customer_id",
+        "site": "site_id",
+        "kind": "kind",
+    }
+
+
+class DHCPScopeViewSet(Records):
+    """DHCP scopes."""
+
+    serializer_class = s.DHCPScopeSerializer
+    model, object_type, resource = DHCPScope, "ipam.dhcpscope", "dhcp"
+    filters: ClassVar[dict[str, str]] = {
+        "tenant": "tenant_id",
+        "prefix": "prefix_id",
+        "server": "server_id",
+    }
+
+
+class DNSZoneViewSet(Records):
+    """DNS zones."""
+
+    serializer_class = s.DNSZoneSerializer
+    model, object_type, resource = DNSZone, "ipam.dnszone", "dns"
+    filters: ClassVar[dict[str, str]] = {"tenant": "tenant_id", "server": "server_id"}
+
+
+class AdminLists(viewsets.ReadOnlyModelViewSet):  # type: ignore[type-arg]
+    """Instance wide lists edited in the administration (read only here)."""
+
+    model: ClassVar[Any]
+    object_type: ClassVar[str]
+
+    def get_queryset(self) -> QuerySet[Any]:
+        """All entries, as in the pages every member reads; API token limits apply."""
+        rows = _token_allows(
+            self.request.user,
+            f"{self.object_type}.view",
+            self.model.objects.order_by("order", "name"),
+        )
+        return filtered(rows, self.request.query_params, {"q": "name__icontains"})
+
+
+class CategoryViewSet(AdminLists):
+    """Device categories."""
+
+    serializer_class = s.CategorySerializer
+    model, object_type = DeviceCategory, "library.category"
+
+
+class RoomTypeViewSet(AdminLists):
+    """Room types."""
+
+    serializer_class = s.RoomTypeSerializer
+    model, object_type = RoomType, "locations.roomtype"
 
 
 class TenantViewSet(viewsets.ReadOnlyModelViewSet):  # type: ignore[type-arg]

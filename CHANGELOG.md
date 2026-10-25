@@ -64,6 +64,10 @@ All notable changes to this project are documented here. The format follows
   ArubaOS-Switch configuration.
 * Floor plan pins: floor devices are drawn as pins at their exact spot; a click shows
   the device with its room, photos, notes and the patch target of every port.
+* The API covers lines, organizations, systems, clusters, virtual machines, storage,
+  DHCP scopes and DNS zones (read and write, validated like the pages) and lists
+  device categories and room types. Token object type, tenant and location limits
+  apply as everywhere.
 
 ### Changed
 

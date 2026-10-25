@@ -3,6 +3,7 @@
 import pytest
 from django.test import Client
 
+from patchmanager.accounts import policy
 from patchmanager.accounts.models import Role
 from patchmanager.accounts.roles import SYSTEM_ROLES
 from patchmanager.accounts.services import PermissionDeniedError
@@ -58,17 +59,24 @@ def test_importers_need_the_import_right(no_import, make_type, super_admin) -> N
                 t["request"], user, device, common.Config(vendor="test"), commit=False
             )
         # The same user may still create and change these objects by hand.
-        assert dns_import.policy.has_perm(user, "ipam.dnszone.add", device)
+        assert policy.has_perm(user, "ipam.dnszone.add", device)
 
 
-def test_import_pages_need_the_import_right(client: Client, no_import, grant) -> None:
+def test_import_pages_need_the_import_right(
+    client: Client, no_import, grant, make_type, super_admin
+) -> None:
     t, user = no_import, no_import["user"]
     login(client, user)
     client.post("/tenants/switch/", {"tenant": t["tenant"].pk}, secure=True)
-    for url in ("/ipam/dns/import/", "/compute/import/"):
+    with rls.system_context():
+        device = devices.create(
+            t["request"], super_admin, device_type=make_type("Switch"), room=t["room"]
+        )
+    urls = ("/ipam/dns/import/", "/compute/import/", f"/devices/{device.pk}/network/read/")
+    for url in urls:
         assert client.get(url, secure=True).status_code == 403, url
     grant(user, "editor", t["tenant"])
-    for url in ("/ipam/dns/import/", "/compute/import/"):
+    for url in urls:
         assert client.get(url, secure=True).status_code == 200, url
 
 

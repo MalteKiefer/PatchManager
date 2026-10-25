@@ -22,6 +22,16 @@ for prefix, viewset in (
     ("vrfs", views.VRFViewSet),
     ("prefixes", views.PrefixViewSet),
     ("ip-addresses", views.IPAddressViewSet),
+    ("circuits", views.CircuitViewSet),
+    ("clusters", views.ClusterViewSet),
+    ("vms", views.VMViewSet),
+    ("storage", views.StorageViewSet),
+    ("organizations", views.OrganizationViewSet),
+    ("systems", views.SystemViewSet),
+    ("dhcp-scopes", views.DHCPScopeViewSet),
+    ("dns-zones", views.DNSZoneViewSet),
+    ("categories", views.CategoryViewSet),
+    ("room-types", views.RoomTypeViewSet),
     ("changes", views.ChangeViewSet),
 ):
     router.register(prefix, viewset, basename=prefix)
