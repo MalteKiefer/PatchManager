@@ -765,6 +765,8 @@ class TenantViewSet(viewsets.ReadOnlyModelViewSet):  # type: ignore[type-arg]
     def get_queryset(self) -> QuerySet[Tenant]:
         """Rows the caller may view, filtered by the query parameters."""
         rows = Tenant.objects.filter(archived_at__isnull=True)  # RLS: tenants with any grant
+        if getattr(self, "swagger_fake_view", False):  # schema generation has no caller
+            return rows
         # As on the tenants page: only those the caller may view (token limits included).
         seen = [t.pk for t in rows if policy.has_perm(self.request.user, "tenancy.tenant.view", t)]
         return rows.filter(pk__in=seen).order_by("name")
