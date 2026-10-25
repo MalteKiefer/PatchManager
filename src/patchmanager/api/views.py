@@ -1,6 +1,6 @@
 """REST API v1. Reads are scoped by the policy engine; writes call the domain services."""
 
-from typing import Any, ClassVar
+from typing import Any, ClassVar, cast
 
 from django.db.models import QuerySet
 from django.forms.models import model_to_dict
@@ -787,8 +787,13 @@ class Records(Base):
     def _form(self, tenant: Tenant, instance: Any = None) -> dict[str, Any]:
         """Cleaned fields of the request body; stored values (or defaults) fill the gaps."""
         resource = crud.REGISTRY[self.resource]
+        body = self._body()
+        known = cast(s.RecordSerializer, self.get_serializer()).fields
+        unknown = sorted(set(body) - set(known))
+        if unknown:  # a misspelt field must not look like a change that was applied
+            raise exceptions.ValidationError({key: ["Unknown field."] for key in unknown})
         data = model_to_dict(instance or resource.model(), fields=resource.form._meta.fields)
-        data.update(self._body())
+        data.update(body)
         form = resource.form(data, instance=instance, tenant=tenant, actor=self.actor)
         if not form.is_valid():
             raise exceptions.ValidationError({k: list(v) for k, v in form.errors.items()})

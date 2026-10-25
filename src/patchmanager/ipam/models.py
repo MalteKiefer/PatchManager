@@ -264,7 +264,13 @@ class DHCPScope(TenantScopedModel):
             raise ValidationError(_("Enter valid addresses.")) from exc
         if first not in network or last not in network or int(first) > int(last):
             raise ValidationError(_("The range must lie inside the prefix, first before last."))
-        if self.gateway and ipaddress.ip_address(str(self.gateway).split("/")[0]) not in network:
+        try:
+            gateway = (
+                ipaddress.ip_address(str(self.gateway).split("/")[0]) if self.gateway else None
+            )
+        except ValueError as exc:
+            raise ValidationError({"gateway": _("Enter valid addresses.")}) from exc
+        if gateway is not None and gateway not in network:
             raise ValidationError(_("The gateway must lie inside the prefix."))
         for name in ("dns_servers", "relays"):
             for item in filter(None, (s.strip() for s in getattr(self, name).split(","))):
