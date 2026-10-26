@@ -488,18 +488,21 @@ def _dhcp(
             "lease_seconds": pool.lease_seconds or 86400,
             "relays": ", ".join(relays.get(pool.network, []))[:200],
         }
+        change = None
         if scope is None:
             scope = DHCPScope(tenant_id=device.tenant_id, created_by=actor, name=name, **fields)
-            result.add(_("New DHCP scope %(name)s") % {"name": name})
+            change = _("New DHCP scope %(name)s") % {"name": name}
         elif any(str(getattr(scope, k) or "") != str(v or "") for k, v in fields.items()):
             for key, value in fields.items():
                 setattr(scope, key, value)
-            result.add(_("DHCP scope %(name)s changed") % {"name": name})
+            change = _("DHCP scope %(name)s changed") % {"name": name}
         try:
             scope.full_clean(exclude=["tenant"])
         except ValidationError as exc:
             result.skipped.append(f"{name}: {'; '.join(exc.messages)}")
             continue
+        if change:  # only once it validates: a skipped scope is not also a change
+            result.add(change)
         scope.save()
         audit.record(
             "ipam.dhcpscope.created" if created else "ipam.dhcpscope.changed",
