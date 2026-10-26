@@ -1,0 +1,24 @@
+{% extends "base.html" %}{% load i18n %}
+{% block title %}{% translate "Import a UniFi backup" %}{% endblock %}
+{% block content %}
+<h1 class="mb-2">{% translate "Import a UniFi backup" %}</h1>
+<p class="mb-5 max-w-3xl text-sm text-slate-500">{% blocktranslate with parts=parts|join:", " %}Reads a UniFi OS console backup and documents its {{ parts }}. Existing VLANs, IP networks, WLANs and devices are updated; nothing changes until you apply. Passwords, keys and firewall rules are not read, and the file is not stored.{% endblocktranslate %}</p>
+<div class="grid gap-6 lg:grid-cols-2">
+  <form method="post" enctype="multipart/form-data" class="card self-start" novalidate>{% csrf_token %}
+    {% include "core/_form.html" %}
+    <p class="mb-3 text-xs text-slate-500">{% translate "Download it in UniFi under Settings, Control Plane, Backups. New devices are placed in the room you choose; existing ones keep their place." %}</p>
+    <div class="flex flex-wrap gap-2">
+      <button class="btn-secondary" name="action" value="preview">{% translate "Show changes" %}</button>
+      {% if result %}<button class="btn-primary" name="action" value="apply">{% translate "Apply changes" %}</button>{% endif %}
+    </div>
+  </form>
+  {% if result %}
+  <section class="card" aria-labelledby="changes-h" aria-live="polite">
+    <h2 id="changes-h" class="mb-3">{% blocktranslate count n=result.changes|length %}{{ n }} change{% plural %}{{ n }} changes{% endblocktranslate %}</h2>
+    <ul class="space-y-1 text-sm">{% for c in result.changes %}<li>{{ c }}</li>{% empty %}<li class="text-slate-500">{% translate "The documentation already matches." %}</li>{% endfor %}</ul>
+    {% if result.skipped %}<h3 class="mt-5 mb-2 text-sm font-semibold">{% translate "Not taken over" %}</h3>
+    <ul class="space-y-1 text-sm text-amber-800 dark:text-amber-300">{% for s in result.skipped %}<li>{{ s }}</li>{% endfor %}</ul>{% endif %}
+  </section>
+  {% endif %}
+</div>
+{% endblock %}

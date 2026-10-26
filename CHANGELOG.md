@@ -8,6 +8,11 @@ All notable changes to this project are documented here. The format follows
 
 ### Added
 
+* UniFi OS backups can be imported: networks become VLANs, IP networks and DHCP
+  scopes with reservations, WLANs are documented without passphrase, gateways,
+  switches and access points with their port VLANs and management addresses, and
+  their uplinks become cables. Existing objects are matched and updated; a preview
+  shows every change first. Secrets are not read and the file is not stored.
 * The sidebar is grouped by task: locations, devices and cabling, network, servers
   and services. Devices, DHCP and DNS, storage and circuits have entries of their
   own; *Devices* is a new list of all devices, filterable by name and status.

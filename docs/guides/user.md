@@ -233,6 +233,26 @@ network port set the mode: *access* with one VLAN, or *trunk* with an optional
 native VLAN and tagged VLANs. A WLAN can bridge into a VLAN; add the wireless
 ports of access points that broadcast it.
 
+### UniFi
+
+*Import and export → Import a UniFi backup* reads a backup of a UniFi OS console
+(*Settings → Control Plane → Backups*, a `.unifi` file) and documents its networks
+as VLANs at the site of the chosen room with IP networks, gateway addresses and
+DHCP scopes (fixed client addresses become reservations), its WLANs with security
+mode and VLAN, its gateways, switches and access points with serial number, MAC
+address, management address and the VLANs of every switch port, and the cables
+between them from their uplinks. Devices whose model is not in the device library
+get a private device type *Ubiquiti <model>* with their ports; the vendor
+*Ubiquiti* has to exist in the library or be addable by you.
+
+Existing objects are matched and updated: VLANs by ID, IP networks by prefix, WLANs
+by SSID, devices by MAC address, serial number or name. New devices go to the room
+you choose. **Show changes** lists everything first; **Apply changes** saves it.
+Each part needs its import right, a part you may not import is left out. Passwords,
+keys, VPN settings and firewall rules are never read and the file is not stored.
+UniFi does not document the backup format; a newer console may write one this
+version cannot read.
+
 ## Your data
 
 *Profile → Download my data* gives you a JSON file with everything PatchManager

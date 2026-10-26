@@ -59,8 +59,13 @@ def apply(
     *,
     commit: bool,
     source: str = "",
+    merge: bool = False,
 ) -> Result:
-    """Make the documentation of ``device`` match ``config`` (or show what that would do)."""
+    """Make the documentation of ``device`` match ``config`` (or show what that would do).
+
+    With ``merge`` the configuration only adds and changes: settings it leaves empty and
+    lists it does not carry (routes, MST, BGP, profiles) stay as documented.
+    """
     require(actor, "dcim.device.change", device)
     require(actor, "dcim.device.import", device)  # reading a configuration is an import
     result = Result(skipped=[*config.warnings])
@@ -75,7 +80,7 @@ def apply(
         )
     try:
         with transaction.atomic():
-            _apply(request, actor, device, config, result, source)
+            _apply(request, actor, device, config, result, source, merge=merge)
             if not commit:
                 raise _Rollback
     except _Rollback:
@@ -96,6 +101,8 @@ def _apply(
     config: model.Config,
     result: Result,
     source: str,
+    *,
+    merge: bool = False,
 ) -> None:
     # Names are compared in their canonical form: Gi1/0/1 is GigabitEthernet1/0/1.
     ports = {model.canonical(p.name): p for p in Port.objects.filter(device=device)}
@@ -107,7 +114,7 @@ def _apply(
             ports[f"skip:{name}"] = None  # type: ignore[assignment]  # report once
         return found
 
-    _settings(device, config, result, source)
+    _settings(device, config, result, source, merge=merge)
     for trunk in config.trunks.values():
         lag = ports.get(model.canonical(trunk.name))
         if lag is not None and lag.kind != PortKind.LAG:  # documented as a plain port
@@ -138,7 +145,7 @@ def _apply(
     for item in config.interfaces.values():
         target = port(item.name)
         if target is not None:
-            _port_settings(target, item, result)
+            _port_settings(target, item, result, merge=merge)
     vlans = {
         vid: _vlan(request, actor, device, vid, v.name, result) for vid, v in config.vlans.items()
     }
@@ -150,11 +157,14 @@ def _apply(
         target = port(item.name) if item.addresses else None
         if target is not None:
             _addresses(request, actor, device, target, item.addresses, result)
-    _replace(device, config, result)
+    if not merge:
+        _replace(device, config, result)
     _dhcp(request, actor, device, config, result)
 
 
-def _settings(device: Device, config: model.Config, result: Result, source: str) -> None:
+def _settings(
+    device: Device, config: model.Config, result: Result, source: str, *, merge: bool = False
+) -> None:
     settings, _created = SwitchSettings.objects.get_or_create(
         device=device, defaults={"tenant_id": device.tenant_id}
     )
@@ -173,6 +183,8 @@ def _settings(device: Device, config: model.Config, result: Result, source: str)
         "dns_servers": config.dns_servers,
         "domain": config.domain,
     }
+    if merge:
+        wanted = {k: v for k, v in wanted.items() if v not in (None, "", [], False)}
     for name, value in wanted.items():
         current = getattr(settings, name)
         if (str(current) if current is not None else None) != (
@@ -189,14 +201,17 @@ def _settings(device: Device, config: model.Config, result: Result, source: str)
     settings.save()
 
 
-def _port_settings(target: Port, item: model.Interface, result: Result) -> None:
-    wanted: dict[str, Any] = {
-        "enabled": item.enabled,
-        "tunneled": item.tunneled,
-        "stp_edge": item.edge,
-        "stp_bpdu_guard": item.bpdu_guard,
-        "stp_root_guard": item.root_guard,
-    }
+def _port_settings(
+    target: Port, item: model.Interface, result: Result, *, merge: bool = False
+) -> None:
+    wanted: dict[str, Any] = {"enabled": item.enabled}
+    if not merge:  # a merge knows nothing about tunnels and spanning tree
+        wanted |= {
+            "tunneled": item.tunneled,
+            "stp_edge": item.edge,
+            "stp_bpdu_guard": item.bpdu_guard,
+            "stp_root_guard": item.root_guard,
+        }
     if item.label:
         wanted["label"] = item.label
     changed = [k for k, v in wanted.items() if getattr(target, k) != v]
