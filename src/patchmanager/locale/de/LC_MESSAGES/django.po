@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-26 11:01+0000\n"
+"POT-Creation-Date: 2026-10-26 11:30+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -415,6 +415,7 @@ msgstr "Der letzte Super-Admin kann nicht entfernt werden."
 #: history/services.py:97 instance/services.py:33 integrations/services.py:78
 #: ipam/dns_import.py:312 metadata/services.py:113 metadata/services.py:181
 #: networks/services.py:109 networks/services.py:139 networks/services.py:148
+#: networks/unifi_import.py:86 networks/unifi_import.py:89
 msgid "You do not have permission to do that."
 msgstr "Sie haben keine Berechtigung dafür."
 
@@ -680,7 +681,7 @@ msgstr "Keine gültige ID."
 msgid "Not a valid value."
 msgstr "Kein gültiger Wert."
 
-#: api/core.py:102 networks/switchconfig.py:540
+#: api/core.py:102 networks/switchconfig.py:555
 msgid "Not found."
 msgstr "Nicht gefunden."
 
@@ -1014,7 +1015,7 @@ msgid "Cable removed."
 msgstr "Kabel entfernt."
 
 #: cabling/views.py:152 core/crud.py:279 core/lists.py:207
-#: dcim/device_views.py:508 dcim/device_views.py:569 dcim/views.py:92
+#: dcim/device_views.py:506 dcim/device_views.py:567 dcim/views.py:92
 #: ipam/views.py:242 ipam/views.py:383 ipam/views.py:468 library/views.py:276
 #: locations/views.py:190 locations/views.py:293 networks/views.py:139
 #: networks/views.py:394
@@ -1131,7 +1132,7 @@ msgid "Kind"
 msgstr "Art"
 
 #: circuits/pages.py:71 compute/pages.py:124 directory/pages.py:126
-#: templates/exchange/index.html:15 templates/ipam/prefixes.html:8
+#: templates/exchange/index.html:16 templates/ipam/prefixes.html:8
 #: templates/networks/stacks.html:9 templates/networks/vlans.html:7
 msgid "Site"
 msgstr "Standort"
@@ -1923,7 +1924,7 @@ msgstr "Andere Einträge verwenden diesen noch."
 msgid "Created."
 msgstr "Erstellt."
 
-#: core/crud.py:275 core/lists.py:203 dcim/device_views.py:526 dcim/views.py:97
+#: core/crud.py:275 core/lists.py:203 dcim/device_views.py:524 dcim/views.py:97
 #: ipam/views.py:236 ipam/views.py:373 ipam/views.py:462 library/views.py:301
 #: locations/views.py:298 locations/views.py:423 networks/views.py:135
 msgid "Deleted."
@@ -2145,24 +2146,24 @@ msgstr "Gerät mit %(n)s Ports angelegt."
 msgid "New port on %(device)s"
 msgstr "Neuer Port an %(device)s"
 
-#: dcim/device_views.py:521
+#: dcim/device_views.py:519
 msgid "Device moved."
 msgstr "Gerät verschoben."
 
-#: dcim/device_views.py:583
+#: dcim/device_views.py:581
 msgid "VLANs saved."
 msgstr "VLANs gespeichert."
 
-#: dcim/device_views.py:708
+#: dcim/device_views.py:706
 #, python-format
 msgid "%(device)s placed in %(rack)s."
 msgstr "%(device)s in %(rack)s eingebaut."
 
-#: dcim/device_views.py:717 floorplans/views.py:50
+#: dcim/device_views.py:715 floorplans/views.py:50
 msgid "Upload a plan first."
 msgstr "Laden Sie zuerst einen Grundriss hoch."
 
-#: dcim/device_views.py:719
+#: dcim/device_views.py:717
 #, python-format
 msgid "%(device)s placed on the plan."
 msgstr "%(device)s im Grundriss platziert."
@@ -4983,52 +4984,52 @@ msgstr "eingefügter Text"
 msgid "Configuration read: %(n)s changes."
 msgstr "Konfiguration eingelesen: %(n)s Änderungen."
 
-#: networks/switchconfig.py:69
+#: networks/switchconfig.py:74
 #, python-format
 msgid "%(n)s lines with secrets were not read."
 msgstr "%(n)s Zeilen mit Geheimnissen wurden nicht gelesen."
 
-#: networks/switchconfig.py:73
+#: networks/switchconfig.py:78
 #, python-format
 msgid "%(n)s commands are not documented, for example: %(first)s"
 msgstr "%(n)s Befehle werden nicht dokumentiert, zum Beispiel: %(first)s"
 
-#: networks/switchconfig.py:106
+#: networks/switchconfig.py:113
 #, python-format
 msgid "Port %(port)s is not on this device."
 msgstr "Port %(port)s gibt es an diesem Gerät nicht."
 
-#: networks/switchconfig.py:115
+#: networks/switchconfig.py:122
 #, python-format
 msgid "%(port)s is documented as a port, not as a link aggregation."
 msgstr "%(port)s ist als Port dokumentiert, nicht als Link-Aggregation."
 
-#: networks/switchconfig.py:128
+#: networks/switchconfig.py:135
 #, python-format
 msgid "New link aggregation %(lag)s"
 msgstr "Neue Link-Aggregation %(lag)s"
 
-#: networks/switchconfig.py:137
+#: networks/switchconfig.py:144
 #, python-format
 msgid "%(port)s joins %(lag)s"
 msgstr "%(port)s tritt %(lag)s bei"
 
-#: networks/switchconfig.py:183
+#: networks/switchconfig.py:195
 #, python-format
 msgid "%(field)s: %(value)s"
 msgstr "%(field)s: %(value)s"
 
-#: networks/switchconfig.py:208
+#: networks/switchconfig.py:223
 #, python-format
 msgid "Port %(port)s: %(fields)s"
 msgstr "Port %(port)s: %(fields)s"
 
-#: networks/switchconfig.py:234
+#: networks/switchconfig.py:249 networks/unifi_import.py:167
 #, python-format
 msgid "New VLAN %(vid)s %(name)s at %(site)s"
 msgstr "Neues VLAN %(vid)s %(name)s an %(site)s"
 
-#: networks/switchconfig.py:240
+#: networks/switchconfig.py:255
 #, python-format
 msgid ""
 "VLAN %(vid)s is called %(doc)s here and %(cfg)s in the configuration; the "
@@ -5037,53 +5038,53 @@ msgstr ""
 "VLAN %(vid)s heißt hier %(doc)s und in der Konfiguration %(cfg)s; der Name "
 "bleibt."
 
-#: networks/switchconfig.py:282
+#: networks/switchconfig.py:297
 #, python-format
 msgid "Port %(port)s: untagged %(untagged)s, tagged %(tagged)s"
 msgstr "Port %(port)s: untagged %(untagged)s, tagged %(tagged)s"
 
-#: networks/switchconfig.py:311
+#: networks/switchconfig.py:326
 #, python-format
 msgid "New VLAN interface %(name)s"
 msgstr "Neues VLAN-Interface %(name)s"
 
-#: networks/switchconfig.py:342 networks/switchconfig.py:349
+#: networks/switchconfig.py:357 networks/switchconfig.py:364
 #, python-format
 msgid "Address %(address)s on %(name)s"
 msgstr "Adresse %(address)s auf %(name)s"
 
-#: networks/switchconfig.py:345
+#: networks/switchconfig.py:360
 #, python-format
 msgid "Address %(address)s is on a virtual machine."
 msgstr "Adresse %(address)s liegt auf einer virtuellen Maschine."
 
-#: networks/switchconfig.py:352
+#: networks/switchconfig.py:367
 #, python-format
 msgid "Address %(address)s is already on another port."
 msgstr "Die Adresse %(address)s liegt bereits auf einem anderen Port."
 
-#: networks/switchconfig.py:398
+#: networks/switchconfig.py:413
 msgid "MST instances"
 msgstr "MST-Instanzen"
 
-#: networks/switchconfig.py:402
+#: networks/switchconfig.py:417
 msgid "static routes"
 msgstr "statische Routen"
 
-#: networks/switchconfig.py:408
+#: networks/switchconfig.py:423
 msgid "BGP neighbors"
 msgstr "BGP-Nachbarn"
 
-#: networks/switchconfig.py:414
+#: networks/switchconfig.py:429
 msgid "device profiles"
 msgstr "Geräteprofile"
 
-#: networks/switchconfig.py:434
+#: networks/switchconfig.py:449
 #, python-format
 msgid "%(what)s: %(n)s"
 msgstr "%(what)s: %(n)s"
 
-#: networks/switchconfig.py:457
+#: networks/switchconfig.py:472
 #, python-format
 msgid ""
 "DHCP pool %(pool)s: the network %(network)s is not documented in IP networks."
@@ -5091,31 +5092,156 @@ msgstr ""
 "DHCP-Pool %(pool)s: Das Netz %(network)s ist unter IP-Netze nicht "
 "dokumentiert."
 
-#: networks/switchconfig.py:465
+#: networks/switchconfig.py:480
 #, python-format
 msgid "DHCP pool %(pool)s: a scope of that name belongs to another server."
 msgstr ""
 "DHCP-Pool %(pool)s: Ein Bereich dieses Namens gehört zu einem anderen Server."
 
-#: networks/switchconfig.py:476
+#: networks/switchconfig.py:491
 #, python-format
 msgid "DHCP pool %(pool)s: you may not document DHCP scopes."
 msgstr "DHCP-Pool %(pool)s: Sie dürfen keine DHCP-Bereiche dokumentieren."
 
-#: networks/switchconfig.py:494
+#: networks/switchconfig.py:509
 #, python-format
 msgid "New DHCP scope %(name)s"
 msgstr "Neuer DHCP-Bereich %(name)s"
 
-#: networks/switchconfig.py:498
+#: networks/switchconfig.py:513
 #, python-format
 msgid "DHCP scope %(name)s changed"
 msgstr "DHCP-Bereich %(name)s geändert"
 
-#: networks/switchconfig.py:534
+#: networks/switchconfig.py:549
 #, python-format
 msgid "Reservations of %(name)s: %(n)s"
 msgstr "Reservierungen von %(name)s: %(n)s"
+
+#: networks/unifi.py:137 networks/unifi_import.py:466
+msgid "The backup is larger than 64 MB."
+msgstr "Das Backup ist größer als 64 MB."
+
+#: networks/unifi.py:139
+msgid "This is not a UniFi OS backup."
+msgstr "Dies ist kein UniFi-OS-Backup."
+
+#: networks/unifi.py:145
+msgid "This is not a UniFi OS backup, or it uses an unknown encryption."
+msgstr "Dies ist kein UniFi-OS-Backup, oder es ist unbekannt verschlüsselt."
+
+#: networks/unifi.py:155
+msgid "The backup holds no UniFi Network database."
+msgstr "Das Backup enthält keine UniFi-Network-Datenbank."
+
+#: networks/unifi.py:158 networks/unifi.py:167
+msgid "The backup archive is damaged."
+msgstr "Das Backup-Archiv ist beschädigt."
+
+#: networks/unifi.py:169 networks/unifi_import.py:473
+msgid "The backup is too large to read."
+msgstr "Das Backup ist zu groß zum Lesen."
+
+#: networks/unifi.py:183 networks/unifi.py:195 networks/unifi.py:241
+msgid "The UniFi Network database is damaged."
+msgstr "Die UniFi-Network-Datenbank ist beschädigt."
+
+#: networks/unifi.py:192
+msgid "The backup holds too many entries."
+msgstr "Das Backup enthält zu viele Einträge."
+
+#: networks/unifi_import.py:57
+msgid "networks"
+msgstr "Netze"
+
+#: networks/unifi_import.py:58 search/services.py:93
+msgid "WLANs"
+msgstr "WLANs"
+
+#: networks/unifi_import.py:59
+msgid "devices"
+msgstr "Geräte"
+
+#: networks/unifi_import.py:60
+msgid "cables"
+msgstr "Kabel"
+
+#: networks/unifi_import.py:93
+#, python-format
+msgid "You may not import %(part)s."
+msgstr "Sie dürfen keine %(part)s importieren."
+
+#: networks/unifi_import.py:190
+#, python-format
+msgid "New IP network %(prefix)s"
+msgstr "Neues IP-Netz %(prefix)s"
+
+#: networks/unifi_import.py:198
+#, python-format
+msgid "IP network %(prefix)s changed"
+msgstr "IP-Netz %(prefix)s geändert"
+
+#: networks/unifi_import.py:209
+#, python-format
+msgid "New WLAN %(ssid)s"
+msgstr "Neues WLAN %(ssid)s"
+
+#: networks/unifi_import.py:214
+#, python-format
+msgid "WLAN %(ssid)s changed"
+msgstr "WLAN %(ssid)s geändert"
+
+#: networks/unifi_import.py:247
+#, python-format
+msgid ""
+"%(vendor)s is not in the device library yet; an administrator can add it."
+msgstr "%(vendor)s steht noch nicht in der Gerätebibliothek; eine Administratorin oder ein Administrator kann den Hersteller anlegen."
+
+#: networks/unifi_import.py:269
+#, python-format
+msgid "New device type %(type)s"
+msgstr "Neuer Gerätetyp %(type)s"
+
+#: networks/unifi_import.py:284
+#, python-format
+msgid "New device %(name)s"
+msgstr "Neues Gerät %(name)s"
+
+#: networks/unifi_import.py:291
+#, python-format
+msgid "Device %(name)s changed"
+msgstr "Gerät %(name)s geändert"
+
+#: networks/unifi_import.py:406 networks/unifi_import.py:411
+#, python-format
+msgid "%(cable)s: a port already has another cable."
+msgstr "%(cable)s: Ein Port hat bereits ein anderes Kabel."
+
+#: networks/unifi_import.py:420
+#, python-format
+msgid "New cable %(cable)s"
+msgstr "Neues Kabel %(cable)s"
+
+#: networks/unifi_import.py:451
+msgid "UniFi OS backup (.unifi)"
+msgstr "UniFi-OS-Backup (.unifi)"
+
+#: networks/unifi_import.py:453
+msgid "Room for new devices"
+msgstr "Raum für neue Geräte"
+
+#: networks/unifi_import.py:525
+msgid "Read the backup again."
+msgstr "Lesen Sie das Backup erneut ein."
+
+#: networks/unifi_import.py:529
+#, python-format
+msgid "UniFi backup imported: %(n)s changes."
+msgstr "UniFi-Backup importiert: %(n)s Änderungen."
+
+#: networks/unifi_import.py:536
+msgid "Choose a UniFi OS backup."
+msgstr "Wählen Sie ein UniFi-OS-Backup."
 
 #: networks/views.py:45
 msgid "All sites of the tenant"
@@ -5182,10 +5308,6 @@ msgstr "Neues SCIM-Token"
 #: templates/locations/index.html:15
 msgid "Sites"
 msgstr "Standorte"
-
-#: search/services.py:93
-msgid "WLANs"
-msgstr "WLANs"
 
 #: search/views.py:20
 msgid "Notes"
@@ -6955,43 +7077,54 @@ msgstr ""
 msgid "Check file"
 msgstr "Datei prüfen"
 
-#: templates/exchange/index.html:13
+#: templates/exchange/index.html:11 templates/networks/unifi_import.html:2
+#: templates/networks/unifi_import.html:4
+msgid "Import a UniFi backup"
+msgstr "UniFi-Backup importieren"
+
+#: templates/exchange/index.html:11
+msgid ""
+"networks, WLANs, devices with their port VLANs and cables from a UniFi OS "
+"console."
+msgstr "Netze, WLANs, Geräte mit ihren Port-VLANs und Kabel aus einer UniFi-OS-Konsole."
+
+#: templates/exchange/index.html:14
 msgid "Export"
 msgstr "Export"
 
-#: templates/exchange/index.html:16
+#: templates/exchange/index.html:17
 msgid "All sites"
 msgstr "Alle Standorte"
 
-#: templates/exchange/index.html:17
+#: templates/exchange/index.html:18
 msgid "Apply"
 msgstr "Übernehmen"
 
-#: templates/exchange/index.html:25
+#: templates/exchange/index.html:26
 msgid "Template"
 msgstr "Vorlage"
 
-#: templates/exchange/index.html:27
+#: templates/exchange/index.html:28
 msgid "PDF reports per site"
 msgstr "PDF Berichte pro Standort"
 
-#: templates/exchange/index.html:29
+#: templates/exchange/index.html:30
 msgid "Site report"
 msgstr "Standortbericht"
 
-#: templates/exchange/index.html:30
+#: templates/exchange/index.html:31
 msgid "Patch list"
 msgstr "Patchliste"
 
-#: templates/exchange/index.html:31
+#: templates/exchange/index.html:32
 msgid "Bill of materials"
 msgstr "Stückliste"
 
-#: templates/exchange/index.html:32
+#: templates/exchange/index.html:33
 msgid "No sites."
 msgstr "Keine Standorte."
 
-#: templates/exchange/index.html:33
+#: templates/exchange/index.html:34
 msgid "Rack elevations and port lists are on the rack and device pages."
 msgstr "Rackansichten und Portlisten finden Sie auf den Rack und Geräteseiten."
 
@@ -8582,10 +8715,12 @@ msgstr ""
 "Sie sehen die Änderungen, bevor etwas gespeichert wird."
 
 #: templates/networks/switch_read.html:11
+#: templates/networks/unifi_import.html:11
 msgid "Show changes"
 msgstr "Änderungen anzeigen"
 
 #: templates/networks/switch_read.html:12
+#: templates/networks/unifi_import.html:12
 msgid "Apply changes"
 msgstr "Änderungen übernehmen"
 
@@ -8595,6 +8730,7 @@ msgid "Read as %(name)s"
 msgstr "Gelesen als %(name)s"
 
 #: templates/networks/switch_read.html:19
+#: templates/networks/unifi_import.html:17
 #, python-format
 msgid "%(n)s change"
 msgid_plural "%(n)s changes"
@@ -8602,10 +8738,12 @@ msgstr[0] "%(n)s Änderung"
 msgstr[1] "%(n)s Änderungen"
 
 #: templates/networks/switch_read.html:20
+#: templates/networks/unifi_import.html:18
 msgid "The documentation already matches."
 msgstr "Die Dokumentation stimmt bereits überein."
 
 #: templates/networks/switch_read.html:21
+#: templates/networks/unifi_import.html:19
 msgid "Not taken over"
 msgstr "Nicht übernommen"
 
@@ -8765,6 +8903,20 @@ msgstr "für"
 #: templates/networks/switching.html:89
 msgid "untagged"
 msgstr "untagged"
+
+#: templates/networks/unifi_import.html:5
+#, python-format
+msgid ""
+"Reads a UniFi OS console backup and documents its %(parts)s. Existing VLANs, "
+"IP networks, WLANs and devices are updated; nothing changes until you apply. "
+"Passwords, keys and firewall rules are not read, and the file is not stored."
+msgstr "Liest das Backup einer UniFi-OS-Konsole und dokumentiert seine %(parts)s. Bestehende VLANs, IP-Netze, WLANs und Geräte werden aktualisiert; nichts ändert sich, bevor Sie übernehmen. Passwörter, Schlüssel und Firewall-Regeln werden nicht gelesen, und die Datei wird nicht gespeichert."
+
+#: templates/networks/unifi_import.html:9
+msgid ""
+"Download it in UniFi under Settings, Control Plane, Backups. New devices are "
+"placed in the room you choose; existing ones keep their place."
+msgstr "Sie laden es in UniFi unter Einstellungen, Control Plane, Backups herunter. Neue Geräte kommen in den gewählten Raum; bestehende behalten ihren Platz."
 
 #: templates/networks/vlan.html:9
 msgid "Access and native ports"

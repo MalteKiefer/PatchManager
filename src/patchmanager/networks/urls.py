@@ -1,10 +1,11 @@
 from django.urls import path
 
-from patchmanager.networks import views
+from patchmanager.networks import unifi_import, views
 
 app_name = "networks"
 
 urlpatterns = [
+    path("unifi/import/", unifi_import.import_view, name="unifi-import"),
     path("vlans/", views.vlan_list, name="vlans"),
     path("vlans/new/", views.vlan_create, name="vlan-create"),
     path("vlans/<uuid:pk>/", views.vlan_detail, name="vlan"),
