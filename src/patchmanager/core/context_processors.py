@@ -10,9 +10,10 @@ from django.utils.functional import SimpleLazyObject
 SECTIONS = {
     "locations": "locations",
     "dcim": "locations",
-    "devices": "locations",
-    "configs": "locations",
     "floorplans": "locations",
+    "devices": "devices",
+    "configs": "devices",
+    "switching": "devices",
     "library": "library",
     "cabling": "cables",
     "networks": "networks",
@@ -34,13 +35,15 @@ def _section(request: HttpRequest) -> str:
     """The navigation entry of the current page."""
     match = request.resolver_match
     namespace = getattr(match, "namespace", "") or ""
-    if namespace == "objects":  # shared record pages: DHCP and DNS belong to IP networks
+    if namespace == "objects":  # shared record pages
         from patchmanager.core.crud import REGISTRY
 
-        resource = REGISTRY.get(match.kwargs.get("key", "")) if match else None
-        if resource is not None and resource.group == "compute":
-            return "compute"
-        return "ipam" if resource is not None and resource.group == "services" else "directory"
+        key = match.kwargs.get("key", "") if match else ""
+        if key in ("storage", "circuits"):  # entries of their own in the sidebar
+            return key
+        resource = REGISTRY.get(key)
+        group = resource.group if resource is not None else ""
+        return {"compute": "compute", "services": "services"}.get(group, "directory")
     return SECTIONS.get(namespace, "")
 
 

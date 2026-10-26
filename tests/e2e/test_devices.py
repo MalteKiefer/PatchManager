@@ -7,6 +7,7 @@ import pytest
 from PIL import Image
 from playwright.sync_api import Page, expect
 
+from tests.e2e.test_accessibility import _axe
 from tests.e2e.test_locations import _sign_in
 
 pytestmark = [pytest.mark.e2e, pytest.mark.django_db(transaction=False)]
@@ -40,7 +41,11 @@ def test_type_to_mounted_device_with_photo(
     page.get_by_label("Lowest unit").fill("4")
     page.get_by_role("button", name="Create").click()
     expect(page.get_by_role("heading", name=re.compile("edge-01"))).to_be_visible()
+    assert _axe(page) == []
+    page.get_by_role("link", name=re.compile("^Ports")).click()
     expect(page.get_by_role("link", name="port8")).to_be_visible()
+    assert _axe(page) == []
+    page.get_by_role("link", name="Notes and files").click()
 
     photo = tmp_path / "front.png"
     buffer = io.BytesIO()

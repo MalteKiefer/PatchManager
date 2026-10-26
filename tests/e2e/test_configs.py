@@ -24,7 +24,7 @@ def test_store_view_and_compare(page: Page, live_server, super_admin) -> None:
         services.add(request, super_admin, device, "hostname sw-0001\nntp server 10.0.0.1\n")
     _sign_in(page, live_server, super_admin)
     page.goto(f"{live_server.url}/devices/{device.pk}/")
-    page.get_by_role("link", name="Versions").click()
+    page.get_by_role("link", name="Configuration").click()
     page.get_by_role("link", name="New version").click()
     page.get_by_label("Configuration").fill("hostname sw-0001\nntp server 10.0.0.2\n")
     page.get_by_role("button", name="Store").click()

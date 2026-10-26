@@ -135,7 +135,7 @@ def test_pages(admin_client, net, system) -> None:
     assert "10.0.5.1/24" in admin_client.get(done.url, secure=True).content.decode()
     assert (
         "10.0.5.1"
-        in admin_client.get(f"/devices/{net['device'].pk}/", secure=True).content.decode()
+        in admin_client.get(f"/devices/{net['device'].pk}/ports/", secure=True).content.decode()
     )
     assert "Add 10.0.5.2/24" in admin_client.get(created.url, secure=True).content.decode()
     with system():

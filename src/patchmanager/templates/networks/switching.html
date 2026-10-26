@@ -1,10 +1,9 @@
-{% extends "base.html" %}{% load i18n %}
+{% extends "base.html" %}{% load i18n pm %}
 {% block title %}{% translate "Switching and routing" %} · {{ device.name }}{% endblock %}
 {% block main_class %}mx-auto max-w-[96rem] px-4 py-6{% endblock %}
 {% block content %}
-{% include "core/_breadcrumbs.html" with current=_("Switching and routing") %}
-<div class="mb-6 flex flex-wrap items-center gap-3">
-  <h1 class="mr-auto">{% translate "Switching and routing" %} · {{ device.name }}</h1>
+{% device_header device "switching" %}
+<div class="mb-6 flex flex-wrap items-center justify-end gap-3">
   {% if can_change %}<a class="btn-primary" href="{% url 'switching:read' device.pk %}">{% translate "Read a configuration" %}</a>{% endif %}
   <a class="btn-secondary" href="{% url 'switching:export' device.pk %}">{% translate "As ArubaOS-Switch configuration" %}</a>
 </div>

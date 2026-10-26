@@ -1,10 +1,9 @@
-{% extends "base.html" %}{% load i18n %}
+{% extends "base.html" %}{% load i18n pm %}
 {% block title %}{% blocktranslate with d=device.name %}Configuration of {{ d }}{% endblocktranslate %}{% endblock %}
 {% block content %}
-{% include "core/_breadcrumbs.html" with current=_("Configuration") %}
-<div class="mb-2 flex flex-wrap items-center gap-3"><h1 class="mr-auto">{% blocktranslate with d=device.name %}Configuration of {{ d }}{% endblocktranslate %}</h1>
+{% device_header device "configs" %}
+<div class="mb-5 flex flex-wrap items-start gap-3"><p class="mr-auto max-w-3xl text-sm text-slate-500">{% translate "Configurations are stored encrypted; each version is kept and every view is recorded in the audit log. Backup tools can store versions through the API." %}</p>
   {% if can_add %}<a class="btn-primary" href="{% url 'configs:create' device.pk %}">{% translate "New version" %}</a>{% endif %}</div>
-<p class="mb-5 max-w-3xl text-sm text-slate-500">{% translate "Configurations are stored encrypted; each version is kept and every view is recorded in the audit log. Backup tools can store versions through the API." %}</p>
 {% if versions %}
 <form method="get" action="{% url 'configs:diff' device.pk %}" class="card overflow-x-auto p-0">
   <table class="table">

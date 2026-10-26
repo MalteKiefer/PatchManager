@@ -1,0 +1,4 @@
+{% load i18n %}{% if neighbours %}<ul class="space-y-1 text-sm">{% for port, far in neighbours %}<li><span class="font-mono text-xs">{{ port.name }}</span> →
+  {% if far == "hidden" %}{% translate "(not visible to you)" %}{% elif far %}<a href="{% url 'devices:device' far.device_id %}">{{ far.device }}</a> · <span class="font-mono text-xs">{{ far.name }}</span>{% else %}{% translate "open end" %}{% endif %}
+  · <a href="{% url 'cabling:trace' port.pk %}">{% translate "trace" %}</a></li>{% endfor %}</ul>
+{% else %}<p class="text-sm text-slate-500">{% translate "No cabled ports." %}</p>{% endif %}

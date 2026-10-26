@@ -8,7 +8,7 @@ from django import forms
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
-from django.db.models import Prefetch
+from django.db.models import Prefetch, Q
 from django.http import Http404, HttpRequest, HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
@@ -365,13 +365,124 @@ def port_create(request: HttpRequest, pk: str) -> HttpResponse:
     )
 
 
+def _details(actor: Any, device: Device) -> list[tuple[Any, Any]]:
+    """Filled attributes for the overview; name and status are in the heading."""
+    from patchmanager.directory.models import Organization
+    from patchmanager.directory.pages import visible
+
+    rows = []
+    for name in DEVICE_FIELDS[2:]:
+        field: Any = Device._meta.get_field(name)
+        value = getattr(device, name)
+        if name == "supplier" and value is not None:
+            supplier = visible(actor, Organization.objects.filter(pk=value.pk))
+            value = value if supplier.exists() else None  # a supplier the user may not see
+        if value not in (None, ""):
+            rows.append((field.verbose_name, value))
+    return rows
+
+
+def _ports(actor: Any, device: Device) -> Any:
+    addresses = policy.scope_queryset(actor, "ipam.ipaddress.view", IPAddress.objects.all())
+    return device.ports.select_related(
+        "rear_port", "untagged_vlan", "cable_end__cable"
+    ).prefetch_related(Prefetch("ip_addresses", queryset=addresses))
+
+
+@login_required
+def device_list(request: HttpRequest) -> HttpResponse:
+    """Devices of the current tenant that the user may see, filterable by name and status."""
+    tenant = getattr(request, "tenant", None)
+    rows = policy.scope_queryset(
+        request.user, "dcim.device.view", Device.objects.filter(tenant=tenant)
+    ).select_related("device_type__vendor", "room", "rack")
+    query = request.GET.get("q", "").strip()
+    if query:
+        rows = rows.filter(
+            Q(name__icontains=query) | Q(serial__icontains=query) | Q(asset_tag__icontains=query)
+        )
+    if request.GET.get("status"):
+        rows = rows.filter(status=request.GET["status"])
+    return render(
+        request,
+        "dcim/devices.html",
+        {
+            "devices": rows.order_by("name")[:500],
+            "filters": request.GET,
+            "statuses": Device.Status.choices,
+        },
+    )
+
+
+@login_required
+def device_detail(request: HttpRequest, pk: str) -> HttpResponse:
+    """Overview of a device: what needs attention, its connections and attributes."""
+    device = _device(request, pk)
+    actor = _actor(request)
+    linked = neighbours(actor, device)
+    ports = list(device.ports.only("pk", "enabled"))
+    return render(
+        request,
+        "dcim/device.html",
+        {
+            "device": device,
+            "neighbours": linked[:8],
+            "connection_count": len(linked),
+            "open_ends": sum(1 for _port, far in linked if far is None),
+            "port_count": len(ports),
+            "disabled": sum(1 for p in ports if not p.enabled),
+            "details": _details(actor, device),
+            **_compute(actor, device),
+            "config": policy.scope_queryset(
+                actor, "configs.config.view", device.configs.order_by("-version")
+            ).first(),
+        },
+    )
+
+
+@login_required
+def device_ports(request: HttpRequest, pk: str) -> HttpResponse:
+    """All ports of a device with VLAN, addresses and cable."""
+    device = _device(request, pk)
+    actor = _actor(request)
+    return render(
+        request,
+        "dcim/device_ports.html",
+        {
+            "device": device,
+            "ports": _ports(actor, device),
+            "can_change": policy.has_perm(actor, "dcim.device.change", device),
+        },
+    )
+
+
+@login_required
+def device_connections(request: HttpRequest, pk: str) -> HttpResponse:
+    """Where each cabled port of a device leads."""
+    device = _device(request, pk)
+    return render(
+        request,
+        "dcim/device_connections.html",
+        {"device": device, "neighbours": neighbours(_actor(request), device)},
+    )
+
+
+@login_required
+def device_notes(request: HttpRequest, pk: str) -> HttpResponse:
+    """Photos, files, notes and linked systems of a device."""
+    return render(request, "dcim/device_notes.html", {"device": _device(request, pk)})
+
+
 @login_required
 @require_http_methods(["GET", "POST"])
-def device_detail(request: HttpRequest, pk: str) -> HttpResponse:
-    """Device attributes, placement, ports, photos and notes."""
+def device_edit(request: HttpRequest, pk: str) -> HttpResponse:
+    """Change the attributes or the placement of a device, or delete it."""
     device = _device(request, pk)
     actor = _actor(request)
     can_change = policy.has_perm(actor, "dcim.device.change", device)
+    can_delete = policy.has_perm(actor, "dcim.device.delete", device)
+    if not (can_change or can_delete):
+        raise PermissionDenied
     action = request.POST.get("action")
     space = RackSpace.objects.filter(device=device).first()
     form = DeviceForm(request.POST if action == "edit" else None, instance=device)
@@ -414,33 +525,16 @@ def device_detail(request: HttpRequest, pk: str) -> HttpResponse:
                 return redirect(node_url(parent))
         except ServiceError as exc:
             messages.error(request, str(exc))
-            return redirect(device_url(device))
+            return redirect(reverse("devices:device-edit", args=[device.pk]))
     return render(
         request,
-        "dcim/device.html",
+        "dcim/device_edit.html",
         {
             "device": device,
-            "space": space,
             "form": form,
             "place_form": place_form,
-            "ports": device.ports.select_related(
-                "rear_port", "untagged_vlan", "cable_end__cable"
-            ).prefetch_related(
-                Prefetch(
-                    "ip_addresses",
-                    queryset=policy.scope_queryset(
-                        actor, "ipam.ipaddress.view", IPAddress.objects.all()
-                    ),
-                )
-            ),
-            "neighbours": neighbours(actor, device),
-            **_compute(actor, device),
-            "configs": policy.scope_queryset(
-                actor, "configs.config.view", device.configs.order_by("-version")
-            )[:1],
             "can_change": can_change,
-            "can_delete": policy.has_perm(actor, "dcim.device.delete", device),
-            "breadcrumbs": [(a, node_url(a)) for a in device.ancestors()],
+            "can_delete": can_delete,
         },
     )
 

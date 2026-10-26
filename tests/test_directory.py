@@ -361,5 +361,10 @@ def test_device_supplier_choices_are_visible_only(
         return real(user, permission, obj, **kwargs)
 
     monkeypatch.setattr(policy, "has_perm", hide)
-    page = admin_client.get(f"/devices/{device.pk}/", secure=True).content.decode()
+    page = admin_client.get(f"/devices/{device.pk}/edit/", secure=True).content.decode()
     assert "Seen Supplier" in page and "Hidden Supplier" not in page
+    with system():
+        device.supplier = Organization.objects.get(name="Hidden Supplier")
+        device.save()
+    overview = admin_client.get(f"/devices/{device.pk}/", secure=True).content.decode()
+    assert "Hidden Supplier" not in overview

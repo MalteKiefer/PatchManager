@@ -1,0 +1,18 @@
+{% load i18n %}{% include "core/_breadcrumbs.html" with current=device.name %}
+<div class="mb-4 flex flex-wrap items-start gap-3">
+  <div class="mr-auto min-w-0">
+    <h1>{{ device.name }} <span class="badge-muted align-middle">{{ device.get_status_display }}</span></h1>
+    <p class="mt-1 text-sm text-slate-500"><a class="underline" href="{% url 'library:type' device.device_type.pk %}">{{ device.device_type }}</a>{% if space %} · {{ device.rack.name }} · U{{ space.start }}{% if space.size > 1 %}–{{ space.end }}{% endif %} · {{ space.get_face_display }}{% elif device.room %} · {{ device.room }}{% endif %}</p>
+  </div>
+  <a class="btn-secondary" href="{% url 'exchange:report' 'ports' device.pk %}">{% translate "Port list (PDF)" %}</a>
+  {% if can_change %}<a class="btn-secondary" href="{% url 'devices:device-edit' device.pk %}" {% if tab == "edit" %}aria-current="page"{% endif %}>{% translate "Edit" %}</a>{% endif %}
+</div>
+<nav class="tabs mb-6" aria-label="{% translate 'Device' %}">
+  <a href="{% url 'devices:device' device.pk %}" {% if tab == "overview" %}aria-current="page"{% endif %}>{% translate "Overview" %}</a>
+  <a href="{% url 'devices:device-ports' device.pk %}" {% if tab == "ports" %}aria-current="page"{% endif %}>{% translate "Ports" %}<span class="count">{{ port_count }}</span></a>
+  <a href="{% url 'devices:device-connections' device.pk %}" {% if tab == "connections" %}aria-current="page"{% endif %}>{% translate "Connections" %}</a>
+  <a href="{% url 'switching:overview' device.pk %}" {% if tab == "switching" %}aria-current="page"{% endif %}>{% translate "Switching and routing" %}</a>
+  <a href="{% url 'configs:list' device.pk %}" {% if tab == "configs" %}aria-current="page"{% endif %}>{% translate "Configuration" %}</a>
+  <a href="{% url 'devices:device-notes' device.pk %}" {% if tab == "notes" %}aria-current="page"{% endif %}>{% translate "Notes and files" %}</a>
+  {% if history %}<a href="{{ history }}">{% translate "History" %}</a>{% endif %}
+</nav>

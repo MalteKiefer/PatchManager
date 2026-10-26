@@ -1,0 +1,6 @@
+{% extends "base.html" %}{% load i18n pm %}
+{% block title %}{% translate "Connections" %} · {{ device.name }}{% endblock %}
+{% block content %}
+{% device_header device "connections" %}
+<section class="card" aria-label="{% translate 'Connections' %}">{% include "dcim/_connections.html" %}</section>
+{% endblock %}

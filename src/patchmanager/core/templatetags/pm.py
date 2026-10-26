@@ -74,3 +74,23 @@ def metadata_panel(context: Any, target: Any) -> dict[str, Any]:
         "note_form": NoteForm(),
         "csrf_token": context.get("csrf_token"),
     }
+
+
+@register.inclusion_tag("dcim/_device_header.html", takes_context=True)
+def device_header(context: Any, device: Any, tab: str) -> dict[str, Any]:
+    """Name, placement and tabs shared by every page of a device."""
+    from patchmanager.accounts import policy
+    from patchmanager.dcim.models import RackSpace
+
+    request = context["request"]
+    return {
+        "request": request,
+        "current_tenant": context.get("current_tenant"),
+        "device": device,
+        "tab": tab,
+        "space": RackSpace.objects.filter(device=device).first(),
+        "port_count": device.ports.count(),
+        "can_change": policy.has_perm(request.user, "dcim.device.change", device),
+        "breadcrumbs": [(a, node_url(a)) for a in device.ancestors()],
+        "history": history_url(device),
+    }

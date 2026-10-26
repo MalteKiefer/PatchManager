@@ -327,7 +327,7 @@ def test_cabling_views(admin_client: Client, kit, system) -> None:
     assert "incomplete" in trace_page and "pp" in trace_page
     port_page = admin_client.get(f"/devices/ports/{source.pk}/", secure=True).content.decode()
     assert "Connected to" in port_page
-    device_page = admin_client.get(f"/devices/{sw.pk}/", secure=True).content.decode()
+    device_page = admin_client.get(f"/devices/{sw.pk}/ports/", secure=True).content.decode()
     assert "P-1" in device_page
     admin_client.post(f"/cabling/disconnect/{source.pk}/", secure=True)
     with system():

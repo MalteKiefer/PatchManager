@@ -8,6 +8,13 @@ All notable changes to this project are documented here. The format follows
 
 ### Added
 
+* The sidebar is grouped by task: locations, devices and cabling, network, servers
+  and services. Devices, DHCP and DNS, storage and circuits have entries of their
+  own; *Devices* is a new list of all devices, filterable by name and status.
+* Device pages are split into tabs with their own address: overview, ports,
+  connections, switching and routing, configuration, notes and files. The overview
+  shows key figures, ports leading to an open end and the documented details;
+  editing, moving and deleting a device are on their own page.
 * The rack PDF shows the elevation like the rack page: front and rear with every
   device, every port with its connection state and the cables in the rack, followed
   by the units and a list of connections.
