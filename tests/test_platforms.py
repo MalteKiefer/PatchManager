@@ -175,6 +175,28 @@ def test_apply_cisco_with_dhcp_dns_and_routed_port(
         assert again.changes == []
 
 
+def test_apply_reports_a_rejected_dhcp_scope_only_as_skipped(
+    make_tree, make_type, super_admin, system
+) -> None:
+    from patchmanager.dcim import devices
+    from patchmanager.ipam.models import Prefix
+
+    tree = make_tree()
+    with system():
+        device = devices.create(
+            tree["request"], super_admin, device_type=make_type("C9300"), room=tree["room"]
+        )
+        Prefix.objects.create(tenant=tree["tenant"], prefix="10.10.0.0/24")
+        text = _read("cisco_ios.txt").replace(
+            "default-router 10.10.0.1", "default-router 10.99.0.1"
+        )
+        result = switchconfig.apply(
+            tree["request"], super_admin, device, platforms.parse(text), commit=False
+        )
+    assert not any("DHCP scope" in change for change in result.changes)
+    assert any(item.startswith("USERS:") for item in result.skipped)
+
+
 def test_arubacx() -> None:
     text = _read("arubacx.txt")
     assert platforms.detect(text).key == "aruba-aos-cx"

@@ -271,7 +271,7 @@ class DHCPScope(TenantScopedModel):
         except ValueError as exc:
             raise ValidationError({"gateway": _("Enter valid addresses.")}) from exc
         if gateway is not None and gateway not in network:
-            raise ValidationError(_("The gateway must lie inside the prefix."))
+            raise ValidationError({"gateway": _("The gateway must lie inside the prefix.")})
         for name in ("dns_servers", "relays"):
             for item in filter(None, (s.strip() for s in getattr(self, name).split(","))):
                 try:
