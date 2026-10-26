@@ -295,7 +295,9 @@ def test_device_views(admin_client: Client, make_tree, make_type, system) -> Non
     url = f"/devices/{device.pk}/"
     assert admin_client.get(url, secure=True).status_code == 200
     admin_client.post(
-        url, {"action": "edit", "name": "srv-1", "status": "planned", "serial": "S1"}, secure=True
+        url + "edit/",
+        {"action": "edit", "name": "srv-1", "status": "planned", "serial": "S1"},
+        secure=True,
     )
     assert admin_client.get(url + "ports/new/", secure=True).status_code == 200
     admin_client.post(
@@ -304,7 +306,7 @@ def test_device_views(admin_client: Client, make_tree, make_type, system) -> Non
         secure=True,
     )
     admin_client.post(
-        url,
+        url + "edit/",
         {
             "action": "place",
             "room": t["room"].pk,
@@ -349,7 +351,7 @@ def test_device_views(admin_client: Client, make_tree, make_type, system) -> Non
     with system():
         assert Port.objects.get(pk=port.pk).label == "BMC"
     admin_client.post(port_url, {"action": "delete"}, secure=True)
-    admin_client.post(url, {"action": "delete"}, secure=True)
+    admin_client.post(url + "edit/", {"action": "delete"}, secure=True)
     with system():
         assert not Device.objects.filter(pk=device.pk).exists()
 
@@ -372,11 +374,44 @@ def test_viewer_and_foreign_access(
     assert client.get(f"/devices/{mine.pk}/", secure=True).status_code == 200
     assert client.get(f"/devices/{theirs.pk}/", secure=True).status_code == 404
     assert client.get(f"/devices/ports/{their_port.pk}/", secure=True).status_code == 404
-    client.post(
-        f"/devices/{mine.pk}/",
+    edit = client.post(
+        f"/devices/{mine.pk}/edit/",
         {"action": "edit", "name": "hacked", "status": "active"},
         secure=True,
     )
+    assert edit.status_code == 403
     assert client.get(f"/devices/new/?room={a['room'].pk}", secure=True).status_code == 403
     with rls.system_context():
         assert Device.objects.get(pk=mine.pk).name == "mine"
+
+
+def test_device_tabs_and_list(
+    client: Client, make_tree, make_type, make_user, grant, super_admin
+) -> None:
+    a, b = make_tree(), make_tree(name="Other")
+    with rls.system_context():
+        mine = devices.create(
+            a["request"], super_admin, device_type=make_type("S"), room=a["room"], name="sw-mine"
+        )
+        devices.create(
+            b["request"], super_admin, device_type=make_type("T"), room=b["room"], name="sw-theirs"
+        )
+    user = make_user()
+    grant(user, "viewer", a["tenant"])
+    login(client, user)
+    client.post("/tenants/switch/", {"tenant": a["tenant"].pk}, secure=True)
+    base = f"/devices/{mine.pk}/"
+    for tab in ("", "ports/", "connections/", "notes/", "configs/", "network/"):
+        page = client.get(base + tab, secure=True)
+        assert page.status_code == 200, tab
+        assert f'href="{base}ports/"' in page.content.decode(), tab  # the tabs on every page
+    overview = client.get(base, secure=True).content.decode()
+    assert f'href="{base}edit/"' not in overview  # a viewer gets no edit link
+    assert client.get(base + "edit/", secure=True).status_code == 403
+    listing = client.get("/devices/", secure=True).content.decode()
+    assert "sw-mine" in listing and "sw-theirs" not in listing
+    assert 'href="/devices/" aria-current="page"' in listing
+    assert "sw-mine" not in client.get("/devices/?q=nothing", secure=True).content.decode()
+    storage = client.get("/items/storage/", secure=True).content.decode()
+    assert 'href="/items/storage/" aria-current="page"' in storage
+    assert 'href="/items/vms/" aria-current="page"' not in storage

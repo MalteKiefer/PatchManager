@@ -1,0 +1,9 @@
+{% extends "base.html" %}{% load i18n pm %}
+{% block title %}{% translate "Notes and files" %} · {{ device.name }}{% endblock %}
+{% block content %}
+{% device_header device "notes" %}
+<div class="space-y-6">
+  {% metadata_panel device %}
+  {% links_panel device %}
+</div>
+{% endblock %}

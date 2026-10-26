@@ -1,0 +1,28 @@
+{% extends "base.html" %}{% load i18n pm %}
+{% block title %}{% translate "Edit" %} · {{ device.name }}{% endblock %}
+{% block content %}
+{% device_header device "edit" %}
+<div class="grid gap-6 lg:grid-cols-3">
+  {% if can_change %}
+  <form method="post" class="card lg:col-span-2" novalidate>{% csrf_token %}<input type="hidden" name="action" value="edit">
+    <h2 class="mb-3">{% translate "Details" %}</h2>
+    {% include "core/_form.html" %}
+    <button class="btn-primary">{% translate "Save" %}</button>
+  </form>
+  {% endif %}
+  <div class="space-y-6">
+    {% if can_change %}
+    <form method="post" class="card" novalidate>{% csrf_token %}<input type="hidden" name="action" value="place">
+      <h2 class="mb-3">{% translate "Placement" %}</h2>
+      {% include "core/_form.html" with form=place_form %}
+      <p class="mb-3 text-xs text-slate-500">{% translate "Leave the rack empty for a floor device." %}</p>
+      <button class="btn-secondary">{% translate "Move" %}</button>
+    </form>
+    {% endif %}
+    {% if can_delete %}<form method="post" class="card" data-confirm="{% translate 'Delete this device with all its ports?' %}">{% csrf_token %}
+      <h2 class="mb-2">{% translate "Delete device" %}</h2>
+      <p class="mb-3 text-sm text-slate-500">{% translate "Removes the device with all its ports and cables." %}</p>
+      <button name="action" value="delete" class="btn-danger">{% translate "Delete device" %}</button></form>{% endif %}
+  </div>
+</div>
+{% endblock %}

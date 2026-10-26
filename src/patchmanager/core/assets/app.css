@@ -53,6 +53,14 @@
   .badge-muted { @apply badge bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300; }
   .nav-link { @apply block rounded-md px-3 py-2 text-sm text-slate-700 no-underline hover:bg-slate-100 hover:no-underline dark:text-slate-300 dark:hover:bg-slate-800; }
   .nav-link[aria-current=page] { @apply bg-brand-50 font-medium text-brand-700 dark:bg-slate-800 dark:text-white; }
+  .tabs { @apply flex gap-1 overflow-x-auto border-b border-[#dde2e8] dark:border-slate-800; }
+  .tabs > a { @apply -mb-px shrink-0 border-b-2 border-transparent px-3 py-2.5 text-sm whitespace-nowrap text-[#3a4552] no-underline hover:border-slate-300 hover:no-underline dark:text-slate-300; }
+  .tabs > a[aria-current="page"] { @apply border-brand-600 font-semibold text-brand-700 dark:text-white; }
+  .tabs .count { @apply ml-1 text-xs font-normal text-[#5b6673] dark:text-slate-400; }
+  .facts { @apply grid grid-cols-[repeat(auto-fit,minmax(10rem,1fr))] gap-px overflow-hidden rounded-xl border border-[#dde2e8] bg-[#dde2e8] dark:border-slate-800 dark:bg-slate-800; }
+  .facts > div { @apply bg-white px-4 py-3 dark:bg-slate-900; }
+  .facts dt { @apply text-xs text-[#5b6673] dark:text-slate-400; }
+  .facts dd { @apply mt-1 text-lg font-semibold; }
   .htmx-request { @apply opacity-60; }
 }
 

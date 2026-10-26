@@ -1,0 +1,18 @@
+{% extends "base.html" %}{% load i18n pm %}
+{% block title %}{% translate "Ports" %} · {{ device.name }}{% endblock %}
+{% block content %}
+{% device_header device "ports" %}
+{% if can_change %}<div class="mb-4 flex justify-end"><a class="btn-primary" href="{% url 'devices:port-create' device.pk %}">{% translate "Add port" %}</a></div>{% endif %}
+<div class="card overflow-x-auto p-0"><table class="table">
+  <thead><tr><th>{% translate "Port" %}</th><th>{% translate "Kind" %}</th><th>{% translate "Connector" %}</th><th>{% translate "Speed" %}</th><th>{% translate "Label" %}</th><th>{% translate "Rear" %}</th><th>VLAN</th><th>IP</th><th>{% translate "Cable" %}</th><th>{% translate "Enabled" %}</th></tr></thead>
+  <tbody>{% for p in ports %}<tr>
+    <td class="whitespace-nowrap"><a class="font-mono text-xs" href="{% url 'devices:port' p.pk %}">{{ p.name }}</a></td><td>{{ p.get_kind_display }}</td><td>{{ p.get_connector_display }}</td>
+    <td>{% if p.speed_mbps %}{{ p.speed_mbps }}{% endif %}</td><td>{{ p.label }}</td>
+    <td class="font-mono text-xs">{% if p.rear_port %}{{ p.rear_port.name }}:{{ p.rear_position }}{% endif %}</td>
+    <td class="text-xs">{% if p.vlan_mode == "trunk" %}{% translate "trunk" %}{% elif p.untagged_vlan %}{{ p.untagged_vlan.vid }}{% endif %}</td>
+    <td class="text-xs tabular-nums">{% for a in p.ip_addresses.all %}<a href="{% url 'ipam:address' a.pk %}">{{ a.host }}</a>{% if not forloop.last %}<br>{% endif %}{% endfor %}</td>
+    <td class="text-xs">{% if p.cable_end %}<a href="{% url 'cabling:cable' p.cable_end.cable_id %}"><span class="mr-1 inline-block size-2 rounded-full" data-swatch="{{ p.cable_end.cable.colour }}" aria-hidden="true"></span>{{ p.cable_end.cable }}</a>{% endif %}</td>
+    <td>{% if p.enabled %}<span class="badge-ok">{% translate "yes" %}</span>{% else %}<span class="badge-muted">{% translate "no" %}</span>{% endif %}</td>
+  </tr>{% empty %}<tr><td colspan="10" class="text-slate-500">{% translate "No ports." %}</td></tr>{% endfor %}</tbody>
+</table></div>
+{% endblock %}

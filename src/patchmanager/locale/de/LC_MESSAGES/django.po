@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-23 06:52+0000\n"
+"POT-Creation-Date: 2026-10-26 11:01+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -50,7 +50,7 @@ msgstr "Führen Sie den Befehl setup_token aus, um eines zu erhalten."
 #: templates/ipam/vrfs.html:8 templates/manage/groups.html:6
 #: templates/manage/roles.html:11 templates/manage/tenants.html:6
 #: templates/manage/users.html:10 templates/networks/stacks.html:9
-#: templates/networks/switching.html:28 templates/networks/vlans.html:7
+#: templates/networks/switching.html:27 templates/networks/vlans.html:7
 #: templates/scim/tokens.html:12 templates/search/results.html:35
 #: templates/search/results.html:36 templates/sso/providers.html:7
 msgid "Name"
@@ -116,7 +116,7 @@ msgstr ""
 msgid "Conditions apply to"
 msgstr "Bedingungen gelten für"
 
-#: accounts/forms.py:143
+#: accounts/forms.py:143 templates/dcim/devices.html:11
 msgid "Location"
 msgstr "Ort"
 
@@ -140,7 +140,7 @@ msgid "The file is too large."
 msgstr "Die Datei ist zu groß."
 
 #: accounts/forms.py:187 configs/views.py:48 ipam/pages.py:336
-#: library/views.py:343 networks/switch_views.py:92
+#: library/views.py:350 networks/switch_views.py:92
 msgid "The file must be UTF-8 text."
 msgstr "Die Datei muss UTF-8-Text enthalten."
 
@@ -218,7 +218,7 @@ msgstr "Notfallkonto"
 #: compute/models.py:299 dcim/models.py:35 dcim/models.py:188
 #: dcim/models.py:241 directory/models.py:27 directory/models.py:62
 #: directory/models.py:102 integrations/models.py:16 ipam/models.py:21
-#: ipam/models.py:202 ipam/models.py:342 ipam/models.py:406
+#: ipam/models.py:202 ipam/models.py:348 ipam/models.py:412
 #: library/models.py:26 library/models.py:144 library/models.py:292
 #: locations/models.py:19 locations/models.py:61 locations/models.py:81
 #: locations/models.py:115 locations/models.py:164 networks/models.py:32
@@ -230,8 +230,8 @@ msgstr "Name"
 #: accounts/models.py:155 accounts/models.py:186 circuits/models.py:68
 #: compute/models.py:50 compute/models.py:133 compute/models.py:190
 #: dcim/models.py:251 directory/models.py:131 ipam/models.py:23
-#: ipam/models.py:77 ipam/models.py:134 ipam/models.py:236 ipam/models.py:306
-#: ipam/models.py:363 library/models.py:242 locations/models.py:38
+#: ipam/models.py:77 ipam/models.py:134 ipam/models.py:236 ipam/models.py:312
+#: ipam/models.py:369 library/models.py:242 locations/models.py:38
 #: locations/models.py:62 locations/models.py:116 locations/models.py:174
 #: networks/models.py:36 networks/models.py:83 networks/models.py:227
 #: networks/models.py:247 networks/models.py:296
@@ -409,11 +409,11 @@ msgstr "Der letzte Super-Admin kann nicht entfernt werden."
 
 #: accounts/services/users.py:30 accounts/services/users.py:169 api/core.py:28
 #: api/tokens.py:74 api/tokens.py:134 api/tokens.py:165 cabling/services.py:50
-#: compute/importing.py:69 directory/links.py:143 directory/links.py:146
+#: compute/importing.py:74 directory/links.py:143 directory/links.py:146
 #: directory/links.py:175 exchange/importer.py:54 exchange/importer.py:70
 #: floorplans/services.py:193 floorplans/views.py:291 history/services.py:76
 #: history/services.py:97 instance/services.py:33 integrations/services.py:78
-#: ipam/dns_import.py:310 metadata/services.py:113 metadata/services.py:181
+#: ipam/dns_import.py:312 metadata/services.py:113 metadata/services.py:181
 #: networks/services.py:109 networks/services.py:139 networks/services.py:148
 msgid "You do not have permission to do that."
 msgstr "Sie haben keine Berechtigung dafür."
@@ -615,7 +615,7 @@ msgstr "Zuweisung hinzugefügt."
 msgid "New assignment for %(who)s"
 msgstr "Neue Zuweisung für %(who)s"
 
-#: accounts/views/manage.py:273 core/lists.py:252 library/views.py:227
+#: accounts/views/manage.py:273 core/lists.py:252 library/views.py:234
 msgid "Add"
 msgstr "Hinzufügen"
 
@@ -680,7 +680,7 @@ msgstr "Keine gültige ID."
 msgid "Not a valid value."
 msgstr "Kein gültiger Wert."
 
-#: api/core.py:102 networks/switchconfig.py:533
+#: api/core.py:102 networks/switchconfig.py:540
 msgid "Not found."
 msgstr "Nicht gefunden."
 
@@ -735,8 +735,8 @@ msgid "Read and write"
 msgstr "Lesen und schreiben"
 
 #: api/ui.py:29 exchange/pdf.py:208 exchange/tables.py:687
-#: templates/core/_breadcrumbs.html:4 templates/locations/index.html:2
-#: templates/locations/index.html:6
+#: templates/base.html:48 templates/core/_breadcrumbs.html:4
+#: templates/locations/index.html:2 templates/locations/index.html:6
 msgid "Locations"
 msgstr "Orte"
 
@@ -744,7 +744,7 @@ msgstr "Orte"
 msgid "Racks and devices"
 msgstr "Racks und Geräte"
 
-#: api/ui.py:31 templates/base.html:55 templates/library/type_detail.html:4
+#: api/ui.py:31 templates/base.html:53 templates/library/type_detail.html:4
 #: templates/library/types.html:2 templates/library/types.html:5
 msgid "Device library"
 msgstr "Gerätebibliothek"
@@ -753,7 +753,7 @@ msgstr "Gerätebibliothek"
 msgid "Cabling"
 msgstr "Verkabelung"
 
-#: api/ui.py:33 templates/base.html:51
+#: api/ui.py:33
 msgid "Networks"
 msgstr "Netze"
 
@@ -769,12 +769,12 @@ msgstr "Server und virtuelle Maschinen"
 msgid "Configurations"
 msgstr "Konfigurationen"
 
-#: api/ui.py:37 circuits/pages.py:64 templates/configs/list.html:11
+#: api/ui.py:37 circuits/pages.py:64 templates/configs/list.html:10
 #: templates/floorplans/editor.html:59
 msgid "Lines"
 msgstr "Zeilen"
 
-#: api/ui.py:38 templates/base.html:54
+#: api/ui.py:38 templates/base.html:62
 msgid "Customers and systems"
 msgstr "Kunden und Systeme"
 
@@ -993,12 +993,13 @@ msgid "These ports cannot be connected."
 msgstr "Diese Ports können nicht verbunden werden."
 
 #: cabling/views.py:43 exchange/pdf.py:269 templates/accounts/security.html:50
-#: templates/dcim/place_here.html:11 templates/networks/switching.html:58
+#: templates/dcim/_device_header.html:10 templates/dcim/devices.html:11
+#: templates/dcim/place_here.html:11 templates/networks/switching.html:57
 msgid "Device"
 msgstr "Gerät"
 
 #: cabling/views.py:44 exchange/pdf.py:269 exchange/pdf.py:319
-#: instance/views.py:163 templates/dcim/device.html:17
+#: instance/views.py:163 templates/dcim/device_ports.html:7
 #: templates/dcim/port.html:40 templates/dcim/rack.html:66
 #: templates/ipam/addresses.html:10 templates/ipam/prefix.html:24
 msgid "Port"
@@ -1012,9 +1013,9 @@ msgstr "Verbunden."
 msgid "Cable removed."
 msgstr "Kabel entfernt."
 
-#: cabling/views.py:152 core/crud.py:271 core/lists.py:207
-#: dcim/device_views.py:395 dcim/device_views.py:473 dcim/views.py:92
-#: ipam/views.py:242 ipam/views.py:383 ipam/views.py:468 library/views.py:269
+#: cabling/views.py:152 core/crud.py:279 core/lists.py:207
+#: dcim/device_views.py:508 dcim/device_views.py:569 dcim/views.py:92
+#: ipam/views.py:242 ipam/views.py:383 ipam/views.py:468 library/views.py:276
 #: locations/views.py:190 locations/views.py:293 networks/views.py:139
 #: networks/views.py:394
 msgid "Saved."
@@ -1124,7 +1125,7 @@ msgstr "Provider"
 #: directory/pages.py:124 exchange/pdf.py:209 exchange/pdf.py:320
 #: exchange/pdf.py:364 templates/cabling/cables.html:7
 #: templates/cabling/cables.html:12 templates/dcim/_port_panel.html:6
-#: templates/dcim/device.html:17 templates/library/type_detail.html:16
+#: templates/dcim/device_ports.html:7 templates/library/type_detail.html:16
 #: templates/networks/stacks.html:9
 msgid "Kind"
 msgstr "Art"
@@ -1137,6 +1138,7 @@ msgstr "Standort"
 
 #: circuits/pages.py:72 compute/pages.py:149 exchange/pdf.py:225
 #: templates/compute/connections.html:9 templates/dcim/_device_panel.html:7
+#: templates/dcim/devices.html:7 templates/dcim/devices.html:11
 #: templates/dcim/place_here.html:11 templates/dcim/rack.html:66
 #: templates/floorplans/_item_panel.html:8
 #: templates/integrations/webhook.html:23 templates/ipam/addresses.html:10
@@ -1215,7 +1217,7 @@ msgid "Virtual machines and containers"
 msgstr "Virtuelle Maschinen und Container"
 
 #: compute/connections.py:214 compute/pages.py:185 compute/pages.py:193
-#: templates/dcim/device.html:42
+#: templates/base.html:60 templates/dcim/device.html:30
 msgid "Storage"
 msgstr "Speicher"
 
@@ -1248,15 +1250,15 @@ msgstr " (neuer Server)"
 msgid "Choose both a room and a device type for new servers, or neither."
 msgstr "Wählen Sie für neue Server Raum und Gerätetyp, oder beides nicht."
 
-#: compute/connections.py:363
+#: compute/connections.py:367
 msgid "Connected. Choose what to take over."
 msgstr "Verbunden. Wählen Sie, was übernommen wird."
 
-#: compute/connections.py:369 templates/compute/connections.html:6
+#: compute/connections.py:373 templates/compute/connections.html:6
 msgid "Connect Proxmox VE"
 msgstr "Proxmox VE verbinden"
 
-#: compute/connections.py:371
+#: compute/connections.py:375
 msgid ""
 "PatchManager reads nodes, virtual machines, containers and storage of the "
 "cluster through its API. It never changes anything there."
@@ -1264,122 +1266,122 @@ msgstr ""
 "PatchManager liest Nodes, virtuelle Maschinen, Container und Speicher des "
 "Clusters über seine API. Dort wird nie etwas geändert."
 
-#: compute/connections.py:376 templates/cabling/connect.html:2
+#: compute/connections.py:380 templates/cabling/connect.html:2
 #: templates/cabling/connect.html:5 templates/cabling/connect.html:18
 #: templates/dcim/port.html:25
 msgid "Connect"
 msgstr "Verbinden"
 
-#: compute/connections.py:412
+#: compute/connections.py:416
 msgid "You may not add virtual machines."
 msgstr "Sie dürfen keine virtuellen Maschinen hinzufügen."
 
-#: compute/connections.py:447
+#: compute/connections.py:451
 #, python-format
 msgid "Updated: %(n)s machines."
 msgstr "Aktualisiert: %(n)s Maschinen."
 
-#: compute/connections.py:473
+#: compute/connections.py:477
 msgid "Updated."
 msgstr "Aktualisiert."
 
-#: compute/connections.py:487
+#: compute/connections.py:491
 msgid "Connection removed; the documented machines stay."
 msgstr "Verbindung entfernt; die dokumentierten Maschinen bleiben."
 
-#: compute/importing.py:150
+#: compute/importing.py:156
 #, python-format
 msgid "Host %(name)s is not documented as a device."
 msgstr "Host %(name)s ist nicht als Gerät dokumentiert."
 
-#: compute/importing.py:156
+#: compute/importing.py:162
 #, python-format
 msgid "Host %(name)s belongs to another cluster."
 msgstr "Host %(name)s gehört zu einem anderen Cluster."
 
-#: compute/importing.py:228
+#: compute/importing.py:234
 #, python-format
 msgid "%(vm)s: network card %(nic)s was left out."
 msgstr "%(vm)s: Netzwerkkarte %(nic)s wurde ausgelassen."
 
-#: compute/importing.py:245
+#: compute/importing.py:251
 #, python-format
 msgid "%(vm)s: disk %(disk)s was left out."
 msgstr "%(vm)s: Festplatte %(disk)s wurde ausgelassen."
 
-#: compute/importing.py:304
+#: compute/importing.py:310
 #, python-format
 msgid "%(address)s is no longer on %(vm)s but stays linked: %(error)s"
 msgstr ""
 "%(address)s ist nicht mehr auf %(vm)s, bleibt aber verknüpft: %(error)s"
 
-#: compute/importing.py:328
+#: compute/importing.py:334
 #, python-format
 msgid "%(address)s of %(vm)s is already used elsewhere and was not linked."
 msgstr ""
 "%(address)s von %(vm)s wird bereits anderweitig verwendet und wurde nicht "
 "verknüpft."
 
-#: compute/importing.py:366 compute/pages.py:124 networks/switch_views.py:39
+#: compute/importing.py:372 compute/pages.py:124 networks/switch_views.py:39
 msgid "Platform"
 msgstr "Plattform"
 
-#: compute/importing.py:375 exchange/pdf.py:172 ipam/pages.py:148
+#: compute/importing.py:381 exchange/pdf.py:172 ipam/pages.py:148
 #: templates/accounts/security.html:50 templates/compute/connection.html:18
 #: templates/ipam/addresses.html:10 templates/ipam/prefix.html:24
-#: templates/manage/audit.html:18 templates/networks/switching.html:28
+#: templates/manage/audit.html:18 templates/networks/switching.html:27
 msgid "Address"
 msgstr "Adresse"
 
-#: compute/importing.py:377
+#: compute/importing.py:383
 msgid ""
 "For example https://pve.example.lan:8006 or https://vcenter.example.lan."
 msgstr ""
 "Zum Beispiel https://pve.example.lan:8006 oder https://vcenter.example.lan."
 
-#: compute/importing.py:381
+#: compute/importing.py:387
 msgid "API token (Proxmox)"
 msgstr "API-Token (Proxmox)"
 
-#: compute/importing.py:384
+#: compute/importing.py:390
 msgid "user@realm!tokenid=secret, with read rights (PVEAuditor)."
 msgstr "user@realm!tokenid=secret, mit Leserechten (PVEAuditor)."
 
-#: compute/importing.py:387
+#: compute/importing.py:393
 msgid "User (vCenter, NAS)"
 msgstr "Benutzer (vCenter, NAS)"
 
-#: compute/importing.py:390
+#: compute/importing.py:396
 msgid "Password (vCenter, NAS)"
 msgstr "Passwort (vCenter, NAS)"
 
-#: compute/importing.py:395
+#: compute/importing.py:401
 msgid "Certificate fingerprint (SHA-256)"
 msgstr "Zertifikats-Fingerabdruck (SHA-256)"
 
-#: compute/importing.py:399
+#: compute/importing.py:405
 msgid ""
 "Only for self signed certificates; otherwise the certificate is verified."
 msgstr ""
 "Nur für selbstsignierte Zertifikate; sonst wird das Zertifikat geprüft."
 
-#: compute/importing.py:403
+#: compute/importing.py:409
 msgid "NAS device (Synology, QNAP)"
 msgstr "NAS-Gerät (Synology, QNAP)"
 
-#: compute/importing.py:421
+#: compute/importing.py:427
 msgid "Enter the API token."
 msgstr "Geben Sie das API-Token ein."
 
-#: compute/importing.py:425
+#: compute/importing.py:431
 msgid "Enter user and password."
 msgstr "Geben Sie Benutzer und Passwort ein."
 
-#: compute/importing.py:427
+#: compute/importing.py:433
 msgid "Choose the NAS device the storage belongs to."
 msgstr "Wählen Sie das NAS-Gerät, zu dem der Speicher gehört."
 
-#: compute/importing.py:465
+#: compute/importing.py:473
 #, python-format
 msgid ""
 "%(created)s new and %(updated)s updated machines, %(storage)s storage "
@@ -1388,11 +1390,11 @@ msgstr ""
 "%(created)s neue und %(updated)s aktualisierte Maschinen, %(storage)s "
 "Speichereinträge."
 
-#: compute/importing.py:477
+#: compute/importing.py:485
 msgid "Import from a platform"
 msgstr "Von einer Plattform importieren"
 
-#: compute/importing.py:479
+#: compute/importing.py:487
 msgid ""
 "Reads clusters, hosts, virtual machines and storage from Proxmox VE and "
 "VMware vCenter, or volumes and shares from a Synology or QNAP NAS. "
@@ -1404,7 +1406,7 @@ msgstr ""
 "Zugangsdaten werden einmal verwendet und nicht gespeichert; verwenden Sie "
 "ein Konto nur mit Leserechten."
 
-#: compute/importing.py:485 ipam/pages.py:387 templates/exchange/index.html:7
+#: compute/importing.py:493 ipam/pages.py:390 templates/exchange/index.html:7
 #: templates/library/types.html:30 templates/manage/roles.html:21
 msgid "Import"
 msgstr "Importieren"
@@ -1617,11 +1619,11 @@ msgid "purpose"
 msgstr "Zweck"
 
 #: compute/models.py:221 compute/pages.py:168 dcim/models.py:252
-#: ipam/models.py:298 ipam/pages.py:149
+#: ipam/models.py:304 ipam/pages.py:149
 msgid "MAC address"
 msgstr "MAC-Adresse"
 
-#: compute/models.py:225 ipam/models.py:301
+#: compute/models.py:225 ipam/models.py:307
 msgid "Use aa:bb:cc:dd:ee:ff."
 msgstr "Verwenden Sie aa:bb:cc:dd:ee:ff."
 
@@ -1643,7 +1645,7 @@ msgid "Separated by commas, for example 10.0.0.5/24."
 msgstr "Durch Kommas getrennt, zum Beispiel 10.0.0.5/24."
 
 #: compute/models.py:243 dcim/models.py:249 ipam/models.py:235
-#: networks/models.py:248 sso/models.py:22 templates/networks/switching.html:49
+#: networks/models.py:248 sso/models.py:22 templates/networks/switching.html:48
 #: templates/sso/providers.html:10
 msgid "enabled"
 msgstr "aktiviert"
@@ -1669,7 +1671,7 @@ msgid "every day"
 msgstr "täglich"
 
 #: compute/models.py:301 directory/models.py:33 ipam/models.py:129
-#: ipam/models.py:304 locations/models.py:21 networks/models.py:242
+#: ipam/models.py:310 locations/models.py:21 networks/models.py:242
 #: tenancy/models.py:22
 msgid "address"
 msgstr "Adresse"
@@ -1713,7 +1715,9 @@ msgstr "Neuer Cluster"
 #: templates/compute/connection.html:4
 #: templates/compute/connection_select.html:4
 #: templates/compute/connections.html:2 templates/compute/connections.html:4
-#: templates/dcim/rack.html:64
+#: templates/dcim/_device_header.html:13 templates/dcim/device.html:7
+#: templates/dcim/device_connections.html:2
+#: templates/dcim/device_connections.html:5 templates/dcim/rack.html:64
 msgid "Connections"
 msgstr "Verbindungen"
 
@@ -1730,7 +1734,7 @@ msgid "Server"
 msgstr "Server"
 
 #: compute/pages.py:144 templates/compute/connections.html:5
-#: templates/dcim/device.html:40
+#: templates/dcim/device.html:28
 msgid "Virtual machines"
 msgstr "Virtuelle Maschinen"
 
@@ -1867,7 +1871,7 @@ msgstr ""
 "herunter und vergleichen Sie sie lokal."
 
 #: configs/views.py:30 networks/switch_views.py:45
-#: templates/configs/list.html:4 templates/dcim/device.html:31
+#: templates/dcim/_device_header.html:15 templates/dcim/device.html:9
 msgid "Configuration"
 msgstr "Konfiguration"
 
@@ -1875,7 +1879,7 @@ msgstr "Konfiguration"
 msgid "or a file"
 msgstr "oder eine Datei"
 
-#: configs/views.py:36 templates/configs/list.html:11
+#: configs/views.py:36 templates/configs/list.html:10
 msgid "Comment"
 msgstr "Kommentar"
 
@@ -1907,20 +1911,20 @@ msgstr "Speichern"
 msgid "Version %(n)s deleted."
 msgstr "Version %(n)s gelöscht."
 
-#: core/crud.py:118 core/crud.py:135
+#: core/crud.py:119 core/crud.py:136
 msgid "This entry already exists."
 msgstr "Dieser Eintrag existiert bereits."
 
-#: core/crud.py:150
+#: core/crud.py:158
 msgid "Other records still use this one."
 msgstr "Andere Einträge verwenden diesen noch."
 
-#: core/crud.py:226 locations/views.py:235
+#: core/crud.py:234 locations/views.py:235
 msgid "Created."
 msgstr "Erstellt."
 
-#: core/crud.py:267 core/lists.py:203 dcim/device_views.py:413 dcim/views.py:97
-#: ipam/views.py:236 ipam/views.py:373 ipam/views.py:462 library/views.py:294
+#: core/crud.py:275 core/lists.py:203 dcim/device_views.py:526 dcim/views.py:97
+#: ipam/views.py:236 ipam/views.py:373 ipam/views.py:462 library/views.py:301
 #: locations/views.py:298 locations/views.py:423 networks/views.py:135
 msgid "Deleted."
 msgstr "Gelöscht."
@@ -2118,7 +2122,8 @@ msgstr "VLAN-Modus"
 msgid "access"
 msgstr "Access"
 
-#: dcim/device_views.py:184 dcim/models.py:267 templates/dcim/device.html:22
+#: dcim/device_views.py:184 dcim/models.py:267
+#: templates/dcim/device_ports.html:12
 msgid "trunk"
 msgstr "Trunk"
 
@@ -2140,24 +2145,24 @@ msgstr "Gerät mit %(n)s Ports angelegt."
 msgid "New port on %(device)s"
 msgstr "Neuer Port an %(device)s"
 
-#: dcim/device_views.py:408
+#: dcim/device_views.py:521
 msgid "Device moved."
 msgstr "Gerät verschoben."
 
-#: dcim/device_views.py:487
+#: dcim/device_views.py:583
 msgid "VLANs saved."
 msgstr "VLANs gespeichert."
 
-#: dcim/device_views.py:612
+#: dcim/device_views.py:708
 #, python-format
 msgid "%(device)s placed in %(rack)s."
 msgstr "%(device)s in %(rack)s eingebaut."
 
-#: dcim/device_views.py:621 floorplans/views.py:50
+#: dcim/device_views.py:717 floorplans/views.py:50
 msgid "Upload a plan first."
 msgstr "Laden Sie zuerst einen Grundriss hoch."
 
-#: dcim/device_views.py:623
+#: dcim/device_views.py:719
 #, python-format
 msgid "%(device)s placed on the plan."
 msgstr "%(device)s im Grundriss platziert."
@@ -2324,7 +2329,7 @@ msgstr "Link-Aggregation"
 msgid "aggregation protocol"
 msgstr "Aggregationsprotokoll"
 
-#: dcim/models.py:290 templates/networks/switching.html:77
+#: dcim/models.py:290 templates/networks/switching.html:76
 msgid "static"
 msgstr "statisch"
 
@@ -2399,7 +2404,7 @@ msgstr ""
 "sie zuerst heraus."
 
 #: dcim/views.py:54 exchange/pdf.py:324 templates/dcim/_port_panel.html:8
-#: templates/dcim/device.html:17
+#: templates/dcim/device_ports.html:7
 msgid "Label"
 msgstr "Bezeichnung"
 
@@ -2586,7 +2591,7 @@ msgstr "Wartung"
 msgid "user"
 msgstr "Nutzer"
 
-#: directory/models.py:176 templates/configs/list.html:15
+#: directory/models.py:176 templates/configs/list.html:14
 #: templates/configs/version.html:11 templates/history/_table.html:8
 #: templates/history/change.html:10 templates/manage/roles.html:14
 msgid "system"
@@ -2702,7 +2707,7 @@ msgstr "Seite %(n)s"
 
 #: exchange/pdf.py:172 ipam/pages.py:151 templates/ipam/addresses.html:10
 #: templates/ipam/prefixes.html:8 templates/ipam/vrfs.html:8
-#: templates/networks/switching.html:48
+#: templates/networks/switching.html:47
 msgid "Description"
 msgstr "Beschreibung"
 
@@ -2721,8 +2726,10 @@ msgid "Racks"
 msgstr "Racks"
 
 #: exchange/pdf.py:209 exchange/tables.py:705 search/services.py:67
-#: templates/core/home.html:20 templates/dcim/rack.html:79
-#: templates/floorplans/_item_panel.html:11 templates/library/types.html:18
+#: templates/base.html:51 templates/core/home.html:20
+#: templates/dcim/devices.html:2 templates/dcim/devices.html:4
+#: templates/dcim/rack.html:79 templates/floorplans/_item_panel.html:11
+#: templates/library/types.html:18
 msgid "Devices"
 msgstr "Geräte"
 
@@ -2762,7 +2769,7 @@ msgstr "Höheneinheit"
 msgid "Front"
 msgstr "Vorderseite"
 
-#: exchange/pdf.py:251 templates/dcim/device.html:17
+#: exchange/pdf.py:251 templates/dcim/device_ports.html:7
 #: templates/dcim/rack.html:20 templates/dcim/room.html:17
 msgid "Rear"
 msgstr "Rückseite"
@@ -2786,7 +2793,7 @@ msgstr "Höheneinheiten"
 
 #: exchange/pdf.py:269 exchange/pdf.py:364 templates/cabling/cable.html:2
 #: templates/cabling/cable.html:6 templates/cabling/cables.html:12
-#: templates/dcim/_port_panel.html:9 templates/dcim/device.html:17
+#: templates/dcim/_port_panel.html:9 templates/dcim/device_ports.html:7
 #: templates/dcim/port.html:14 templates/dcim/rack.html:66
 msgid "Cable"
 msgstr "Kabel"
@@ -2799,12 +2806,12 @@ msgstr "Anderes Ende"
 msgid "Complete"
 msgstr "Vollständig"
 
-#: exchange/pdf.py:276 templates/dcim/device.html:25
+#: exchange/pdf.py:276 templates/dcim/device_ports.html:15
 #: templates/integrations/webhooks.html:11
 msgid "yes"
 msgstr "ja"
 
-#: exchange/pdf.py:276 templates/dcim/device.html:25
+#: exchange/pdf.py:276 templates/dcim/device_ports.html:15
 #: templates/integrations/webhooks.html:11
 msgid "no"
 msgstr "nein"
@@ -2815,7 +2822,7 @@ msgid "Rack %(name)s"
 msgstr "Rack %(name)s"
 
 #: exchange/pdf.py:321 templates/dcim/_port_panel.html:7
-#: templates/dcim/device.html:17 templates/library/type_detail.html:16
+#: templates/dcim/device_ports.html:7 templates/library/type_detail.html:16
 msgid "Connector"
 msgstr "Steckverbinder"
 
@@ -2823,7 +2830,7 @@ msgstr "Steckverbinder"
 msgid "Mbit/s"
 msgstr "Mbit/s"
 
-#: exchange/pdf.py:325 templates/dcim/device.html:48
+#: exchange/pdf.py:325 templates/dcim/device.html:20
 #: templates/dcim/port.html:16
 msgid "Connected to"
 msgstr "Verbunden mit"
@@ -2968,7 +2975,7 @@ msgstr "Präfixe"
 msgid "IP addresses"
 msgstr "IP-Adressen"
 
-#: exchange/tables.py:752 search/services.py:82 templates/base.html:50
+#: exchange/tables.py:752 search/services.py:82 templates/base.html:52
 #: templates/cabling/cable.html:4 templates/cabling/cables.html:2
 #: templates/cabling/cables.html:4 templates/core/home.html:22
 #: templates/dcim/rack.html:13
@@ -2976,7 +2983,8 @@ msgid "Cables"
 msgstr "Kabel"
 
 #: exchange/tables.py:772 search/services.py:75
-#: templates/dcim/_device_panel.html:8 templates/dcim/device.html:15
+#: templates/dcim/_device_header.html:12 templates/dcim/_device_panel.html:8
+#: templates/dcim/device.html:6 templates/dcim/device_ports.html:2
 #: templates/floorplans/_item_panel.html:21 templates/library/catalog.html:16
 #: templates/library/catalog_entry.html:9 templates/library/type_detail.html:14
 msgid "Ports"
@@ -3331,8 +3339,8 @@ msgstr "Einladungslinks sind gültig für (Stunden)"
 msgid "SMTP server"
 msgstr "SMTP-Server"
 
-#: instance/views.py:160 instance/views.py:185 ipam/models.py:371
-#: ipam/models.py:411 ipam/models.py:466
+#: instance/views.py:160 instance/views.py:185 ipam/models.py:377
+#: ipam/models.py:417 ipam/models.py:472
 msgid "Enter a host name."
 msgstr "Geben Sie einen Hostnamen ein."
 
@@ -3692,7 +3700,7 @@ msgstr "Die Antwort des Providers ist kein JSON."
 msgid "The provider sent no zone file."
 msgstr "Der Anbieter hat keine Zonendatei geschickt."
 
-#: ipam/dns_import.py:277 ipam/models.py:347
+#: ipam/dns_import.py:277 ipam/models.py:353
 msgid "Enter a domain name like example.com."
 msgstr "Geben Sie einen Domainnamen wie example.com ein."
 
@@ -3794,7 +3802,7 @@ msgstr ""
 "Wohin Router Anfragen weiterleiten (ip helper-address), durch Kommas "
 "getrennt."
 
-#: ipam/models.py:264
+#: ipam/models.py:264 ipam/models.py:272
 msgid "Enter valid addresses."
 msgstr "Geben Sie gültige Adressen ein."
 
@@ -3802,106 +3810,106 @@ msgstr "Geben Sie gültige Adressen ein."
 msgid "The range must lie inside the prefix, first before last."
 msgstr "Der Bereich muss im Präfix liegen, die erste Adresse vor der letzten."
 
-#: ipam/models.py:268
+#: ipam/models.py:274
 msgid "The gateway must lie inside the prefix."
 msgstr "Das Gateway muss im Präfix liegen."
 
-#: ipam/models.py:275
+#: ipam/models.py:281
 #, python-format
 msgid "%(value)s is not an address."
 msgstr "%(value)s ist keine Adresse."
 
-#: ipam/models.py:280
+#: ipam/models.py:286
 msgid "Write each option as code=value."
 msgstr "Schreiben Sie jede Option als Code=Wert."
 
-#: ipam/models.py:295
+#: ipam/models.py:301
 msgid "scope"
 msgstr "Bereich"
 
-#: ipam/models.py:305 networks/models.py:161
+#: ipam/models.py:311 networks/models.py:161
 msgid "hostname"
 msgstr "Hostname"
 
-#: ipam/models.py:333
+#: ipam/models.py:339
 msgid "Enter a valid address."
 msgstr "Geben Sie eine gültige Adresse ein."
 
-#: ipam/models.py:335
+#: ipam/models.py:341
 msgid "The address must lie inside the prefix of the scope."
 msgstr "Die Adresse muss im Präfix des Bereichs liegen."
 
-#: ipam/models.py:351
+#: ipam/models.py:357
 msgid "primary name server"
 msgstr "primärer Nameserver"
 
-#: ipam/models.py:352
+#: ipam/models.py:358
 msgid "responsible email"
 msgstr "verantwortliche E-Mail"
 
-#: ipam/models.py:353
+#: ipam/models.py:359
 msgid "default TTL (seconds)"
 msgstr "Standard-TTL (Sekunden)"
 
-#: ipam/models.py:354
+#: ipam/models.py:360
 msgid "serial"
 msgstr "Seriennummer"
 
-#: ipam/models.py:361 ipam/pages.py:169
+#: ipam/models.py:367 ipam/pages.py:169
 msgid "DNS server"
 msgstr "DNS-Server"
 
-#: ipam/models.py:373
+#: ipam/models.py:379
 msgid "Enter an email address or host name."
 msgstr "Geben Sie eine E-Mail-Adresse oder einen Hostnamen ein."
 
-#: ipam/models.py:403
+#: ipam/models.py:409
 msgid "zone"
 msgstr "Zone"
 
-#: ipam/models.py:408
+#: ipam/models.py:414
 msgid "Relative to the zone; @ for the zone itself."
 msgstr "Relativ zur Zone; @ für die Zone selbst."
 
-#: ipam/models.py:415 sso/models.py:21
+#: ipam/models.py:421 sso/models.py:21
 msgid "type"
 msgstr "Typ"
 
-#: ipam/models.py:416
+#: ipam/models.py:422
 msgid "value"
 msgstr "Wert"
 
-#: ipam/models.py:417 ipam/pages.py:190
+#: ipam/models.py:423 ipam/pages.py:190
 msgid "TTL (seconds)"
 msgstr "TTL (Sekunden)"
 
-#: ipam/models.py:419 networks/models.py:204 networks/models.py:328
-#: templates/networks/stack.html:14 templates/networks/switching.html:73
-#: templates/networks/switching.html:83
+#: ipam/models.py:425 networks/models.py:204 networks/models.py:328
+#: templates/networks/stack.html:14 templates/networks/switching.html:72
+#: templates/networks/switching.html:82
 msgid "priority"
 msgstr "Priorität"
 
-#: ipam/models.py:427
+#: ipam/models.py:433
 msgid "documented address"
 msgstr "dokumentierte Adresse"
 
-#: ipam/models.py:447
+#: ipam/models.py:453
 msgid "The value must be one line."
 msgstr "Der Wert muss einzeilig sein."
 
-#: ipam/models.py:452
+#: ipam/models.py:458
 msgid "Enter an address."
 msgstr "Geben Sie eine Adresse ein."
 
-#: ipam/models.py:454
+#: ipam/models.py:460
 msgid "A records take IPv4, AAAA records IPv6."
 msgstr "A-Einträge nehmen IPv4, AAAA-Einträge IPv6."
 
-#: ipam/models.py:456
+#: ipam/models.py:462
 msgid "MX and SRV records need a priority."
 msgstr "MX- und SRV-Einträge brauchen eine Priorität."
 
-#: ipam/models.py:468
+#: ipam/models.py:474
 msgid "SRV records take weight, port and target."
 msgstr "SRV-Einträge nehmen Gewicht, Port und Ziel."
 
@@ -3945,7 +3953,7 @@ msgstr "Erste Adresse"
 msgid "Last address"
 msgstr "Letzte Adresse"
 
-#: ipam/pages.py:132 sso/views.py:190 templates/dcim/device.html:17
+#: ipam/pages.py:132 sso/views.py:190 templates/dcim/device_ports.html:7
 msgid "Enabled"
 msgstr "Aktiviert"
 
@@ -3953,7 +3961,7 @@ msgstr "Aktiviert"
 msgid "New reservation"
 msgstr "Neue Reservierung"
 
-#: ipam/pages.py:150 templates/networks/switching.html:60
+#: ipam/pages.py:150 templates/networks/switching.html:59
 msgid "Hostname"
 msgstr "Hostname"
 
@@ -3977,7 +3985,7 @@ msgstr "Seriennummer"
 msgid "Import zone"
 msgstr "Zone importieren"
 
-#: ipam/pages.py:182 templates/base.html:56
+#: ipam/pages.py:182 templates/base.html:63
 msgid "Records"
 msgstr "Nachweise"
 
@@ -3985,9 +3993,10 @@ msgstr "Nachweise"
 msgid "New record"
 msgstr "Neuer Eintrag"
 
-#: ipam/pages.py:187 sso/views.py:189 templates/dcim/place_here.html:11
-#: templates/history/activity.html:7 templates/manage/roles.html:11
-#: templates/search/results.html:7 templates/sso/providers.html:7
+#: ipam/pages.py:187 sso/views.py:189 templates/dcim/devices.html:11
+#: templates/dcim/place_here.html:11 templates/history/activity.html:7
+#: templates/manage/roles.html:11 templates/search/results.html:7
+#: templates/sso/providers.html:7
 msgid "Type"
 msgstr "Typ"
 
@@ -4007,7 +4016,7 @@ msgstr "Zone"
 msgid "For example example.com."
 msgstr "Zum Beispiel example.com."
 
-#: ipam/pages.py:301 templates/configs/list.html:11
+#: ipam/pages.py:301 templates/configs/list.html:10
 msgid "Source"
 msgstr "Quelle"
 
@@ -4034,16 +4043,16 @@ msgstr "Die dokumentierten Einträge dieser Zone ersetzen"
 msgid "Paste a zone file or choose one."
 msgstr "Fügen Sie eine Zonendatei ein oder wählen Sie eine."
 
-#: ipam/pages.py:372
+#: ipam/pages.py:375
 #, python-format
 msgid "%(n)s records imported."
 msgstr "%(n)s Einträge importiert."
 
-#: ipam/pages.py:380
+#: ipam/pages.py:383
 msgid "Import a DNS zone"
 msgstr "DNS-Zone importieren"
 
-#: ipam/pages.py:382
+#: ipam/pages.py:385
 msgid ""
 "Read a zone file, or a zone of deSEC, Cloudflare or Hetzner DNS through "
 "their API."
@@ -4101,20 +4110,20 @@ msgstr "Die Adresse ist keinem Port und keiner Maschine mehr zugeordnet."
 msgid "New VRF"
 msgstr "Neues VRF"
 
-#: library/interchange.py:139
+#: library/interchange.py:140
 #, python-format
 msgid "%(section)s must be a list of ports with names."
 msgstr "%(section)s muss eine Liste von Ports mit Namen sein."
 
-#: library/interchange.py:142
+#: library/interchange.py:143
 msgid "Too many ports."
 msgstr "Zu viele Ports."
 
-#: library/interchange.py:153
+#: library/interchange.py:155
 msgid "The file is not valid YAML or JSON."
 msgstr "Die Datei ist kein gültiges YAML oder JSON."
 
-#: library/interchange.py:159
+#: library/interchange.py:161
 msgid "The file needs a manufacturer and a model."
 msgstr "Die Datei benötigt einen Hersteller und ein Modell."
 
@@ -4439,7 +4448,7 @@ msgstr "Frontports können nur Rückports desselben Typs zugeordnet werden."
 msgid "The number of front ports must be a multiple of the rear ports."
 msgstr "Die Anzahl der Frontports muss ein Vielfaches der Rückports sein."
 
-#: library/views.py:47 library/views.py:120 library/views.py:355
+#: library/views.py:47 library/views.py:120 library/views.py:362
 msgid "Shared with all tenants"
 msgstr "Für alle Mandanten freigegeben"
 
@@ -4459,52 +4468,52 @@ msgstr "Bild der Rückseite"
 msgid "YAML or JSON file"
 msgstr "YAML- oder JSON-Datei"
 
-#: library/views.py:200
+#: library/views.py:207
 msgid "Device type created. Now add its ports."
 msgstr "Gerätetyp angelegt. Fügen Sie jetzt die Ports hinzu."
 
-#: library/views.py:225
+#: library/views.py:232
 #, python-format
 msgid "Add ports to %(type)s"
 msgstr "Ports zu %(type)s hinzufügen"
 
-#: library/views.py:288
+#: library/views.py:295
 msgid "copy"
 msgstr "Kopie"
 
-#: library/views.py:290
+#: library/views.py:297
 msgid "Copied into a private type of this tenant."
 msgstr "In einen privaten Typ dieses Mandanten kopiert."
 
-#: library/views.py:335
+#: library/views.py:342
 msgid "Choose a file of at most 1 MB."
 msgstr "Wählen Sie eine Datei mit höchstens 1 MB."
 
-#: library/views.py:347
+#: library/views.py:354
 msgid "Device type imported."
 msgstr "Gerätetyp importiert."
 
-#: library/views.py:393
+#: library/views.py:402
 msgid "Added to the library with all its ports."
 msgstr "Mit allen Ports in die Bibliothek übernommen."
 
-#: library/views.py:398
+#: library/views.py:407
 msgid "Network ports"
 msgstr "Netzwerkports"
 
-#: library/views.py:399
+#: library/views.py:408
 msgid "Front ports"
 msgstr "Frontports"
 
-#: library/views.py:400
+#: library/views.py:409
 msgid "Rear ports"
 msgstr "Rückports"
 
-#: library/views.py:401
+#: library/views.py:410
 msgid "Console ports"
 msgstr "Konsolenports"
 
-#: library/views.py:402
+#: library/views.py:411
 msgid "Power inlets"
 msgstr "Stromeingänge"
 
@@ -4762,7 +4771,7 @@ msgstr "Sicherheit"
 msgid "hidden SSID"
 msgstr "Versteckte SSID"
 
-#: networks/models.py:151 templates/networks/switching.html:61
+#: networks/models.py:151 templates/networks/switching.html:60
 msgid "off"
 msgstr "aus"
 
@@ -4774,7 +4783,7 @@ msgstr "Spanning Tree"
 msgid "bridge priority"
 msgstr "Bridge-Priorität"
 
-#: networks/models.py:168 templates/networks/switching.html:71
+#: networks/models.py:168 templates/networks/switching.html:70
 msgid "MST region"
 msgstr "MST-Region"
 
@@ -4782,7 +4791,7 @@ msgstr "MST-Region"
 msgid "MST revision"
 msgstr "MST-Revision"
 
-#: networks/models.py:172 templates/networks/switching.html:61
+#: networks/models.py:172 templates/networks/switching.html:60
 msgid "IP routing"
 msgstr "IP-Routing"
 
@@ -4965,61 +4974,61 @@ msgstr ""
 "Fügen Sie eine Konfiguration ein, wählen Sie eine Datei oder eine "
 "gespeicherte Version."
 
-#: networks/switch_views.py:193
+#: networks/switch_views.py:198
 msgid "pasted text"
 msgstr "eingefügter Text"
 
-#: networks/switch_views.py:219
+#: networks/switch_views.py:224
 #, python-format
 msgid "Configuration read: %(n)s changes."
 msgstr "Konfiguration eingelesen: %(n)s Änderungen."
 
-#: networks/switchconfig.py:68
+#: networks/switchconfig.py:69
 #, python-format
 msgid "%(n)s lines with secrets were not read."
 msgstr "%(n)s Zeilen mit Geheimnissen wurden nicht gelesen."
 
-#: networks/switchconfig.py:72
+#: networks/switchconfig.py:73
 #, python-format
 msgid "%(n)s commands are not documented, for example: %(first)s"
 msgstr "%(n)s Befehle werden nicht dokumentiert, zum Beispiel: %(first)s"
 
-#: networks/switchconfig.py:105
+#: networks/switchconfig.py:106
 #, python-format
 msgid "Port %(port)s is not on this device."
 msgstr "Port %(port)s gibt es an diesem Gerät nicht."
 
-#: networks/switchconfig.py:114
+#: networks/switchconfig.py:115
 #, python-format
 msgid "%(port)s is documented as a port, not as a link aggregation."
 msgstr "%(port)s ist als Port dokumentiert, nicht als Link-Aggregation."
 
-#: networks/switchconfig.py:127
+#: networks/switchconfig.py:128
 #, python-format
 msgid "New link aggregation %(lag)s"
 msgstr "Neue Link-Aggregation %(lag)s"
 
-#: networks/switchconfig.py:136
+#: networks/switchconfig.py:137
 #, python-format
 msgid "%(port)s joins %(lag)s"
 msgstr "%(port)s tritt %(lag)s bei"
 
-#: networks/switchconfig.py:182
+#: networks/switchconfig.py:183
 #, python-format
 msgid "%(field)s: %(value)s"
 msgstr "%(field)s: %(value)s"
 
-#: networks/switchconfig.py:207
+#: networks/switchconfig.py:208
 #, python-format
 msgid "Port %(port)s: %(fields)s"
 msgstr "Port %(port)s: %(fields)s"
 
-#: networks/switchconfig.py:233
+#: networks/switchconfig.py:234
 #, python-format
 msgid "New VLAN %(vid)s %(name)s at %(site)s"
 msgstr "Neues VLAN %(vid)s %(name)s an %(site)s"
 
-#: networks/switchconfig.py:239
+#: networks/switchconfig.py:240
 #, python-format
 msgid ""
 "VLAN %(vid)s is called %(doc)s here and %(cfg)s in the configuration; the "
@@ -5028,53 +5037,53 @@ msgstr ""
 "VLAN %(vid)s heißt hier %(doc)s und in der Konfiguration %(cfg)s; der Name "
 "bleibt."
 
-#: networks/switchconfig.py:281
+#: networks/switchconfig.py:282
 #, python-format
 msgid "Port %(port)s: untagged %(untagged)s, tagged %(tagged)s"
 msgstr "Port %(port)s: untagged %(untagged)s, tagged %(tagged)s"
 
-#: networks/switchconfig.py:310
+#: networks/switchconfig.py:311
 #, python-format
 msgid "New VLAN interface %(name)s"
 msgstr "Neues VLAN-Interface %(name)s"
 
-#: networks/switchconfig.py:341 networks/switchconfig.py:348
+#: networks/switchconfig.py:342 networks/switchconfig.py:349
 #, python-format
 msgid "Address %(address)s on %(name)s"
 msgstr "Adresse %(address)s auf %(name)s"
 
-#: networks/switchconfig.py:344
+#: networks/switchconfig.py:345
 #, python-format
 msgid "Address %(address)s is on a virtual machine."
 msgstr "Adresse %(address)s liegt auf einer virtuellen Maschine."
 
-#: networks/switchconfig.py:351
+#: networks/switchconfig.py:352
 #, python-format
 msgid "Address %(address)s is already on another port."
 msgstr "Die Adresse %(address)s liegt bereits auf einem anderen Port."
 
-#: networks/switchconfig.py:397
+#: networks/switchconfig.py:398
 msgid "MST instances"
 msgstr "MST-Instanzen"
 
-#: networks/switchconfig.py:401
+#: networks/switchconfig.py:402
 msgid "static routes"
 msgstr "statische Routen"
 
-#: networks/switchconfig.py:407
+#: networks/switchconfig.py:408
 msgid "BGP neighbors"
 msgstr "BGP-Nachbarn"
 
-#: networks/switchconfig.py:413
+#: networks/switchconfig.py:414
 msgid "device profiles"
 msgstr "Geräteprofile"
 
-#: networks/switchconfig.py:433
+#: networks/switchconfig.py:434
 #, python-format
 msgid "%(what)s: %(n)s"
 msgstr "%(what)s: %(n)s"
 
-#: networks/switchconfig.py:456
+#: networks/switchconfig.py:457
 #, python-format
 msgid ""
 "DHCP pool %(pool)s: the network %(network)s is not documented in IP networks."
@@ -5082,28 +5091,28 @@ msgstr ""
 "DHCP-Pool %(pool)s: Das Netz %(network)s ist unter IP-Netze nicht "
 "dokumentiert."
 
-#: networks/switchconfig.py:464
+#: networks/switchconfig.py:465
 #, python-format
 msgid "DHCP pool %(pool)s: a scope of that name belongs to another server."
 msgstr ""
 "DHCP-Pool %(pool)s: Ein Bereich dieses Namens gehört zu einem anderen Server."
 
-#: networks/switchconfig.py:475
+#: networks/switchconfig.py:476
 #, python-format
 msgid "DHCP pool %(pool)s: you may not document DHCP scopes."
 msgstr "DHCP-Pool %(pool)s: Sie dürfen keine DHCP-Bereiche dokumentieren."
 
-#: networks/switchconfig.py:492
+#: networks/switchconfig.py:494
 #, python-format
 msgid "New DHCP scope %(name)s"
 msgstr "Neuer DHCP-Bereich %(name)s"
 
-#: networks/switchconfig.py:496
+#: networks/switchconfig.py:498
 #, python-format
 msgid "DHCP scope %(name)s changed"
 msgstr "DHCP-Bereich %(name)s geändert"
 
-#: networks/switchconfig.py:527
+#: networks/switchconfig.py:534
 #, python-format
 msgid "Reservations of %(name)s: %(n)s"
 msgstr "Reservierungen von %(name)s: %(n)s"
@@ -5462,23 +5471,24 @@ msgid "Cancel"
 msgstr "Abbrechen"
 
 #: templates/accounts/profile.html:2 templates/accounts/profile.html:4
-#: templates/base.html:63
+#: templates/base.html:70
 msgid "Profile"
 msgstr "Profil"
 
 #: templates/accounts/profile.html:7 templates/cabling/cable.html:20
-#: templates/core/crud_detail.html:25 templates/dcim/device.html:59
-#: templates/ipam/address.html:22 templates/ipam/prefix.html:39
-#: templates/ipam/vrf.html:9 templates/library/type_detail.html:30
-#: templates/locations/node.html:83 templates/locations/survey.html:22
-#: templates/manage/audit.html:18 templates/manage/group_detail.html:7
-#: templates/manage/list_item.html:7 templates/networks/stack.html:22
-#: templates/networks/vlan.html:16 templates/networks/wlan.html:16
+#: templates/core/crud_detail.html:25 templates/dcim/device.html:36
+#: templates/dcim/device_edit.html:8 templates/ipam/address.html:22
+#: templates/ipam/prefix.html:39 templates/ipam/vrf.html:9
+#: templates/library/type_detail.html:30 templates/locations/node.html:83
+#: templates/locations/survey.html:22 templates/manage/audit.html:18
+#: templates/manage/group_detail.html:7 templates/manage/list_item.html:7
+#: templates/networks/stack.html:22 templates/networks/vlan.html:16
+#: templates/networks/wlan.html:16
 msgid "Details"
 msgstr "Details"
 
 #: templates/accounts/profile.html:9 templates/cabling/cable.html:22
-#: templates/core/crud_detail.html:27 templates/dcim/device.html:61
+#: templates/core/crud_detail.html:27 templates/dcim/device_edit.html:10
 #: templates/dcim/port.html:42 templates/dcim/rack.html:100
 #: templates/instance/branding.html:9 templates/instance/settings.html:13
 #: templates/integrations/webhook.html:34 templates/ipam/address.html:23
@@ -5505,14 +5515,17 @@ msgid ""
 "Download everything PatchManager stores about you: profile, roles, sessions, "
 "second factors (without secrets), API tokens, sign in links and your actions "
 "in the audit log."
-msgstr "Laden Sie alles herunter, was PatchManager über Sie speichert: Profil, Rollen, Sitzungen, zweite Faktoren (ohne Geheimnisse), API-Token, Anmeldeverknüpfungen und Ihre Aktionen im Audit-Log."
+msgstr ""
+"Laden Sie alles herunter, was PatchManager über Sie speichert: Profil, "
+"Rollen, Sitzungen, zweite Faktoren (ohne Geheimnisse), API-Token, "
+"Anmeldeverknüpfungen und Ihre Aktionen im Audit-Log."
 
 #: templates/accounts/profile.html:19
 msgid "Download my data"
 msgstr "Meine Daten herunterladen"
 
 #: templates/accounts/security.html:2 templates/accounts/security.html:5
-#: templates/base.html:64 templates/networks/wlans.html:7
+#: templates/base.html:71 templates/networks/wlans.html:7
 msgid "Security"
 msgstr "Sicherheit"
 
@@ -5602,7 +5615,7 @@ msgstr "Zuletzt aktiv"
 msgid "This session"
 msgstr "Diese Sitzung"
 
-#: templates/accounts/security.html:55 templates/base.html:66
+#: templates/accounts/security.html:55 templates/base.html:73
 msgid "Sign out"
 msgstr "Abmelden"
 
@@ -5672,7 +5685,7 @@ msgid "API clients"
 msgstr "API-Clients"
 
 #: templates/api/_token_form.html:1 templates/api/tokens.html:2
-#: templates/api/tokens.html:4 templates/base.html:65
+#: templates/api/tokens.html:4 templates/base.html:72
 msgid "API tokens"
 msgstr "API-Token"
 
@@ -5873,62 +5886,83 @@ msgid "Switch"
 msgstr "Wechseln"
 
 #: templates/base.html:47 templates/core/home.html:2
-#: templates/ipam/_facts.html:1 templates/manage/_base.html:7
+#: templates/dcim/_device_header.html:11 templates/ipam/_facts.html:1
+#: templates/manage/_base.html:7
 msgid "Overview"
 msgstr "Übersicht"
-
-#: templates/base.html:48
-msgid "Infrastructure"
-msgstr "Infrastruktur"
 
 #: templates/base.html:49
 msgid "Locations and racks"
 msgstr "Orte und Racks"
 
-#: templates/base.html:52 templates/ipam/addresses.html:4
+#: templates/base.html:50
+msgid "Devices and cabling"
+msgstr "Geräte und Verkabelung"
+
+#: templates/base.html:54
+msgid "Network"
+msgstr "Netzwerk"
+
+#: templates/base.html:55
+msgid "VLANs, WLANs and stacks"
+msgstr "VLANs, WLANs und Stacks"
+
+#: templates/base.html:56 templates/ipam/addresses.html:4
 #: templates/ipam/prefixes.html:4 templates/ipam/vrfs.html:4
 msgid "IP networks"
 msgstr "IP-Netze"
 
-#: templates/base.html:53
-msgid "Servers and storage"
-msgstr "Server und Speicher"
+#: templates/base.html:57
+msgid "DHCP and DNS"
+msgstr "DHCP und DNS"
 
-#: templates/base.html:57 templates/history/activity.html:2
+#: templates/base.html:58
+msgid "Servers and services"
+msgstr "Server und Dienste"
+
+#: templates/base.html:59
+msgid "Clusters and VMs"
+msgstr "Cluster und VMs"
+
+#: templates/base.html:61
+msgid "Circuits"
+msgstr "Leitungen"
+
+#: templates/base.html:64 templates/history/activity.html:2
 #: templates/history/activity.html:4
 msgid "Activity"
 msgstr "Aktivität"
 
-#: templates/base.html:58 templates/exchange/index.html:2
+#: templates/base.html:65 templates/exchange/index.html:2
 #: templates/exchange/index.html:4
 msgid "Import and export"
 msgstr "Import und Export"
 
-#: templates/base.html:59 templates/manage/_base.html:4
+#: templates/base.html:66 templates/manage/_base.html:4
 #: templates/manage/dashboard.html:2 templates/manage/dashboard.html:4
 msgid "Administration"
 msgstr "Administration"
 
-#: templates/base.html:78 templates/ipam/addresses.html:8
+#: templates/base.html:85 templates/ipam/addresses.html:8
 #: templates/library/catalog.html:12 templates/library/types.html:7
 #: templates/manage/users.html:6 templates/search/results.html:2
 #: templates/search/results.html:4 templates/search/results.html:8
 msgid "Search"
 msgstr "Suchen"
 
-#: templates/base.html:80
+#: templates/base.html:87
 msgid "Search devices, ports, cables, VLANs"
 msgstr "Geräte, Ports, Kabel, VLANs suchen"
 
-#: templates/base.html:95
+#: templates/base.html:102
 msgid "Language"
 msgstr "Sprache"
 
-#: templates/base.html:100
+#: templates/base.html:107
 msgid "Source code (AGPL-3.0)"
 msgstr "Quellcode (AGPL-3.0)"
 
-#: templates/base.html:100 templates/core/licenses.html:2
+#: templates/base.html:107 templates/core/licenses.html:2
 #: templates/core/licenses.html:4
 msgid "Licenses"
 msgstr "Lizenzen"
@@ -5937,11 +5971,11 @@ msgstr "Lizenzen"
 msgid "Choose a port"
 msgstr "Port wählen"
 
-#: templates/cabling/cable.html:7 templates/history/object.html:2
-#: templates/history/object.html:5 templates/ipam/address.html:5
-#: templates/ipam/prefix.html:7 templates/ipam/vrf.html:5
-#: templates/metadata/_panel.html:4 templates/networks/vlan.html:5
-#: templates/networks/wlan.html:5
+#: templates/cabling/cable.html:7 templates/dcim/_device_header.html:17
+#: templates/history/object.html:2 templates/history/object.html:5
+#: templates/ipam/address.html:5 templates/ipam/prefix.html:7
+#: templates/ipam/vrf.html:5 templates/metadata/_panel.html:4
+#: templates/networks/vlan.html:5 templates/networks/wlan.html:5
 msgid "History"
 msgstr "Verlauf"
 
@@ -5966,8 +6000,8 @@ msgstr "Kabel entfernen"
 msgid "Label or device"
 msgstr "Bezeichnung oder Gerät"
 
-#: templates/cabling/cables.html:9 templates/history/activity.html:12
-#: templates/manage/audit.html:15
+#: templates/cabling/cables.html:9 templates/dcim/devices.html:8
+#: templates/history/activity.html:12 templates/manage/audit.html:15
 msgid "Filter"
 msgstr "Filtern"
 
@@ -6034,8 +6068,8 @@ msgstr ""
 msgid "Hops"
 msgstr "Stationen"
 
-#: templates/cabling/trace.html:32 templates/dcim/_port_panel.html:14
-#: templates/dcim/device.html:50 templates/dcim/port.html:16
+#: templates/cabling/trace.html:32 templates/dcim/_connections.html:2
+#: templates/dcim/_port_panel.html:14 templates/dcim/port.html:16
 #: templates/dcim/rack.html:70 templates/ipam/address.html:14
 #: templates/ipam/addresses.html:13 templates/ipam/prefix.html:27
 #: templates/locations/node.html:69
@@ -6174,16 +6208,12 @@ msgstr "entfernt"
 msgid "The two versions are the same."
 msgstr "Die beiden Versionen sind gleich."
 
-#: templates/configs/list.html:2 templates/configs/list.html:5
+#: templates/configs/list.html:2
 #, python-format
 msgid "Configuration of %(d)s"
 msgstr "Konfiguration von %(d)s"
 
-#: templates/configs/list.html:6
-msgid "New version"
-msgstr "Neue Version"
-
-#: templates/configs/list.html:7
+#: templates/configs/list.html:5
 msgid ""
 "Configurations are stored encrypted; each version is kept and every view is "
 "recorded in the audit log. Backup tools can store versions through the API."
@@ -6192,51 +6222,55 @@ msgstr ""
 "erhalten und jedes Ansehen steht im Audit-Log. Backup-Werkzeuge können "
 "Versionen über die API speichern."
 
-#: templates/configs/list.html:11 templates/core/licenses.html:11
+#: templates/configs/list.html:6
+msgid "New version"
+msgstr "Neue Version"
+
+#: templates/configs/list.html:10 templates/core/licenses.html:11
 msgid "Version"
 msgstr "Version"
 
-#: templates/configs/list.html:11
+#: templates/configs/list.html:10
 msgid "Stored"
 msgstr "Gespeichert"
 
-#: templates/configs/list.html:11 templates/history/_table.html:2
+#: templates/configs/list.html:10 templates/history/_table.html:2
 #: templates/history/activity.html:9
 msgid "By"
 msgstr "Von"
 
-#: templates/configs/list.html:11
+#: templates/configs/list.html:10
 msgid "Compare from"
 msgstr "Vergleichen von"
 
-#: templates/configs/list.html:11 templates/history/activity.html:10
+#: templates/configs/list.html:10 templates/history/activity.html:10
 #: templates/manage/audit.html:13
 msgid "From"
 msgstr "Von"
 
-#: templates/configs/list.html:11
+#: templates/configs/list.html:10
 msgid "To"
 msgstr "Bis"
 
-#: templates/configs/list.html:17
+#: templates/configs/list.html:16
 #, python-format
 msgid "Compare from version %(n)s"
 msgstr "Vergleichen ab Version %(n)s"
 
-#: templates/configs/list.html:18
+#: templates/configs/list.html:17
 #, python-format
 msgid "Compare to version %(n)s"
 msgstr "Vergleichen mit Version %(n)s"
 
-#: templates/configs/list.html:21
+#: templates/configs/list.html:20
 msgid "Compare"
 msgstr "Vergleichen"
 
-#: templates/configs/list.html:24 templates/dcim/device.html:34
+#: templates/configs/list.html:23
 msgid "No configuration stored yet."
 msgstr "Noch keine Konfiguration gespeichert."
 
-#: templates/configs/list.html:24
+#: templates/configs/list.html:23
 msgid "Store the first version"
 msgstr "Erste Version speichern"
 
@@ -6410,6 +6444,34 @@ msgstr "Paket"
 msgid "License"
 msgstr "Lizenz"
 
+#: templates/dcim/_connections.html:2
+msgid "open end"
+msgstr "offenes Ende"
+
+#: templates/dcim/_connections.html:3
+msgid "trace"
+msgstr "verfolgen"
+
+#: templates/dcim/_connections.html:4
+msgid "No cabled ports."
+msgstr "Keine verkabelten Ports."
+
+#: templates/dcim/_device_header.html:7
+msgid "Port list (PDF)"
+msgstr "Portliste (PDF)"
+
+#: templates/dcim/_device_header.html:8 templates/dcim/device_edit.html:2
+msgid "Edit"
+msgstr "Bearbeiten"
+
+#: templates/dcim/_device_header.html:14 templates/networks/switching.html:2
+msgid "Switching and routing"
+msgstr "Switching und Routing"
+
+#: templates/dcim/_device_header.html:16 templates/dcim/device_notes.html:2
+msgid "Notes and files"
+msgstr "Notizen und Dateien"
+
 #: templates/dcim/_device_panel.html:8
 #, python-format
 msgid "%(cabled)s of %(total)s cabled"
@@ -6451,73 +6513,71 @@ msgstr "Die Strecke wird Ihnen nicht angezeigt."
 msgid "Open port"
 msgstr "Port öffnen"
 
-#: templates/dcim/device.html:7 templates/networks/switching.html:2
-#: templates/networks/switching.html:5 templates/networks/switching.html:7
-msgid "Switching and routing"
-msgstr "Switching und Routing"
-
 #: templates/dcim/device.html:8
-msgid "Port list (PDF)"
-msgstr "Portliste (PDF)"
+msgid "Disabled ports"
+msgstr "Deaktivierte Ports"
 
-#: templates/dcim/device.html:17 templates/library/type_detail.html:16
-msgid "Speed"
-msgstr "Geschwindigkeit"
-
-#: templates/dcim/device.html:26 templates/floorplans/_item_panel.html:28
-#: templates/networks/switching.html:23
-msgid "No ports."
-msgstr "Keine Ports."
-
-#: templates/dcim/device.html:28
-msgid "Add port"
-msgstr "Port hinzufügen"
-
-#: templates/dcim/device.html:32 templates/manage/system.html:10
-msgid "Versions"
-msgstr "Versionen"
-
-#: templates/dcim/device.html:33
+#: templates/dcim/device.html:9
 #, python-format
-msgid "stored %(when)s ago"
-msgstr "vor %(when)s gespeichert"
+msgid "%(when)s ago"
+msgstr "vor %(when)s"
 
-#: templates/dcim/device.html:38
+#: templates/dcim/device.html:15
+msgid "Needs attention"
+msgstr "Braucht Aufmerksamkeit"
+
+#: templates/dcim/device.html:16
+#, python-format
+msgid "%(n)s cabled port leads to an open end."
+msgid_plural "%(n)s cabled ports lead to an open end."
+msgstr[0] "%(n)s verkabelter Port führt zu einem offenen Ende."
+msgstr[1] "%(n)s verkabelte Ports führen zu einem offenen Ende."
+
+#: templates/dcim/device.html:16
+msgid "Show connections"
+msgstr "Verbindungen anzeigen"
+
+#: templates/dcim/device.html:21
+#, python-format
+msgid "All %(n)s connections"
+msgstr "Alle %(n)s Verbindungen"
+
+#: templates/dcim/device.html:26
 msgid "Virtualisation and storage"
 msgstr "Virtualisierung und Speicher"
 
-#: templates/dcim/device.html:39
+#: templates/dcim/device.html:27
 msgid "Host of cluster"
 msgstr "Host des Clusters"
 
-#: templates/dcim/device.html:50
-msgid "open end"
-msgstr "offenes Ende"
+#: templates/dcim/device.html:38
+msgid "No details documented yet."
+msgstr "Noch keine Angaben dokumentiert."
 
-#: templates/dcim/device.html:51
-msgid "trace"
-msgstr "verfolgen"
-
-#: templates/dcim/device.html:65
+#: templates/dcim/device_edit.html:16
 msgid "Placement"
 msgstr "Platzierung"
 
-#: templates/dcim/device.html:67
+#: templates/dcim/device_edit.html:18
 msgid "Leave the rack empty for a floor device."
 msgstr "Rack leer lassen für ein Raumgerät."
 
-#: templates/dcim/device.html:68 templates/dcim/rack.html:107
+#: templates/dcim/device_edit.html:19 templates/dcim/rack.html:107
 #: templates/floorplans/editor.html:26
 msgid "Move"
 msgstr "Verschieben"
 
-#: templates/dcim/device.html:71
+#: templates/dcim/device_edit.html:22
 msgid "Delete this device with all its ports?"
 msgstr "Dieses Gerät mit allen Ports löschen?"
 
-#: templates/dcim/device.html:71
+#: templates/dcim/device_edit.html:23 templates/dcim/device_edit.html:25
 msgid "Delete device"
 msgstr "Gerät löschen"
+
+#: templates/dcim/device_edit.html:24
+msgid "Removes the device with all its ports and cables."
+msgstr "Entfernt das Gerät mit allen Ports und Kabeln."
 
 #: templates/dcim/device_form.html:2 templates/dcim/device_form.html:4
 msgid "New device"
@@ -6544,6 +6604,27 @@ msgstr ""
 #: templates/library/type_form.html:5 templates/library/types.html:15
 msgid "New device type"
 msgstr "Neuer Gerätetyp"
+
+#: templates/dcim/device_ports.html:5
+msgid "Add port"
+msgstr "Port hinzufügen"
+
+#: templates/dcim/device_ports.html:7 templates/library/type_detail.html:16
+msgid "Speed"
+msgstr "Geschwindigkeit"
+
+#: templates/dcim/device_ports.html:16 templates/floorplans/_item_panel.html:28
+#: templates/networks/switching.html:22
+msgid "No ports."
+msgstr "Keine Ports."
+
+#: templates/dcim/devices.html:6
+msgid "Name, serial number or asset tag"
+msgstr "Name, Seriennummer oder Inventarnummer"
+
+#: templates/dcim/devices.html:16
+msgid "No devices."
+msgstr "Keine Geräte."
 
 #: templates/dcim/place_here.html:2 templates/dcim/place_here.html:4
 msgid "Place a device"
@@ -6607,7 +6688,7 @@ msgstr "Kein Kabel."
 msgid "Add IP address"
 msgstr "IP-Adresse hinzufügen"
 
-#: templates/dcim/port.html:33 templates/networks/switching.html:78
+#: templates/dcim/port.html:33 templates/networks/switching.html:77
 #: templates/networks/vlan.html:10 templates/networks/vlan.html:12
 msgid "None."
 msgstr "Keine."
@@ -8131,6 +8212,10 @@ msgstr "OK"
 msgid "problem"
 msgstr "Problem"
 
+#: templates/manage/system.html:10
+msgid "Versions"
+msgstr "Versionen"
+
 #: templates/manage/system.html:12
 msgid "License notices"
 msgstr "Lizenzhinweise"
@@ -8365,7 +8450,9 @@ msgstr "Zum Notfallkonto machen"
 msgid ""
 "Anonymise this account? Name, email, sign in data, roles and tokens are "
 "removed for good. The audit log keeps its records."
-msgstr "Dieses Konto anonymisieren? Name, E-Mail, Anmeldedaten, Rollen und Token werden endgültig entfernt. Das Audit-Log behält seine Einträge."
+msgstr ""
+"Dieses Konto anonymisieren? Name, E-Mail, Anmeldedaten, Rollen und Token "
+"werden endgültig entfernt. Das Audit-Log behält seine Einträge."
 
 #: templates/manage/user_detail.html:34
 msgid "Anonymise"
@@ -8474,7 +8561,7 @@ msgid "No stacks yet."
 msgstr "Noch keine Stacks."
 
 #: templates/networks/switch_read.html:2 templates/networks/switch_read.html:4
-#: templates/networks/switch_read.html:5 templates/networks/switching.html:8
+#: templates/networks/switch_read.html:5 templates/networks/switching.html:7
 msgid "Read a configuration"
 msgstr "Konfiguration einlesen"
 
@@ -8522,11 +8609,11 @@ msgstr "Die Dokumentation stimmt bereits überein."
 msgid "Not taken over"
 msgstr "Nicht übernommen"
 
-#: templates/networks/switching.html:9
+#: templates/networks/switching.html:8
 msgid "As ArubaOS-Switch configuration"
 msgstr "Als ArubaOS-Switch-Konfiguration"
 
-#: templates/networks/switching.html:11
+#: templates/networks/switching.html:10
 msgid ""
 "Nothing documented yet. Read the running configuration of the switch, or set "
 "VLANs on the ports."
@@ -8534,11 +8621,11 @@ msgstr ""
 "Noch nichts dokumentiert. Lesen Sie die laufende Konfiguration des Switches "
 "ein oder setzen Sie VLANs an den Ports."
 
-#: templates/networks/switching.html:15
+#: templates/networks/switching.html:14
 msgid "Ports and VLANs"
 msgstr "Ports und VLANs"
 
-#: templates/networks/switching.html:16
+#: templates/networks/switching.html:15
 msgid ""
 "Fill: untagged VLAN. Marks below: tagged VLANs. Outline: edge port. G: "
 "guard. T: tunnelled."
@@ -8546,136 +8633,136 @@ msgstr ""
 "Füllung: untagged VLAN. Marken darunter: tagged VLANs. Gestrichelter Rand: "
 "Edge-Port. G: Guard. T: getunnelt."
 
-#: templates/networks/switching.html:21 templates/networks/switching.html:90
+#: templates/networks/switching.html:20 templates/networks/switching.html:89
 msgid "tagged"
 msgstr "tagged"
 
-#: templates/networks/switching.html:28
+#: templates/networks/switching.html:27
 msgid "Untagged"
 msgstr "Untagged"
 
-#: templates/networks/switching.html:28
+#: templates/networks/switching.html:27
 msgid "Tagged"
 msgstr "Tagged"
 
-#: templates/networks/switching.html:33
+#: templates/networks/switching.html:32
 msgid "area"
 msgstr "Area"
 
-#: templates/networks/switching.html:33
+#: templates/networks/switching.html:32
 msgid "passive"
 msgstr "passiv"
 
-#: templates/networks/switching.html:34
+#: templates/networks/switching.html:33
 msgid "No VLANs on this device."
 msgstr "Keine VLANs an diesem Gerät."
 
-#: templates/networks/switching.html:38
+#: templates/networks/switching.html:37
 msgid "Routing"
 msgstr "Routing"
 
-#: templates/networks/switching.html:39
+#: templates/networks/switching.html:38
 msgid "Static routes"
 msgstr "Statische Routen"
 
-#: templates/networks/switching.html:41
+#: templates/networks/switching.html:40
 msgid "Destination"
 msgstr "Ziel"
 
-#: templates/networks/switching.html:41
+#: templates/networks/switching.html:40
 msgid "Next hop"
 msgstr "Next Hop"
 
-#: templates/networks/switching.html:41
+#: templates/networks/switching.html:40
 msgid "Distance"
 msgstr "Distanz"
 
-#: templates/networks/switching.html:42
+#: templates/networks/switching.html:41
 msgid "discard"
 msgstr "verwerfen"
 
-#: templates/networks/switching.html:43
+#: templates/networks/switching.html:42
 msgid "No static routes."
 msgstr "Keine statischen Routen."
 
-#: templates/networks/switching.html:46 templates/networks/switching.html:53
+#: templates/networks/switching.html:45 templates/networks/switching.html:52
 msgid "router ID"
 msgstr "Router-ID"
 
-#: templates/networks/switching.html:48
+#: templates/networks/switching.html:47
 msgid "Neighbor"
 msgstr "Nachbar"
 
-#: templates/networks/switching.html:48
+#: templates/networks/switching.html:47
 msgid "Remote AS"
 msgstr "Remote-AS"
 
-#: templates/networks/switching.html:48
+#: templates/networks/switching.html:47
 msgid "State"
 msgstr "Zustand"
 
-#: templates/networks/switching.html:49
+#: templates/networks/switching.html:48
 msgid "shut down"
 msgstr "abgeschaltet"
 
-#: templates/networks/switching.html:50
+#: templates/networks/switching.html:49
 msgid "No neighbors."
 msgstr "Keine Nachbarn."
 
-#: templates/networks/switching.html:61
+#: templates/networks/switching.html:60
 msgid "on"
 msgstr "an"
 
-#: templates/networks/switching.html:62
+#: templates/networks/switching.html:61
 msgid "Tunnel gateways"
 msgstr "Tunnel-Gateways"
 
-#: templates/networks/switching.html:63
+#: templates/networks/switching.html:62
 msgid "Read from"
 msgstr "Gelesen aus"
 
-#: templates/networks/switching.html:67
+#: templates/networks/switching.html:66
 msgid "Spanning tree"
 msgstr "Spanning Tree"
 
-#: templates/networks/switching.html:69
+#: templates/networks/switching.html:68
 msgid "Mode"
 msgstr "Modus"
 
-#: templates/networks/switching.html:70
+#: templates/networks/switching.html:69
 msgid "Bridge priority"
 msgstr "Bridge-Priorität"
 
-#: templates/networks/switching.html:73
+#: templates/networks/switching.html:72
 #, python-format
 msgid "Instance %(n)s"
 msgstr "Instanz %(n)s"
 
-#: templates/networks/switching.html:76
+#: templates/networks/switching.html:75
 msgid "Link aggregations"
 msgstr "Link-Aggregationen"
 
-#: templates/networks/switching.html:81
+#: templates/networks/switching.html:80
 msgid "Stack or virtual switch"
 msgstr "Stack oder virtueller Switch"
 
-#: templates/networks/switching.html:82
+#: templates/networks/switching.html:81
 msgid "domain"
 msgstr "Domain"
 
-#: templates/networks/switching.html:84
+#: templates/networks/switching.html:83
 msgid "Not part of a stack."
 msgstr "Nicht Teil eines Stacks."
 
-#: templates/networks/switching.html:88
+#: templates/networks/switching.html:87
 msgid "Device profiles"
 msgstr "Geräteprofile"
 
-#: templates/networks/switching.html:89
+#: templates/networks/switching.html:88
 msgid "for"
 msgstr "für"
 
-#: templates/networks/switching.html:90
+#: templates/networks/switching.html:89
 msgid "untagged"
 msgstr "untagged"
 
@@ -8854,6 +8941,9 @@ msgstr "Mandant gespeichert."
 msgid "Tenant deleted."
 msgstr "Mandant gelöscht."
 
+#~ msgid "Infrastructure"
+#~ msgstr "Infrastruktur"
+
 #~ msgid "The off-site status file cannot be read."
 #~ msgstr "Die Statusdatei der externen Sicherung kann nicht gelesen werden."
 
@@ -8870,9 +8960,6 @@ msgstr "Mandant gelöscht."
 #~ msgid "Restoring is done on the server, see the deployment guide."
 #~ msgstr ""
 #~ "Die Wiederherstellung erfolgt auf dem Server, siehe Betriebshandbuch."
-
-#~ msgid "No floor devices."
-#~ msgstr "Keine Raumgeräte."
 
 #~ msgid "Whole room"
 #~ msgstr "Ganzer Raum"

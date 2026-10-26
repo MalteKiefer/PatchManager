@@ -45,14 +45,21 @@
       {% endif %}
       <nav class="app-nav">
         <a href="{% url 'core:home' %}" {% if request.resolver_match.url_name == "home" %}aria-current="page"{% endif %}>{% include "core/_icon.html" with name="home" %}{% translate "Overview" %}</a>
-        <p class="app-nav-label">{% translate "Infrastructure" %}</p>
+        <p class="app-nav-label">{% translate "Locations" %}</p>
         <a href="{% url 'locations:index' %}" {% if section == "locations" %}aria-current="page"{% endif %}>{% include "core/_icon.html" with name="locations" %}{% translate "Locations and racks" %}</a>
+        <p class="app-nav-label">{% translate "Devices and cabling" %}</p>
+        <a href="{% url 'devices:devices' %}" {% if section == "devices" %}aria-current="page"{% endif %}>{% include "core/_icon.html" with name="device" %}{% translate "Devices" %}</a>
         <a href="{% url 'cabling:cables' %}" {% if section == "cables" %}aria-current="page"{% endif %}>{% include "core/_icon.html" with name="cables" %}{% translate "Cables" %}</a>
-        <a href="{% url 'networks:vlans' %}" {% if section == "networks" %}aria-current="page"{% endif %}>{% include "core/_icon.html" with name="networks" %}{% translate "Networks" %}</a>
-        <a href="{% url 'ipam:prefixes' %}" {% if section == "ipam" %}aria-current="page"{% endif %}>{% include "core/_icon.html" with name="ipam" %}{% translate "IP networks" %}</a>
-        <a href="{% url 'objects:index' 'vms' %}" {% if section == "compute" %}aria-current="page"{% endif %}>{% include "core/_icon.html" with name="compute" %}{% translate "Servers and storage" %}</a>
-        <a href="{% url 'objects:index' 'organizations' %}" {% if section == "directory" %}aria-current="page"{% endif %}>{% include "core/_icon.html" with name="directory" %}{% translate "Customers and systems" %}</a>
         <a href="{% url 'library:types' %}" {% if section == "library" %}aria-current="page"{% endif %}>{% include "core/_icon.html" with name="library" %}{% translate "Device library" %}</a>
+        <p class="app-nav-label">{% translate "Network" %}</p>
+        <a href="{% url 'networks:vlans' %}" {% if section == "networks" %}aria-current="page"{% endif %}>{% include "core/_icon.html" with name="networks" %}{% translate "VLANs, WLANs and stacks" %}</a>
+        <a href="{% url 'ipam:prefixes' %}" {% if section == "ipam" %}aria-current="page"{% endif %}>{% include "core/_icon.html" with name="ipam" %}{% translate "IP networks" %}</a>
+        <a href="{% url 'objects:index' 'dhcp' %}" {% if section == "services" %}aria-current="page"{% endif %}>{% include "core/_icon.html" with name="dns" %}{% translate "DHCP and DNS" %}</a>
+        <p class="app-nav-label">{% translate "Servers and services" %}</p>
+        <a href="{% url 'objects:index' 'vms' %}" {% if section == "compute" %}aria-current="page"{% endif %}>{% include "core/_icon.html" with name="compute" %}{% translate "Clusters and VMs" %}</a>
+        <a href="{% url 'objects:index' 'storage' %}" {% if section == "storage" %}aria-current="page"{% endif %}>{% include "core/_icon.html" with name="storage" %}{% translate "Storage" %}</a>
+        <a href="{% url 'objects:index' 'circuits' %}" {% if section == "circuits" %}aria-current="page"{% endif %}>{% include "core/_icon.html" with name="circuit" %}{% translate "Circuits" %}</a>
+        <a href="{% url 'objects:index' 'organizations' %}" {% if section == "directory" %}aria-current="page"{% endif %}>{% include "core/_icon.html" with name="directory" %}{% translate "Customers and systems" %}</a>
         <p class="app-nav-label">{% translate "Records" %}</p>
         <a href="{% url 'history:activity' %}" {% if section == "activity" %}aria-current="page"{% endif %}>{% include "core/_icon.html" with name="activity" %}{% translate "Activity" %}</a>
         <a href="{% url 'exchange:index' %}" {% if section == "exchange" %}aria-current="page"{% endif %}>{% include "core/_icon.html" with name="exchange" %}{% translate "Import and export" %}</a>

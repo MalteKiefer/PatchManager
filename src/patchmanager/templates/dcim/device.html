@@ -1,37 +1,25 @@
 {% extends "base.html" %}{% load i18n pm %}
 {% block title %}{{ device.name }}{% endblock %}
 {% block content %}
-{% include "core/_breadcrumbs.html" with current=device.name %}
-<div class="mb-6 flex flex-wrap items-center gap-3">
-  <h1 class="mr-auto">{{ device.name }} <span class="text-base font-normal text-slate-500"><a href="{% url 'library:type' device.device_type.pk %}">{{ device.device_type }}</a></span></h1>
-  <a class="btn-secondary" href="{% url 'switching:overview' device.pk %}">{% translate "Switching and routing" %}</a>
-  <a class="btn-secondary" href="{% url 'exchange:report' 'ports' device.pk %}">{% translate "Port list (PDF)" %}</a>
-  <span class="badge-muted">{{ device.get_status_display }}</span>
-  {% if space %}<span class="badge-muted">{{ device.rack.name }} · U{{ space.start }}{% if space.size > 1 %}–{{ space.end }}{% endif %} · {{ space.get_face_display }}</span>{% endif %}
-</div>
+{% device_header device "overview" %}
+<dl class="facts mb-6">
+  <div><dt>{% translate "Ports" %}</dt><dd>{{ port_count }}</dd></div>
+  <div><dt>{% translate "Connections" %}</dt><dd>{{ connection_count }}</dd></div>
+  <div><dt>{% translate "Disabled ports" %}</dt><dd>{{ disabled }}</dd></div>
+  <div><dt>{% translate "Configuration" %}</dt><dd>{% if config %}{% blocktranslate with when=config.created_at|timesince %}{{ when }} ago{% endblocktranslate %}{% else %}–{% endif %}</dd></div>
+</dl>
 <div class="grid gap-6 lg:grid-cols-3">
   <div class="space-y-6 lg:col-span-2">
-    <section class="card" aria-labelledby="ports-h">
-      <h2 id="ports-h" class="mb-3">{% translate "Ports" %} <span class="text-sm font-normal text-slate-500">({{ ports|length }})</span></h2>
-      <div class="overflow-x-auto"><table class="table">
-        <thead><tr><th>{% translate "Port" %}</th><th>{% translate "Kind" %}</th><th>{% translate "Connector" %}</th><th>{% translate "Speed" %}</th><th>{% translate "Label" %}</th><th>{% translate "Rear" %}</th><th>VLAN</th><th>IP</th><th>{% translate "Cable" %}</th><th>{% translate "Enabled" %}</th></tr></thead>
-        <tbody>{% for p in ports %}<tr>
-          <td><a class="font-mono text-xs" href="{% url 'devices:port' p.pk %}">{{ p.name }}</a></td><td>{{ p.get_kind_display }}</td><td>{{ p.get_connector_display }}</td>
-          <td>{% if p.speed_mbps %}{{ p.speed_mbps }}{% endif %}</td><td>{{ p.label }}</td>
-          <td class="font-mono text-xs">{% if p.rear_port %}{{ p.rear_port.name }}:{{ p.rear_position }}{% endif %}</td>
-          <td class="text-xs">{% if p.vlan_mode == "trunk" %}{% translate "trunk" %}{% elif p.untagged_vlan %}{{ p.untagged_vlan.vid }}{% endif %}</td>
-          <td class="text-xs tabular-nums">{% for a in p.ip_addresses.all %}<a href="{% url 'ipam:address' a.pk %}">{{ a.host }}</a>{% if not forloop.last %}<br>{% endif %}{% endfor %}</td>
-          <td class="text-xs">{% if p.cable_end %}<a href="{% url 'cabling:cable' p.cable_end.cable_id %}"><span class="mr-1 inline-block size-2 rounded-full" data-swatch="{{ p.cable_end.cable.colour }}" aria-hidden="true"></span>{{ p.cable_end.cable }}</a>{% endif %}</td>
-          <td>{% if p.enabled %}<span class="badge-ok">{% translate "yes" %}</span>{% else %}<span class="badge-muted">{% translate "no" %}</span>{% endif %}</td>
-        </tr>{% empty %}<tr><td colspan="10" class="text-slate-500">{% translate "No ports." %}</td></tr>{% endfor %}</tbody>
-      </table></div>
-      {% if can_change %}<a class="btn-secondary mt-4" href="{% url 'devices:port-create' device.pk %}">{% translate "Add port" %}</a>{% endif %}
+    {% if open_ends %}
+    <section class="card border-amber-300 bg-amber-50 dark:border-amber-800 dark:bg-amber-950" aria-labelledby="attention-h">
+      <h2 id="attention-h" class="mb-2">{% translate "Needs attention" %}</h2>
+      <p class="text-sm">{% blocktranslate count n=open_ends %}{{ n }} cabled port leads to an open end.{% plural %}{{ n }} cabled ports lead to an open end.{% endblocktranslate %} <a href="{% url 'devices:device-connections' device.pk %}">{% translate "Show connections" %}</a></p>
     </section>
-    <section class="card" aria-labelledby="config-h">
-      <div class="mb-2 flex items-center gap-2"><h2 id="config-h" class="mr-auto">{% translate "Configuration" %}</h2>
-        <a class="btn-secondary" href="{% url 'configs:list' device.pk %}">{% translate "Versions" %}</a></div>
-      {% for c in configs %}<p class="text-sm"><a href="{% url 'configs:version' device.pk c.version %}">v{{ c.version }}</a> {% blocktranslate with when=c.created_at|timesince %}stored {{ when }} ago{% endblocktranslate %}{% if c.comment %}, {{ c.comment }}{% endif %}</p>
-      {% empty %}<p class="text-sm text-slate-500">{% translate "No configuration stored yet." %}</p>{% endfor %}
+    {% endif %}
+    <section class="card" aria-labelledby="deps-h">
+      <div class="mb-3 flex items-baseline gap-3"><h2 id="deps-h" class="mr-auto">{% translate "Connected to" %}</h2>
+        {% if connection_count > neighbours|length %}<a class="text-sm" href="{% url 'devices:device-connections' device.pk %}">{% blocktranslate with n=connection_count %}All {{ n }} connections{% endblocktranslate %}</a>{% endif %}</div>
+      {% include "dcim/_connections.html" %}
     </section>
     {% if cluster or guests or volumes %}
     <section class="card" aria-labelledby="compute-h">
@@ -43,32 +31,11 @@
       <ul class="space-y-1 text-sm">{% for v in volumes %}<li><a href="{% url 'objects:detail' 'storage' v.pk %}">{{ v.name }}</a> · {{ v.get_kind_display }}{% if v.size_gb %} · {{ v.used_gb|default:"?" }} / {{ v.size_gb }} GB{% endif %}</li>{% endfor %}</ul>{% endif %}
     </section>
     {% endif %}
-    {% if neighbours %}
-    <section class="card" aria-labelledby="deps-h">
-      <h2 id="deps-h" class="mb-3">{% translate "Connected to" %}</h2>
-      <ul class="space-y-1 text-sm">{% for port, far in neighbours %}<li><span class="font-mono text-xs">{{ port.name }}</span> →
-        {% if far == "hidden" %}{% translate "(not visible to you)" %}{% elif far %}<a href="{% url 'devices:device' far.device_id %}">{{ far.device }}</a> · <span class="font-mono text-xs">{{ far.name }}</span>{% else %}{% translate "open end" %}{% endif %}
-        · <a href="{% url 'cabling:trace' port.pk %}">{% translate "trace" %}</a></li>{% endfor %}</ul>
-    </section>
-    {% endif %}
-    {% links_panel device %}
-    {% metadata_panel device %}
   </div>
-  <aside class="space-y-6">
-    <form method="post" class="card" novalidate>{% csrf_token %}<input type="hidden" name="action" value="edit">
-      <h2 class="mb-3">{% translate "Details" %}</h2>
-      <fieldset {% if not can_change %}disabled{% endif %}>{% include "core/_form.html" %}</fieldset>
-      {% if can_change %}<button class="btn-primary">{% translate "Save" %}</button>{% endif %}
-    </form>
-    {% if can_change %}
-    <form method="post" class="card" novalidate>{% csrf_token %}<input type="hidden" name="action" value="place">
-      <h2 class="mb-3">{% translate "Placement" %}</h2>
-      {% include "core/_form.html" with form=place_form %}
-      <p class="mb-3 text-xs text-slate-500">{% translate "Leave the rack empty for a floor device." %}</p>
-      <button class="btn-secondary">{% translate "Move" %}</button>
-    </form>
-    {% endif %}
-    {% if can_delete %}<form method="post" data-confirm="{% translate 'Delete this device with all its ports?' %}">{% csrf_token %}<button name="action" value="delete" class="btn-danger">{% translate "Delete device" %}</button></form>{% endif %}
+  <aside class="card self-start" aria-labelledby="details-h">
+    <h2 id="details-h" class="mb-3">{% translate "Details" %}</h2>
+    {% if details %}<dl class="grid grid-cols-2 gap-x-3 gap-y-2 text-sm">{% for label, value in details %}<dt class="text-slate-500">{{ label|capfirst }}</dt><dd class="break-words">{{ value|linebreaksbr }}</dd>{% endfor %}</dl>
+    {% else %}<p class="text-sm text-slate-500">{% translate "No details documented yet." %}</p>{% endif %}
   </aside>
 </div>
 {% endblock %}
