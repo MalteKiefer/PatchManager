@@ -503,15 +503,16 @@ def _dhcp(
             continue
         if change:  # only once it validates: a skipped scope is not also a change
             result.add(change)
-        scope.save()
-        audit.record(
-            "ipam.dhcpscope.created" if created else "ipam.dhcpscope.changed",
-            request=request,
-            obj=scope,
-            data={"name": name, "from": "configuration"},
-        )
+            scope.save()
         have = {(r.mac_address, str(r.address).split("/")[0]) for r in scope.reservations.all()}
         want = {(mac, ip) for mac, ip, _name in pool.reservations}
+        if change or have != want:  # an unchanged scope leaves no audit entry
+            audit.record(
+                "ipam.dhcpscope.created" if created else "ipam.dhcpscope.changed",
+                request=request,
+                obj=scope,
+                data={"name": name, "from": "configuration"},
+            )
         if have != want:
             scope.reservations.all().delete()
             saved = 0
