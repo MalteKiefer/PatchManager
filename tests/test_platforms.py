@@ -173,6 +173,10 @@ def test_apply_cisco_with_dhcp_dns_and_routed_port(
             tree["request"], super_admin, device, platforms.parse(text), commit=True, source="test"
         )
         assert again.changes == []
+        from patchmanager.audit.models import AuditEvent
+
+        # The unchanged scope of the second apply is not audited again.
+        assert AuditEvent.objects.filter(action__startswith="ipam.dhcpscope.").count() == 1
 
 
 def test_apply_reports_a_rejected_dhcp_scope_only_as_skipped(
