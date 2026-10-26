@@ -293,8 +293,9 @@ class _Import:
             Port.objects.filter(device=device, kind=PortKind.INTERFACE).order_by("order", "name")
         )
         if ports and not any(p.mac_address.lower() == item.mac for p in ports):
-            ports[0].mac_address = item.mac
-            ports[0].save(update_fields=["mac_address", "updated_at"])
+            ports[0] = device_services.update_port(
+                self.request, self.actor, ports[0], mac_address=item.mac
+            )
         self.devices[item.mac] = device
         self.ports[item.mac] = ports
 

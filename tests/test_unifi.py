@@ -267,3 +267,43 @@ def test_page_needs_an_import_right(client: Client, make_tree, make_user, grant)
     login(client, user)
     client.post("/tenants/switch/", {"tenant": tree["tenant"].pk}, secure=True)
     assert client.get("/networks/unifi/import/", secure=True).status_code == 403
+
+
+@pytest.mark.parametrize(("kind", "size"), [(b"\x02", -7), (b"\x03", -3), (b"\x05", -8)])
+def test_wrong_lengths_are_damage_not_a_loop(kind: bytes, size: int) -> None:
+    # Each size points the cursor back at its own element: read naively, it never ends.
+    body = kind + b"k\0" + struct.pack("<i", size) + b"\0" * 8
+    doc = struct.pack("<i", len(body) + 5) + body + b"\0"
+    with pytest.raises(unifi.ReadError):
+        unifi.parse(_bson({"__cmd": "select", "collection": "device"}) + doc)
+
+
+def test_ports_of_devices_the_user_may_not_change_stay(
+    make_tree, make_type, make_user, grant, super_admin
+) -> None:
+    from patchmanager.dcim import devices
+
+    tree = make_tree()
+    with rls.system_context():
+        Vendor.objects.create(name="Ubiquiti")
+        existing = devices.create(
+            tree["request"],
+            super_admin,
+            device_type=make_type("T"),
+            room=tree["room"],
+            name="SW",
+            serial="SW1",  # matches: nothing on the device itself changes
+        )
+    Role.objects.create(
+        key="no-device-change",
+        name="No device change",
+        permissions=sorted(
+            p for p in SYSTEM_ROLES["editor"].permissions() if p != "dcim.device.change"
+        ),
+    )
+    user = make_user()
+    grant(user, "no-device-change", tree["tenant"])
+    backup = unifi.read(_backup(_site())).only(SITE)
+    with rls.system_context():
+        unifi_import.run(tree["request"], user, tree["tenant"], backup, tree["room"], commit=True)
+        assert not existing.ports.exclude(mac_address="").exists()

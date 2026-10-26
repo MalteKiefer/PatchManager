@@ -196,8 +196,16 @@ def parse(database: bytes) -> Backup:
     return _backup(rows)
 
 
-def _document(buf: bytes, i: int) -> dict[str, Any]:  # one branch per BSON type
-    (length,) = struct.unpack_from("<i", buf, i)
+def _size(buf: bytes, i: int, end: int, minimum: int, extra: int = 4) -> int:
+    """A length field at ``i``, checked to fit before ``end``: a wrong one is damage, not a loop."""
+    size: int = struct.unpack_from("<i", buf, i)[0]
+    if size < minimum or i + extra + size > end:
+        raise ReadError(_("The UniFi Network database is damaged."))
+    return size
+
+
+def _document(buf: bytes, i: int, limit: int | None = None) -> dict[str, Any]:
+    length = _size(buf, i, len(buf) if limit is None else limit, 5, extra=0)
     end = i + length - 1
     i += 4
     out: dict[str, Any] = {}
@@ -211,18 +219,17 @@ def _document(buf: bytes, i: int) -> dict[str, Any]:  # one branch per BSON type
             (value,) = struct.unpack_from("<d", buf, i)
             i += 8
         elif kind in (0x02, 0x0D, 0x0E):
-            (size,) = struct.unpack_from("<i", buf, i)
+            size = _size(buf, i, end, 1)
             value = buf[i + 4 : i + 3 + size].decode()
             i += 4 + size
         elif kind in (0x03, 0x04):
-            (size,) = struct.unpack_from("<i", buf, i)
-            value = _document(buf, i)
+            size = _size(buf, i, end, 5, extra=0)
+            value = _document(buf, i, end)
             if kind == 0x04:
                 value = list(value.values())
             i += size
         elif kind == 0x05:
-            (size,) = struct.unpack_from("<i", buf, i)
-            i += 5 + size
+            i += 5 + _size(buf, i, end, 0, extra=5)
         elif kind == 0x07:
             value = buf[i : i + 12].hex()
             i += 12
