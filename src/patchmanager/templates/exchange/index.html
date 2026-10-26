@@ -8,7 +8,7 @@
     {% include "core/_form.html" with form=form %}
     <p class="mb-3 text-xs text-slate-500">{% blocktranslate with n=max_rows %}The file is checked first; nothing changes until you confirm. Up to {{ n }} rows. Existing objects with the same name are updated, empty cells keep their value.{% endblocktranslate %}</p>
     <button class="btn-primary">{% translate "Check file" %}</button>
-    <p class="mt-4 border-t border-[#dde2e8] pt-3 text-sm dark:border-slate-800"><a href="{% url 'networks:unifi-import' %}">{% translate "Import a UniFi backup" %}</a>: {% translate "networks, WLANs, devices with their port VLANs and cables from a UniFi OS console." %}</p>
+    <p class="mt-4 border-t border-[#dde2e8] pt-3 text-sm dark:border-slate-800"><a class="underline" href="{% url 'networks:unifi-import' %}">{% translate "Import a UniFi backup" %}</a>: {% translate "networks, WLANs, devices with their port VLANs and cables from a UniFi OS console." %}</p>
   </form>
   <section class="card" aria-labelledby="export-h">
     <h2 id="export-h" class="mb-3">{% translate "Export" %}</h2>

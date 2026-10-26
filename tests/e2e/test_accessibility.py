@@ -71,6 +71,7 @@ def _pages(live_server, tree) -> list[str]:
         "/history/",
         "/search/?q=A0",
         "/exchange/",
+        "/networks/unifi/import/",
         "/account/",
         "/account/security/",
         "/account/tokens/",
