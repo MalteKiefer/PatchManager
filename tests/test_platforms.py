@@ -195,6 +195,13 @@ def test_apply_reports_a_rejected_dhcp_scope_only_as_skipped(
         )
     assert not any("DHCP scope" in change for change in result.changes)
     assert any(item.startswith("USERS:") for item in result.skipped)
+    with system():
+        config = platforms.parse(_read("cisco_ios.txt"))
+        config.pools["USERS"].reservations.append(("00:11:22:33:44:66", "10.99.0.9", "x"))
+        result = switchconfig.apply(tree["request"], super_admin, device, config, commit=False)
+    # The reservation outside the prefix is skipped, not counted.
+    assert "Reservations of USERS: 1" in result.changes
+    assert any(item.startswith("10.99.0.9:") for item in result.skipped)
 
 
 def test_arubacx() -> None:

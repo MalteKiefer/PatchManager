@@ -514,6 +514,7 @@ def _dhcp(
         want = {(mac, ip) for mac, ip, _name in pool.reservations}
         if have != want:
             scope.reservations.all().delete()
+            saved = 0
             for mac, ip, host in pool.reservations:
                 reservation = DHCPReservation(
                     tenant_id=device.tenant_id,
@@ -528,7 +529,8 @@ def _dhcp(
                     result.skipped.append(f"{ip}: {'; '.join(exc.messages)}")
                     continue
                 reservation.save()
-            result.add(_("Reservations of %(name)s: %(n)s") % {"name": name, "n": len(want)})
+                saved += 1
+            result.add(_("Reservations of %(name)s: %(n)s") % {"name": name, "n": saved})
 
 
 def document(device: Device, user: Any) -> model.Config:
